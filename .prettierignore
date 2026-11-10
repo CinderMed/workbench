@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+fixtures/
+docs/specification.md
+CLAUDE.md
+.tmp/
+**/dist/
