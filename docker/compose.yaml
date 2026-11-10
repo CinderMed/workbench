@@ -32,7 +32,9 @@ services:
       CINDERMED_DEV_PASSWORD: ${CINDERMED_DEV_PASSWORD:-cindermed-dev}
       CINDERMED_WEB_URL: http://localhost:${WEB_PORT:-8080}
     volumes:
-      - ./keycloak/cindermed-realm.json:/opt/keycloak/data/import/cindermed-realm.json:ro
+      # Mount the directory, not the file: a git branch switch replaces the file and
+      # would leave a single-file bind mount pointing to a deleted inode.
+      - ./keycloak:/opt/keycloak/data/import:ro
     ports:
       - "${KEYCLOAK_PORT:-8081}:8080"
 
