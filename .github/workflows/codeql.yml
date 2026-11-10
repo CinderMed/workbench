@@ -13,8 +13,8 @@ permissions:
 jobs:
   analyze:
     name: CodeQL
-    # Code scanning on a private repository needs GitHub Advanced Security, which the Free plan
-    # does not include. The job is skipped until the repository is public (ADR-0003).
+    # On the Free plan code scanning is available only for public repositories:
+    # skip instead of failing on the upload if the repository becomes private (ADR-0003).
     if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     permissions:
