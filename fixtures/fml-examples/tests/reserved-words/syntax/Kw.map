@@ -1,0 +1,20 @@
+map "http://example.org/fhir/x/StructureMap/Kw" = `Kw`
+
+group Kw(source src, target tgt) {
+  src.source as v -> tgt.source = v "r-source";
+  src.target as v -> tgt.target = v "r-target";
+  src.group as v -> tgt.group = v "r-group";
+  src.first as v -> tgt.first = v "r-first";
+  src.last as v -> tgt.last = v "r-last";
+  src.share as v -> tgt.share = v "r-share";
+  src.default as v -> tgt.default = v "r-default";
+  src.check as v -> tgt.check = v "r-check";
+  src.log as v -> tgt.log = v "r-log";
+  src.where as v -> tgt.where = v "r-where";
+  src.then as v -> tgt.then = v "r-then";
+  src.map as v -> tgt.map = v "r-map";
+  src.uses as v -> tgt.uses = v "r-uses";
+  src.alias as v -> tgt.alias = v "r-alias";
+  src.prefix as v -> tgt.prefix = v "r-prefix";
+  src.extends as v -> tgt.extends = v "r-extends";
+}

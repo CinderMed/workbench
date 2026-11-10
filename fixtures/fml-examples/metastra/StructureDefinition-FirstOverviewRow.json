@@ -1,0 +1,657 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "FirstOverviewRow",
+  "url": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+  "version": "1.2.0",
+  "name": "FirstOverviewRow",
+  "title": "Normalized row of table FirstOverview",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "FirstOverviewRow",
+        "path": "FirstOverviewRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FirstOverviewRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "FirstOverviewRow.patient_id",
+        "path": "FirstOverviewRow.patient_id",
+        "short": "1. Patient ID",
+        "definition": "Pseudonymised patient identifier, unique in the registry.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.encounter_fo",
+        "path": "FirstOverviewRow.encounter_fo",
+        "short": "2. Visit Date",
+        "definition": "Date of the first visit (baseline).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.encounter_fo",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.proc_surg_yn",
+        "path": "FirstOverviewRow.proc_surg_yn",
+        "short": "3. At baseline, has the patient been hospitalized for a surgical spinal treatment?",
+        "definition": "Whether at baseline the patient has already had spinal surgery.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.proc_surg_yn",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.proc_surg_loc",
+        "path": "FirstOverviewRow.proc_surg_loc",
+        "short": "5.1 Localization of surgically treated lesion",
+        "definition": "Surgically treated spinal levels; several levels possible.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FirstOverviewRow.proc_surg_loc",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.patient_gender",
+        "path": "FirstOverviewRow.patient_gender",
+        "short": "6. Gender",
+        "definition": "Administrative gender of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_gender",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.patient_birthdate",
+        "path": "FirstOverviewRow.patient_birthdate",
+        "short": "7. Date of birth",
+        "definition": "Date of birth of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_birthdate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.cond_osteoporosis_yn",
+        "path": "FirstOverviewRow.cond_osteoporosis_yn",
+        "short": "14. Osteoporosis",
+        "definition": "Osteoporosis diagnosis of the patient at the first visit.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.cond_osteoporosis_yn",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_pain_axial_intervals",
+        "path": "FirstOverviewRow.obs_pain_axial_intervals",
+        "short": "17.1 Pain level axial",
+        "definition": "Axial (spine) pain level reported by the patient, in four classes.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_pain_axial_intervals",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_pain_axial_nrs",
+        "path": "FirstOverviewRow.obs_pain_axial_nrs",
+        "short": "17.2 NRS (if available) axial",
+        "definition": "Numerical Rating Scale score of axial pain, from 0 to 10.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_pain_axial_nrs",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_bloodt_hb",
+        "path": "FirstOverviewRow.obs_bloodt_hb",
+        "short": "24.1 Hb",
+        "definition": "Haemoglobin concentration in blood; unit in column obs_bloodt_hb_spec.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_bloodt_hb",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_bloodt_hb_spec",
+        "path": "FirstOverviewRow.obs_bloodt_hb_spec",
+        "short": "Specify unity measure used",
+        "definition": "Unit of measure used for obs_bloodt_hb.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_bloodt_hb_spec",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Patient0",
+        "path": "FirstOverviewRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Encounter0",
+        "path": "FirstOverviewRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (first visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Observation0",
+        "path": "FirstOverviewRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (axial pain), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Observation1",
+        "path": "FirstOverviewRow.id_Observation1",
+        "short": "Computed id of Observation[1]",
+        "definition": "Deterministic id of the resource of role Observation[1] (haemoglobin), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Observation1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Condition1",
+        "path": "FirstOverviewRow.id_Condition1",
+        "short": "Computed id of Condition[1]",
+        "definition": "Deterministic id of the resource of role Condition[1] (osteoporosis), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Condition1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Procedure0",
+        "path": "FirstOverviewRow.id_Procedure0",
+        "short": "Computed id of Procedure[0]",
+        "definition": "Deterministic id of the resource of role Procedure[0] (previous spinal surgery), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Procedure0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "FirstOverviewRow",
+        "path": "FirstOverviewRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FirstOverviewRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "FirstOverviewRow.patient_id",
+        "path": "FirstOverviewRow.patient_id",
+        "short": "1. Patient ID",
+        "definition": "Pseudonymised patient identifier, unique in the registry.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.encounter_fo",
+        "path": "FirstOverviewRow.encounter_fo",
+        "short": "2. Visit Date",
+        "definition": "Date of the first visit (baseline).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.encounter_fo",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.proc_surg_yn",
+        "path": "FirstOverviewRow.proc_surg_yn",
+        "short": "3. At baseline, has the patient been hospitalized for a surgical spinal treatment?",
+        "definition": "Whether at baseline the patient has already had spinal surgery.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.proc_surg_yn",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.proc_surg_loc",
+        "path": "FirstOverviewRow.proc_surg_loc",
+        "short": "5.1 Localization of surgically treated lesion",
+        "definition": "Surgically treated spinal levels; several levels possible.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FirstOverviewRow.proc_surg_loc",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.patient_gender",
+        "path": "FirstOverviewRow.patient_gender",
+        "short": "6. Gender",
+        "definition": "Administrative gender of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_gender",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.patient_birthdate",
+        "path": "FirstOverviewRow.patient_birthdate",
+        "short": "7. Date of birth",
+        "definition": "Date of birth of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.patient_birthdate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.cond_osteoporosis_yn",
+        "path": "FirstOverviewRow.cond_osteoporosis_yn",
+        "short": "14. Osteoporosis",
+        "definition": "Osteoporosis diagnosis of the patient at the first visit.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.cond_osteoporosis_yn",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_pain_axial_intervals",
+        "path": "FirstOverviewRow.obs_pain_axial_intervals",
+        "short": "17.1 Pain level axial",
+        "definition": "Axial (spine) pain level reported by the patient, in four classes.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_pain_axial_intervals",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_pain_axial_nrs",
+        "path": "FirstOverviewRow.obs_pain_axial_nrs",
+        "short": "17.2 NRS (if available) axial",
+        "definition": "Numerical Rating Scale score of axial pain, from 0 to 10.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_pain_axial_nrs",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_bloodt_hb",
+        "path": "FirstOverviewRow.obs_bloodt_hb",
+        "short": "24.1 Hb",
+        "definition": "Haemoglobin concentration in blood; unit in column obs_bloodt_hb_spec.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_bloodt_hb",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.obs_bloodt_hb_spec",
+        "path": "FirstOverviewRow.obs_bloodt_hb_spec",
+        "short": "Specify unity measure used",
+        "definition": "Unit of measure used for obs_bloodt_hb.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.obs_bloodt_hb_spec",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Patient0",
+        "path": "FirstOverviewRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Encounter0",
+        "path": "FirstOverviewRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (first visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Observation0",
+        "path": "FirstOverviewRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (axial pain), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Observation1",
+        "path": "FirstOverviewRow.id_Observation1",
+        "short": "Computed id of Observation[1]",
+        "definition": "Deterministic id of the resource of role Observation[1] (haemoglobin), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Observation1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Condition1",
+        "path": "FirstOverviewRow.id_Condition1",
+        "short": "Computed id of Condition[1]",
+        "definition": "Deterministic id of the resource of role Condition[1] (osteoporosis), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Condition1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FirstOverviewRow.id_Procedure0",
+        "path": "FirstOverviewRow.id_Procedure0",
+        "short": "Computed id of Procedure[0]",
+        "definition": "Deterministic id of the resource of role Procedure[0] (previous spinal surgery), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FirstOverviewRow.id_Procedure0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

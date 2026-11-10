@@ -1,0 +1,158 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.0.0",
+  "source": "FirstOverview",
+  "logicalModel": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "report-drop",
+  "columns": [
+    {
+      "name": "patient_id",
+      "sourceName": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "encounter_fo",
+      "sourceName": "encounter_fo",
+      "type": "date",
+      "dateFormat": "dd/MM/yyyy"
+    },
+    {
+      "name": "proc_surg_yn",
+      "sourceName": "proc_surg_yn",
+      "type": "string"
+    },
+    {
+      "name": "proc_surg_loc",
+      "sourceName": "proc_surg_loc",
+      "type": "string",
+      "multiValue": {
+        "separator": ","
+      }
+    },
+    {
+      "name": "patient_gender",
+      "sourceName": "patient_gender",
+      "type": "string"
+    },
+    {
+      "name": "patient_birthdate",
+      "sourceName": "patient_birthdate",
+      "type": "date",
+      "dateFormat": "dd/MM/yyyy"
+    },
+    {
+      "name": "cond_osteoporosis_yn",
+      "sourceName": "cond_osteoporosis_yn",
+      "type": "string"
+    },
+    {
+      "name": "obs_pain_axial_intervals",
+      "sourceName": "obs_pain_axial_intervals",
+      "type": "string"
+    },
+    {
+      "name": "obs_pain_axial_nrs",
+      "sourceName": "obs_pain_axial_nrs",
+      "type": "integer"
+    },
+    {
+      "name": "obs_bloodt_hb",
+      "sourceName": "obs_bloodt_hb",
+      "type": "decimal",
+      "missingValues": [
+        "NA"
+      ]
+    },
+    {
+      "name": "obs_bloodt_hb_spec",
+      "sourceName": "obs_bloodt_hb_spec",
+      "type": "string"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "patient_id",
+        "encounter_fo"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "obs-pain-axial"
+      ],
+      "columns": [
+        "patient_id",
+        "encounter_fo"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation1",
+      "literals": [
+        "obs-hb"
+      ],
+      "columns": [
+        "patient_id",
+        "encounter_fo"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Condition1",
+      "literals": [
+        "cond-osteoporosis"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Procedure0",
+      "literals": [
+        "proc-spine-surgery"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

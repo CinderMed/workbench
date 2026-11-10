@@ -1,0 +1,28 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/motu/Encounter/enc-5ab30cfc657392220819d49d",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-5ab30cfc657392220819d49d",
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "IMP",
+        "display" : "inpatient encounter"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-216da54b5931a6d37cca8e29"
+      },
+      "period" : {
+        "start" : "2023-09-03",
+        "end" : "2023-10-28"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-5ab30cfc657392220819d49d"
+    }
+  }]
+}

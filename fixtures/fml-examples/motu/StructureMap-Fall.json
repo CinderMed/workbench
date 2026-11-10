@@ -1,0 +1,263 @@
+{
+  "resourceType" : "StructureMap",
+  "id" : "Fall",
+  "text" : {
+    "status" : "additional",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/motu/StructureMap/Fall&quot; = `Fall`\n\nuses &quot;http://example.org/fhir/motu/StructureDefinition/FallRow&quot; alias FallRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/AdverseEvent&quot; alias AdverseEvent as produced\n\ngroup Fall(source src : FallRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // AdverseEvent[0] · fall — created when: FallDate is not empty\n  src where ($this.id_AdverseEvent0.exists() and ($this.FallDate.exists())) -&gt; bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {\n    src.id_AdverseEvent0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'AdverseEvent/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/AdverseEvent/' + $this) &quot;AdverseEvent0-id&quot;;\n    src then AdverseEvent0(src, res) &quot;AdverseEvent0-body&quot;;\n  } &quot;AdverseEvent0&quot;;\n}\n\ngroup AdverseEvent0(source src : FallRow, target res : AdverseEvent) {\n  src -&gt; res.actuality = 'actual' &quot;fixed-actuality&quot;;\n  src -&gt; res.event = cc('http://snomed.info/sct', '1912002', 'Fall') &quot;fixed-event&quot;;\n  src.FallDate as v -&gt; res.date = v &quot;R-007&quot;;\n  // R-008, R-009 references to other tables (via rel_fall_patient, rel_fall_stay)\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-008&quot;;\n  src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-009&quot;;\n}\n</pre></div>"
+  },
+  "url" : "http://example.org/fhir/motu/StructureMap/Fall",
+  "name" : "Fall",
+  "structure" : [{
+    "url" : "http://example.org/fhir/motu/StructureDefinition/FallRow",
+    "mode" : "source",
+    "alias" : "FallRow"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Bundle",
+    "mode" : "target",
+    "alias" : "Bundle"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/AdverseEvent",
+    "mode" : "produced",
+    "alias" : "AdverseEvent"
+  }],
+  "group" : [{
+    "name" : "Fall",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FallRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "bundle",
+      "type" : "Bundle",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "bundle-type",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "type",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "transaction"
+        }]
+      }]
+    },
+    {
+      "name" : "AdverseEvent0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_AdverseEvent0.exists() and ($this.FallDate.exists()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "AdverseEvent"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "AdverseEvent0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_AdverseEvent0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'AdverseEvent/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/motu/AdverseEvent/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "AdverseEvent0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "AdverseEvent0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "AdverseEvent0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FallRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "AdverseEvent",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-actuality",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "actuality",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "actual"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-event",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "event",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "1912002"
+        },
+        {
+          "valueString" : "Fall"
+        }]
+      }]
+    },
+    {
+      "name" : "R-007",
+      "source" : [{
+        "context" : "src",
+        "element" : "FallDate",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "date",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-008",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "R-009",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Encounter0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "encounter",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Encounter/' + $this"
+        }]
+      }]
+    }]
+  }]
+}

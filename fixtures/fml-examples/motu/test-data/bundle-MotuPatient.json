@@ -1,0 +1,20 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/motu/Patient/pat-216da54b5931a6d37cca8e29",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-216da54b5931a6d37cca8e29",
+      "identifier" : [{
+        "value" : "1042"
+      }],
+      "gender" : "female",
+      "birthDate" : "1951-02-14"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-216da54b5931a6d37cca8e29"
+    }
+  }]
+}

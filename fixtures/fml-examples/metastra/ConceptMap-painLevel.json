@@ -1,0 +1,65 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "painLevel",
+  "url": "http://example.org/fhir/metastra/ConceptMap/painLevel",
+  "version": "1.2.0",
+  "name": "PainLevel",
+  "status": "draft",
+  "description": "Pain intensity classes used in FirstOverview and LastOverview.",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "2",
+          "display": "medium",
+          "target": [
+            {
+              "code": "LA6751-7",
+              "equivalence": "equivalent",
+              "display": "Moderate"
+            }
+          ]
+        }
+      ],
+      "target": "http://loinc.org"
+    },
+    {
+      "element": [
+        {
+          "code": "0",
+          "display": "no pain",
+          "target": [
+            {
+              "code": "373067005",
+              "equivalence": "equivalent",
+              "display": "No"
+            }
+          ]
+        },
+        {
+          "code": "1",
+          "display": "low",
+          "target": [
+            {
+              "code": "62482003",
+              "equivalence": "equivalent",
+              "display": "Low"
+            }
+          ]
+        },
+        {
+          "code": "3",
+          "display": "high",
+          "target": [
+            {
+              "code": "75540009",
+              "equivalence": "equivalent",
+              "display": "High"
+            }
+          ]
+        }
+      ],
+      "target": "http://snomed.info/sct"
+    }
+  ]
+}

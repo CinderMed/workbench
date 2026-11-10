@@ -1,0 +1,17 @@
+map "http://example.org/fhir/motu/StructureMap/Test" = `Test`
+
+uses "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow" alias HospitalStayRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Provenance" alias Provenance as produced
+
+group Test(source src : HospitalStayRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  src where ($this.id_Encounter0.exists()) -> bundle.entry as e, e.resource = create('Provenance') as res, e.request as req then {
+    src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Provenance/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/Provenance/' + $this) "id";
+    src -> res.recorded = '2026-11-09T12:00:00Z' "recorded";
+    src.id_Encounter0 as t -> res.target as r, r.reference = evaluate(t, 'Encounter/' + $this) "target";
+    src -> res.agent as ag then {
+      src -> ag.who as w, w.display = 'workbench' "who";
+    } "agent";
+  } "Provenance";
+}

@@ -1,0 +1,23 @@
+{
+  "resourceType": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+  "patient_id": "MTS-0003",
+  "encounter_fo": "2024-03-12",
+  "proc_surg_yn": "1",
+  "proc_surg_loc": [
+    "8",
+    "20"
+  ],
+  "patient_gender": "Female",
+  "patient_birthdate": "1956-07-05",
+  "cond_osteoporosis_yn": "-1",
+  "obs_pain_axial_intervals": "1",
+  "obs_pain_axial_nrs": 3,
+  "obs_bloodt_hb": 11.2,
+  "obs_bloodt_hb_spec": "1",
+  "id_Patient0": "pat-262fcad357d433b08c501ec1",
+  "id_Encounter0": "enc-9bcb7484895d673b121d94f2",
+  "id_Observation0": "obs-pain-axial-9bcb7484895d673b121d94f2",
+  "id_Observation1": "obs-hb-9bcb7484895d673b121d94f2",
+  "id_Condition1": "cond-osteoporosis-262fcad357d433b08c501ec1",
+  "id_Procedure0": "proc-spine-surgery-262fcad357d433b08c501ec1"
+}

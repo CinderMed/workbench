@@ -1,0 +1,20 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/metastra/Patient/pat-b2716a830fdcebab0d0ad229",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-b2716a830fdcebab0d0ad229",
+      "identifier" : [{
+        "value" : "MTS-0007"
+      }],
+      "gender" : "male",
+      "birthDate" : "1949-11-21"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-b2716a830fdcebab0d0ad229"
+    }
+  }]
+}

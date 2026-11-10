@@ -1,0 +1,225 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "HospitalStayRow",
+  "url": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
+  "version": "1.2.0",
+  "name": "HospitalStayRow",
+  "title": "Normalized row of table HospitalStay",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "HospitalStayRow",
+        "path": "HospitalStayRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "HospitalStayRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "HospitalStayRow.AnonymousID",
+        "path": "HospitalStayRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.AdmissionDate",
+        "path": "HospitalStayRow.AdmissionDate",
+        "short": "AdmissionDate",
+        "definition": "Admission date of the stay.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.AdmissionDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.DischargeDate",
+        "path": "HospitalStayRow.DischargeDate",
+        "short": "DischargeDate",
+        "definition": "Discharge date.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.DischargeDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.id_Encounter0",
+        "path": "HospitalStayRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital stay), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.id_Patient0",
+        "path": "HospitalStayRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "HospitalStayRow",
+        "path": "HospitalStayRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "HospitalStayRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "HospitalStayRow.AnonymousID",
+        "path": "HospitalStayRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.AdmissionDate",
+        "path": "HospitalStayRow.AdmissionDate",
+        "short": "AdmissionDate",
+        "definition": "Admission date of the stay.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.AdmissionDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.DischargeDate",
+        "path": "HospitalStayRow.DischargeDate",
+        "short": "DischargeDate",
+        "definition": "Discharge date.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.DischargeDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.id_Encounter0",
+        "path": "HospitalStayRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital stay), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "HospitalStayRow.id_Patient0",
+        "path": "HospitalStayRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "HospitalStayRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

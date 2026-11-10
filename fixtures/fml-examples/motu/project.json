@@ -1,0 +1,427 @@
+{
+  "$schema": "./mapping-project.schema.json",
+  "formatVersion": "1.2.0",
+  "project": {
+    "id": "prj_motu",
+    "name": "MOTU",
+    "description": "Extract of MOTU (Arcobelli et al., Scientific Data 2024) with three tables linked by AnonymousID. Sex values and test data invented for the example.",
+    "fhirVersion": "4.0.1",
+    "canonicalBase": "http://example.org/fhir/motu",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/motu"
+    },
+    "terminology": {
+      "provider": "bioportal",
+      "allowedSystems": [
+        "http://loinc.org"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "src_patient",
+      "name": "MotuPatient",
+      "description": "Demographics of amputee patients.",
+      "rowKey": [
+        "col_p_id"
+      ],
+      "columns": [
+        {
+          "id": "col_p_id",
+          "name": "AnonymousID",
+          "label": "AnonymousID",
+          "description": "Anonymous patient identifier, shared by all tables.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_p_sex",
+          "name": "Sex",
+          "label": "Sex",
+          "description": "Sex of the patient.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "M"
+            },
+            {
+              "code": "F"
+            }
+          ]
+        },
+        {
+          "id": "col_p_birth",
+          "name": "BirthDay",
+          "label": "BirthDay",
+          "description": "Date of birth.",
+          "dataType": "date",
+          "dateFormat": "dd/MM/yyyy"
+        }
+      ]
+    },
+    {
+      "id": "src_stay",
+      "name": "HospitalStay",
+      "description": "Rehabilitation stays: one or more per patient.",
+      "rowKey": [
+        "col_s_id",
+        "col_s_adm"
+      ],
+      "columns": [
+        {
+          "id": "col_s_id",
+          "name": "AnonymousID",
+          "description": "Anonymous patient identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_s_adm",
+          "name": "AdmissionDate",
+          "description": "Admission date of the stay.",
+          "dataType": "date",
+          "dateFormat": "dd/MM/yyyy"
+        },
+        {
+          "id": "col_s_dis",
+          "name": "DischargeDate",
+          "description": "Discharge date.",
+          "dataType": "date",
+          "dateFormat": "dd/MM/yyyy"
+        }
+      ]
+    },
+    {
+      "id": "src_fall",
+      "name": "Fall",
+      "description": "Falls that happened during a stay.",
+      "rowKey": [
+        "col_f_id",
+        "col_f_adm",
+        "col_f_date"
+      ],
+      "columns": [
+        {
+          "id": "col_f_id",
+          "name": "AnonymousID",
+          "description": "Anonymous patient identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_f_adm",
+          "name": "AdmissionDate",
+          "description": "Admission date of the stay during which the fall happened.",
+          "dataType": "date",
+          "dateFormat": "dd/MM/yyyy"
+        },
+        {
+          "id": "col_f_date",
+          "name": "FallDate",
+          "description": "Date of the fall; must be after AdmissionDate.",
+          "dataType": "date",
+          "dateFormat": "dd/MM/yyyy"
+        }
+      ]
+    }
+  ],
+  "sourceRelations": [
+    {
+      "id": "rel_stay_patient",
+      "from": {
+        "sourceId": "src_stay",
+        "columnIds": [
+          "col_s_id"
+        ]
+      },
+      "to": {
+        "sourceId": "src_patient",
+        "columnIds": [
+          "col_p_id"
+        ]
+      }
+    },
+    {
+      "id": "rel_fall_patient",
+      "from": {
+        "sourceId": "src_fall",
+        "columnIds": [
+          "col_f_id"
+        ]
+      },
+      "to": {
+        "sourceId": "src_patient",
+        "columnIds": [
+          "col_p_id"
+        ]
+      }
+    },
+    {
+      "id": "rel_fall_stay",
+      "from": {
+        "sourceId": "src_fall",
+        "columnIds": [
+          "col_f_id",
+          "col_f_adm"
+        ]
+      },
+      "to": {
+        "sourceId": "src_stay",
+        "columnIds": [
+          "col_s_id",
+          "col_s_adm"
+        ]
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_patient",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_p_id"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ins_encounter0",
+      "resourceType": "Encounter",
+      "index": 0,
+      "label": "hospital stay",
+      "sourceId": "src_stay",
+      "multiplicity": {
+        "kind": "perGroup",
+        "groupBy": [
+          "col_s_id",
+          "col_s_adm"
+        ]
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_s_adm"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "enc"
+          },
+          {
+            "columnId": "col_s_id"
+          },
+          {
+            "columnId": "col_s_adm"
+          }
+        ]
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "finished"
+          }
+        },
+        {
+          "path": "class",
+          "value": {
+            "type": "Coding",
+            "coding": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_ae0",
+      "resourceType": "AdverseEvent",
+      "index": 0,
+      "label": "fall",
+      "sourceId": "src_fall",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_f_date"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "fall"
+          },
+          {
+            "columnId": "col_f_id"
+          },
+          {
+            "columnId": "col_f_adm"
+          },
+          {
+            "columnId": "col_f_date"
+          }
+        ]
+      },
+      "fixedValues": [
+        {
+          "path": "actuality",
+          "value": {
+            "type": "code",
+            "value": "actual"
+          }
+        },
+        {
+          "path": "event",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "1912002",
+              "display": "Fall",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_01",
+      "code": "R-001",
+      "columnId": "col_p_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_02",
+      "code": "R-002",
+      "columnId": "col_p_sex",
+      "instanceId": "ins_patient0",
+      "path": "gender",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_sex"
+      }
+    },
+    {
+      "id": "map_03",
+      "code": "R-003",
+      "columnId": "col_p_birth",
+      "instanceId": "ins_patient0",
+      "path": "birthDate",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_04",
+      "code": "R-004",
+      "columnId": "col_s_adm",
+      "instanceId": "ins_encounter0",
+      "path": "period.start",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_05",
+      "code": "R-005",
+      "columnId": "col_s_dis",
+      "instanceId": "ins_encounter0",
+      "path": "period.end",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_06",
+      "code": "R-006",
+      "instanceId": "ins_encounter0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true,
+        "via": "rel_stay_patient"
+      }
+    },
+    {
+      "id": "map_07",
+      "code": "R-007",
+      "columnId": "col_f_date",
+      "instanceId": "ins_ae0",
+      "path": "date",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_08",
+      "code": "R-008",
+      "instanceId": "ins_ae0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true,
+        "via": "rel_fall_patient"
+      }
+    },
+    {
+      "id": "map_09",
+      "code": "R-009",
+      "instanceId": "ins_ae0",
+      "path": "encounter",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_encounter0",
+        "via": "rel_fall_stay"
+      }
+    }
+  ],
+  "valueMaps": [
+    {
+      "id": "vm_sex",
+      "name": "sex",
+      "target": "code",
+      "entries": [
+        {
+          "sourceValue": "M",
+          "target": {
+            "value": "male"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "F",
+          "target": {
+            "value": "female"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    }
+  ]
+}

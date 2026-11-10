@@ -1,0 +1,36 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "osteoStatus",
+  "url": "http://example.org/fhir/metastra/ConceptMap/osteoStatus",
+  "version": "1.2.0",
+  "name": "OsteoStatus",
+  "status": "draft",
+  "description": "",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "1",
+          "display": "yes",
+          "target": [
+            {
+              "code": "confirmed",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "-1",
+          "display": "unknown",
+          "target": [
+            {
+              "code": "unconfirmed",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ],
+      "target": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.0.0",
+  "source": "T",
+  "logicalModel": "http://example.org/T",
+  "input": {
+    "format": "csv",
+    "delimiter": ";"
+  },
+  "columns": [
+    {
+      "name": "hb",
+      "sourceName": "Hb",
+      "type": "decimal",
+      "decimalSeparator": ","
+    },
+    {
+      "name": "n",
+      "sourceName": "N",
+      "type": "integer"
+    },
+    {
+      "name": "ok",
+      "sourceName": "Ok",
+      "type": "boolean",
+      "trueValues": [
+        "s\u00ec",
+        "si"
+      ],
+      "falseValues": [
+        "no"
+      ]
+    },
+    {
+      "name": "d",
+      "sourceName": "Anno",
+      "type": "date",
+      "dateFormat": "yyyy"
+    }
+  ],
+  "ids": []
+}

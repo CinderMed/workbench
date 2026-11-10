@@ -1,0 +1,261 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "FallRow",
+  "url": "http://example.org/fhir/motu/StructureDefinition/FallRow",
+  "version": "1.2.0",
+  "name": "FallRow",
+  "title": "Normalized row of table Fall",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/motu/StructureDefinition/FallRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "FallRow",
+        "path": "FallRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FallRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "FallRow.AnonymousID",
+        "path": "FallRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.AdmissionDate",
+        "path": "FallRow.AdmissionDate",
+        "short": "AdmissionDate",
+        "definition": "Admission date of the stay during which the fall happened.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.AdmissionDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.FallDate",
+        "path": "FallRow.FallDate",
+        "short": "FallDate",
+        "definition": "Date of the fall; must be after AdmissionDate.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.FallDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_AdverseEvent0",
+        "path": "FallRow.id_AdverseEvent0",
+        "short": "Computed id of AdverseEvent[0]",
+        "definition": "Deterministic id of the resource of role AdverseEvent[0] (fall), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_AdverseEvent0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_Patient0",
+        "path": "FallRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_Encounter0",
+        "path": "FallRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital stay), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "FallRow",
+        "path": "FallRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FallRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "FallRow.AnonymousID",
+        "path": "FallRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.AdmissionDate",
+        "path": "FallRow.AdmissionDate",
+        "short": "AdmissionDate",
+        "definition": "Admission date of the stay during which the fall happened.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.AdmissionDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.FallDate",
+        "path": "FallRow.FallDate",
+        "short": "FallDate",
+        "definition": "Date of the fall; must be after AdmissionDate.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.FallDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_AdverseEvent0",
+        "path": "FallRow.id_AdverseEvent0",
+        "short": "Computed id of AdverseEvent[0]",
+        "definition": "Deterministic id of the resource of role AdverseEvent[0] (fall), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_AdverseEvent0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_Patient0",
+        "path": "FallRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "FallRow.id_Encounter0",
+        "path": "FallRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital stay), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FallRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}
