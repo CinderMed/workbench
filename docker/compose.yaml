@@ -1,0 +1,80 @@
+# CinderMed development stack (specification, "Docker Compose").
+# Every value has a development default; copy .env.example to .env to change them.
+# The defaults are for local development only: never reuse them on a shared server.
+name: cindermed
+
+services:
+  db:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: cindermed
+      POSTGRES_USER: cindermed
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cindermed-dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cindermed -d cindermed"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin-dev}
+      # Browsers and tokens use the published address; containers may use keycloak:8080.
+      KC_HOSTNAME: http://localhost:${KEYCLOAK_PORT:-8081}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      # Password of the development test users (one per project role), used by the realm import.
+      CINDERMED_DEV_PASSWORD: ${CINDERMED_DEV_PASSWORD:-cindermed-dev}
+      CINDERMED_WEB_URL: http://localhost:${WEB_PORT:-8080}
+    volumes:
+      - ./keycloak/cindermed-realm.json:/opt/keycloak/data/import/cindermed-realm.json:ro
+    ports:
+      - "${KEYCLOAK_PORT:-8081}:8080"
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    image: cindermed/api:dev
+    environment:
+      PORT: "3000"
+      DATABASE_URL: ${DATABASE_URL:-postgres://cindermed:cindermed-dev@db:5432/cindermed}
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8081/realms/cindermed}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-cindermed-web}
+      BIOPORTAL_API_KEY: ${BIOPORTAL_API_KEY:-}
+      LOINC_USERNAME: ${LOINC_USERNAME:-}
+      LOINC_PASSWORD: ${LOINC_PASSWORD:-}
+      MATCHBOX_URL: ${MATCHBOX_URL:-}
+      FHIR_PACKAGE_REGISTRY: ${FHIR_PACKAGE_REGISTRY:-https://packages.fhir.org}
+    volumes:
+      - fhir-packages:/app/.fhir
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_OIDC_AUTHORITY: ${OIDC_ISSUER:-http://localhost:8081/realms/cindermed}
+        VITE_OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-cindermed-web}
+    image: cindermed/web:dev
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+volumes:
+  pgdata:
+  fhir-packages:

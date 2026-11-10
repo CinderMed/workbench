@@ -106,3 +106,19 @@ jobs:
           name: golden-output
           path: .tmp/golden
           retention-days: 14
+
+  compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and start the development stack
+        run: docker compose up --build --detach --wait --wait-timeout 300
+      - name: Keycloak login, test user sign-in, web app and API through the web proxy
+        run: bash tooling/compose/smoke.sh
+      - name: Logs
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop
+        if: always()
+        run: docker compose down --volumes
