@@ -1,6 +1,6 @@
 {
   "name": "@cindermed/web",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "CinderMed web app (React)",
   "license": "Apache-2.0",
