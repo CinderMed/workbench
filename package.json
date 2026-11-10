@@ -17,7 +17,8 @@
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json",
     "boundaries": "depcruise apps packages --config .dependency-cruiser.cjs",
     "check:fixtures": "sha256sum --check --quiet --strict fixtures/fml-examples.sha256",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "golden": "bash tooling/golden/run-examples.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
