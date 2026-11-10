@@ -1,0 +1,26 @@
+name: Bug
+description: Something does not work as the specification or the documentation says.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste patient data, credentials or API keys. Use made-up values or the examples in fixtures/.
+        To report a security vulnerability, follow SECURITY.md instead of opening an issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Steps to reproduce, what you expected and what you got.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Workbench version, or package and version (e.g. @cindermed/fml 0.2.0).
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or output
+      render: text

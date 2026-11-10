@@ -39,3 +39,9 @@ The specification fixes the stack (TypeScript strict, pnpm workspaces, Vitest, d
 - Adding a dependency with an install script needs an explicit `allowBuilds` entry, reviewed in the PR.
 - The TypeScript 7 upgrade is blocked on typescript-eslint and needs a follow-up when support lands.
 - Coverage thresholds on empty packages are trivially met; they start to matter from module 1.
+
+## Addendum: community files (module 0, `chore/org-community-files`)
+
+The specification puts the community files (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, issue and pull request templates, `FUNDING.yml`) in the organization's `CinderMed/.github` repository, which GitHub applies to every repository. While `workbench` is the only repository, they live in `workbench/.github/`. They move to `CinderMed/.github` when a second repository exists (the `website`, or the extracted core from ADR-0001); `workbench` then keeps only what is specific to it.
+
+`tooling/community-files.test.ts` checks that the issue forms are valid YAML, that the pull request template keeps the sections required by the specification, and that the commit scopes listed in CONTRIBUTING match `commitlint.config.js`.

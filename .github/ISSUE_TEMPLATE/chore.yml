@@ -1,0 +1,24 @@
+name: Chore
+description: Tooling, infrastructure, CI, documentation or maintenance work.
+labels: ["chore"]
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: Branch
+      description: chore/, ci/, docs/, refactor/ or fix/ followed by a kebab-case name.
+      placeholder: chore/docker-compose
+    validations:
+      required: true
+  - type: input
+    id: module
+    attributes:
+      label: Module
+      description: Module number, or "none". Also add the matching module-N label.
+      placeholder: "0"
+  - type: textarea
+    id: scope
+    attributes:
+      label: What to do
+    validations:
+      required: true
