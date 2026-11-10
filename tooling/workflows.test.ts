@@ -38,7 +38,13 @@ function usesOf(document: unknown): string[] {
 
 describe("GitHub Actions", () => {
   it("has the module 0 workflows", () => {
-    expect(readdirSync(workflowsDir).sort()).toEqual(["ci.yml", "codeql.yml", "pr-title.yml"]);
+    expect(readdirSync(workflowsDir).sort()).toEqual([
+      "changeset-check.yml",
+      "ci.yml",
+      "codeql.yml",
+      "pr-title.yml",
+      "release.yml",
+    ]);
   });
 
   it.each(yamlFiles)("%s pins every external action to a full commit SHA", (path) => {

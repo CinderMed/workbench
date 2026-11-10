@@ -4,7 +4,7 @@
 
 Do not open a public issue for a security problem.
 
-Report it privately with a draft [security advisory](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/creating-a-repository-security-advisory) on this repository (Security tab → Advisories → New draft security advisory), or by contacting an owner of the [CinderMed organization](https://github.com/CinderMed). Once the repository is public, [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) will be enabled and becomes the preferred channel.
+Report it privately through GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability): Security tab → Report a vulnerability. If that is not possible, contact an owner of the [CinderMed organization](https://github.com/CinderMed).
 
 Please include the affected version or commit, steps to reproduce and the impact. Do not include real patient data or real credentials in the report.
 

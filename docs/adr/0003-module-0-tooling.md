@@ -57,3 +57,18 @@ The specification puts the community files (CONTRIBUTING, CODE_OF_CONDUCT, SECUR
 **Dependency updates.** Renovate (`renovate.json`) rather than Dependabot, because it handles pnpm workspaces and lockfile maintenance well: one weekly grouped PR for non-major updates, one for GitHub Actions (kept pinned by digest), `minimumReleaseAge` of 7 days, `chore(deps)` titles and the `no-changeset` label. TypeScript is held below 6.1 (see above). Renovate needs its GitHub App installed on the organization.
 
 **Code scanning and branch protection.** `codeql.yml` runs on every PR, every push to `main` and weekly. On the Free plan, code scanning and branch protection are available only for public repositories; the repository is public, so both apply. The CodeQL job still has a guard that skips it if the repository is ever made private again, instead of failing on the upload.
+
+## Addendum: versions and releases (module 0, `chore/changesets-release`)
+
+**Changesets.** `.changeset/config.json` puts `@cindermed/api` and `@cindermed/web` in one `fixed` group, written as the glob `@cindermed/{api,web}` so the configuration is valid before `apps/web` exists: their shared version is the workbench version. Every other package versions independently. Private packages are versioned but not tagged one by one (`privatePackages.tag: false`); per-package tags arrive with npm publishing at `v0.3.0`. `pnpm version-packages` runs `changeset version` and formats the generated changelogs and manifests with Prettier, so the "Version Packages" PR passes `format:check`.
+
+**Changeset check.** `changeset-check.yml` (job `Changeset`) runs `tooling/release/changeset-check-cli.ts` on every PR and re-runs when labels change. A changeset is required when a file under `packages/*` or `apps/*` changes, except tests, `CHANGELOG.md`, `README.md` and the documentation site (`apps/docs`). It passes with the `no-changeset` label and on the "Version Packages" PR (`changeset-release/*`). The rules are pure functions with unit tests.
+
+**Release workflow.** `release.yml` runs on every push to `main`:
+
+1. With pending changesets, `changesets/action` opens or updates the "Version Packages" PR, titled `chore(infra): version packages`.
+2. Without pending changesets, `tooling/release/product-release-cli.ts` reads the workbench version from `apps/api/package.json`. If its `vX.Y.Z` tag does not exist yet, it creates the tag and a GitHub Release, with notes taken from the changelog sections of every package bumped in that commit. Version `0.0.0` (nothing released) and existing tags are skipped, so the step is idempotent. Versions with a pre-release suffix become pre-releases.
+
+The job exposes `released`, `version` and `tag` as outputs. Tags created with `GITHUB_TOKEN` do not trigger other workflows, so the jobs that run on a release (Docker images in `chore/docker-compose`, docs deploy in `docs/site-skeleton`) are added to `release.yml` and depend on these outputs.
+
+**Tokens.** `changesets/action` needs the repository setting "Allow GitHub Actions to create and approve pull requests". A pull request opened with `GITHUB_TOKEN` does not trigger the CI workflows, so its required checks never report. The workflow uses an optional `RELEASE_TOKEN` secret (a fine-grained token or GitHub App token with contents and pull-requests write) when present. Without it, the "Version Packages" PR only changes versions and changelogs already checked on `main`, and an admin merges it.

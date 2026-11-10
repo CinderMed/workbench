@@ -18,9 +18,12 @@
     "boundaries": "depcruise apps packages --config .dependency-cruiser.cjs",
     "check:fixtures": "sha256sum --check --quiet --strict fixtures/fml-examples.sha256",
     "prepare": "lefthook install",
-    "golden": "bash tooling/golden/run-examples.sh"
+    "golden": "bash tooling/golden/run-examples.sh",
+    "changeset": "changeset",
+    "version-packages": "changeset version && prettier --write --log-level warn \"**/CHANGELOG.md\" \"{apps,packages}/*/package.json\""
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
