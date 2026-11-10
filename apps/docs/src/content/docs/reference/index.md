@@ -10,4 +10,4 @@ This section will document the contracts of CinderMed, generated from their sche
 - the export package manifest (1.0.0)
 - the REST API (OpenAPI)
 
-Design decisions are recorded as [architecture decision records](https://github.com/CinderMed/workbench/tree/main/docs/adr) in the repository.
+The full functional [specification](https://github.com/CinderMed/workbench/blob/main/docs/specification.md) and the [architecture decision records](https://github.com/CinderMed/workbench/tree/main/docs/adr) live in the repository.
