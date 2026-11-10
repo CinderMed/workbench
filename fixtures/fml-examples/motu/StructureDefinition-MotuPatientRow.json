@@ -1,0 +1,189 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "MotuPatientRow",
+  "url": "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow",
+  "version": "1.2.0",
+  "name": "MotuPatientRow",
+  "title": "Normalized row of table MotuPatient",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "MotuPatientRow",
+        "path": "MotuPatientRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MotuPatientRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "MotuPatientRow.AnonymousID",
+        "path": "MotuPatientRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier, shared by all tables.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.Sex",
+        "path": "MotuPatientRow.Sex",
+        "short": "Sex",
+        "definition": "Sex of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.Sex",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.BirthDay",
+        "path": "MotuPatientRow.BirthDay",
+        "short": "BirthDay",
+        "definition": "Date of birth.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.BirthDay",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.id_Patient0",
+        "path": "MotuPatientRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "MotuPatientRow",
+        "path": "MotuPatientRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MotuPatientRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "MotuPatientRow.AnonymousID",
+        "path": "MotuPatientRow.AnonymousID",
+        "short": "AnonymousID",
+        "definition": "Anonymous patient identifier, shared by all tables.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.AnonymousID",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.Sex",
+        "path": "MotuPatientRow.Sex",
+        "short": "Sex",
+        "definition": "Sex of the patient.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.Sex",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.BirthDay",
+        "path": "MotuPatientRow.BirthDay",
+        "short": "BirthDay",
+        "definition": "Date of birth.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.BirthDay",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "MotuPatientRow.id_Patient0",
+        "path": "MotuPatientRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MotuPatientRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

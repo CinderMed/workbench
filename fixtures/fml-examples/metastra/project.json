@@ -1,0 +1,1054 @@
+{
+  "$schema": "./mapping-project.schema.json",
+  "formatVersion": "1.2.0",
+  "project": {
+    "id": "prj_metastra",
+    "name": "Metastra",
+    "description": "Registry of patients with spinal metastases (REDCap dictionary). Sample extract with 11 variables of the FirstOverview form.",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/metastra",
+    "terminology": {
+      "provider": "bioportal",
+      "allowedSystems": [
+        "http://loinc.org"
+      ]
+    },
+    "createdAt": "2026-11-09T15:00:00Z",
+    "updatedAt": "2026-11-09T16:30:00Z",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/metastra"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_firstoverview",
+      "name": "FirstOverview",
+      "description": "First visit of the patient: demographics, pain, blood tests, comorbidities.",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "import": {
+        "fileName": "Dictionary_METASTRA_FHIR_Last.xlsx",
+        "sheet": "FirstOverview",
+        "fileKind": "dictionary",
+        "headerRow": 2,
+        "columnRoles": {
+          "Label": "label",
+          "Description": "description",
+          "Variable": "name",
+          "Data Type": "dataType",
+          "Default values": "valueLabel",
+          "REDCap code": "valueCode",
+          "Resource": "ignore"
+        },
+        "continuationRows": "allowedValuesOfPrevious",
+        "typeRules": {
+          "list, single choice": "categorical",
+          "yes/no": "categorical",
+          "list, multiple choice": "multipleChoice",
+          "number": "decimal",
+          "float": "decimal",
+          "text": "string"
+        },
+        "importedAt": "2026-11-09T15:05:00Z"
+      },
+      "sections": [
+        {
+          "id": "sec_demo",
+          "name": "Demographic data",
+          "order": 1
+        },
+        {
+          "id": "sec_osteo",
+          "name": "Osteporosis/Osteopenia",
+          "order": 2
+        },
+        {
+          "id": "sec_pain",
+          "name": "Pain",
+          "order": 3
+        },
+        {
+          "id": "sec_blood",
+          "name": "Blood test",
+          "order": 4
+        }
+      ],
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "1. Patient ID",
+          "description": "Pseudonymised patient identifier, unique in the registry.",
+          "dataType": "string",
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_encounter_fo",
+          "name": "encounter_fo",
+          "label": "2. Visit Date",
+          "description": "Date of the first visit (baseline).",
+          "dataType": "date",
+          "provenance": {
+            "kind": "import"
+          },
+          "dateFormat": "dd/MM/yyyy"
+        },
+        {
+          "id": "col_proc_surg_yn",
+          "name": "proc_surg_yn",
+          "label": "3. At baseline, has the patient been hospitalized for a surgical spinal treatment?",
+          "description": "Whether at baseline the patient has already had spinal surgery.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "1",
+              "label": "yes"
+            },
+            {
+              "code": "0",
+              "label": "no"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_proc_surg_loc",
+          "name": "proc_surg_loc",
+          "label": "5.1 Localization of surgically treated lesion",
+          "description": "Surgically treated spinal levels; several levels possible.",
+          "dataType": "multipleChoice",
+          "multiValue": {
+            "encoding": "delimited",
+            "separator": ","
+          },
+          "allowedValues": [
+            {
+              "code": "1",
+              "label": "C1"
+            },
+            {
+              "code": "2",
+              "label": "C2"
+            },
+            {
+              "code": "8",
+              "label": "T1"
+            },
+            {
+              "code": "20",
+              "label": "L1"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_gender",
+          "name": "patient_gender",
+          "label": "6. Gender",
+          "description": "Administrative gender of the patient.",
+          "sectionId": "sec_demo",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "Female",
+              "label": "Female"
+            },
+            {
+              "code": "Male",
+              "label": "Male"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_birthdate",
+          "name": "patient_birthdate",
+          "label": "7. Date of birth",
+          "description": "Date of birth of the patient.",
+          "sectionId": "sec_demo",
+          "dataType": "date",
+          "provenance": {
+            "kind": "import"
+          },
+          "dateFormat": "dd/MM/yyyy"
+        },
+        {
+          "id": "col_osteo_yn",
+          "name": "cond_osteoporosis_yn",
+          "label": "14. Osteoporosis",
+          "description": "Osteoporosis diagnosis of the patient at the first visit.",
+          "sectionId": "sec_osteo",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "1",
+              "label": "yes"
+            },
+            {
+              "code": "0",
+              "label": "no"
+            },
+            {
+              "code": "-1",
+              "label": "unknown"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_pain_axial",
+          "name": "obs_pain_axial_intervals",
+          "label": "17.1 Pain level axial",
+          "description": "Axial (spine) pain level reported by the patient, in four classes.",
+          "sectionId": "sec_pain",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "0",
+              "label": "no pain"
+            },
+            {
+              "code": "1",
+              "label": "low"
+            },
+            {
+              "code": "2",
+              "label": "medium"
+            },
+            {
+              "code": "3",
+              "label": "high"
+            },
+            {
+              "code": "-1",
+              "label": "unknown"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_pain_axial_nrs",
+          "name": "obs_pain_axial_nrs",
+          "label": "17.2 NRS (if available) axial",
+          "description": "Numerical Rating Scale score of axial pain, from 0 to 10.",
+          "sectionId": "sec_pain",
+          "dataType": "integer",
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_hb",
+          "name": "obs_bloodt_hb",
+          "label": "24.1 Hb",
+          "description": "Haemoglobin concentration in blood; unit in column obs_bloodt_hb_spec.",
+          "sectionId": "sec_blood",
+          "dataType": "decimal",
+          "missingValues": [
+            "NA"
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        },
+        {
+          "id": "col_hb_unit",
+          "name": "obs_bloodt_hb_spec",
+          "label": "Specify unity measure used",
+          "description": "Unit of measure used for obs_bloodt_hb.",
+          "sectionId": "sec_blood",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "1",
+              "label": "g/dL"
+            },
+            {
+              "code": "2",
+              "label": "g/L"
+            },
+            {
+              "code": "3",
+              "label": "mmol/L"
+            }
+          ],
+          "provenance": {
+            "kind": "import"
+          }
+        }
+      ]
+    }
+  ],
+  "sourceRelations": [],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "description": "The registry patient: one resource per record.",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash",
+        "hashLength": 24
+      }
+    },
+    {
+      "id": "ins_encounter0",
+      "resourceType": "Encounter",
+      "index": 0,
+      "label": "first visit",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perGroup",
+        "groupBy": [
+          "col_patient_id",
+          "col_encounter_fo"
+        ]
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_encounter_fo"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "enc"
+          },
+          {
+            "columnId": "col_patient_id"
+          },
+          {
+            "columnId": "col_encounter_fo"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "finished"
+          }
+        },
+        {
+          "path": "class",
+          "value": {
+            "type": "Coding",
+            "coding": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "AMB",
+              "display": "ambulatory"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "axial pain",
+      "description": "Axial pain assessment at the first visit: intensity class + NRS as a component.",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0",
+        "encounterInstanceId": "ins_encounter0"
+      },
+      "createWhen": {
+        "op": "and",
+        "conditions": [
+          {
+            "op": "notEmpty",
+            "columnId": "col_pain_axial"
+          },
+          {
+            "op": "notEquals",
+            "columnId": "col_pain_axial",
+            "value": "-1"
+          }
+        ]
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-pain-axial"
+          },
+          {
+            "columnId": "col_patient_id"
+          },
+          {
+            "columnId": "col_encounter_fo"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "slices": [
+        {
+          "id": "slc_nrs",
+          "path": "component",
+          "name": "nrs",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://snomed.info/sct",
+                  "code": "1284852002",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "279039007",
+              "display": "Low back pain",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ],
+      "review": {
+        "status": "toReview",
+        "comments": [
+          {
+            "id": "cmt_0001",
+            "author": "Laura M.",
+            "createdAt": "2026-11-08T17:05:00Z",
+            "text": "Should we check the code for \"medium\"?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ins_obs1",
+      "resourceType": "Observation",
+      "index": 1,
+      "label": "haemoglobin",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0",
+        "encounterInstanceId": "ins_encounter0"
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_hb"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-hb"
+          },
+          {
+            "columnId": "col_patient_id"
+          },
+          {
+            "columnId": "col_encounter_fo"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "38082009",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_cond1",
+      "resourceType": "Condition",
+      "index": 1,
+      "label": "osteoporosis",
+      "description": "Osteoporosis: created if the answer is yes (confirmed) or unknown (unconfirmed); not created if no.",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0",
+        "encounterInstanceId": "ins_encounter0"
+      },
+      "createWhen": {
+        "op": "in",
+        "columnId": "col_osteo_yn",
+        "values": [
+          "1",
+          "-1"
+        ]
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "cond-osteoporosis"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "64859006",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_proc0",
+      "resourceType": "Procedure",
+      "index": 0,
+      "label": "previous spinal surgery",
+      "description": "Spinal surgery before baseline, with the treated levels.",
+      "sourceId": "src_firstoverview",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "createWhen": {
+        "op": "equals",
+        "columnId": "col_proc_surg_yn",
+        "value": "1"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "proc-spine-surgery"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "completed"
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "columnId": "col_patient_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_gender",
+      "instanceId": "ins_patient0",
+      "path": "gender",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_gender"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "columnId": "col_birthdate",
+      "instanceId": "ins_patient0",
+      "path": "birthDate",
+      "transform": {
+        "kind": "cast",
+        "to": "date",
+        "inputFormat": "dd/MM/yyyy"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "columnId": "col_encounter_fo",
+      "instanceId": "ins_encounter0",
+      "path": "period.start",
+      "transform": {
+        "kind": "cast",
+        "to": "dateTime",
+        "inputFormat": "dd/MM/yyyy"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "instanceId": "ins_encounter0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0006",
+      "code": "R-006",
+      "columnId": "col_pain_axial",
+      "instanceId": "ins_obs0",
+      "path": "valueCodeableConcept",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_painlevel"
+      },
+      "review": {
+        "status": "toReview"
+      }
+    },
+    {
+      "id": "map_0007",
+      "code": "R-007",
+      "columnId": "col_pain_axial_nrs",
+      "instanceId": "ins_obs0",
+      "path": "component[nrs].valueInteger",
+      "transform": {
+        "kind": "copy"
+      },
+      "review": {
+        "status": "toReview"
+      }
+    },
+    {
+      "id": "map_0008",
+      "code": "R-008",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0009",
+      "code": "R-009",
+      "instanceId": "ins_obs0",
+      "path": "encounter",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_encounter0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0010",
+      "code": "R-010",
+      "columnId": "col_hb",
+      "instanceId": "ins_obs1",
+      "path": "valueQuantity",
+      "transform": {
+        "kind": "quantity",
+        "unitColumnId": "col_hb_unit",
+        "unitValueMapId": "vm_hb_unit"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0011",
+      "code": "R-011",
+      "columnId": "col_osteo_yn",
+      "instanceId": "ins_cond1",
+      "path": "verificationStatus",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_osteo_status"
+      },
+      "review": {
+        "status": "approved"
+      }
+    },
+    {
+      "id": "map_0012",
+      "code": "R-012",
+      "instanceId": "ins_cond1",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0013",
+      "code": "R-013",
+      "columnId": "col_proc_surg_loc",
+      "instanceId": "ins_proc0",
+      "path": "bodySite",
+      "repeat": {
+        "kind": "eachValue"
+      },
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_spine_level"
+      },
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "id": "map_0014",
+      "code": "R-014",
+      "instanceId": "ins_proc0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": [
+    {
+      "id": "vm_gender",
+      "name": "administrativeGender",
+      "target": "code",
+      "entries": [
+        {
+          "sourceValue": "Female",
+          "target": {
+            "value": "female"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "Male",
+          "target": {
+            "value": "male"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_painlevel",
+      "name": "painLevel",
+      "description": "Pain intensity classes used in FirstOverview and LastOverview.",
+      "target": "CodeableConcept",
+      "entries": [
+        {
+          "sourceValue": "0",
+          "sourceLabel": "no pain",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "373067005",
+            "display": "No",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "1",
+          "sourceLabel": "low",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "62482003",
+            "display": "Low",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "2",
+          "sourceLabel": "medium",
+          "target": {
+            "system": "http://loinc.org",
+            "code": "LA6751-7",
+            "display": "Moderate",
+            "verification": {
+              "status": "verified",
+              "checkedAt": "2026-11-09T16:20:00Z"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "3",
+          "sourceLabel": "high",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "75540009",
+            "display": "High",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "-1",
+          "sourceLabel": "unknown",
+          "action": {
+            "kind": "skipInstance"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_osteo_status",
+      "name": "osteoStatus",
+      "target": "CodeableConcept",
+      "entries": [
+        {
+          "sourceValue": "1",
+          "sourceLabel": "yes",
+          "target": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "-1",
+          "sourceLabel": "unknown",
+          "target": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "unconfirmed"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "0",
+          "sourceLabel": "no",
+          "action": {
+            "kind": "skipInstance"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_hb_unit",
+      "name": "hbUnit",
+      "target": "Quantity.unit",
+      "entries": [
+        {
+          "sourceValue": "1",
+          "sourceLabel": "g/dL",
+          "target": {
+            "system": "http://unitsofmeasure.org",
+            "code": "g/dL",
+            "display": "g/dL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "2",
+          "sourceLabel": "g/L",
+          "target": {
+            "system": "http://unitsofmeasure.org",
+            "code": "g/L",
+            "display": "g/L"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "3",
+          "sourceLabel": "mmol/L",
+          "target": {
+            "system": "http://unitsofmeasure.org",
+            "code": "mmol/L",
+            "display": "mmol/L"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_spine_level",
+      "name": "spineLevel",
+      "description": "Spinal levels (SNOMED CT codes from the Metastra sheet, entered by hand).",
+      "target": "CodeableConcept",
+      "entries": [
+        {
+          "sourceValue": "1",
+          "sourceLabel": "C1",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "14806007",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "2",
+          "sourceLabel": "C2",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "731673003",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "8",
+          "sourceLabel": "T1",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "731692001",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "20",
+          "sourceLabel": "L1",
+          "target": {
+            "system": "http://snomed.info/sct",
+            "code": "731695004",
+            "verification": {
+              "status": "manual"
+            }
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    }
+  ],
+  "templates": []
+}

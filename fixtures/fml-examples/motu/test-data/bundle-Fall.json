@@ -1,0 +1,30 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/motu/AdverseEvent/fall-ec46da53f99387ff973d02bb",
+    "resource" : {
+      "resourceType" : "AdverseEvent",
+      "id" : "fall-ec46da53f99387ff973d02bb",
+      "actuality" : "actual",
+      "event" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "1912002",
+          "display" : "Fall"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-216da54b5931a6d37cca8e29"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-5ab30cfc657392220819d49d"
+      },
+      "date" : "2023-09-17"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "AdverseEvent/fall-ec46da53f99387ff973d02bb"
+    }
+  }]
+}

@@ -1,0 +1,23 @@
+map "http://example.org/fhir/motu/StructureMap/Fall" = `Fall`
+
+uses "http://example.org/fhir/motu/StructureDefinition/FallRow" alias FallRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/AdverseEvent" alias AdverseEvent as produced
+
+group Fall(source src : FallRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // AdverseEvent[0] · fall — created when: FallDate is not empty
+  src where ($this.id_AdverseEvent0.exists() and ($this.FallDate.exists())) -> bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {
+    src.id_AdverseEvent0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'AdverseEvent/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/AdverseEvent/' + $this) "AdverseEvent0-id";
+    src then AdverseEvent0(src, res) "AdverseEvent0-body";
+  } "AdverseEvent0";
+}
+
+group AdverseEvent0(source src : FallRow, target res : AdverseEvent) {
+  src -> res.actuality = 'actual' "fixed-actuality";
+  src -> res.event = cc('http://snomed.info/sct', '1912002', 'Fall') "fixed-event";
+  src.FallDate as v -> res.date = v "R-007";
+  // R-008, R-009 references to other tables (via rel_fall_patient, rel_fall_stay)
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-008";
+  src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "R-009";
+}

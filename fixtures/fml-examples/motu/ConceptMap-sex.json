@@ -1,0 +1,33 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "sex",
+  "url": "http://example.org/fhir/motu/ConceptMap/sex",
+  "version": "1.2.0",
+  "name": "Sex",
+  "status": "draft",
+  "description": "",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "M",
+          "target": [
+            {
+              "code": "male",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "F",
+          "target": [
+            {
+              "code": "female",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

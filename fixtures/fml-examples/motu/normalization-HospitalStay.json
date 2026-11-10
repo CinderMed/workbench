@@ -1,0 +1,62 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.0.0",
+  "source": "HospitalStay",
+  "logicalModel": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "report-drop",
+  "columns": [
+    {
+      "name": "AnonymousID",
+      "sourceName": "AnonymousID",
+      "type": "string"
+    },
+    {
+      "name": "AdmissionDate",
+      "sourceName": "AdmissionDate",
+      "type": "date",
+      "dateFormat": "dd/MM/yyyy"
+    },
+    {
+      "name": "DischargeDate",
+      "sourceName": "DischargeDate",
+      "type": "date",
+      "dateFormat": "dd/MM/yyyy"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "AnonymousID",
+        "AdmissionDate"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "AnonymousID"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

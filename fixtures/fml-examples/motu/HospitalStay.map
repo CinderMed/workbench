@@ -1,0 +1,26 @@
+map "http://example.org/fhir/motu/StructureMap/HospitalStay" = `HospitalStay`
+
+uses "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow" alias HospitalStayRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as produced
+
+group HospitalStay(source src : HospitalStayRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Encounter[0] · hospital stay — created when: AdmissionDate is not empty
+  src where ($this.id_Encounter0.exists() and $this.AdmissionDate.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
+    src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/Encounter/' + $this) "Encounter0-id";
+    src then Encounter0(src, res) "Encounter0-body";
+  } "Encounter0";
+}
+
+group Encounter0(source src : HospitalStayRow, target res : Encounter) {
+  src -> res.status = 'finished' "fixed-status";
+  src -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'IMP', 'inpatient encounter') "fixed-class";
+  // period: non-repeating element written by two rows (R-004, R-005) → one shared instance
+  src where ($this.AdmissionDate.exists() or $this.DischargeDate.exists()) -> res.period as p then {
+    src.AdmissionDate as v -> p.start = v "R-004";
+    src.DischargeDate as v -> p.end = v "R-005";
+  } "Encounter0-period";
+  // R-006 reference to Patient[0] in another table (via rel_stay_patient): the resource must already be loaded
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-006";
+}

@@ -1,0 +1,24 @@
+map "http://example.org/fhir/motu/StructureMap/MotuPatient" = `MotuPatient`
+
+uses "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow" alias MotuPatientRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as produced
+
+group MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+}
+
+group Patient0(source src : MotuPatientRow, target res : Patient) {
+  src where ($this.AnonymousID.exists()) -> res.identifier as rep then {
+    src.AnonymousID as v -> rep.value = v "R-001";
+  } "Patient0-identifier";
+  // R-002: value map sex (one rule per value)
+  src.Sex as v where ($this = 'M') -> res.gender = 'male' "R-002-M";
+  src.Sex as v where ($this = 'F') -> res.gender = 'female' "R-002-F";
+  src.BirthDay as v -> res.birthDate = v "R-003";
+}

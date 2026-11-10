@@ -1,0 +1,8 @@
+{
+  "resourceType": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
+  "AnonymousID": "1042",
+  "AdmissionDate": "2023-09-03",
+  "DischargeDate": "2023-10-28",
+  "id_Encounter0": "enc-5ab30cfc657392220819d49d",
+  "id_Patient0": "pat-216da54b5931a6d37cca8e29"
+}

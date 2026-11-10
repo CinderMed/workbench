@@ -1,0 +1,146 @@
+{
+  "$schema": "../manifest.schema.json",
+  "formatVersion": "1.0.0",
+  "package": {
+    "name": "metastra-mapping",
+    "version": "0.1.0",
+    "createdAt": "2026-11-10T09:01:15Z",
+    "generator": {
+      "name": "cindermed (verification prototype)",
+      "version": "0.0.1"
+    }
+  },
+  "project": {
+    "id": "prj_metastra",
+    "name": "Metastra",
+    "formatVersion": "1.2.0",
+    "file": "project.json"
+  },
+  "fhirVersion": "4.0.1",
+  "packages": [
+    {
+      "name": "hl7.fhir.r4.core",
+      "version": "4.0.1"
+    }
+  ],
+  "output": {
+    "bundleType": "transaction",
+    "requestMethod": "PUT",
+    "fullUrlBase": "http://example.org/fhir/metastra"
+  },
+  "loadOrder": [
+    [
+      "FirstOverview"
+    ]
+  ],
+  "tables": [
+    {
+      "source": "FirstOverview",
+      "dependsOn": [],
+      "structureMap": {
+        "url": "http://example.org/fhir/metastra/StructureMap/FirstOverview",
+        "fml": "FirstOverview.map",
+        "json": "StructureMap-FirstOverview.json"
+      },
+      "logicalModel": {
+        "url": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+        "file": "StructureDefinition-FirstOverviewRow.json"
+      },
+      "normalization": "normalization-FirstOverview.json",
+      "creates": [
+        "Patient[0] · patient",
+        "Encounter[0] · first visit",
+        "Observation[0] · axial pain",
+        "Observation[1] · haemoglobin",
+        "Condition[1] · osteoporosis",
+        "Procedure[0] · previous spinal surgery"
+      ]
+    }
+  ],
+  "conceptMaps": [
+    {
+      "url": "http://example.org/fhir/metastra/ConceptMap/administrativeGender",
+      "file": "ConceptMap-administrativeGender.json"
+    },
+    {
+      "url": "http://example.org/fhir/metastra/ConceptMap/hbUnit",
+      "file": "ConceptMap-hbUnit.json"
+    },
+    {
+      "url": "http://example.org/fhir/metastra/ConceptMap/osteoStatus",
+      "file": "ConceptMap-osteoStatus.json"
+    },
+    {
+      "url": "http://example.org/fhir/metastra/ConceptMap/painLevel",
+      "file": "ConceptMap-painLevel.json"
+    },
+    {
+      "url": "http://example.org/fhir/metastra/ConceptMap/spineLevel",
+      "file": "ConceptMap-spineLevel.json"
+    }
+  ],
+  "verification": {
+    "grammar": {
+      "source": "HL7/mapping-language-ig input/images/mapping.g4",
+      "commit": "8bb04b4",
+      "result": "passed"
+    },
+    "compile": {
+      "engine": "HL7 validator (org.hl7.fhir.core)",
+      "version": "7.0.5",
+      "result": "passed"
+    }
+  },
+  "files": [
+    {
+      "path": "project.json",
+      "sha256": "9b34f1b1773727319686dcfda9500138a882e48e90cfa9d731ed9cc0d531d83f",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "FirstOverview.map",
+      "sha256": "7eaf2a3d38b33c5fd82914e7f88643c227b2c91a0477f3e859cf1ba14aca4f88",
+      "mediaType": "text/fhir-mapping"
+    },
+    {
+      "path": "StructureMap-FirstOverview.json",
+      "sha256": "eb562bd18810911868ac1f60158bc4febe9a950332639a923cf3fb58b2868a17",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "StructureDefinition-FirstOverviewRow.json",
+      "sha256": "a087f908c5034ba7bafd6ff5078000b4d7757bcdb2291044f3bfea604eae3264",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "normalization-FirstOverview.json",
+      "sha256": "ca25e0479ba8b57597f6876b168089a2aedcead7fb28992fbb9426a5df32fbe3",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "ConceptMap-administrativeGender.json",
+      "sha256": "349a152b94dc7a100f53f02d2457cc100a03dec823004d42ba4fd190246db78b",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "ConceptMap-hbUnit.json",
+      "sha256": "e15a7112100bcd1634137ee1f0c1db54bef198b3500bc30662eaf4ee63f7997d",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "ConceptMap-osteoStatus.json",
+      "sha256": "49cf289cd15834663f929f11ca75ed22dd6cbcafeb51ee65365efce8c6800c56",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "ConceptMap-painLevel.json",
+      "sha256": "b3f9567fff8c033817053cbd27a9458f31b97fa81696d953f8486619bf7b1066",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "ConceptMap-spineLevel.json",
+      "sha256": "79586552df70b688be9368e801007edc15371b8aa7a91f9261a62c66bcf122e6",
+      "mediaType": "application/fhir+json"
+    }
+  ]
+}

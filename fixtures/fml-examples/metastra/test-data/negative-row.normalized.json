@@ -1,0 +1,12 @@
+{
+  "resourceType": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+  "patient_id": "MTS-0007",
+  "proc_surg_yn": "0",
+  "patient_gender": "Male",
+  "patient_birthdate": "1949-11-21",
+  "cond_osteoporosis_yn": "0",
+  "obs_pain_axial_intervals": "-1",
+  "id_Patient0": "pat-b2716a830fdcebab0d0ad229",
+  "id_Condition1": "cond-osteoporosis-b2716a830fdcebab0d0ad229",
+  "id_Procedure0": "proc-spine-surgery-b2716a830fdcebab0d0ad229"
+}

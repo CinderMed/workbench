@@ -1,0 +1,1549 @@
+{
+  "resourceType" : "StructureMap",
+  "id" : "FirstOverview",
+  "text" : {
+    "status" : "additional",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/metastra/StructureMap/FirstOverview&quot; = `FirstOverview`\n\nuses &quot;http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow&quot; alias FirstOverviewRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as produced\nuses &quot;http://hl7.org/fhir/StructureDefinition/Encounter&quot; alias Encounter as produced\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as produced\nuses &quot;http://hl7.org/fhir/StructureDefinition/Condition&quot; alias Condition as produced\nuses &quot;http://hl7.org/fhir/StructureDefinition/Procedure&quot; alias Procedure as produced\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n\n  // Encounter[0] · first visit — created when: encounter_fo is not empty\n  src where ($this.id_Encounter0.exists() and ($this.encounter_fo.exists())) -&gt; bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {\n    src.id_Encounter0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Encounter/' + $this) &quot;Encounter0-id&quot;;\n    src then Encounter0(src, res) &quot;Encounter0-body&quot;;\n  } &quot;Encounter0&quot;;\n\n  // Observation[0] · axial pain — created when: value present and not -1 (skipInstance)\n  src where ($this.id_Observation0.exists() and ($this.obs_pain_axial_intervals.exists() and $this.obs_pain_axial_intervals.where($this = '-1').empty())) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n\n  // Observation[1] · haemoglobin — created when: obs_bloodt_hb is not empty\n  src where ($this.id_Observation1.exists() and ($this.obs_bloodt_hb.exists())) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation1 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Observation/' + $this) &quot;Observation1-id&quot;;\n    src then Observation1(src, res) &quot;Observation1-body&quot;;\n  } &quot;Observation1&quot;;\n\n  // Condition[1] · osteoporosis — created when: value in {1, -1} and not 0 (skipInstance)\n  src where ($this.id_Condition1.exists() and ($this.cond_osteoporosis_yn.where($this = '1' or $this = '-1').exists() and $this.cond_osteoporosis_yn.where($this = '0').empty())) -&gt; bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {\n    src.id_Condition1 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Condition/' + $this) &quot;Condition1-id&quot;;\n    src then Condition1(src, res) &quot;Condition1-body&quot;;\n  } &quot;Condition1&quot;;\n\n  // Procedure[0] · previous spinal surgery — created when: proc_surg_yn = 1\n  src where ($this.id_Procedure0.exists() and ($this.proc_surg_yn.where($this = '1').exists())) -&gt; bundle.entry as e, e.resource = create('Procedure') as res, e.request as req then {\n    src.id_Procedure0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Procedure/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Procedure/' + $this) &quot;Procedure0-id&quot;;\n    src then Procedure0(src, res) &quot;Procedure0-body&quot;;\n  } &quot;Procedure0&quot;;\n}\n\ngroup Patient0(source src : FirstOverviewRow, target res : Patient) {\n  // identifier: repeating element without a slice → one shared repetition\n  src where ($this.patient_id.exists()) -&gt; res.identifier as rep then {\n    src.patient_id as v -&gt; rep.value = v &quot;R-001&quot;;\n  } &quot;Patient0-identifier&quot;;\n  // R-002: value map administrativeGender (one rule per value; ConceptMap exported separately)\n  src.patient_gender as v where ($this = 'Female') -&gt; res.gender = 'female' &quot;R-002-Female&quot;;\n  src.patient_gender as v where ($this = 'Male') -&gt; res.gender = 'male' &quot;R-002-Male&quot;;\n  src.patient_birthdate as v -&gt; res.birthDate = v &quot;R-003&quot;;\n}\n\ngroup Encounter0(source src : FirstOverviewRow, target res : Encounter) {\n  src -&gt; res.status = 'finished' &quot;fixed-status&quot;;\n  src -&gt; res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') &quot;fixed-class&quot;;\n  src.encounter_fo as v -&gt; res.period as p, p.start = v &quot;R-004&quot;;\n  // R-005 automatic (context) reference to Patient[0]: Patient[0] is always created\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-005&quot;;\n}\n\ngroup Observation0(source src : FirstOverviewRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://snomed.info/sct', '279039007', 'Low back pain') &quot;fixed-code&quot;;\n  // R-006: value map painLevel (one rule per value; ConceptMap exported separately)\n  src.obs_pain_axial_intervals as v where ($this = '0') -&gt; res.value = cc('http://snomed.info/sct', '373067005', 'No') &quot;R-006-0&quot;;\n  src.obs_pain_axial_intervals as v where ($this = '1') -&gt; res.value = cc('http://snomed.info/sct', '62482003', 'Low') &quot;R-006-1&quot;;\n  src.obs_pain_axial_intervals as v where ($this = '2') -&gt; res.value = cc('http://loinc.org', 'LA6751-7', 'Moderate') &quot;R-006-2&quot;;\n  src.obs_pain_axial_intervals as v where ($this = '3') -&gt; res.value = cc('http://snomed.info/sct', '75540009', 'High') &quot;R-006-3&quot;;\n  // component[nrs]: named slice, created only if the column has a value\n  src where ($this.obs_pain_axial_nrs.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://snomed.info/sct', '1284852002') &quot;slice-nrs-code&quot;;\n    src.obs_pain_axial_nrs as v -&gt; slc.value = v &quot;R-007&quot;;\n  } &quot;slice-nrs&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-008&quot;;\n  // R-009 the reference honours the creation condition of Encounter[0]\n  src where ($this.encounter_fo.exists()) then {\n    src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-009&quot;;\n  } &quot;R-009-guard&quot;;\n}\n\ngroup Observation1(source src : FirstOverviewRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://snomed.info/sct', '38082009') &quot;fixed-code&quot;;\n  src.obs_bloodt_hb as v -&gt; res.value = create('Quantity') as q then {\n    v -&gt; q.value = v &quot;R-010-value&quot;;\n    // R-010-unit: unit from the auxiliary column, value map hbUnit\n    src.obs_bloodt_hb_spec as u where ($this = '1') -&gt; q.unit = 'g/dL', q.system = 'http://unitsofmeasure.org', q.code = 'g/dL' &quot;R-010-unit-1&quot;;\n    src.obs_bloodt_hb_spec as u where ($this = '2') -&gt; q.unit = 'g/L', q.system = 'http://unitsofmeasure.org', q.code = 'g/L' &quot;R-010-unit-2&quot;;\n    src.obs_bloodt_hb_spec as u where ($this = '3') -&gt; q.unit = 'mmol/L', q.system = 'http://unitsofmeasure.org', q.code = 'mmol/L' &quot;R-010-unit-3&quot;;\n  } &quot;R-010&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;subject-auto&quot;;\n  src where ($this.encounter_fo.exists()) then {\n    src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;encounter-auto&quot;;\n  } &quot;encounter-auto-guard&quot;;\n}\n\ngroup Condition1(source src : FirstOverviewRow, target res : Condition) {\n  src -&gt; res.code = cc('http://snomed.info/sct', '64859006') &quot;fixed-code&quot;;\n  // R-011: value map osteoStatus (one rule per value; ConceptMap exported separately)\n  src.cond_osteoporosis_yn as v where ($this = '1') -&gt; res.verificationStatus = cc('http://terminology.hl7.org/CodeSystem/condition-ver-status', 'confirmed') &quot;R-011-1&quot;;\n  src.cond_osteoporosis_yn as v where ($this = '-1') -&gt; res.verificationStatus = cc('http://terminology.hl7.org/CodeSystem/condition-ver-status', 'unconfirmed') &quot;R-011--1&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-012&quot;;\n}\n\ngroup Procedure0(source src : FirstOverviewRow, target res : Procedure) {\n  src -&gt; res.status = 'completed' &quot;fixed-status&quot;;\n  // R-013 repeat eachValue: the normalized column is a list; each rule fires for every matching value\n  // R-013: value map spineLevel (one rule per value; ConceptMap exported separately)\n  src.proc_surg_loc as v where ($this = '1') -&gt; res.bodySite = cc('http://snomed.info/sct', '14806007') &quot;R-013-1&quot;;\n  src.proc_surg_loc as v where ($this = '2') -&gt; res.bodySite = cc('http://snomed.info/sct', '731673003') &quot;R-013-2&quot;;\n  src.proc_surg_loc as v where ($this = '8') -&gt; res.bodySite = cc('http://snomed.info/sct', '731692001') &quot;R-013-8&quot;;\n  src.proc_surg_loc as v where ($this = '20') -&gt; res.bodySite = cc('http://snomed.info/sct', '731695004') &quot;R-013-20&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-014&quot;;\n}\n</pre></div>"
+  },
+  "url" : "http://example.org/fhir/metastra/StructureMap/FirstOverview",
+  "name" : "FirstOverview",
+  "structure" : [{
+    "url" : "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
+    "mode" : "source",
+    "alias" : "FirstOverviewRow"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Bundle",
+    "mode" : "target",
+    "alias" : "Bundle"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Patient",
+    "mode" : "produced",
+    "alias" : "Patient"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Encounter",
+    "mode" : "produced",
+    "alias" : "Encounter"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Observation",
+    "mode" : "produced",
+    "alias" : "Observation"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Condition",
+    "mode" : "produced",
+    "alias" : "Condition"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Procedure",
+    "mode" : "produced",
+    "alias" : "Procedure"
+  }],
+  "group" : [{
+    "name" : "FirstOverview",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "bundle",
+      "type" : "Bundle",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "bundle-type",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "type",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "transaction"
+        }]
+      }]
+    },
+    {
+      "name" : "Patient0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Patient0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Patient"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Patient0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Patient0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Patient/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Patient/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Patient0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Patient0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Encounter0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Encounter0.exists() and ($this.encounter_fo.exists()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Encounter"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Encounter0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Encounter0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Encounter/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Encounter/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Encounter0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Encounter0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Observation0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Observation0.exists() and ($this.obs_pain_axial_intervals.exists() and $this.obs_pain_axial_intervals.where($this = '-1').empty()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Observation"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Observation0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Observation0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Observation/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Observation/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Observation0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Observation0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Observation1",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Observation1.exists() and ($this.obs_bloodt_hb.exists()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Observation"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Observation1-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Observation1",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Observation/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Observation/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Observation1-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Observation1",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Condition1",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Condition1.exists() and ($this.cond_osteoporosis_yn.where(($this = '1') or ($this = '-1')).exists() and $this.cond_osteoporosis_yn.where($this = '0').empty()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Condition"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Condition1-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Condition1",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Condition/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Condition/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Condition1-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Condition1",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Procedure0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Procedure0.exists() and ($this.proc_surg_yn.where($this = '1').exists()))"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Procedure"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Procedure0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Procedure0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Procedure/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/metastra/Procedure/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Procedure0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Procedure0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Patient0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Patient",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "Patient0-identifier",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.patient_id.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "identifier",
+        "variable" : "rep"
+      }],
+      "rule" : [{
+        "name" : "R-001",
+        "source" : [{
+          "context" : "src",
+          "element" : "patient_id",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "rep",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-002-Female",
+      "source" : [{
+        "context" : "src",
+        "element" : "patient_gender",
+        "variable" : "v",
+        "condition" : "($this = 'Female')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "gender",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "female"
+        }]
+      }]
+    },
+    {
+      "name" : "R-002-Male",
+      "source" : [{
+        "context" : "src",
+        "element" : "patient_gender",
+        "variable" : "v",
+        "condition" : "($this = 'Male')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "gender",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "male"
+        }]
+      }]
+    },
+    {
+      "name" : "R-003",
+      "source" : [{
+        "context" : "src",
+        "element" : "patient_birthdate",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "birthDate",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Encounter0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Encounter",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "finished"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-class",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "class",
+        "transform" : "c",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        },
+        {
+          "valueString" : "AMB"
+        },
+        {
+          "valueString" : "ambulatory"
+        }]
+      }]
+    },
+    {
+      "name" : "R-004",
+      "source" : [{
+        "context" : "src",
+        "element" : "encounter_fo",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "period",
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "start",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-005",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Observation0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Observation",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "final"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-code",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "279039007"
+        },
+        {
+          "valueString" : "Low back pain"
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-0",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_pain_axial_intervals",
+        "variable" : "v",
+        "condition" : "($this = '0')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "373067005"
+        },
+        {
+          "valueString" : "No"
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-1",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_pain_axial_intervals",
+        "variable" : "v",
+        "condition" : "($this = '1')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "62482003"
+        },
+        {
+          "valueString" : "Low"
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-2",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_pain_axial_intervals",
+        "variable" : "v",
+        "condition" : "($this = '2')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://loinc.org"
+        },
+        {
+          "valueString" : "LA6751-7"
+        },
+        {
+          "valueString" : "Moderate"
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-3",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_pain_axial_intervals",
+        "variable" : "v",
+        "condition" : "($this = '3')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "75540009"
+        },
+        {
+          "valueString" : "High"
+        }]
+      }]
+    },
+    {
+      "name" : "slice-nrs",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.obs_pain_axial_nrs.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-nrs-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://snomed.info/sct"
+          },
+          {
+            "valueString" : "1284852002"
+          }]
+        }]
+      },
+      {
+        "name" : "R-007",
+        "source" : [{
+          "context" : "src",
+          "element" : "obs_pain_axial_nrs",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-008",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "R-009-guard",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.encounter_fo.exists())"
+      }],
+      "rule" : [{
+        "name" : "R-009",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Encounter0",
+          "variable" : "t"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "encounter",
+          "variable" : "r"
+        },
+        {
+          "context" : "r",
+          "contextType" : "variable",
+          "element" : "reference",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "t"
+          },
+          {
+            "valueString" : "'Encounter/' + $this"
+          }]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Observation1",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Observation",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "final"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-code",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "38082009"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_bloodt_hb",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "variable" : "q",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Quantity"
+        }]
+      }],
+      "rule" : [{
+        "name" : "R-010-value",
+        "source" : [{
+          "context" : "v"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-010-unit-1",
+        "source" : [{
+          "context" : "src",
+          "element" : "obs_bloodt_hb_spec",
+          "variable" : "u",
+          "condition" : "($this = '1')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/dL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://unitsofmeasure.org"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/dL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-010-unit-2",
+        "source" : [{
+          "context" : "src",
+          "element" : "obs_bloodt_hb_spec",
+          "variable" : "u",
+          "condition" : "($this = '2')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/L"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://unitsofmeasure.org"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/L"
+          }]
+        }]
+      },
+      {
+        "name" : "R-010-unit-3",
+        "source" : [{
+          "context" : "src",
+          "element" : "obs_bloodt_hb_spec",
+          "variable" : "u",
+          "condition" : "($this = '3')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mmol/L"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://unitsofmeasure.org"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mmol/L"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "subject-auto",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "encounter-auto-guard",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.encounter_fo.exists())"
+      }],
+      "rule" : [{
+        "name" : "encounter-auto",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Encounter0",
+          "variable" : "t"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "encounter",
+          "variable" : "r"
+        },
+        {
+          "context" : "r",
+          "contextType" : "variable",
+          "element" : "reference",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "t"
+          },
+          {
+            "valueString" : "'Encounter/' + $this"
+          }]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Condition1",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Condition",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-code",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "64859006"
+        }]
+      }]
+    },
+    {
+      "name" : "R-011-1",
+      "source" : [{
+        "context" : "src",
+        "element" : "cond_osteoporosis_yn",
+        "variable" : "v",
+        "condition" : "($this = '1')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "verificationStatus",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        },
+        {
+          "valueString" : "confirmed"
+        }]
+      }]
+    },
+    {
+      "name" : "R-011--1",
+      "source" : [{
+        "context" : "src",
+        "element" : "cond_osteoporosis_yn",
+        "variable" : "v",
+        "condition" : "($this = '-1')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "verificationStatus",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        },
+        {
+          "valueString" : "unconfirmed"
+        }]
+      }]
+    },
+    {
+      "name" : "R-012",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Procedure0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "FirstOverviewRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Procedure",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "completed"
+        }]
+      }]
+    },
+    {
+      "name" : "R-013-1",
+      "source" : [{
+        "context" : "src",
+        "element" : "proc_surg_loc",
+        "variable" : "v",
+        "condition" : "($this = '1')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "bodySite",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "14806007"
+        }]
+      }]
+    },
+    {
+      "name" : "R-013-2",
+      "source" : [{
+        "context" : "src",
+        "element" : "proc_surg_loc",
+        "variable" : "v",
+        "condition" : "($this = '2')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "bodySite",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "731673003"
+        }]
+      }]
+    },
+    {
+      "name" : "R-013-8",
+      "source" : [{
+        "context" : "src",
+        "element" : "proc_surg_loc",
+        "variable" : "v",
+        "condition" : "($this = '8')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "bodySite",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "731692001"
+        }]
+      }]
+    },
+    {
+      "name" : "R-013-20",
+      "source" : [{
+        "context" : "src",
+        "element" : "proc_surg_loc",
+        "variable" : "v",
+        "condition" : "($this = '20')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "bodySite",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "731695004"
+        }]
+      }]
+    },
+    {
+      "name" : "R-014",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  }]
+}

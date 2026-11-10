@@ -1,0 +1,56 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "spineLevel",
+  "url": "http://example.org/fhir/metastra/ConceptMap/spineLevel",
+  "version": "1.2.0",
+  "name": "SpineLevel",
+  "status": "draft",
+  "description": "Spinal levels (SNOMED CT codes from the Metastra sheet, entered by hand).",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "1",
+          "display": "C1",
+          "target": [
+            {
+              "code": "14806007",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "2",
+          "display": "C2",
+          "target": [
+            {
+              "code": "731673003",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "8",
+          "display": "T1",
+          "target": [
+            {
+              "code": "731692001",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "20",
+          "display": "L1",
+          "target": [
+            {
+              "code": "731695004",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ],
+      "target": "http://snomed.info/sct"
+    }
+  ]
+}

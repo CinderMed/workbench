@@ -1,0 +1,49 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "hbUnit",
+  "url": "http://example.org/fhir/metastra/ConceptMap/hbUnit",
+  "version": "1.2.0",
+  "name": "HbUnit",
+  "status": "draft",
+  "description": "",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "1",
+          "display": "g/dL",
+          "target": [
+            {
+              "code": "g/dL",
+              "equivalence": "equivalent",
+              "display": "g/dL"
+            }
+          ]
+        },
+        {
+          "code": "2",
+          "display": "g/L",
+          "target": [
+            {
+              "code": "g/L",
+              "equivalence": "equivalent",
+              "display": "g/L"
+            }
+          ]
+        },
+        {
+          "code": "3",
+          "display": "mmol/L",
+          "target": [
+            {
+              "code": "mmol/L",
+              "equivalence": "equivalent",
+              "display": "mmol/L"
+            }
+          ]
+        }
+      ],
+      "target": "http://unitsofmeasure.org"
+    }
+  ]
+}

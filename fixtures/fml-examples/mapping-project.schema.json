@@ -1,0 +1,1688 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fhir-mapping-workbench.example.org/schema/mapping-project/1.2.0",
+  "title": "FHIR Mapping Workbench – project file",
+  "description": "Native format of a tabular → FHIR mapping project. It is the source of truth from which the grid, the FML (StructureMap, logical model, ConceptMap) and the CSV export are generated. Every reference between objects uses the stable internal 'id', never the visible names.",
+  "type": "object",
+  "required": [
+    "formatVersion",
+    "project",
+    "sources",
+    "instances",
+    "mappings",
+    "valueMaps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "formatVersion": {
+      "description": "Version of this file format (semver). The major changes only with incompatible changes.",
+      "type": "string",
+      "pattern": "^1\\.\\d+\\.\\d+$"
+    },
+    "project": {
+      "$ref": "#/$defs/Project"
+    },
+    "sources": {
+      "description": "Source tables. The MVP UI handles one; the format allows several (B11).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    },
+    "sourceRelations": {
+      "description": "Key-based links between tables (B11). Empty with a single table.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SourceRelation"
+      },
+      "default": []
+    },
+    "instances": {
+      "description": "Roles of FHIR resources in the template (e.g. Condition[1] · osteoporosis). They are not real resources.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Instance"
+      }
+    },
+    "mappings": {
+      "description": "Mapping rows: column (or constant) → element of a role.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MappingRow"
+      }
+    },
+    "valueMaps": {
+      "description": "Value maps, reusable by several rows. Each one becomes a ConceptMap.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ValueMap"
+      }
+    },
+    "templates": {
+      "description": "Reusable groups of roles and rows with parameters (C7, V2).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Template"
+      },
+      "default": []
+    },
+    "extensions": {
+      "description": "Free space for data of external tools (e.g. conversion module, AI assistant). Ignored by the FML generator.",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "description": "Stable internal identifier, generated automatically (e.g. ULID). It never changes, not even when the object is renamed.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{6,64}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Canonical": {
+      "type": "string",
+      "format": "uri"
+    },
+    "Name": {
+      "description": "Machine-readable name (columns, tables, sections): no leading or trailing spaces.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\S(.*\\S)?$"
+    },
+    "Description": {
+      "description": "Free-text semantic description. Used by people and by the future AI assistant (module I).",
+      "type": "string"
+    },
+    "Status": {
+      "description": "Review status (A5).",
+      "enum": [
+        "todo",
+        "draft",
+        "toReview",
+        "approved",
+        "notMappable",
+        "excluded"
+      ]
+    },
+    "Provenance": {
+      "description": "Who created the object. 'ai' is reserved for the assistant (module I): its proposals enter as 'draft'.",
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "user",
+            "import",
+            "ai"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "description": "E.g. name of the import profile or of the AI model."
+        },
+        "acceptedBy": {
+          "type": "string",
+          "description": "User who accepted an AI proposal."
+        }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Comment"
+          }
+        }
+      }
+    },
+    "Comment": {
+      "type": "object",
+      "required": [
+        "id",
+        "author",
+        "createdAt",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "author": {
+          "type": "string"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "text": {
+          "type": "string"
+        },
+        "replyTo": {
+          "$ref": "#/$defs/Id"
+        },
+        "resolved": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "Project": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "fhirVersion",
+        "canonicalBase"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "fhirVersion": {
+          "description": "Target FHIR version (A1).",
+          "enum": [
+            "4.0.1",
+            "5.0.0"
+          ]
+        },
+        "packages": {
+          "description": "Additional FHIR packages (IGs, profiles) besides the core.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "examples": [
+                  "hl7.fhir.uv.ips"
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "canonicalBase": {
+          "description": "Base of the generated canonical URLs (StructureMap, StructureDefinition, ConceptMap, CodeSystem).",
+          "$ref": "#/$defs/Canonical"
+        },
+        "terminology": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "enum": [
+                "bioportal",
+                "fhirTerminologyServer",
+                "none"
+              ]
+            },
+            "allowedSystems": {
+              "description": "Searchable systems. For now only free-licence terminologies.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Canonical"
+              }
+            }
+          },
+          "description": "The API key is NOT stored in the file: it stays on the server."
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "output": {
+          "description": "Shape of the conversion output. Each source record produces ONE Bundle; resources shared by several records (perGroup) merge on the server thanks to deterministic ids and PUT. With PUT, if two records write different fields of the same resource, the last one wins: the application reports it.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bundleType": {
+              "const": "transaction",
+              "default": "transaction"
+            },
+            "requestMethod": {
+              "const": "PUT",
+              "default": "PUT"
+            },
+            "fullUrlBase": {
+              "description": "Absolute base for Bundle.entry.fullUrl ({base}/{Type}/{id}), needed so that relative references resolve inside the Bundle. Usually the URL of the target FHIR server; canonicalBase is used when absent.",
+              "$ref": "#/$defs/Canonical"
+            }
+          }
+        }
+      }
+    },
+    "Source": {
+      "description": "An input table (B1–B6).",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "columns"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/Name",
+          "examples": [
+            "FirstOverview",
+            "MotuPatient"
+          ]
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "rowKey": {
+          "description": "Columns that identify a record (e.g. patient_id). Used for deterministic ids and for links between tables.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "import": {
+          "$ref": "#/$defs/ImportProfile"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Id"
+              },
+              "name": {
+                "type": "string",
+                "examples": [
+                  "Demographic data",
+                  "Pain"
+                ]
+              },
+              "description": {
+                "$ref": "#/$defs/Description"
+              },
+              "order": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Column"
+          }
+        }
+      }
+    },
+    "ImportProfile": {
+      "description": "Import wizard settings (B2, B3), reusable on other sheets.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fileName": {
+          "type": "string"
+        },
+        "sheet": {
+          "type": "string"
+        },
+        "fileKind": {
+          "enum": [
+            "data",
+            "dictionary"
+          ]
+        },
+        "delimiter": {
+          "type": "string",
+          "maxLength": 1
+        },
+        "encoding": {
+          "type": "string",
+          "default": "utf-8"
+        },
+        "headerRow": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "skipRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "columnRoles": {
+          "description": "Only for fileKind = dictionary: role of each column of the file (key = header or letter).",
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "name",
+              "label",
+              "description",
+              "dataType",
+              "valueLabel",
+              "valueCode",
+              "section",
+              "ignore"
+            ]
+          }
+        },
+        "continuationRows": {
+          "enum": [
+            "allowedValuesOfPrevious",
+            "ignore"
+          ]
+        },
+        "typeRules": {
+          "description": "Translation of the file's types into workbench types (e.g. 'list, single choice' → categorical).",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ColumnType"
+          }
+        },
+        "importedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "ColumnType": {
+      "enum": [
+        "string",
+        "integer",
+        "decimal",
+        "date",
+        "dateTime",
+        "boolean",
+        "categorical",
+        "multipleChoice"
+      ]
+    },
+    "Column": {
+      "description": "A source variable (B4–B6).",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "dataType"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/Name",
+          "description": "Current name, possibly corrected by hand."
+        },
+        "originalName": {
+          "description": "Name as it appears in the data file, if different from 'name' (alias used in the FML). E.g. 'obs_bloodt_lymphocites_spec'.",
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "examples": [
+            "17.1 Pain level axial"
+          ]
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "sectionId": {
+          "$ref": "#/$defs/Id"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dataType": {
+          "$ref": "#/$defs/ColumnType"
+        },
+        "dateFormat": {
+          "type": "string",
+          "examples": [
+            "dd/MM/yyyy",
+            "yyyy"
+          ]
+        },
+        "unit": {
+          "description": "Fixed unit of the column, if known (e.g. kg).",
+          "$ref": "#/$defs/Coding"
+        },
+        "missingValues": {
+          "description": "Values to treat as missing (e.g. 'NA', '-1').",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedValues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Value as it appears in the data (e.g. '1', '-1', 'Male')."
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "$ref": "#/$defs/Description"
+              }
+            }
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        },
+        "multiValue": {
+          "description": "Only for dataType = multipleChoice: how the multiple value appears in the data.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "encoding",
+                "separator"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "encoding": {
+                  "const": "delimited",
+                  "description": "Several codes in the same cell, e.g. '1,3,5'."
+                },
+                "separator": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "encoding",
+                "columns"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "encoding": {
+                  "const": "expanded",
+                  "description": "One 0/1 column per value, e.g. var___1, var___2 (B9, V2)."
+                },
+                "columns": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "originalName"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      },
+                      "originalName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "dataType": {
+            "const": "multipleChoice"
+          }
+        },
+        "required": [
+          "dataType"
+        ]
+      },
+      "then": {
+        "required": [
+          "multiValue"
+        ]
+      }
+    },
+    "SourceRelation": {
+      "description": "Link between two tables (e.g. MotuKnee.AnonymousID → MotuPatient.AnonymousID).",
+      "type": "object",
+      "required": [
+        "id",
+        "from",
+        "to"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "from": {
+          "$ref": "#/$defs/ColumnSet"
+        },
+        "to": {
+          "$ref": "#/$defs/ColumnSet"
+        },
+        "cardinality": {
+          "enum": [
+            "manyToOne",
+            "oneToOne"
+          ],
+          "default": "manyToOne"
+        }
+      }
+    },
+    "ColumnSet": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "columnIds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sourceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "columnIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      }
+    },
+    "Instance": {
+      "description": "Role of a FHIR resource in the template (C1–C7). The visible key is resourceType[index], e.g. Condition[1].",
+      "type": "object",
+      "required": [
+        "id",
+        "resourceType",
+        "index",
+        "sourceId",
+        "multiplicity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "resourceType": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z]+$",
+          "examples": [
+            "Patient",
+            "Condition"
+          ]
+        },
+        "index": {
+          "description": "Generated index, unique per resourceType in the project.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "label": {
+          "type": "string",
+          "examples": [
+            "osteoporosis",
+            "axial pain"
+          ]
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "profile": {
+          "$ref": "#/$defs/Canonical"
+        },
+        "sourceId": {
+          "description": "Table the role reads its fields from.",
+          "$ref": "#/$defs/Id"
+        },
+        "multiplicity": {
+          "$ref": "#/$defs/Multiplicity"
+        },
+        "context": {
+          "description": "Context roles used to fill subject/patient/encounter automatically (C3, F2).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "patientInstanceId": {
+              "$ref": "#/$defs/Id"
+            },
+            "encounterInstanceId": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        "createWhen": {
+          "description": "Creation condition (C4). Single rule: the resource is created if createWhen is true (absent = always) AND no column mapped to the role has, in the record, a value whose action is skipInstance.",
+          "$ref": "#/$defs/Condition"
+        },
+        "idRule": {
+          "description": "Rule for the deterministic id of the generated resource (C6). 'literal' parts stay readable; column values are encoded according to 'encoding'. Final id: [A-Za-z0-9-.], at most 64 characters (checked by the application).",
+          "type": "object",
+          "required": [
+            "parts"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "parts": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "literal"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "literal": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "columnId"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "columnId": {
+                        "$ref": "#/$defs/Id"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "separator": {
+              "type": "string",
+              "default": "-"
+            },
+            "encoding": {
+              "description": "hash = SHA-256 of the column values (optionally keyed with a server-side secret), truncated to hashLength hex characters; sanitize = readable values with disallowed characters replaced by '-'.",
+              "enum": [
+                "hash",
+                "sanitize"
+              ],
+              "default": "hash"
+            },
+            "hashLength": {
+              "type": "integer",
+              "minimum": 16,
+              "maximum": 40,
+              "default": 24
+            }
+          }
+        },
+        "slices": {
+          "description": "Named repetitions of an element (D4), e.g. component[nrs].",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slice"
+          }
+        },
+        "fixedValues": {
+          "description": "Constant values of the role (C5), e.g. status = final, code = SCT 279039007.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "$ref": "#/$defs/ElementPath"
+              },
+              "value": {
+                "$ref": "#/$defs/FhirValue"
+              }
+            }
+          }
+        },
+        "templateId": {
+          "$ref": "#/$defs/Id"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        }
+      }
+    },
+    "Multiplicity": {
+      "description": "How many resources the role produces FOR EACH converted RECORD.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "perRow",
+              "description": "One resource per record."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "groupBy"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "perGroup",
+              "description": "One resource per combination of key columns (e.g. patient + visit date), even when several records share it."
+            },
+            "groupBy": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Id"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "columnId"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "perValue",
+              "description": "One resource for each selected value of a multiple-choice column (V2)."
+            },
+            "columnId": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ]
+    },
+    "Slice": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "name",
+        "discriminator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "path": {
+          "type": "string",
+          "description": "Repeated element",
+          "examples": [
+            "component",
+            "category",
+            "identifier"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9-]*$",
+          "examples": [
+            "nrs",
+            "vas"
+          ]
+        },
+        "discriminator": {
+          "description": "Fixed values that identify the repetition (e.g. component.code).",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "examples": [
+                  "code"
+                ]
+              },
+              "value": {
+                "$ref": "#/$defs/FhirValue"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ElementPath": {
+      "description": "Path inside the role, without the resource type, with optional named slices. E.g. 'valueCodeableConcept', 'component[nrs].valueInteger', 'verificationStatus'. Rule: without a slice, all rows that touch a repeating element write into the SAME repetition (the first); several repetitions need a named slice.",
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(\\[[a-z][A-Za-z0-9-]*\\])?(\\.[a-z][A-Za-z0-9]*(\\[[a-z][A-Za-z0-9-]*\\])?)*$"
+    },
+    "Coding": {
+      "type": "object",
+      "required": [
+        "system",
+        "code"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "$ref": "#/$defs/Canonical"
+        },
+        "version": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display": {
+          "type": "string"
+        },
+        "verification": {
+          "description": "Result of the terminology server check (E4). 'manual' = entered by hand, cannot be checked (e.g. SNOMED CT without a licence).",
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "verified",
+                "displayMismatch",
+                "notFound",
+                "manual"
+              ]
+            },
+            "checkedAt": {
+              "$ref": "#/$defs/Timestamp"
+            },
+            "serverDisplay": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "FhirValue": {
+      "description": "Typed FHIR value for constants and fixed values.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "string",
+                "code",
+                "boolean",
+                "integer",
+                "decimal",
+                "date",
+                "dateTime",
+                "uri"
+              ]
+            },
+            "value": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "coding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "Coding",
+                "CodeableConcept"
+              ]
+            },
+            "coding": {
+              "$ref": "#/$defs/Coding"
+            },
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "unit"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "Quantity"
+            },
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "$ref": "#/$defs/Coding"
+            }
+          }
+        }
+      ]
+    },
+    "Condition": {
+      "description": "Condition built by the guided editor (C4). 'expression' is reserved for the technical role (D6).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "columnId"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "enum": [
+                "notEmpty",
+                "empty"
+              ]
+            },
+            "columnId": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "columnId",
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "enum": [
+                "equals",
+                "notEquals"
+              ]
+            },
+            "columnId": {
+              "$ref": "#/$defs/Id"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "columnId",
+            "values"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "enum": [
+                "in",
+                "notIn"
+              ]
+            },
+            "columnId": {
+              "$ref": "#/$defs/Id"
+            },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "conditions"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "enum": [
+                "and",
+                "or"
+              ]
+            },
+            "conditions": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/Condition"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "condition"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "not"
+            },
+            "condition": {
+              "$ref": "#/$defs/Condition"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "language",
+            "expression"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "expression"
+            },
+            "language": {
+              "enum": [
+                "fhirpath"
+              ]
+            },
+            "expression": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "MappingRow": {
+      "description": "A grid row (D1–D8). No columnId = constant value or reference.",
+      "type": "object",
+      "required": [
+        "id",
+        "code",
+        "instanceId",
+        "path",
+        "transform"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "code": {
+          "description": "Generated visible code (e.g. R-031), used in FML rule names and in error messages.",
+          "type": "string",
+          "pattern": "^R-\\d{3,}$"
+        },
+        "columnId": {
+          "$ref": "#/$defs/Id"
+        },
+        "instanceId": {
+          "$ref": "#/$defs/Id"
+        },
+        "path": {
+          "$ref": "#/$defs/ElementPath"
+        },
+        "transform": {
+          "$ref": "#/$defs/Transform"
+        },
+        "condition": {
+          "description": "Extra condition that applies to this row only.",
+          "$ref": "#/$defs/Condition"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        },
+        "repeat": {
+          "description": "For multipleChoice columns: 'eachValue' writes one repetition of the element for each selected value (e.g. Procedure.bodySite for each level). The target element must be repeating.",
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "eachValue"
+            }
+          }
+        }
+      }
+    },
+    "Transform": {
+      "description": "Guided transforms (D5) and references (F1–F3).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "copy"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "to"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "cast"
+            },
+            "to": {
+              "enum": [
+                "string",
+                "integer",
+                "decimal",
+                "boolean",
+                "date",
+                "dateTime"
+              ]
+            },
+            "inputFormat": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "constant"
+            },
+            "value": {
+              "$ref": "#/$defs/FhirValue"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "valueMapId"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "valueMap"
+            },
+            "valueMapId": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "description": "Quantity: fixed unit (unit) or read from an auxiliary column translated with a value map (unitColumnId + unitValueMapId).",
+          "properties": {
+            "kind": {
+              "const": "quantity"
+            },
+            "unit": {
+              "$ref": "#/$defs/Coding"
+            },
+            "unitColumnId": {
+              "$ref": "#/$defs/Id"
+            },
+            "unitValueMapId": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "columnIds"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "concat"
+            },
+            "columnIds": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/Id"
+              }
+            },
+            "separator": {
+              "type": "string",
+              "default": " "
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "targetInstanceId"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "reference"
+            },
+            "targetInstanceId": {
+              "$ref": "#/$defs/Id"
+            },
+            "auto": {
+              "type": "boolean",
+              "default": false,
+              "description": "true = generated from the context (F2)."
+            },
+            "via": {
+              "description": "Table relation to use when the target role is in another table (B11).",
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "description": "Reference to another role. The id of the referenced resource is computed by applying the target role's idRule to the current record: its columns must be in the same table or reachable through 'via'. A reference to a perValue role is allowed only if the source element is repeating (one reference per generated resource)."
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "language",
+            "expression"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "expression"
+            },
+            "language": {
+              "enum": [
+                "fml",
+                "fhirpath"
+              ]
+            },
+            "expression": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "ValueMap": {
+      "description": "Map from source values to codes (E1–E6). It becomes a ConceptMap.",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "target",
+        "entries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "examples": [
+            "painLevel",
+            "yesNoUnknown"
+          ]
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "target": {
+          "enum": [
+            "CodeableConcept",
+            "Coding",
+            "code",
+            "boolean",
+            "Quantity.unit"
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ValueMapEntry"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        }
+      }
+    },
+    "ValueMapEntry": {
+      "type": "object",
+      "required": [
+        "sourceValue",
+        "action"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sourceValue": {
+          "type": "string"
+        },
+        "sourceLabel": {
+          "type": "string"
+        },
+        "target": {
+          "description": "Required when action.kind = use.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Coding"
+            },
+            {
+              "type": "object",
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": [
+                    "string",
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "action": {
+          "$ref": "#/$defs/ValueAction"
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "properties": {
+              "kind": {
+                "const": "use"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "target"
+        ]
+      }
+    },
+    "ValueAction": {
+      "description": "Action for a value (E6).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "use"
+            },
+            "also": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SetElement"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "skipInstance",
+              "description": "Do not create the role's resource."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "set"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "setElement"
+            },
+            "set": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/SetElement"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "absent",
+              "description": "Treat as a missing value: the element is not written."
+            }
+          }
+        }
+      ]
+    },
+    "SetElement": {
+      "type": "object",
+      "required": [
+        "path",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/ElementPath"
+        },
+        "value": {
+          "$ref": "#/$defs/FhirValue"
+        }
+      }
+    },
+    "Template": {
+      "description": "Reusable group of roles and rows (C7, V2). Applications substitute the parameters, e.g. suffix '_2' for LastOverview.",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "instanceIds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "$ref": "#/$defs/Description"
+        },
+        "instanceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "kind"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "columnSuffix",
+                  "columnPrefix",
+                  "sourceId",
+                  "contextEncounter"
+                ]
+              }
+            }
+          }
+        },
+        "applications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "arguments"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Id"
+              },
+              "label": {
+                "type": "string"
+              },
+              "arguments": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

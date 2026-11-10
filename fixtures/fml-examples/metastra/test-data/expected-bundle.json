@@ -1,0 +1,167 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/metastra/Patient/pat-262fcad357d433b08c501ec1",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-262fcad357d433b08c501ec1",
+      "identifier" : [{
+        "value" : "MTS-0003"
+      }],
+      "gender" : "female",
+      "birthDate" : "1956-07-05"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-262fcad357d433b08c501ec1"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/metastra/Encounter/enc-9bcb7484895d673b121d94f2",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-9bcb7484895d673b121d94f2",
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "AMB",
+        "display" : "ambulatory"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-262fcad357d433b08c501ec1"
+      },
+      "period" : {
+        "start" : "2024-03-12"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-9bcb7484895d673b121d94f2"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/metastra/Observation/obs-pain-axial-9bcb7484895d673b121d94f2",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-pain-axial-9bcb7484895d673b121d94f2",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "279039007",
+          "display" : "Low back pain"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-262fcad357d433b08c501ec1"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-9bcb7484895d673b121d94f2"
+      },
+      "valueCodeableConcept" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "62482003",
+          "display" : "Low"
+        }]
+      },
+      "component" : [{
+        "code" : {
+          "coding" : [{
+            "system" : "http://snomed.info/sct",
+            "code" : "1284852002"
+          }]
+        },
+        "valueInteger" : 3
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-pain-axial-9bcb7484895d673b121d94f2"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/metastra/Observation/obs-hb-9bcb7484895d673b121d94f2",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-hb-9bcb7484895d673b121d94f2",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "38082009"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-262fcad357d433b08c501ec1"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-9bcb7484895d673b121d94f2"
+      },
+      "valueQuantity" : {
+        "value" : 11.2,
+        "unit" : "g/dL",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "g/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-hb-9bcb7484895d673b121d94f2"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/metastra/Condition/cond-osteoporosis-262fcad357d433b08c501ec1",
+    "resource" : {
+      "resourceType" : "Condition",
+      "id" : "cond-osteoporosis-262fcad357d433b08c501ec1",
+      "verificationStatus" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code" : "unconfirmed"
+        }]
+      },
+      "code" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "64859006"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-262fcad357d433b08c501ec1"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Condition/cond-osteoporosis-262fcad357d433b08c501ec1"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/metastra/Procedure/proc-spine-surgery-262fcad357d433b08c501ec1",
+    "resource" : {
+      "resourceType" : "Procedure",
+      "id" : "proc-spine-surgery-262fcad357d433b08c501ec1",
+      "status" : "completed",
+      "subject" : {
+        "reference" : "Patient/pat-262fcad357d433b08c501ec1"
+      },
+      "bodySite" : [{
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "731692001"
+        }]
+      },
+      {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "731695004"
+        }]
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Procedure/proc-spine-surgery-262fcad357d433b08c501ec1"
+    }
+  }]
+}

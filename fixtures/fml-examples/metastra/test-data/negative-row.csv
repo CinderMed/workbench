@@ -1,0 +1,2 @@
+patient_id,encounter_fo,proc_surg_yn,proc_surg_loc,patient_gender,patient_birthdate,cond_osteoporosis_yn,obs_pain_axial_intervals,obs_pain_axial_nrs,obs_bloodt_hb,obs_bloodt_hb_spec
+MTS-0007,,0,,Male,21/11/1949,0,-1,,NA,

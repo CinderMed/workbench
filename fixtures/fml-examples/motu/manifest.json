@@ -1,0 +1,190 @@
+{
+  "$schema": "../manifest.schema.json",
+  "formatVersion": "1.0.0",
+  "package": {
+    "name": "motu-mapping",
+    "version": "0.1.0",
+    "createdAt": "2026-11-10T09:01:15Z",
+    "generator": {
+      "name": "cindermed (verification prototype)",
+      "version": "0.0.1"
+    }
+  },
+  "project": {
+    "id": "prj_motu",
+    "name": "MOTU",
+    "formatVersion": "1.2.0",
+    "file": "project.json"
+  },
+  "fhirVersion": "4.0.1",
+  "packages": [
+    {
+      "name": "hl7.fhir.r4.core",
+      "version": "4.0.1"
+    }
+  ],
+  "output": {
+    "bundleType": "transaction",
+    "requestMethod": "PUT",
+    "fullUrlBase": "http://example.org/fhir/motu"
+  },
+  "loadOrder": [
+    [
+      "MotuPatient"
+    ],
+    [
+      "HospitalStay"
+    ],
+    [
+      "Fall"
+    ]
+  ],
+  "tables": [
+    {
+      "source": "MotuPatient",
+      "dependsOn": [],
+      "structureMap": {
+        "url": "http://example.org/fhir/motu/StructureMap/MotuPatient",
+        "fml": "MotuPatient.map",
+        "json": "StructureMap-MotuPatient.json"
+      },
+      "logicalModel": {
+        "url": "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow",
+        "file": "StructureDefinition-MotuPatientRow.json"
+      },
+      "normalization": "normalization-MotuPatient.json",
+      "creates": [
+        "Patient[0] · patient"
+      ]
+    },
+    {
+      "source": "HospitalStay",
+      "dependsOn": [
+        "MotuPatient"
+      ],
+      "structureMap": {
+        "url": "http://example.org/fhir/motu/StructureMap/HospitalStay",
+        "fml": "HospitalStay.map",
+        "json": "StructureMap-HospitalStay.json"
+      },
+      "logicalModel": {
+        "url": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
+        "file": "StructureDefinition-HospitalStayRow.json"
+      },
+      "normalization": "normalization-HospitalStay.json",
+      "creates": [
+        "Encounter[0] · hospital stay"
+      ]
+    },
+    {
+      "source": "Fall",
+      "dependsOn": [
+        "HospitalStay",
+        "MotuPatient"
+      ],
+      "structureMap": {
+        "url": "http://example.org/fhir/motu/StructureMap/Fall",
+        "fml": "Fall.map",
+        "json": "StructureMap-Fall.json"
+      },
+      "logicalModel": {
+        "url": "http://example.org/fhir/motu/StructureDefinition/FallRow",
+        "file": "StructureDefinition-FallRow.json"
+      },
+      "normalization": "normalization-Fall.json",
+      "creates": [
+        "AdverseEvent[0] · fall"
+      ]
+    }
+  ],
+  "conceptMaps": [
+    {
+      "url": "http://example.org/fhir/motu/ConceptMap/sex",
+      "file": "ConceptMap-sex.json"
+    }
+  ],
+  "verification": {
+    "grammar": {
+      "source": "HL7/mapping-language-ig input/images/mapping.g4",
+      "commit": "8bb04b4",
+      "result": "passed"
+    },
+    "compile": {
+      "engine": "HL7 validator (org.hl7.fhir.core)",
+      "version": "7.0.5",
+      "result": "passed"
+    }
+  },
+  "files": [
+    {
+      "path": "project.json",
+      "sha256": "a93984d46089e76488b13033af61cd1bbcc2fc61dce9bce9531cb91d7bc3cff5",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "MotuPatient.map",
+      "sha256": "68e71381efbb539a8674e8b5b1187f5aef3f4cf7f910de0375e2dc40c191d9c6",
+      "mediaType": "text/fhir-mapping"
+    },
+    {
+      "path": "StructureMap-MotuPatient.json",
+      "sha256": "13350ebe689673bd57a3bd89f2f02d6785b9908891429c2f4d0e0696d64d27c5",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "StructureDefinition-MotuPatientRow.json",
+      "sha256": "33e4235733090b73de7f923afa55ba1125aea7f6235ecebc7aa0fbb845ad61f4",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "normalization-MotuPatient.json",
+      "sha256": "f19fcba460e63c2234b06676946f2ae46181f7aaa598529282ab352d6531c5b5",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "HospitalStay.map",
+      "sha256": "00b3d11866a341e42e0d96c7bde738eac51dc9913f2bc206b57940d072ee768a",
+      "mediaType": "text/fhir-mapping"
+    },
+    {
+      "path": "StructureMap-HospitalStay.json",
+      "sha256": "004a8692266f99ae58bf3432829f445e10acff8eccdfb176d8f581d06f4f3837",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "StructureDefinition-HospitalStayRow.json",
+      "sha256": "f0f08c0153dff6df01fd75d8212fea67813b02589957acc55b220f38094f67a0",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "normalization-HospitalStay.json",
+      "sha256": "e3b0369683c81512af73c0c966019b7508a03d0d7874373592d7e5f6b3143a19",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "Fall.map",
+      "sha256": "9c68f7e8d0b7cec774b63797692f3120ecaf75b9732cbf6864c50dc8b9b51935",
+      "mediaType": "text/fhir-mapping"
+    },
+    {
+      "path": "StructureMap-Fall.json",
+      "sha256": "794b8b421cddbb86659214be31a156b54179ddb8307c8b51a3ad382a63c93569",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "StructureDefinition-FallRow.json",
+      "sha256": "f6e352d6ef0ac37db00c18ee7153fecf7bcbe2800e2da012384bce1e067928c2",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "normalization-Fall.json",
+      "sha256": "18f6c19069a4add5011e479c457fbfda11fd877491dcff9e2095972487e369c5",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "ConceptMap-sex.json",
+      "sha256": "1b6436db7701796b93c9f263d7b806c6cdc0ddc7b962684f9430a300da9bdab5",
+      "mediaType": "application/fhir+json"
+    }
+  ]
+}

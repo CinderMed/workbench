@@ -1,0 +1,48 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.0.0",
+  "source": "MotuPatient",
+  "logicalModel": "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "report-drop",
+  "columns": [
+    {
+      "name": "AnonymousID",
+      "sourceName": "AnonymousID",
+      "type": "string"
+    },
+    {
+      "name": "Sex",
+      "sourceName": "Sex",
+      "type": "string"
+    },
+    {
+      "name": "BirthDay",
+      "sourceName": "BirthDay",
+      "type": "date",
+      "dateFormat": "dd/MM/yyyy"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "AnonymousID"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

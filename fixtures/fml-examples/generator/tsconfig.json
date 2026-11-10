@@ -1,0 +1,2 @@
+{ "compilerOptions": { "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext", "strict": true, "noEmit": true, "types": [], "skipLibCheck": true },
+  "files": ["fml-ast.ts", "fml-print.ts", "example-hospitalstay.ts"] }
