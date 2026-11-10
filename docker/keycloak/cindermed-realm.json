@@ -1,0 +1,122 @@
+{
+  "realm": "cindermed",
+  "displayName": "CinderMed (development)",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "resetPasswordAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "clients": [
+    {
+      "clientId": "cindermed-web",
+      "name": "CinderMed web app",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["${CINDERMED_WEB_URL}/*", "http://localhost:5173/*"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${CINDERMED_WEB_URL}/*##http://localhost:5173/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "owner",
+      "email": "owner@cindermed.test",
+      "emailVerified": true,
+      "firstName": "Olga",
+      "lastName": "Owner",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${CINDERMED_DEV_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "cindermed.devRole": ["owner"]
+      }
+    },
+    {
+      "username": "mapper",
+      "email": "mapper@cindermed.test",
+      "emailVerified": true,
+      "firstName": "Marco",
+      "lastName": "Mapper",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${CINDERMED_DEV_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "cindermed.devRole": ["mapper"]
+      }
+    },
+    {
+      "username": "reviewer",
+      "email": "reviewer@cindermed.test",
+      "emailVerified": true,
+      "firstName": "Rita",
+      "lastName": "Reviewer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${CINDERMED_DEV_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "cindermed.devRole": ["reviewer"]
+      }
+    },
+    {
+      "username": "engineer",
+      "email": "engineer@cindermed.test",
+      "emailVerified": true,
+      "firstName": "Enzo",
+      "lastName": "Engineer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${CINDERMED_DEV_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "cindermed.devRole": ["engineer"]
+      }
+    },
+    {
+      "username": "viewer",
+      "email": "viewer@cindermed.test",
+      "emailVerified": true,
+      "firstName": "Vera",
+      "lastName": "Viewer",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${CINDERMED_DEV_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "cindermed.devRole": ["viewer"]
+      }
+    }
+  ]
+}

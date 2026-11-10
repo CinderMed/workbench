@@ -7,8 +7,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/app.d.ts",
+      "default": "./dist/app.js"
     }
   },
   "files": [
@@ -17,6 +17,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start": "node dist/server.js",
+    "dev": "node --watch --experimental-strip-types src/server.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.12.8"
   }
 }

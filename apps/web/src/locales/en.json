@@ -1,0 +1,14 @@
+{
+  "app": {
+    "name": "CinderMed",
+    "subtitle": "FHIR Mapping Workbench"
+  },
+  "auth": {
+    "loading": "Checking your session…",
+    "redirecting": "Redirecting to sign in…",
+    "signedInAs": "Signed in as {{name}}",
+    "signOut": "Sign out",
+    "error": "Sign-in failed: {{message}}",
+    "retry": "Try again"
+  }
+}

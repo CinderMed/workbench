@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+.tmp
+.fhir
+.git
+coverage
+fixtures
+docs
+*.log
+.env
+.env.*
+!.env.example

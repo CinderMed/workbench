@@ -58,7 +58,7 @@ describe("GitHub Actions", () => {
   it("runs the required CI jobs", () => {
     const ci = load(".github/workflows/ci.yml") as Workflow;
     expect(Object.keys(ci.jobs).sort()).toEqual(
-      ["build", "fixtures", "golden", "lint", "test", "typecheck"].sort(),
+      ["build", "compose", "fixtures", "golden", "lint", "test", "typecheck"].sort(),
     );
   });
 

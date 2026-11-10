@@ -17,6 +17,14 @@ corepack enable    # pnpm, pinned in package.json
 pnpm install       # also installs the git hooks (lefthook)
 ```
 
+## Development stack
+
+```bash
+docker compose up --build   # web http://localhost:8080, API :3000, Keycloak :8081
+```
+
+Sign in with a test user (`owner`, `mapper`, `reviewer`, `engineer` or `viewer`; password `cindermed-dev` unless `CINDERMED_DEV_PASSWORD` is set). Copy `.env.example` to `.env` to change ports and passwords. `pnpm --filter @cindermed/web dev` starts the web app with Vite on port 5173, using the same Keycloak.
+
 ## Checks
 
 Run them before opening a pull request; CI runs the same commands.

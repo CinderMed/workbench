@@ -72,3 +72,21 @@ The specification puts the community files (CONTRIBUTING, CODE_OF_CONDUCT, SECUR
 The job exposes `released`, `version` and `tag` as outputs. Tags created with `GITHUB_TOKEN` do not trigger other workflows, so the jobs that run on a release (Docker images in `chore/docker-compose`, docs deploy in `docs/site-skeleton`) are added to `release.yml` and depend on these outputs.
 
 **Tokens.** `changesets/action` needs the repository setting "Allow GitHub Actions to create and approve pull requests". A pull request opened with `GITHUB_TOKEN` does not trigger the CI workflows, so its required checks never report. The workflow uses an optional `RELEASE_TOKEN` secret (a fine-grained token or GitHub App token with contents and pull-requests write) when present. Without it, the "Version Packages" PR only changes versions and changelogs already checked on `main`, and an admin merges it.
+
+## Addendum: Docker Compose development stack (module 0, `chore/docker-compose`)
+
+**Layout.** The services are defined in `docker/compose.yaml`, as the repository layout says. A two-line `compose.yaml` at the root includes it, so `docker compose up` works from the repository root with no `-f`. Every variable has a development default, so no `.env` file is needed; `.env.example` lists the eight variables from the specification plus the passwords and ports of the stack.
+
+**Images.** Exact tags: `node:22.23.4-alpine3.24` to build, `nginxinc/nginx-unprivileged:1.31.7-alpine` to serve the web app (non-root, port 8080, `/api/` proxied to the `api` service), `postgres:17.11-alpine` and `quay.io/keycloak/keycloak:26.8.2`. Renovate updates them with the same 7-day release age. The API image is made with `pnpm deploy --prod` and runs as the `node` user. The images install dependencies with `--ignore-scripts`: the only allowed install script (lefthook) is for git hooks.
+
+**Keycloak.** `start-dev --import-realm` with `docker/keycloak/cindermed-realm.json`:
+
+- the realm `cindermed`;
+- the public client `cindermed-web`: authorization code flow with PKCE (S256), redirects to the web app and to the Vite dev server;
+- one test user per project role (`owner`, `mapper`, `reviewer`, `engineer`, `viewer`) with `@cindermed.test` emails. Roles are per project and live in the database (specification, "Permissions"); these users only make the roles easy to try once module 4 assigns them.
+
+The realm file contains no password: the users' password comes from the `CINDERMED_DEV_PASSWORD` placeholder, which Keycloak resolves from the environment at import. `KC_HOSTNAME` is the published address (`http://localhost:8081`), so tokens have the same issuer for the browser and for the API. The bootstrap admin, the test users and PostgreSQL have development-only default passwords set in `docker/compose.yaml`. They are not production credentials and must be changed on any shared server. Keycloak keeps its own data in the container (dev-file); the realm is imported again on every start.
+
+**Web shell.** Module 0 has no features, so the web app only proves the stack: it signs the user in with `oidc-client-ts` and shows the user's name and a sign-out button. Its text goes through i18next (English source locale). The OIDC authority and client are fixed at build time (Vite variables, Docker build arguments). The API only answers `GET /api/health`; JWT verification arrives with A2 in module 4.
+
+**Verification.** The CI job `Docker Compose` builds and starts the stack, then runs `tooling/compose/smoke.sh`. The script checks that the web app is served, that the API answers through the web proxy, that Keycloak shows the login form for `cindermed-web`, and that a test user signs in and is redirected back to the web app with an authorization code. Image publishing is a job of `release.yml` that runs after a product release: `ghcr.io/cindermed/workbench-api` and `workbench-web`, tagged `X.Y.Z` and `sha-<commit>`, plus `latest` for stable versions, with build provenance.
