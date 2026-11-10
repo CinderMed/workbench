@@ -102,4 +102,4 @@ The realm file contains no password: the users' password comes from the `CINDERM
 
 Versioned docs per minor release come with the first walkthroughs; until then the site shows the latest release. GitHub Pages must be enabled with "GitHub Actions" as the source.
 
-**Boundaries and lint.** `apps/docs` is outside the ADR-0001 package boundaries: dependency-cruiser skips it, because Astro's virtual `astro:*` modules cannot be resolved. It needs no changeset (see the changeset check). ESLint ignores the generated `.astro/` folder.
+**Boundaries and lint.** `apps/docs` is outside the ADR-0001 package boundaries: dependency-cruiser skips it, because Astro's virtual `astro:*` modules cannot be resolved. It needs no changeset (see the changeset check). ESLint ignores the generated `.astro/` folder; `pnpm lint` runs `astro sync` first, so the `astro:content` types exist on a fresh checkout.
