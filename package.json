@@ -11,7 +11,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "vitest run --coverage",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "pnpm --filter @cindermed/docs sync && eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json",

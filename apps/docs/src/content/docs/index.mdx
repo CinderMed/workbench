@@ -1,0 +1,40 @@
+---
+title: CinderMed
+description: FHIR Mapping Workbench. Map tabular datasets to FHIR R4 and R5 and generate FML.
+template: splash
+hero:
+  tagline: Map tabular datasets to FHIR R4 and R5, and generate verified FHIR Mapping Language.
+  actions:
+    - text: Get started
+      link: /workbench/getting-started/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/CinderMed/workbench
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+:::caution[Early development]
+CinderMed is being built one module at a time. This site grows with it: the worked examples (Metastra and MOTU) arrive with the first complete release.
+:::
+
+<CardGrid>
+  <Card title="Import your source" icon="document">
+    Bring in a data file or a data dictionary (CSV, TSV, Excel), then correct types, values and
+    descriptions.
+  </Card>
+  <Card title="Map in a grid" icon="list-format">
+    One row per source column: choose the resource role, the element and the transform, with inline
+    validation.
+  </Card>
+  <Card title="Work together" icon="comment">
+    Mappers, reviewers and engineers share a project, with row statuses, comments and safe
+    concurrent saving.
+  </Card>
+  <Card title="Export verified FML" icon="rocket">
+    StructureMaps checked against the official grammar, plus the logical model, ConceptMaps,
+    CSV/Excel and the project file.
+  </Card>
+</CardGrid>
