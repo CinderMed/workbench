@@ -42,6 +42,7 @@ describe("GitHub Actions", () => {
       "changeset-check.yml",
       "ci.yml",
       "codeql.yml",
+      "docs.yml",
       "pr-title.yml",
       "release.yml",
     ]);

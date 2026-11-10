@@ -50,7 +50,8 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: "node_modules" },
-    exclude: { path: "(^|/)(dist|node_modules)/" },
+    // apps/docs (Astro) imports virtual astro:* modules and is outside the ADR-0001 boundaries.
+    exclude: { path: "(^|/)(dist|node_modules|\\.astro)/|^apps/docs/" },
     tsPreCompilationDeps: true,
     tsConfig: { fileName: "tsconfig.base.json" },
     enhancedResolveOptions: {

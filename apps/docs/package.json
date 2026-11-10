@@ -1,0 +1,24 @@
+{
+  "name": "@cindermed/docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CinderMed user documentation (Astro Starlight)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.10",
+    "astro": "^7.4.8",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "starlight-links-validator": "^0.27.0",
+    "typescript": "~6.0.3"
+  }
+}

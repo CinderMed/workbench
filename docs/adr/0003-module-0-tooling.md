@@ -90,3 +90,16 @@ The realm file contains no password: the users' password comes from the `CINDERM
 **Web shell.** Module 0 has no features, so the web app only proves the stack: it signs the user in with `oidc-client-ts` and shows the user's name and a sign-out button. Its text goes through i18next (English source locale). The OIDC authority and client are fixed at build time (Vite variables, Docker build arguments). The API only answers `GET /api/health`; JWT verification arrives with A2 in module 4.
 
 **Verification.** The CI job `Docker Compose` builds and starts the stack, then runs `tooling/compose/smoke.sh`. The script checks that the web app is served, that the API answers through the web proxy, that Keycloak shows the login form for `cindermed-web`, and that a test user signs in and is redirected back to the web app with an authorization code. Image publishing is a job of `release.yml` that runs after a product release: `ghcr.io/cindermed/workbench-api` and `workbench-web`, tagged `X.Y.Z` and `sha-<commit>`, plus `latest` for stable versions, with build provenance.
+
+## Addendum: documentation site (module 0, `docs/site-skeleton`)
+
+**Site.** `apps/docs` (`@cindermed/docs`) uses Astro Starlight. English is the root locale, configured so that an Italian locale can be added later as a translation (ADR-0002). It is published on GitHub Pages at `https://cindermed.github.io/workbench/` until a domain is chosen. The sidebar has "Start here" (getting started with `docker compose up`), "Guides" (the Metastra and MOTU walkthroughs, module 9) and "Reference" (schemas and REST API, generated later). `starlight-links-validator` fails the build on a broken internal link, and `astro check` type-checks the site.
+
+**Workflow.** `docs.yml` (job `Docs build`) builds the site and validates its links on every PR and every push to `main`. Deploying uses the same workflow:
+
+- called by `release.yml` after a product release, for the release tag (tags created with `GITHUB_TOKEN` trigger no workflow, see above);
+- by hand (`workflow_dispatch`) for a given tag, for releases made before the workflow existed (`v0.0.1`).
+
+Versioned docs per minor release come with the first walkthroughs; until then the site shows the latest release. GitHub Pages must be enabled with "GitHub Actions" as the source.
+
+**Boundaries and lint.** `apps/docs` is outside the ADR-0001 package boundaries: dependency-cruiser skips it, because Astro's virtual `astro:*` modules cannot be resolved. It needs no changeset (see the changeset check). ESLint ignores the generated `.astro/` folder.

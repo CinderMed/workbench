@@ -1,0 +1,61 @@
+name: Docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # Deploys the site of a release (called by release.yml after a product release).
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build (the release tag)
+        type: string
+        required: true
+      deploy:
+        type: boolean
+        default: true
+  # Manual deploy, e.g. for a release made before this workflow existed.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to build and deploy (a release tag, e.g. v0.0.1)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Docs build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: ./.github/actions/setup
+      - name: Type check
+        run: pnpm --filter @cindermed/docs typecheck
+      - name: Build and validate internal links
+        run: pnpm --filter @cindermed/docs build
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        # inputs.deploy is set only by release.yml (workflow_call); github.event_name is then the caller's.
+        if: github.event_name == 'workflow_dispatch' || inputs.deploy
+        with:
+          path: apps/docs/dist
+
+  deploy:
+    name: Docs deploy
+    needs: build
+    if: github.event_name == 'workflow_dispatch' || inputs.deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
