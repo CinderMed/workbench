@@ -28,7 +28,7 @@ Check a file with [`cindermed validate`](/workbench/reference/cli/).
 Inside CinderMed every value has one form: dates in ISO 8601 (`2023-09-17`), decimals with a point (`11.20`), booleans `true`/`false`. Local formats are declared on the column, so the conversion can translate them when it reads the data file:
 
 - `dateFormat`: the date pattern in the file, for example `dd/MM/yyyy`
-- `decimalSeparator`: `.` (default) or `,` for values such as `11,20`
+- `decimalSeparator`: `.` (default) or `,` for values such as `11,20`. The separator is strict and there are no thousands separators: in a `,` column, `1.234` and `1.234,5` are invalid values (`1.234` is a thousands separator in Italian data, so it is never read as 1.234); in a `.` column, `1,234` is invalid.
 
 A column of type `boolean` accepts only `true`/`false`, `1`/`0`, `yes`/`no` and `y`/`n`, in any case. Booleans written as words in another language, such as `Sì`/`No`, are a `categorical` column with a value map to `boolean`. `cindermed validate` reports `ALLOWED_VALUE_TYPE_MISMATCH` when an allowed value does not fit its column: `Sì` in a `boolean` column, `11,20` in a decimal column without `decimalSeparator: ","`, or `31/02/2023` in a date column.
 

@@ -54,6 +54,7 @@ function convert(v, c) {
     case 'string': case 'code': return v;
     case 'integer': { if (!/^[+-]?\d+$/.test(v)) return undefined; const n = BigInt(v); return { json: n.toString(), canon: n.toString() }; }
     case 'decimal': {
+      if (c.decimalSeparator === ',' && v.includes('.')) return undefined;  // strict separator, no thousands separators
       const s = (c.decimalSeparator === ',') ? v.replace(',', '.') : v;
       if (!/^[+-]?\d+(\.\d+)?$/.test(s)) return undefined;
       const t = s.replace(/^\+/, '').replace(/^(-?)0+(?=\d)/, '$1');      // decimal digits kept

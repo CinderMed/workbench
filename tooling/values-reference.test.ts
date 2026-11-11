@@ -25,8 +25,15 @@ interface Case {
 
 const cases: readonly Case[] = [
   { type: "integer", values: ["42", "+007", "-0", "-12", "1.0", "abc", "1e3"] },
-  { type: "decimal", values: ["11.20", "011.20", "+3", "-007.5", "11,20", ".5", "11."] },
-  { type: "decimal", decimalSeparator: ",", values: ["11,20", "0,5", "1.234,5", "11.20", "x"] },
+  {
+    type: "decimal",
+    values: ["11.20", "011.20", "+3", "-007.5", "11,20", ".5", "11.", "1,234", "1,234.5"],
+  },
+  {
+    type: "decimal",
+    decimalSeparator: ",",
+    values: ["11,20", "0,5", "-0,5", "1.234", "1.234,5", "11.20", "1,234,5", ",5", "x"],
+  },
   { type: "boolean", values: ["1", "TRUE", "yes", "Y", "0", "False", "NO", "n", "Sì", "si", "2"] },
   {
     type: "date",
