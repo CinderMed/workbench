@@ -6,17 +6,18 @@
  *
  * What it covers: an Italian yes/no column (`Sì`/`No`) is categorical, and the value map `siNo`
  * (target boolean) becomes one rule per value with a boolean constant on Observation.value.
- * Rule names of value-map rules are `<row code>-<source value>`, with characters outside
- * `[A-Za-z0-9_.-]` replaced by `_` (`Sì` → `R-002-S_`).
+ * Rule names of value-map rules follow `valueRuleNames` (`Sì` → `R-002-S_`, `No` → `R-002-No`).
  */
 import {
   groupName,
   ident,
   ruleName,
   type Expr,
+  type RuleName,
   type Rule,
   type StructureMapAst,
 } from "../fml-ast.js";
+import { valueRuleNames } from "../generator/rule-names.js";
 
 const base = "http://example.org/fhir/boolean-value-map";
 const src = ident("src");
@@ -97,9 +98,9 @@ function roleEntry(
 }
 
 /** One value-map rule: `src.col as v where ($this = 'value') -> res.value = <boolean>`. */
-function booleanValueRule(name: string, value: string, result: boolean): Rule {
+function booleanValueRule(name: RuleName, value: string, result: boolean): Rule {
   return {
-    name: ruleName(name),
+    name,
     source: {
       context: src,
       element: ident("fumatore"),
@@ -113,6 +114,7 @@ function booleanValueRule(name: string, value: string, result: boolean): Rule {
 }
 
 const rowType = ident("VisitRow");
+const [siName, noName] = valueRuleNames("R-002", ["Sì", "No"]) as [RuleName, RuleName];
 
 export const booleanValueMap: StructureMapAst = {
   url: `${base}/StructureMap/Visit`,
@@ -231,11 +233,11 @@ export const booleanValueMap: StructureMapAst = {
           ],
         },
         {
-          ...booleanValueRule("R-002-S_", "Sì", true),
+          ...booleanValueRule(siName, "Sì", true),
           comment:
             "R-002: value map siNo to boolean (one rule per value; ConceptMap exported separately)",
         },
-        booleanValueRule("R-002-No", "No", false),
+        booleanValueRule(noName, "No", false),
         {
           name: ruleName("R-003"),
           source: { context: src, element: ident("id_Patient0"), alias: ident("t") },

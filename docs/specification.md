@@ -462,7 +462,7 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 | Copy | `src.col as v -> res.element = v` (a normalized date is also copied into dateTime) |
 | Several rows on the same complex element | One shared block, created if at least one column has a value: `src where ($this.a.exists() or $this.b.exists()) -> res.period as p then { … }` |
 | Named slice | `src where ($this.col.exists()) -> res.component as slc then { discriminator with cc(…); value }` |
-| Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes. ConceptMaps are exported only as documentation |
+| Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes and booleans. Each rule is named `<row code>-<value>`, with characters outside `[A-Za-z0-9_.-]` replaced by `_` (`R-006-1`, `R-011--1`, `Sì` → `R-002-S_`); when two values of the same map get the same name, the later ones in entry order get a numeric suffix (`Sí` → `R-002-S_2`, `N A` after `N/A` → `R-002-N_A2`). ConceptMaps are exported only as documentation |
 | Quantity with unit from a column | `res.value = create('Quantity') as q then { value; one rule per unit with unit, system and code }` |
 | Multiple choice, `repeat: eachValue` | The normalization produces a list; each per-value rule fires for every item, so one repetition per selected value |
 | Reference in the same table | `src.id_Target as t -> res.subject as r, r.reference = evaluate(t, 'Type/' + $this)`, inside the creation condition of the target role |
