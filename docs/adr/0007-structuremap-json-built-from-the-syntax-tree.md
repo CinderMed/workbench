@@ -29,3 +29,9 @@ The verified examples hold the JSON the HL7 validator 7.0.5 compiled from each m
 - Each new node in the syntax tree also needs its JSON form and a comparison with the engine's output.
 - If the engine changes how it compiles or renders FHIRPath (a new validator version, or Matchbox in V2), the fixtures and this function have to follow. In V2, when Matchbox compiles every export, we can replace the built JSON with the compiled one; we will revisit then.
 - A golden case on an R5 project is needed before R5 exports are relied on (module 3, when R5 definitions are loaded).
+
+## Addendum (2026-11-11, review of PR #77)
+
+- **`status`.** The JSON always has `status: "draft"`. FHIR requires it and the transform does not read it, so the verified Bundles stay valid. This replaces the decision above not to add it. Comparisons with the compiled fixtures and with the engine's output ignore only this field.
+- **Comparison with the engine in CI.** In `ci/golden-tests`, every golden case compares the built JSON with the JSON the HL7 engine compiles, in CI, from the printed FML, not only with the stored fixtures.
+- **Manifest.** Built JSON is not compiled JSON: the manifest keeps `verification.compile` = `"skipped"`.

@@ -6,7 +6,8 @@
  * (org.hl7.fhir.core 7.0.5) produces when it compiles the printed text (fixtures/fml-examples/
  * *\/StructureMap-*.json):
  *
- * - `id` and `name` are the map name; no `status` and no metadata, as in the compiled output;
+ * - `id` and `name` are the map name; no metadata, as in the compiled output, except `status`,
+ *   which FHIR requires and the compiled output lacks: always `draft` (ADR-0007 addendum);
  * - the narrative is the FML text, XML-escaped inside `<pre>`;
  * - constants become a `copy` transform with a `value[x]` parameter, variables `valueId`;
  * - `where` conditions are FHIRPath rendered the way the HL7 engine renders a parsed expression:
@@ -85,6 +86,8 @@ export interface StructureMapJson {
   readonly text: { readonly status: "additional"; readonly div: string };
   readonly url: string;
   readonly name: string;
+  /** Required by FHIR; absent from the HL7 engine's output (ADR-0007 addendum). */
+  readonly status: "draft";
   readonly structure: readonly {
     readonly url: string;
     readonly mode: string;
@@ -260,6 +263,7 @@ export function toStructureMap(
     },
     url: map.url,
     name: map.name,
+    status: "draft",
     structure: map.uses.map((use) => ({ url: use.url, mode: use.mode, alias: use.alias })),
     group: map.groups.map((group) => groupJson(group, release)),
   };
