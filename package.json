@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json",
     "codegen": "node tooling/codegen/model-types-cli.ts",
+    "cindermed": "node apps/cli/dist/bin.js",
     "boundaries": "depcruise apps packages --config .dependency-cruiser.cjs",
     "check:fixtures": "sha256sum --check --quiet --strict fixtures/fml-examples.sha256",
     "prepare": "lefthook install",

@@ -18,5 +18,11 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
+  },
+  "bin": {
+    "cindermed": "./dist/bin.js"
+  },
+  "dependencies": {
+    "@cindermed/model": "workspace:*"
   }
 }

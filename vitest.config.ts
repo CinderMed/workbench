@@ -32,6 +32,7 @@ export default defineConfig({
         "**/*.test.{ts,tsx}",
         "**/dist/**",
         "apps/*/src/server.ts",
+        "apps/cli/src/bin.ts",
         "apps/web/src/main.tsx",
         "apps/web/src/test-setup.ts",
       ],

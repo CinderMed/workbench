@@ -3,9 +3,12 @@ title: Reference
 description: Project file, normalization, manifest and REST API.
 ---
 
-This section will document the contracts of CinderMed, generated from their schemas:
+- [Project file](/workbench/reference/project-file/): format, versions and how CinderMed writes it
+- [Command line](/workbench/reference/cli/): `cindermed validate` and its exit codes
 
-- the project file (format 1.2.0)
+Later this section will also document the contracts generated from their schemas:
+
+- the project file schema (format 1.2.0)
 - the normalization specification (1.0.0)
 - the export package manifest (1.0.0)
 - the REST API (OpenAPI)
