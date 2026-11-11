@@ -90,6 +90,33 @@ describe("planTable", () => {
     expect(patient.idFields[0]?.field).toBe("id_Patient0");
   });
 
+  it("never gives a column the names id, extension or resourceType", () => {
+    const changed = structuredCopy(motu);
+    const [first, second, third] = changed.sources[0].columns;
+    if (second === undefined || third === undefined) throw new Error("fixture changed");
+    first.name = "id";
+    second.name = "extension";
+    third.name = "resourceType";
+    const planned = plan(changed, "src_patient");
+    expect(planned.columns.map((c) => c.element)).toEqual(["id2", "extension2", "resourceType2"]);
+    const paths = logicalModel(changed, planned).snapshot.element.map((e) => e.path);
+    expect(paths).toEqual(
+      expect.arrayContaining([
+        "MotuPatientRow.id2",
+        "MotuPatientRow.extension2",
+        "MotuPatientRow.resourceType2",
+      ]),
+    );
+    expect(paths).not.toEqual(expect.arrayContaining(["MotuPatientRow.id"]));
+    // The data file is still read with the original headers.
+    const spec = normalizationSpec(changed, planned);
+    expect(spec.columns.map((c) => [c.name, c.sourceName])).toEqual([
+      ["id2", "id"],
+      ["extension2", "extension"],
+      ["resourceType2", "resourceType"],
+    ]);
+  });
+
   it("rejects a table name that is not a valid FML name", () => {
     const renamed = structuredCopy(motu);
     renamed.sources[0].name = "Motu Patient";

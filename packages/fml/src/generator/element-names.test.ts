@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { FmlNameError } from "../fml-ast.js";
-import { MAX_ELEMENT_NAME_LENGTH, assignElementName, baseElementName } from "./element-names.js";
+import {
+  MAX_ELEMENT_NAME_LENGTH,
+  RESERVED_ELEMENT_NAMES,
+  assignElementName,
+  baseElementName,
+} from "./element-names.js";
 
 describe("element names", () => {
   it.each([
@@ -46,5 +51,9 @@ describe("element names", () => {
   it("always returns a valid FML identifier", () => {
     expect(() => assignElementName("", new Set())).not.toThrow(FmlNameError);
     expect(assignElementName("", new Set())).toBe("c");
+  });
+
+  it("reserves id, extension and resourceType for the row itself", () => {
+    expect([...RESERVED_ELEMENT_NAMES].sort()).toEqual(["extension", "id", "resourceType"]);
   });
 });

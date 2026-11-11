@@ -12,6 +12,18 @@
  */
 import { RESERVED_WORDS, ident, type Identifier } from "../fml-ast.js";
 
+/**
+ * Names a column can never take, because the normalized row already uses them: `id` and
+ * `extension` are inherited from Element, the base of the R4 logical model, and `resourceType`
+ * is the property the normalizer writes on every row. A column with one of these names is
+ * treated like a collision (`id` → `id2`).
+ */
+export const RESERVED_ELEMENT_NAMES: ReadonlySet<string> = new Set([
+  "id",
+  "extension",
+  "resourceType",
+]);
+
 /** Maximum length of an element name (normalization.schema.json, ElementName). */
 export const MAX_ELEMENT_NAME_LENGTH = 64;
 const COLLISION_BASE_LENGTH = 60;

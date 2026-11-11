@@ -11,7 +11,7 @@
 import type { Column, Id, Instance, ProjectFile, Source, ValidationResult } from "@cindermed/model";
 import { groupName, ident, type GroupName, type Identifier } from "../fml-ast.js";
 import { GeneratorCode, GeneratorInputError } from "./codes.js";
-import { assignElementName } from "./element-names.js";
+import { RESERVED_ELEMENT_NAMES, assignElementName } from "./element-names.js";
 
 export interface PlannedColumn {
   readonly column: Column;
@@ -206,8 +206,12 @@ export function planTable(project: ProjectFile, sourceId: Id): Planned<TablePlan
     return { instance, field: ident(idFieldName(instance)) };
   });
 
-  // Id field names are fixed by the contract (`id_Type0`): columns give way to them.
-  const taken = new Set<string>(idNames.map((entry) => entry.field));
+  // Names already used by the row itself and the id field names fixed by the contract
+  // (`id_Type0`): columns give way to them.
+  const taken = new Set<string>([
+    ...RESERVED_ELEMENT_NAMES,
+    ...idNames.map((entry) => entry.field),
+  ]);
   const columns = source.columns.map((column) => ({
     column,
     element: assignElementName(column.name, taken),
