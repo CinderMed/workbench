@@ -30,7 +30,7 @@ Inside CinderMed every value has one form: dates in ISO 8601 (`2023-09-17`), dec
 - `dateFormat`: the date pattern in the file, for example `dd/MM/yyyy`
 - `decimalSeparator`: `.` (default) or `,` for values such as `11,20`
 
-A column of type `boolean` accepts only `true`/`false`, `1`/`0`, `yes`/`no` and `y`/`n`, in any case. Booleans written as words in another language, such as `Sì`/`No`, are a `categorical` column with a value map to `boolean`.
+A column of type `boolean` accepts only `true`/`false`, `1`/`0`, `yes`/`no` and `y`/`n`, in any case. Booleans written as words in another language, such as `Sì`/`No`, are a `categorical` column with a value map to `boolean`. `cindermed validate` reports `ALLOWED_VALUE_TYPE_MISMATCH` when an allowed value does not fit its column: `Sì` in a `boolean` column, `11,20` in a decimal column without `decimalSeparator: ","`, or `31/02/2023` in a date column.
 
 `project.output.onInvalidValue` sets what the conversion does with a value that does not fit its column, such as `31/02/2023` in a date column:
 

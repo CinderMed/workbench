@@ -1,0 +1,189 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "VisitRow",
+  "url": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
+  "version": "1.3.0",
+  "name": "VisitRow",
+  "title": "Normalized row of table Visit",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "Patient ID",
+        "definition": "Patient ID",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.fumatore",
+        "path": "VisitRow.fumatore",
+        "short": "Fumatore",
+        "definition": "Smoking status at the visit, answered in Italian.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.fumatore",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (smoker), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "Patient ID",
+        "definition": "Patient ID",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.fumatore",
+        "path": "VisitRow.fumatore",
+        "short": "Fumatore",
+        "definition": "Smoking status at the visit, answered in Italian.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.fumatore",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (smoker), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

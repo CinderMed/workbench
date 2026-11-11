@@ -14,6 +14,9 @@ verification prototypes, not the final generator, which will be written in TypeS
   - `example-hospitalstay.ts` — tree of the MOTU HospitalStay map; printed, it is exactly `motu/HospitalStay.map`
 - `metastra/` — 1 table (FirstOverview), 6 roles, 11 variables
 - `motu/` — 3 linked tables (MotuPatient, HospitalStay, Fall), references across tables
+- `boolean-value-map/` — 1 table (Visit): an Italian yes/no column (`Sì`/`No`) is categorical, with a value map to
+  boolean on `Observation.valueBoolean`. `Visit.map` is printed from the syntax tree in
+  `packages/fml/src/test-support/boolean-value-map.ts` (not written by hand) and compiled with the HL7 engine
   - `project.json` — project file
   - `*.map` — StructureMaps in FML (written by applying the generator rules)
   - `StructureDefinition-*Row.json` — logical model of the normalized row
@@ -42,15 +45,16 @@ verification prototypes, not the final generator, which will be written in TypeS
    Needs the hl7.fhir.r4.core#4.0.1 package in the ~/.fhir/packages cache (downloaded automatically when online).
 4. Generator types: `cd generator && npx tsc -p tsconfig.json`, then `npx tsx example-hospitalstay.ts` prints `motu/HospitalStay.map`.
 
-Full suite: `VALIDATOR=/path/to/validator_cli.jar bash tests/run-all.sh` (8 checks, including negative cases, a row
-with an impossible date, and the same row stopping the conversion with `onInvalidValue: fail`).
+Full suite: `VALIDATOR=/path/to/validator_cli.jar bash tests/run-all.sh` (12 checks, including negative cases, a row
+with an impossible date, the same row stopping the conversion with `onInvalidValue: fail`, and the `Sì`/`No`
+rows of `boolean-value-map` producing `valueBoolean` true and false).
 
 ## Results (9 November 2026)
 - Official grammar: 4/4 maps OK
 - HL7 engine: every transform ran
 - R4 validation: Metastra full row 0 errors (11 best-practice warnings); negative row 0 errors (creates only Patient);
   MOTU, three Bundles merged, 0 errors; Fall row with an impossible date → no resource (correct)
-- Suite: 7 of 7 passed (8 of 8 from 11 November 2026, see below)
+- Suite: 7 of 7 passed (12 of 12 from 11 November 2026, see below)
 - TypeScript: `tsc --strict` with no errors; the HospitalStay map printed from the tree is byte-identical to the file
   and passes every check
 
@@ -65,3 +69,11 @@ specification, and normalization 1.1.0 adds `onInvalidValue: fail`. Both example
 specifications were regenerated with the TypeScript generator (`@cindermed/fml`): only `version` and
 `formatVersion` changed. The suite passed 8 of 8 with the HL7 validator 7.0.5, and every produced Bundle is
 identical to the verified one.
+
+## Golden case boolean-value-map (11 November 2026)
+Booleans written as words are a categorical column with a value map to boolean (project 1.3.0, rule 9). The map
+`boolean-value-map/Visit.map` is printed by `@cindermed/fml` from a syntax tree; the logical model and the
+normalization specification come from the TypeScript generator. The HL7 validator 7.0.5 compiled the map
+(`compile … -version=4.0.1 -tx=n/a -ig=boolean-value-map`, line endings normalized to LF like the other compiled
+maps) and ran it on three rows: `Sì` → `valueBoolean: true`, `No` → `valueBoolean: false`, empty answer → no
+Observation. All three Bundles validate with 0 errors (best-practice warnings only). Suite: 12 of 12.

@@ -31,6 +31,8 @@ export const IntegrityCode = {
   ID_INVALID_CHARACTERS: "ID_INVALID_CHARACTERS",
   /** Rule 8: `repeat: eachValue` on a row whose column is not `multipleChoice`. */
   REPEAT_REQUIRES_MULTIPLE_CHOICE: "REPEAT_REQUIRES_MULTIPLE_CHOICE",
+  /** Rule 9: an allowed value of a column does not fit the column's type (e.g. `Sì` in a `boolean` column). */
+  ALLOWED_VALUE_TYPE_MISMATCH: "ALLOWED_VALUE_TYPE_MISMATCH",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];

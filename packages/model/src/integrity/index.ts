@@ -1,6 +1,7 @@
 /**
- * Integrity level of project validation (specification, "Project validation"): the 8 rules the
- * JSON Schema cannot express. Run it on a project that already passed the schema check.
+ * Integrity level of project validation (specification, "Project validation"): the rules the
+ * JSON Schema cannot express (9 since project format 1.3.0). Run it on a project that already passed
+ * the schema check.
  */
 import type { ProjectFile } from "../generated/project.js";
 import type { ValidationResult } from "../validation-result.js";
@@ -13,6 +14,7 @@ import { checkReferences } from "./rule-5-references.js";
 import { checkValueMaps } from "./rule-6-value-maps.js";
 import { checkResourceIds } from "./rule-7-resource-ids.js";
 import { checkRepeat } from "./rule-8-repeat.js";
+import { checkAllowedValues } from "./rule-9-allowed-values.js";
 
 export { IntegrityCode } from "./codes.js";
 export { MAX_ID_LENGTH, idLength } from "./rule-7-resource-ids.js";
@@ -26,9 +28,10 @@ const RULES = [
   checkValueMaps,
   checkResourceIds,
   checkRepeat,
+  checkAllowedValues,
 ] as const;
 
-/** Checks the integrity rules 1–8 and returns every violation, in rule order, without duplicates. */
+/** Checks the integrity rules 1–9 and returns every violation, in rule order, without duplicates. */
 export function checkIntegrity(project: ProjectFile): ValidationResult[] {
   const index = buildIndex(project);
   const seen = new Set<string>();

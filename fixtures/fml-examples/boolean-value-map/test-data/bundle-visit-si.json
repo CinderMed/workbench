@@ -1,0 +1,41 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/boolean-value-map/Patient/pat-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-e2505a26bb5ff0304b7ecf81",
+      "identifier" : [{
+        "value" : "P-001"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/boolean-value-map/Observation/obs-smoker-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-smoker-e2505a26bb5ff0304b7ecf81",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "77176002",
+          "display" : "Smoker"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+      },
+      "valueBoolean" : true
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-smoker-e2505a26bb5ff0304b7ecf81"
+    }
+  }]
+}

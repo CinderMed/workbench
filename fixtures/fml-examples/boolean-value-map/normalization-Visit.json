@@ -1,0 +1,54 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.1.0",
+  "source": "Visit",
+  "logicalModel": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "patient_id",
+      "sourceName": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "fumatore",
+      "sourceName": "fumatore",
+      "type": "string"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "obs-smoker"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

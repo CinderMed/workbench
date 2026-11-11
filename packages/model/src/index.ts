@@ -35,6 +35,17 @@ export type { ExportManifest } from "./generated/manifest.js";
 export type * as Manifest from "./generated/manifest.js";
 
 export { IntegrityCode, MAX_ID_LENGTH, checkIntegrity, idLength } from "./integrity/index.js";
+export {
+  FALSE_VALUES,
+  TRUE_VALUES,
+  canonicalText,
+  parseBoolean,
+  parseDate,
+  parseDateTime,
+  parseDecimal,
+  parseInteger,
+  type DecimalSeparator,
+} from "./values/index.js";
 
 export {
   type Migration,

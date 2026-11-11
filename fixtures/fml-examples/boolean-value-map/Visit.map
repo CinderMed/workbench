@@ -1,0 +1,38 @@
+map "http://example.org/fhir/boolean-value-map/StructureMap/Visit" = `Visit`
+
+uses "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow" alias VisitRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as produced
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as produced
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Visit(source src : VisitRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+  // Observation[0] · smoker — created when: fumatore is not empty
+  src where ($this.id_Observation0.exists() and $this.fumatore.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Observation/' + $this) "Observation0-id";
+    src then Observation0(src, res) "Observation0-body";
+  } "Observation0";
+}
+
+group Patient0(source src : VisitRow, target res : Patient) {
+  // identifier: repeating element without a slice → one shared repetition
+  src where ($this.patient_id.exists()) -> res.identifier as rep then {
+    src.patient_id as v -> rep.value = v "R-001";
+  } "Patient0-identifier";
+}
+
+group Observation0(source src : VisitRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.code = cc('http://snomed.info/sct', '77176002', 'Smoker') "fixed-code";
+  // R-002: value map siNo to boolean (one rule per value; ConceptMap exported separately)
+  src.fumatore as v where ($this = 'Sì') -> res.value = true "R-002-S_";
+  src.fumatore as v where ($this = 'No') -> res.value = false "R-002-No";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-003";
+}
