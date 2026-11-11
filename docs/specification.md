@@ -500,7 +500,7 @@ For each table the generator produces artifacts described by their own schemas, 
 
 The conversion module reads only the package: the normalization specification to prepare each row, the StructureMap to produce the Bundle, the manifest for the table order.
 
-**Normalization: what happens to each cell.** The algorithm is fixed in the schema, so two implementations produce the same JSON byte for byte.
+**Normalization: what happens to each cell.** The algorithm is fixed in the schema, so two implementations produce the same JSON byte for byte. The reference implementation is `@cindermed/normalizer` (ADR-0010), kept byte-identical to `tools/normalize.mjs` by a differential test. The data file is decoded as the WHATWG Encoding Standard says: `iso-8859-1` is read as windows-1252 (0x80 is `€`), and UTF-8 drops a leading byte order mark.
 
 1. Unicode NFC and removal of outer spaces.
 2. Empty cell or value in `missingValues` → element omitted.

@@ -33,6 +33,9 @@ export interface NormalizationSpec {
     format: "csv";
     delimiter?: string;
     quote?: string;
+    /**
+     * Decoding follows the WHATWG Encoding Standard (TextDecoder): 'iso-8859-1' is decoded as windows-1252, so bytes 0x80–0x9F are characters such as € (0x80), not C1 control characters. 'utf-8' and 'utf-8-bom' drop a leading byte order mark.
+     */
     encoding?: "utf-8" | "utf-8-bom" | "windows-1252" | "iso-8859-1";
     headerRow?: number;
   };

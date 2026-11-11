@@ -55,6 +55,7 @@
           "default": "\""
         },
         "encoding": {
+          "description": "Decoding follows the WHATWG Encoding Standard (TextDecoder): 'iso-8859-1' is decoded as windows-1252, so bytes 0x80–0x9F are characters such as € (0x80), not C1 control characters. 'utf-8' and 'utf-8-bom' drop a leading byte order mark.",
           "enum": [
             "utf-8",
             "utf-8-bom",

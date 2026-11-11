@@ -98,3 +98,9 @@ AdverseEvent0; FirstOverview Encounter0, Observation1, Procedure0), nothing else
 `StructureMap-Fall.json` and `StructureMap-FirstOverview.json` from a folder without the old compiled JSON (the engine
 otherwise loads the existing StructureMap instead of the `.map`); only the four `condition` strings and the narrative
 changed. The manifests carry the new SHA-256. Suite: 13 of 13, every Bundle identical.
+
+## WHATWG decoding (11 November 2026)
+`tools/normalize.mjs` decodes the data file with `TextDecoder`, as the TypeScript reference `@cindermed/normalizer`
+does (ADR-0010): `iso-8859-1` is read as windows-1252 (0x80 is `€`, not a C1 control character), and UTF-8 drops a
+leading byte order mark. The normalization schema describes it under `input.encoding`. No example uses a single-byte
+encoding, so no output changes; suite: 13 of 13.
