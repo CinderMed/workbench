@@ -134,8 +134,8 @@ describe("validateNormalizationSchema", () => {
     expect(validateNormalizationSchema(fallFail)).toEqual([]);
   });
 
-  it("rejects duplicate or empty allowed values", () => {
-    for (const allowedValues of [["Sì", "Sì"], [""]]) {
+  it("rejects duplicate or empty allowed values, and an empty list", () => {
+    for (const allowedValues of [["Sì", "Sì"], [""], []]) {
       const normalization = copy(visitNormalization);
       first(list(normalization, "columns").slice(-1))["allowedValues"] = allowedValues;
       expect(validateNormalizationSchema(normalization)).toContainEqual(

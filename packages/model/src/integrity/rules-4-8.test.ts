@@ -188,13 +188,115 @@ describe("rule 6: value map source values are allowed values of the columns", ()
     ).toEqual(["col_hb_unit", "col_sites"]);
   });
 
-  it("does not require allowed values on columns of other types", () => {
+  it("restricts value maps to categorical, multiple-choice and boolean columns", () => {
+    const results = check((p) => {
+      row(p, "map_pid").transform = { kind: "valueMap", valueMapId: "vm_sex" };
+      row(p, "map_pid").path = "gender";
+    });
+    expect(results).toEqual([
+      {
+        severity: "error",
+        code: IntegrityCode.VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED,
+        objectKind: "mapping",
+        id: "map_pid",
+        field: "columnId",
+        message:
+          "value map 'sex' needs a categorical, multipleChoice or boolean column, but column 'patient_id' is string: declare the column categorical, with its allowed values",
+      },
+    ]);
+  });
+
+  it("reports the unit column of a quantity that is not categorical", () => {
+    const results = check((p) => {
+      at(at(p.sources, 0).columns, 4).dataType = "integer";
+    });
+    expect(
+      only(IntegrityCode.VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED, results).map((r) => [r.id, r.field]),
+    ).toEqual([["map_hb", "transform.unitColumnId"]]);
+  });
+
+  it("accepts a boolean column without allowed values", () => {
     expect(
       check((p) => {
-        row(p, "map_pid").transform = { kind: "valueMap", valueMapId: "vm_sex" };
-        row(p, "map_pid").path = "gender";
+        const sex = at(at(p.sources, 0).columns, 1);
+        sex.dataType = "boolean";
+        delete sex.allowedValues;
       }).filter((r) => r.code.startsWith("VALUE_MAP_")),
     ).toEqual([]);
+  });
+});
+
+describe("rule 6: a value map covers every allowed value of its columns", () => {
+  it("reports the allowed values without an entry, once per map and column", () => {
+    const results = check((p) => {
+      at(at(p.sources, 0).columns, 1).allowedValues = [
+        { code: "M" },
+        { code: "F" },
+        { code: "U" },
+        { code: "X " },
+      ];
+      p.mappings.push({ ...row(p, "map_sex"), id: "map_sex_again", code: "R-099" });
+    });
+    expect(results).toEqual([
+      {
+        severity: "error",
+        code: IntegrityCode.VALUE_MAP_INCOMPLETE,
+        objectKind: "valueMap",
+        id: "vm_sex",
+        field: "entries",
+        message:
+          "value map 'sex' has no entry for 'U', 'X' of column 'sex' (row R-002): add an entry with a code or an action (skipInstance, setElement, absent)",
+      },
+    ]);
+  });
+
+  it("does not require entries for missing values", () => {
+    expect(
+      check((p) => {
+        const sex = at(at(p.sources, 0).columns, 1);
+        sex.allowedValues = [{ code: "M" }, { code: "F" }, { code: "99" }];
+        sex.missingValues = ["99"];
+      }),
+    ).toEqual([]);
+  });
+
+  it("counts an entry with an action as covered", () => {
+    expect(
+      check((p) => {
+        at(at(p.sources, 0).columns, 1).allowedValues = [
+          { code: "M" },
+          { code: "F" },
+          { code: "U" },
+        ];
+        valueMap(p, "vm_sex").entries.push({ sourceValue: "U", action: { kind: "skipInstance" } });
+      }),
+    ).toEqual([]);
+  });
+
+  it("compares after NFC and trim, case-sensitive", () => {
+    const results = check((p) => {
+      at(at(p.sources, 0).columns, 1).allowedValues = [
+        { code: "M" },
+        { code: "F" },
+        { code: "Sì" },
+      ];
+      const entries = valueMap(p, "vm_sex").entries;
+      entries.push({ sourceValue: "si", action: { kind: "absent" } });
+    });
+    expect(
+      only(IntegrityCode.VALUE_MAP_INCOMPLETE, results).map((r) => r.message.split(":")[0]),
+    ).toEqual(["value map 'sex' has no entry for 'Sì' of column 'sex' (row R-002)"]);
+  });
+
+  it("checks multiple-choice columns and the unit column of a quantity", () => {
+    const results = check((p) => {
+      at(at(p.sources, 0).columns, 2).allowedValues = [{ code: "1" }, { code: "2" }, { code: "3" }];
+      at(at(p.sources, 0).columns, 4).allowedValues = [{ code: "1" }, { code: "2" }, { code: "4" }];
+    });
+    expect(only(IntegrityCode.VALUE_MAP_INCOMPLETE, results).map((r) => r.id)).toEqual([
+      "vm_hb_unit",
+      "vm_sites",
+    ]);
   });
 });
 

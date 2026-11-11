@@ -4,6 +4,10 @@
 // normalization: boolean only in the canonical forms, decimal with the column's decimalSeparator,
 // integer, date/dateTime according to dateFormat with a calendar check. Values listed in
 // missingValues, and values that are empty after trimming, are treated as missing and skipped.
+//
+// A categorical or multiple-choice column with a list must keep at least one value once missing
+// values are removed (ALLOWED_VALUES_EMPTY): the normalization (1.2.0) would reject every value of
+// an empty list, so it never reaches the normalization specification.
 import type { Column } from "../generated/project.js";
 import type { ValidationResult } from "../validation-result.js";
 import {
@@ -53,6 +57,20 @@ export function checkAllowedValues(index: ProjectIndex): ValidationResult[] {
   for (const source of index.project.sources) {
     for (const column of source.columns) {
       const missing = new Set((column.missingValues ?? []).map(canonicalText));
+      const listed = column.dataType === "categorical" || column.dataType === "multipleChoice";
+      const left = (column.allowedValues ?? [])
+        .map((allowed) => canonicalText(allowed.code))
+        .filter((value) => value !== "" && !missing.has(value));
+      if (listed && column.allowedValues !== undefined && left.length === 0) {
+        results.push(
+          error(
+            IntegrityCode.ALLOWED_VALUES_EMPTY,
+            { objectKind: "column", id: column.id },
+            "allowedValues",
+            `column '${column.name}' has no allowed values left once missing values are removed: the conversion would reject every value`,
+          ),
+        );
+      }
       (column.allowedValues ?? []).forEach((allowed, i) => {
         const value = canonicalText(allowed.code);
         if (value === "" || missing.has(value)) return;

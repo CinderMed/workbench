@@ -30,6 +30,16 @@ export const IntegrityCode = {
    * a value outside the map would be lost silently (normalization 1.2.0 checks only listed values).
    */
   VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES: "VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES",
+  /**
+   * Rule 6: a value map is used by a column that is not categorical, multipleChoice or boolean:
+   * the column has no list of values to map, so it must be declared categorical.
+   */
+  VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED: "VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED",
+  /**
+   * Rule 6: an allowed value of a column (not a missing value) has no entry in a value map that the
+   * column uses; the entry may carry a code or an action.
+   */
+  VALUE_MAP_INCOMPLETE: "VALUE_MAP_INCOMPLETE",
   /** Rule 7: the generated id can exceed 64 characters. */
   ID_TOO_LONG: "ID_TOO_LONG",
   /** Rule 7: a literal part or the separator of an `idRule` has characters outside `[A-Za-z0-9.-]`. */
@@ -38,6 +48,11 @@ export const IntegrityCode = {
   REPEAT_REQUIRES_MULTIPLE_CHOICE: "REPEAT_REQUIRES_MULTIPLE_CHOICE",
   /** Rule 9: an allowed value of a column does not fit the column's type (e.g. `Sì` in a `boolean` column). */
   ALLOWED_VALUE_TYPE_MISMATCH: "ALLOWED_VALUE_TYPE_MISMATCH",
+  /**
+   * Rule 9: a categorical or multiple-choice column has an allowed-values list that is empty once
+   * missing values are removed, so the normalization would reject every value.
+   */
+  ALLOWED_VALUES_EMPTY: "ALLOWED_VALUES_EMPTY",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];
