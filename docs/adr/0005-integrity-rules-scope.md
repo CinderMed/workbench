@@ -85,4 +85,4 @@ Project format 1.3.0 declares locale at the border (ADR-0009 addendum), so a col
   - `string`, `categorical` and `multipleChoice` are not checked.
 - A value is first canonicalized as the normalization does (NFC, trim). Empty values and values in `missingValues` are skipped.
 - **Shared parsers.** The check uses the cell parsers in `@cindermed/model` (`src/values/`). They are an exact port of the reference normalizer `tools/normalize.mjs`, proved by a differential test that runs the same values through both. The normalizer package (#75) imports the same parsers, so the rule and the conversion cannot disagree. They live in `model` because `normalizer` depends on `model`, so the reverse import would be a cycle.
-- Like the reference normalizer, a `,` decimal column also accepts `.` (`11.20` is read as 11.20). Making it strict changes the reference normalizer too, so it is left for a separate decision.
+- The decimal separator is strict (decided in #89, ADR-0009 addendum "strict decimal separator"): in a `,` column a value with `.` (`1.234`, `11.20`) does not fit, so rule 9 reports it.

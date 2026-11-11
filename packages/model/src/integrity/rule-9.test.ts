@@ -39,9 +39,13 @@ describe("rule 9: allowed values fit the column type", () => {
     const comma = mismatches((p) => {
       const hb = column(p, "col_hb");
       hb.decimalSeparator = ",";
-      hb.allowedValues = [{ code: "11,20" }, { code: "abc" }];
+      hb.allowedValues = [{ code: "11,20" }, { code: "abc" }, { code: "1.234" }, { code: "1.5" }];
     });
-    expect(comma.map((r) => r.field)).toEqual(["allowedValues.1.code"]);
+    expect(comma.map((r) => r.field)).toEqual([
+      "allowedValues.1.code",
+      "allowedValues.2.code",
+      "allowedValues.3.code",
+    ]);
     expect(comma[0]?.message).toContain("separator ','");
 
     const point = mismatches((p) => {

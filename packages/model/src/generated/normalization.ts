@@ -57,7 +57,7 @@ export interface NormalizationSpec {
   };
 }
 /**
- * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept; boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss without time zone). Value that cannot be converted → onInvalidValue.
+ * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept (the separator is strict and there are no thousands separators: with ',' a '.' is invalid, with '.' a ',' is invalid); boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss without time zone). Value that cannot be converted → onInvalidValue.
  *
  * This interface was referenced by `NormalizationSpec`'s JSON-Schema
  * via the `definition` "Column".

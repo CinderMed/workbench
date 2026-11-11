@@ -22,9 +22,12 @@ export type DecimalSeparator = "." | ",";
 
 /**
  * Decimal with the column's separator, written with `.` and every digit kept (`11,20` → `11.20`):
- * no sign `+`, no leading zeros in the integer part.
+ * no sign `+`, no leading zeros in the integer part. The separator is strict and there are no
+ * thousands separators: with `,` a `.` is invalid (`1.234` is one thousand two hundred thirty-four
+ * in Italian data, never 1.234), and with `.` a `,` is invalid.
  */
 export function parseDecimal(text: string, separator: DecimalSeparator = "."): string | undefined {
+  if (separator === "," && text.includes(".")) return undefined;
   const dotted = separator === "," ? text.replace(",", ".") : text;
   if (!/^[+-]?\d+(\.\d+)?$/.test(dotted)) return undefined;
   return dotted.replace(/^\+/, "").replace(/^(-?)0+(?=\d)/, "$1");

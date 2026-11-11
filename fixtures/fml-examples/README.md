@@ -70,6 +70,10 @@ specifications were regenerated with the TypeScript generator (`@cindermed/fml`)
 `formatVersion` changed. The suite passed 8 of 8 with the HL7 validator 7.0.5, and every produced Bundle is
 identical to the verified one.
 
+The decimal separator is strict (same day, normalization 1.1.0 not yet released): with `decimalSeparator: ","`
+a value containing `.` (`1.234`, `1.234,5`) is invalid, and with `.` a value containing `,` is invalid.
+`tools/normalize.mjs` applies it; no example data is affected and the suite gives the same Bundles.
+
 ## Golden case boolean-value-map (11 November 2026)
 Booleans written as words are a categorical column with a value map to boolean (project 1.3.0, rule 9). The map
 `boolean-value-map/Visit.map` is printed by `@cindermed/fml` from a syntax tree; the logical model and the
