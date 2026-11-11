@@ -44,3 +44,13 @@ export {
   type StructureMapSourceJson,
   type StructureMapTargetJson,
 } from "./structure-map.js";
+export {
+  FML_GRAMMAR_ERROR,
+  GRAMMAR_COMMIT,
+  GRAMMAR_SOURCE,
+  checkGrammar,
+  parseFml,
+  type FmlSyntaxError,
+  type GrammarCheckOptions,
+  type ResultOwner,
+} from "./grammar-check.js";

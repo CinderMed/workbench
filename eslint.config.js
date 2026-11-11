@@ -16,6 +16,8 @@ export default tseslint.config(
       ".tmp/**",
       "coverage/**",
       "fixtures/**",
+      // antlr-ng output (ADR-0008): generated, checked for drift instead of linted.
+      "packages/fml/src/grammar/generated/**",
       "docs/**",
     ],
   },
