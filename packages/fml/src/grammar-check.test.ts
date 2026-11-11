@@ -7,7 +7,7 @@ import reservedWordsAccepted from "../../../fixtures/fml-examples/tests/reserved
 import reservedWords from "../../../fixtures/fml-examples/tests/reserved-words/syntax/Kw.map?raw";
 import { groupName, ident, ruleName, type StructureMapAst } from "./fml-ast.js";
 import { printMapWithLines, type PrintedMap } from "./fml-print.js";
-import { FML_GRAMMAR_ERROR, GRAMMAR_COMMIT, checkGrammar, parseFml } from "./grammar-check.js";
+import { FML_GRAMMAR_ERROR, GRAMMAR_COMMIT, checkGrammar, parseFml } from "./grammar.js";
 import { hospitalStay } from "./test-support/hospital-stay.js";
 
 const fallback = { objectKind: "source", id: "src_hospitalstay" } as const;

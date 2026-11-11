@@ -4,6 +4,10 @@ const NODE_IO =
   "^(node:)?(fs|fs/promises|net|http|http2|https|dgram|dns|dns/promises|tls|child_process|cluster|worker_threads|readline|repl|vm|inspector)$";
 const IO_LIBRARIES = "(^|/)node_modules/(pg|kysely|undici|node-fetch|axios|ws|ioredis|fastify)/";
 
+// The grammar check of @cindermed/fml: its subpath (resolved or not), its sources and the antlr4ng runtime.
+const FML_GRAMMAR =
+  "^@cindermed/fml/grammar$|^packages/fml/(src|dist)/grammar(-check)?\\.|^packages/fml/src/grammar/|(^|/)antlr4ng($|/)";
+
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
@@ -34,6 +38,22 @@ module.exports = {
       severity: "error",
       from: { path: "^apps/web/" },
       to: { path: "^apps/api/" },
+    },
+    {
+      name: "web-no-fml-grammar",
+      comment:
+        "The FML grammar check runs in the backend only: apps/web never loads the parser or antlr4ng (ADR-0008).",
+      severity: "error",
+      from: { path: "^apps/web/" },
+      to: { path: FML_GRAMMAR },
+    },
+    {
+      name: "fml-root-without-grammar",
+      comment:
+        "The @cindermed/fml root entry never reaches the grammar check; it is exported from @cindermed/fml/grammar (ADR-0008).",
+      severity: "error",
+      from: { path: "^packages/fml/src/index\\.ts$" },
+      to: { path: FML_GRAMMAR, reachable: true },
     },
     {
       name: "no-circular",

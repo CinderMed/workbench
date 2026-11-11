@@ -96,3 +96,57 @@ describe("package boundaries (ADR-0001)", () => {
     ).toEqual(["web-not-to-api"]);
   });
 });
+
+describe("FML grammar check stays in the backend (ADR-0008)", () => {
+  const grammarSources = {
+    "packages/fml/src/grammar/generated/mappingParser.ts": "export const parser = 1;\n",
+    "packages/fml/src/grammar-check.ts":
+      'import { parser } from "./grammar/generated/mappingParser";\nexport const parseFml = parser;\n',
+    "packages/fml/src/grammar.ts":
+      'import { parseFml } from "./grammar-check";\nexport const check = parseFml;\n',
+    "packages/fml/src/fml-print.ts": "export const printMap = 1;\n",
+  };
+
+  it("rejects the web app importing the @cindermed/fml/grammar subpath", async () => {
+    expect(
+      await cruiseRules({
+        "apps/web/src/index.ts":
+          'import { parseFml } from "@cindermed/fml/grammar";\nexport const x = parseFml;\n',
+      }),
+    ).toEqual(["not-to-unresolvable", "web-no-fml-grammar"]);
+  });
+
+  it("rejects the web app reaching the grammar check sources or antlr4ng", async () => {
+    expect(
+      await cruiseRules({
+        ...grammarSources,
+        "node_modules/antlr4ng/index.js": "export const Parser = 1;\n",
+        "node_modules/antlr4ng/package.json": '{ "name": "antlr4ng", "main": "index.js" }\n',
+        "apps/web/src/index.ts":
+          'import { check } from "../../../packages/fml/src/grammar";\nimport { Parser } from "antlr4ng";\nexport const x = [check, Parser];\n',
+      }),
+    ).toEqual(["web-no-fml-grammar", "web-no-fml-grammar"]);
+  });
+
+  it("accepts the web app importing the package root", async () => {
+    expect(
+      await cruiseRules({
+        ...grammarSources,
+        "packages/fml/src/index.ts": 'export { printMap } from "./fml-print";\n',
+        "apps/web/src/index.ts":
+          'import { printMap } from "../../../packages/fml/src/index";\nexport const x = printMap;\n',
+      }),
+    ).toEqual([]);
+  });
+
+  it("rejects a package root that reaches the grammar check, even indirectly", async () => {
+    // One violation per grammar module reached: grammar.ts, grammar-check.ts and the parser.
+    const rules = await cruiseRules({
+      ...grammarSources,
+      "packages/fml/src/helper.ts": 'export { check } from "./grammar";\n',
+      "packages/fml/src/index.ts": 'export { check } from "./helper";\n',
+    });
+    expect(new Set(rules)).toEqual(new Set(["fml-root-without-grammar"]));
+    expect(rules).toHaveLength(3);
+  });
+});
