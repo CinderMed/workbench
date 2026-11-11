@@ -49,3 +49,29 @@ export {
   type StructureMapSourceJson,
   type StructureMapTargetJson,
 } from "./structure-map.js";
+export { GeneratorCode, GeneratorInputError } from "./generator/codes.js";
+export {
+  MAX_ELEMENT_NAME_LENGTH,
+  assignElementName,
+  baseElementName,
+} from "./generator/element-names.js";
+export {
+  ELEMENT_TYPE,
+  logicalModel,
+  logicalModelName,
+  logicalModelUrl,
+  type ElementDefinitionJson,
+  type LogicalModelJson,
+} from "./generator/logical-model.js";
+export {
+  normalizationSpec,
+  type NormalizationSpecOptions,
+} from "./generator/normalization-spec.js";
+export {
+  planTable,
+  roleKey,
+  type Planned,
+  type PlannedColumn,
+  type PlannedIdField,
+  type TablePlan,
+} from "./generator/table-plan.js";
