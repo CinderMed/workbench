@@ -72,3 +72,17 @@ The `perValue` part of rule 5 has no structural half. A reference row has no col
 - Result codes are a contract with the clients (grid, CLI). New checks add codes, and existing codes are never renamed.
 - A `sanitize` id that passes rule 7 can still be too long for some data. The normalizer reports those rows when it computes the ids.
 - Revisit rule 6 if real projects need value maps shared by columns with different allowed values.
+
+## Addendum (2026-11-11): rule 9, allowed values fit the column type
+
+Project format 1.3.0 declares locale at the border (ADR-0009 addendum), so a column's allowed values must be convertible to the column's type. Otherwise the conversion would stop (`onInvalidValue: fail`) or lose data.
+
+- **Rule 9**, error level (it blocks the export), code `ALLOWED_VALUE_TYPE_MISMATCH`, objectKind `column`, field `allowedValues.N.code`:
+  - `boolean`: only the canonical forms of the normalization (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive). The message suggests "categorical + value map" for words such as `Sì`/`No`.
+  - `integer`: an integer.
+  - `decimal`: a number with the column's `decimalSeparator` (default `.`).
+  - `date` and `dateTime`: a valid date (calendar check) that matches `dateFormat`, ISO when absent.
+  - `string`, `categorical` and `multipleChoice` are not checked.
+- A value is first canonicalized as the normalization does (NFC, trim). Empty values and values in `missingValues` are skipped.
+- **Shared parsers.** The check uses the cell parsers in `@cindermed/model` (`src/values/`). They are an exact port of the reference normalizer `tools/normalize.mjs`, proved by a differential test that runs the same values through both. The normalizer package (#75) imports the same parsers, so the rule and the conversion cannot disagree. They live in `model` because `normalizer` depends on `model`, so the reverse import would be a cycle.
+- Like the reference normalizer, a `,` decimal column also accepts `.` (`11.20` is read as 11.20). Making it strict changes the reference normalizer too, so it is left for a separate decision.

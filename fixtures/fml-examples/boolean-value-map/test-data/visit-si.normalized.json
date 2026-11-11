@@ -1,0 +1,7 @@
+{
+  "resourceType": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
+  "patient_id": "P-001",
+  "fumatore": "Sì",
+  "id_Patient0": "pat-e2505a26bb5ff0304b7ecf81",
+  "id_Observation0": "obs-smoker-e2505a26bb5ff0304b7ecf81"
+}

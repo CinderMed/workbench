@@ -1,0 +1,18 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/boolean-value-map/Patient/pat-8e88677cc577742b1709c99f",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-8e88677cc577742b1709c99f",
+      "identifier" : [{
+        "value" : "P-003"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-8e88677cc577742b1709c99f"
+    }
+  }]
+}

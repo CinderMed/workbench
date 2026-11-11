@@ -3,7 +3,7 @@
 set -u; cd "$(dirname "$0")/.."
 J=${VALIDATOR:?set VALIDATOR to the path of validator_cli.jar}; ok=0; ko=0
 [ -f tools/java/RunMap.class ] || javac -proc:none -cp "$J" tools/java/RunMap.java 2>&1 | grep -v JAVA_TOOL
-rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json
+rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json
 run(){ # folder map input output expected_entries [external-refs]
   node tools/normalize.mjs "$1/normalization-$2.json" "$1/test-data/$3.csv" > "$1/test-data/$3.normalized.json" 2>/dev/null
   res=$(java -Xmx2g -cp "$J:tools/java" RunMap "$1" "http://example.org/fhir/$1/StructureMap/$2" "$1/test-data/$3.normalized.json" "$1/test-data/$4.json" 2>&1 | grep -E "Bundle validation|\[error\]")
@@ -26,6 +26,17 @@ vout=$(node tools/normalize.mjs tests/fall-fail.json motu/test-data/Fall.csv 2>/
 if [ "$fcode" -ne 0 ] && [ -z "$fout" ] && echo "$ferr" | grep -q 'AdmissionDate: invalid value "31/02/2023" for date (onInvalidValue: fail)' \
    && [ "$vout" = "$(cat motu/test-data/Fall.normalized.json)" ]; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
 printf '%-8s %-12s %-22s exit=%s rows=%s\n' "$s" "motu" "Fall-invalid (fail)" "$fcode" "$([ -z "$fout" ] && echo 0 || echo some)"
+# Italian yes/no column (Sì/No): categorical + value map to boolean → Observation.valueBoolean.
+# The map is printed from a syntax tree (packages/fml/src/test-support/boolean-value-map.ts).
+run boolean-value-map Visit visit-si bundle-visit-si 2
+run boolean-value-map Visit visit-no bundle-visit-no 2
+run boolean-value-map Visit visit-empty bundle-visit-empty 1
+b=$(python3 -c "
+import json
+v=lambda f:[e['resource'].get('valueBoolean') for e in json.load(open(f))['entry'] if e['resource']['resourceType']=='Observation']
+print(v('boolean-value-map/test-data/bundle-visit-si.json'), v('boolean-value-map/test-data/bundle-visit-no.json'))")
+if [ "$b" = "[True] [False]" ]; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
+printf '%-8s %-12s %-22s Sì → %s, No → %s\n' "$s" "boolean" "valueBoolean" "${b%% *}" "${b##* }"
 python3 - <<'PY'
 import json
 b={"resourceType":"Bundle","type":"transaction","entry":[]}

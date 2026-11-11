@@ -1,0 +1,189 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.3.0",
+  "project": {
+    "id": "prj_boolean_value_map",
+    "name": "Boolean value map",
+    "description": "Golden case: a yes/no answer written in Italian (Sì/No) is a categorical column with a value map to boolean, mapped to Observation.valueBoolean.",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/boolean-value-map",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/boolean-value-map",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One row per visit.",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "Patient ID",
+          "dataType": "string"
+        },
+        {
+          "id": "col_smoker",
+          "name": "fumatore",
+          "label": "Fumatore",
+          "description": "Smoking status at the visit, answered in Italian.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "Sì",
+              "label": "smoker"
+            },
+            {
+              "code": "No",
+              "label": "non-smoker"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "smoker",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_smoker"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-smoker"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "77176002",
+              "display": "Smoker",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "columnId": "col_patient_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_smoker",
+      "instanceId": "ins_obs0",
+      "path": "valueBoolean",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_si_no"
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": [
+    {
+      "id": "vm_si_no",
+      "name": "siNo",
+      "description": "Italian yes/no answers to boolean.",
+      "target": "boolean",
+      "entries": [
+        {
+          "sourceValue": "Sì",
+          "target": {
+            "value": true
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "No",
+          "target": {
+            "value": false
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    }
+  ]
+}

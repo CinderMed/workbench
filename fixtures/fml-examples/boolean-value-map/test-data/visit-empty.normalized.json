@@ -1,0 +1,6 @@
+{
+  "resourceType": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
+  "patient_id": "P-003",
+  "id_Patient0": "pat-8e88677cc577742b1709c99f",
+  "id_Observation0": "obs-smoker-8e88677cc577742b1709c99f"
+}

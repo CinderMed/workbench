@@ -381,6 +381,7 @@ Each arrow is an `…Id` field that points to the internal id of another object.
 6. The `sourceValue`s of a value map match the allowed values of the columns that use it.
 7. Generated ids respect the FHIR limit of 64 characters, fixed parts included.
 8. `repeat: eachValue` is used only with `multipleChoice` columns and towards repeating elements.
+9. The allowed values of a column fit its declared type (format 1.3.0, code `ALLOWED_VALUE_TYPE_MISMATCH`, error): `boolean` only in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive), so `Sì`/`No` needs a `categorical` column with a value map to `boolean`; `integer` an integer; `decimal` a number with the column's `decimalSeparator`; `date` and `dateTime` a valid date that matches `dateFormat`. Values listed in `missingValues` are ignored. The check uses the same parsers as the normalization, so a value accepted here is a value the conversion accepts.
 
 **Example: the role Condition\[1\] · osteoporosis** (excerpt of the example file)
 
@@ -608,7 +609,7 @@ Validation runs in the API on every save (on the changed object and on those tha
 | Level | Checks | Severity |
 | --- | --- | --- |
 | Schema | Project JSON Schema (Ajv) | Error |
-| Integrity | The 8 rules listed in the JSON Schema section (ids, internal references, uniqueness, `via`, `repeat`, id length) | Error |
+| Integrity | The 9 rules listed in the JSON Schema section (ids, internal references, uniqueness, `via`, `repeat`, id length, allowed values that fit the column type) | Error |
 | FHIR | Existing path, type compatible with the transform, cardinality, type allowed for References, declared slices | Error |
 | Quality | Columns without a description, columns neither mapped nor excluded, roles without rows, `perGroup` roles fed by several rows, `manual` codes or codes with a different display | Warning |
 
@@ -631,7 +632,7 @@ The check acts at three moments:
 | `string` | string, markdown | code, id, uri, url, canonical (the value must match their format; see binding) | Error |
 | `integer` | integer | positiveInt, unsignedInt (an out-of-range value gives an invalid resource); decimal | Error |
 | `decimal` | decimal | — | Error (integer would lose the decimals) |
-| `boolean` | boolean | — | Error: writing it as a code or text needs a value map |
+| `boolean` | boolean | — | Error: writing it as a code or text needs a value map. A `boolean` column holds only canonical forms (rule 9); words such as `Sì`/`No` are a `categorical` column |
 | `date` | date, dateTime | — | Error (instant needs time and time zone) |
 | `dateTime` | dateTime | — | Error |
 | `categorical` | — | code and string, only if the column's values are fine as they are (see binding) | Error: a value map is needed |
@@ -641,7 +642,7 @@ The check acts at three moments:
 
 | Transform | Allowed columns | Allowed FHIR elements |
 | --- | --- | --- |
-| Value map | categorical, multipleChoice, boolean, string, integer | The map's target type (`code`, `Coding`, `CodeableConcept`, `boolean`) must match the element's type |
+| Value map | categorical, multipleChoice, boolean, string, integer | The map's target type (`code`, `Coding`, `CodeableConcept`, `boolean`) must match the element's type. A map to `boolean` turns local yes/no words into `true`/`false` (golden case `boolean-value-map`: `Sì`/`No` → `Observation.valueBoolean`) |
 | Quantity | integer, decimal | Quantity and its profiles (SimpleQuantity, Age, Duration) |
 | Conversion (`cast`) | integer → decimal, date → dateTime, any type → string | The conversion's result type |
 | Concatenation | string, code, integer, decimal | string, markdown |
@@ -666,7 +667,7 @@ The check acts at three moments:
 | `CARDINALITY_MISMATCH` | Error | Multiple values towards a single element |
 | `DUPLICATE_TARGET` | Error | Two rows on the same non-repeating element without exclusive conditions |
 
-The verified examples already cover the copies string → string, integer → integer, decimal → decimal, date → date and date → dateTime. Every other combination the table allows must have a golden case before it is enabled (modules 2 and 3).
+The verified examples already cover the copies string → string, integer → integer, decimal → decimal, date → date and date → dateTime, and the value map from a categorical column to `boolean` (`valueBoolean`). Every other combination the table allows must have a golden case before it is enabled (modules 2 and 3).
 
 ### Data and persistence
 
