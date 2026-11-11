@@ -31,6 +31,8 @@ export default defineConfig({
       exclude: [
         "**/*.test.{ts,tsx}",
         "**/dist/**",
+        // antlr-ng output (ADR-0008): generated code, checked for drift by tooling/codegen.
+        "packages/fml/src/grammar/generated/**",
         "apps/*/src/server.ts",
         "apps/cli/src/bin.ts",
         "apps/web/src/main.tsx",

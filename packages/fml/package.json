@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./grammar": {
+      "types": "./dist/grammar.d.ts",
+      "default": "./dist/grammar.js"
     }
   },
   "files": [
@@ -18,5 +22,9 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@cindermed/model": "workspace:*",
+    "antlr4ng": "3.0.16"
   }
 }

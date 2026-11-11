@@ -1,4 +1,9 @@
-/** FML syntax tree, printer, project-to-FML generator and grammar check. */
+/**
+ * FML syntax tree, printer and project-to-FML generator.
+ *
+ * The grammar check lives in the `@cindermed/fml/grammar` subpath, so that importing the printer
+ * or the types never pulls in the generated parser and the antlr4ng runtime (ADR-0008).
+ */
 export {
   FmlNameError,
   RESERVED_WORDS,

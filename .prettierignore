@@ -5,3 +5,4 @@ CLAUDE.md
 .tmp/
 **/dist/
 packages/model/src/schemas/
+packages/fml/src/grammar/generated/
