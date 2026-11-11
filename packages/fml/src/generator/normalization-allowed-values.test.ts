@@ -1,5 +1,6 @@
 import type { Column } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
+import { GeneratorInputError } from "./codes.js";
 import { normalizationAllowedValues } from "./normalization-spec.js";
 
 const column = (fields: Partial<Column>): Column => ({
@@ -40,5 +41,16 @@ describe("normalizationAllowedValues", () => {
     expect(
       normalizationAllowedValues(column({ dataType: "integer", allowedValues: [{ code: "1" }] })),
     ).toBeUndefined();
+  });
+
+  it("never writes an empty list: a project that breaks rule 9 is refused", () => {
+    expect(() => normalizationAllowedValues(column({ allowedValues: [] }))).toThrow(
+      GeneratorInputError,
+    );
+    expect(() =>
+      normalizationAllowedValues(
+        column({ allowedValues: [{ code: "NA " }, { code: " " }], missingValues: ["NA"] }),
+      ),
+    ).toThrow(/ALLOWED_VALUES_EMPTY/);
   });
 });

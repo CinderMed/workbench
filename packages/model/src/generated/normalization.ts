@@ -82,8 +82,10 @@ export interface Column {
   missingValues?: string[];
   /**
    * Since 1.2.0. The only values a cell may hold (each part, with multiValue), compared after Unicode NFC and trim, case-sensitive. A value outside the list is an invalid value, so onInvalidValue applies. Missing values are removed before the check. Absent = not checked; written by the generator for categorical and multipleChoice columns.
+   *
+   * @minItems 1
    */
-  allowedValues?: string[];
+  allowedValues?: [string, ...string[]];
   /**
    * Multiple value in one cell: split on the separator, each part trimmed, empty parts dropped, order kept, duplicates removed.
    */

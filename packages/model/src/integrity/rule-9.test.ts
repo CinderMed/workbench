@@ -112,3 +112,50 @@ describe("rule 9: allowed values fit the column type", () => {
     ]);
   });
 });
+
+describe("rule 9: an allowed-values list is not empty once missing values are removed", () => {
+  const empty = (mutate: (p: ProjectFile) => void) =>
+    only(IntegrityCode.ALLOWED_VALUES_EMPTY, check(mutate));
+
+  it("accepts the clean project", () => {
+    expect(empty(() => undefined)).toEqual([]);
+  });
+
+  it("reports an empty list", () => {
+    expect(
+      empty((p) => {
+        column(p, "col_sex").allowedValues = [];
+      }),
+    ).toEqual([
+      {
+        severity: "error",
+        code: IntegrityCode.ALLOWED_VALUES_EMPTY,
+        objectKind: "column",
+        id: "col_sex",
+        field: "allowedValues",
+        message:
+          "column 'sex' has no allowed values left once missing values are removed: the conversion would reject every value",
+      },
+    ]);
+  });
+
+  it("reports a list made only of missing values, multiple choice included", () => {
+    const results = empty((p) => {
+      const sites = column(p, "col_sites");
+      sites.allowedValues = [{ code: " 99" }, { code: "" }];
+      sites.missingValues = ["99"];
+    });
+    expect(results.map((r) => r.id)).toEqual(["col_sites"]);
+  });
+
+  it("does not check other types, or columns without a list", () => {
+    expect(
+      empty((p) => {
+        const hb = column(p, "col_hb");
+        hb.allowedValues = [{ code: "NA" }];
+        hb.missingValues = ["NA"];
+        delete column(p, "col_sex").allowedValues;
+      }),
+    ).toEqual([]);
+  });
+});

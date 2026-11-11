@@ -18,6 +18,7 @@ import {
   type NormalizationSpec,
   type ProjectFile,
 } from "@cindermed/model";
+import { GeneratorInputError } from "./codes.js";
 import { ELEMENT_TYPE, logicalModelUrl } from "./logical-model.js";
 import type { PlannedColumn, PlannedIdField, TablePlan } from "./table-plan.js";
 
@@ -37,13 +38,21 @@ export const DEFAULT_ON_INVALID_VALUE = "fail";
  * (normalization 1.2.0): canonical text (NFC, trim), case kept, without duplicates, in project
  * order. Values that are also missing values stay missing, so they are left out. Other types, and
  * columns without allowed values, give `undefined`: their values are not checked against a list.
+ * A list left empty breaks integrity rule 9 (`ALLOWED_VALUES_EMPTY`): it is never written, because
+ * it would reject every value.
  */
-export function normalizationAllowedValues(column: Column): string[] | undefined {
+export function normalizationAllowedValues(column: Column): [string, ...string[]] | undefined {
   if (column.dataType !== "categorical" && column.dataType !== "multipleChoice") return undefined;
   if (column.allowedValues === undefined) return undefined;
   const missing = new Set((column.missingValues ?? []).map(canonicalText));
   const values = column.allowedValues.map((value) => canonicalText(value.code));
-  return [...new Set(values.filter((value) => value !== "" && !missing.has(value)))];
+  const [first, ...rest] = new Set(values.filter((value) => value !== "" && !missing.has(value)));
+  if (first === undefined) {
+    throw new GeneratorInputError(
+      `Column "${column.name}" has no allowed values left once missing values are removed (ALLOWED_VALUES_EMPTY): validate before generating.`,
+    );
+  }
+  return [first, ...rest];
 }
 
 function columnSpec({ column, element }: PlannedColumn): Normalization.Column {

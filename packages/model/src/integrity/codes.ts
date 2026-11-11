@@ -38,6 +38,11 @@ export const IntegrityCode = {
   REPEAT_REQUIRES_MULTIPLE_CHOICE: "REPEAT_REQUIRES_MULTIPLE_CHOICE",
   /** Rule 9: an allowed value of a column does not fit the column's type (e.g. `Sì` in a `boolean` column). */
   ALLOWED_VALUE_TYPE_MISMATCH: "ALLOWED_VALUE_TYPE_MISMATCH",
+  /**
+   * Rule 9: a categorical or multiple-choice column has an allowed-values list that is empty once
+   * missing values are removed, so the normalization would reject every value.
+   */
+  ALLOWED_VALUES_EMPTY: "ALLOWED_VALUES_EMPTY",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];
