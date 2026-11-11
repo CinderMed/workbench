@@ -8,8 +8,8 @@ description: Project file, normalization, manifest and REST API.
 
 Later this section will also document the contracts generated from their schemas:
 
-- the project file schema (format 1.2.0)
-- the normalization specification (1.0.0)
+- the project file schema (format 1.3.0)
+- the normalization specification (1.1.0)
 - the export package manifest (1.0.0)
 - the REST API (OpenAPI)
 

@@ -39,3 +39,15 @@ The prototype leaves a few cases open or handles them silently:
 - The FML generator (branch `feature/g2-generator-roles`) takes element names and id fields from the plan instead of recomputing them.
 - The project schema 1.2.0 has no `decimalSeparator`, `trueValues` or `falseValues` on columns. The normalization supports them, but the generator cannot emit them, so Italian decimals (`11,20`) and booleans (`Sì`/`no`) cannot yet be described from a project. Adding them is a contract change (project schema 1.3.0, a compatible minor version) and needs approval.
 - New generator codes are added to `GeneratorCode` and documented when the export shows them to users.
+
+## Addendum (2026-11-11): data formats at the border (project 1.3.0, normalization 1.1.0)
+
+This addendum replaces the consequence above about `decimalSeparator`, `trueValues` and `falseValues`.
+
+- **Principle.** Inside the platform every value has one canonical form: ISO dates, `.` decimals, `true`/`false`. Local formats are declared explicitly at the border, and a value that does not fit is reported or blocks the conversion.
+- **`decimalSeparator`** is a column field (project 1.3.0, `.` or `,`, default `.`). A value map cannot express numbers, so this one field is needed. The generator writes it into the normalization column only when the column declares it.
+- **`onInvalidValue`** comes from `project.output.onInvalidValue` (project 1.3.0): `fail` (default), `report-drop` or `reject-row`. The generator writes it into every normalization specification. Normalization 1.1.0 adds `fail`: the conversion stops at the first value that cannot be converted, reports it and writes no rows.
+- **No `trueValues` or `falseValues`** in the project, and the generator never writes them. A `boolean` column accepts only the normalization's canonical forms. Booleans written as words (`Sì`/`No`) are a `categorical` column with a value map to `boolean`.
+- **`input` is a run-time setting.** Delimiter, quote, encoding and header row describe the data file, not the mapping. They are not in the project, the generator writes the schema defaults, and the conversion module overrides them at run time with the settings of the file it reads. The normalization specification describes what to do with each value; how to read the file is decided when it is read.
+- **Normalization `formatVersion`** changes from `const "1.0.0"` to the pattern `^1\.\d+\.\d+$`, as in the project schema. A 1.1.0 reader accepts every 1.0.0 specification (`tests/fall-iso.json` and `tests/types.json` stay at 1.0.0 and still validate).
+- The example projects set `onInvalidValue: report-drop`, the behaviour they were verified with. Their regenerated logical models and normalization specifications differ only in `version` and `formatVersion`, and the golden suite gives the same Bundles.

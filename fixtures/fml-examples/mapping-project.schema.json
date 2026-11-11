@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fhir-mapping-workbench.example.org/schema/mapping-project/1.2.0",
+  "$id": "https://fhir-mapping-workbench.example.org/schema/mapping-project/1.3.0",
   "title": "FHIR Mapping Workbench – project file",
   "description": "Native format of a tabular → FHIR mapping project. It is the source of truth from which the grid, the FML (StructureMap, logical model, ConceptMap) and the CSV export are generated. Every reference between objects uses the stable internal 'id', never the visible names.",
   "type": "object",
@@ -281,6 +281,15 @@
             "fullUrlBase": {
               "description": "Absolute base for Bundle.entry.fullUrl ({base}/{Type}/{id}), needed so that relative references resolve inside the Bundle. Usually the URL of the target FHIR server; canonicalBase is used when absent.",
               "$ref": "#/$defs/Canonical"
+            },
+            "onInvalidValue": {
+              "description": "What the conversion does with a value that cannot be converted to the column's type (e.g. 'abc' in an integer column, '31/02/2023' in a date column). fail: the conversion stops at the first such value and reports it; report-drop: the value is omitted and reported; reject-row: the whole row is discarded and reported. Written into every normalization specification.",
+              "enum": [
+                "fail",
+                "report-drop",
+                "reject-row"
+              ],
+              "default": "fail"
             }
           }
         }
@@ -483,6 +492,14 @@
             "dd/MM/yyyy",
             "yyyy"
           ]
+        },
+        "decimalSeparator": {
+          "description": "Only for dataType = decimal: decimal separator used in the data file (e.g. ',' for '11,20'). Inside the platform decimals always use '.'; the normalization converts at the border.",
+          "enum": [
+            ".",
+            ","
+          ],
+          "default": "."
         },
         "unit": {
           "description": "Fixed unit of the column, if known (e.g. kg).",

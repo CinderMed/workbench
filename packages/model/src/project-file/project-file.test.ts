@@ -178,7 +178,7 @@ describe("parseProject", () => {
     expect(parsed.results.map((result) => result.code)).toEqual([IntegrityCode.DUPLICATE_ROW_CODE]);
   });
 
-  it.each(["2.0.0", "1.3.0"])("rejects the newer format version %s", (version) => {
+  it.each(["2.0.0", "1.4.0"])("rejects the newer format version %s", (version) => {
     const parsed = parseProject(JSON.stringify(withVersion(version)));
     expect(parsed.project).toBeUndefined();
     expect(parsed.results).toEqual([
@@ -191,10 +191,10 @@ describe("parseProject", () => {
   });
 
   it("reads another patch of the current minor as it is", () => {
-    const parsed = parseProject(JSON.stringify(withVersion("1.2.7")));
+    const parsed = parseProject(JSON.stringify(withVersion("1.3.7")));
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBeUndefined();
-    expect(parsed.project?.formatVersion).toBe("1.2.7");
+    expect(parsed.project?.formatVersion).toBe("1.3.7");
   });
 
   it("reads an older minor of the same major and stamps the current version", () => {
@@ -202,6 +202,21 @@ describe("parseProject", () => {
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBe("1.0.0");
     expect(parsed.project?.formatVersion).toBe(PROJECT_FORMAT_VERSION);
+  });
+
+  it("reads a 1.2.0 project as 1.3.0, leaving onInvalidValue to its default (fail)", () => {
+    // A real 1.2.0 file: the motu example as it was before format 1.3.0 (ADR-0006, addendum).
+    const legacy = copy(motu) as unknown as {
+      formatVersion: string;
+      project: { output: Record<string, unknown> };
+    };
+    legacy.formatVersion = "1.2.0";
+    delete legacy.project.output["onInvalidValue"];
+    const parsed = parseProject(JSON.stringify(legacy));
+    expect(parsed.results).toEqual([]);
+    expect(parsed.migratedFrom).toBe("1.2.0");
+    expect(parsed.project?.formatVersion).toBe("1.3.0");
+    expect(parsed.project?.project.output).not.toHaveProperty("onInvalidValue");
   });
 
   it("rejects an older major with no migration", () => {

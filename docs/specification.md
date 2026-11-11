@@ -332,12 +332,12 @@ The most important constraints concern clinical data: the real dataset must neve
 
 ## Project JSON Schema
 
-The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.2.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
+The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.3.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
 
 | Key | Content | Features |
 | --- | --- | --- |
-| `project` | Name, description, FHIR version (4.0.1 or 5.0.0), packages, base of the canonical URLs, allowed terminologies (the API key stays on the server) | A1, E2 |
-| `sources[]` | Tables: row key, import profile, sections, columns with name, original alias, type, semantic description, allowed values, missing values | B1–B6, B11 |
+| `project` | Name, description, FHIR version (4.0.1 or 5.0.0), packages, base of the canonical URLs, allowed terminologies (the API key stays on the server), conversion output (`fullUrlBase`, `onInvalidValue`) | A1, E2 |
+| `sources[]` | Tables: row key, import profile, sections, columns with name, original alias, type, date format, decimal separator, semantic description, allowed values, missing values | B1–B6, B11 |
 | `sourceRelations[]` | Links between tables through key columns; empty with a single table | B11 |
 | `instances[]` | Roles: `resourceType` + `index` (visible key `Condition[1]`), label, description, multiplicity, context, creation condition, id rule, named slices, fixed values | C1–C6, D4 |
 | `mappings[]` | Rows: code `R-nnn`, column (absent for constants and references), role, path, transform, condition, notes | D1–D8, F1–F3 |
@@ -368,6 +368,7 @@ Each arrow is an `…Id` field that points to the internal id of another object.
 | References | The id of the referenced resource is computed by applying the target role's `idRule` to the current record. The rule's columns must be in the same table or reachable through `via`. A reference to a `perValue` role is allowed only from a repeating element (one reference per generated resource), never from a single element. |
 | Resource creation | A resource is created if `createWhen` is true (absent = always) and no column mapped to the role has a value whose action is `skipInstance`. The grid shows the resulting condition in plain words. |
 | Repeating elements | Without a slice, all rows that touch a repeating element write into the same repetition. Several repetitions need a named slice. |
+| Data formats (format 1.3.0) | Inside the platform every value has one canonical form: ISO dates, `.` decimals, `true`/`false`. Local formats are declared on the column, at the border: `dateFormat` (e.g. `dd/MM/yyyy`) and `decimalSeparator` (`.` or `,`, e.g. `11,20`). Booleans written as words (`Sì`/`No`) are a `categorical` column with a value map to `boolean`; a `boolean` column accepts only the canonical forms. The data file's delimiter, quote, encoding and header row describe the file, not the mapping: the conversion module receives them at run time. `project.output.onInvalidValue` decides what happens to a value that cannot be converted: `fail` (default) stops the conversion and reports it, `report-drop` omits and reports it, `reject-row` discards the row and reports it. |
 | Multiple choices | The column declares how the value appears in the data: `delimited` (e.g. `1,3,5` with a separator) or `expanded` (one 0/1 column per value, V2). A row with `repeat: eachValue` writes one repetition per value, e.g. `Procedure.bodySite` for each level of `proc_surg_loc`. |
 
 **Rules the schema cannot express**, checked by the application on import and on save:
@@ -444,7 +445,7 @@ In the R5 specification FML has maturity 0 (Draft) and status Trial Use, and som
 | `cast`, `qty`, `reference`, `append`, `uuid`, `id`, `cp`, `truncate`, `escape`, `pointer`, `dateOp` | Not used in the MVP; `dateOp` has undocumented parameters |
 | ConceptMap embedded in the map | Not used: ConceptMaps are exported separately as documentation |
 
-**What standard FML cannot do: row normalization.** Three pieces of the model cannot be computed reliably inside a StructureMap: hashed ids (FHIRPath has no hash functions), dates in local formats such as `dd/MM/yyyy`, and missing values such as `NA`. The solution is a deterministic normalization step before the StructureMap, which turns each CSV row into typed JSON conforming to the logical model: ISO dates, multiple choices as arrays, missing values removed, columns renamed to the corrected name, ids already computed in dedicated fields. The normalization specification is derived from the schema (`dateFormat`, `missingValues`, `multiValue`, `originalName`, `idRule`) and exported with the FML; the conversion module runs it. The advantage is that the FML stays simple and each part can be checked on its own.
+**What standard FML cannot do: row normalization.** Three pieces of the model cannot be computed reliably inside a StructureMap: hashed ids (FHIRPath has no hash functions), dates in local formats such as `dd/MM/yyyy`, and missing values such as `NA`. The solution is a deterministic normalization step before the StructureMap, which turns each CSV row into typed JSON conforming to the logical model: ISO dates, multiple choices as arrays, missing values removed, columns renamed to the corrected name, ids already computed in dedicated fields. The normalization specification is derived from the schema (`dateFormat`, `decimalSeparator`, `missingValues`, `multiValue`, `originalName`, `idRule`, `output.onInvalidValue`) and exported with the FML; the conversion module runs it. The advantage is that the FML stays simple and each part can be checked on its own.
 
 ## Translation rules (verified on Metastra and MOTU)
 
@@ -487,8 +488,8 @@ For each table the generator produces artifacts described by their own schemas, 
 
 | Artifact | Format | Produced by | Used by |
 | --- | --- | --- | --- |
-| Project file | `mapping-project.schema.json` 1.2.0 | Workbench | Generator, export |
-| Normalization specification | `normalization.schema.json` 1.0.0 | Generator | Conversion module |
+| Project file | `mapping-project.schema.json` 1.3.0 | Workbench | Generator, export |
+| Normalization specification | `normalization.schema.json` 1.1.0 | Generator | Conversion module |
 | Logical model of the normalized row | `logical` StructureDefinition | Generator | FML engine |
 | StructureMap | FML, plus JSON compiled by the HL7 engine | Generator (syntax tree → printer) | FML engine |
 | ConceptMap | FHIR resources | Generator | Documentation and reuse |
@@ -503,8 +504,8 @@ The conversion module reads only the package: the normalization specification to
 1. Unicode NFC and removal of outer spaces.
 2. Empty cell or value in `missingValues` → element omitted.
 3. Multiple choice: split on the separator, empty parts dropped, duplicates removed, order kept.
-4. Conversion by type: integers without leading zeros; decimals with `decimalSeparator` (comma too) and digits kept (`11,20` → `11.20`); booleans from configurable lists (e.g. `Sì`/`no`); dates according to `dateFormat` (`yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`) with a calendar check (`31/02/2023` is rejected), year-only and year-month included.
-5. Value that cannot be converted → `onInvalidValue`: omitted and reported (default) or row discarded.
+4. Conversion by type: integers without leading zeros; decimals with `decimalSeparator` (comma too) and digits kept (`11,20` → `11.20`); booleans in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive; the generator never writes `trueValues`/`falseValues`, and words such as `Sì`/`No` go through a value map); dates according to `dateFormat` (`yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`) with a calendar check (`31/02/2023` is rejected), year-only and year-month included.
+5. Value that cannot be converted → `onInvalidValue`, taken from `project.output.onInvalidValue`: `fail` (the project default) stops the conversion at the first such value and reports it; `report-drop` omits it and reports it; `reject-row` discards the row and reports it. (The normalization schema's own default, for specifications that omit the field, stays `report-drop`.)
 6. Id: SHA-256 (or HMAC with a key kept outside the package) over the already normalized values, joined by U+001F; result = fixed parts + the first 24 hex characters. If a column of the id is missing, the id is not computed and the role is not created.
 
 **Element names.** The element name in the logical model and in the FML comes from the column name. Characters outside `[A-Za-z0-9_]` become `_`; the prefix `c` is added if the name does not start with a letter, and a trailing `_` for the four words the grammar rejects. Examples: `log` → `log_`, `Pain level (0-10)` → `Pain_level__0_10_`, `2nd visit` → `c2nd_visit`. The original name stays in `sourceName` to read the data file.
@@ -572,7 +573,7 @@ workbench/
     cli/                 `cindermed` command (validate, export); published to npm with the domain packages
     docs/                user documentation site (Astro Starlight): guides, worked examples, reference
   packages/
-    model/               JSON Schemas (project 1.2.0, normalization, manifest), generated types, integrity rules
+    model/               JSON Schemas (project 1.3.0, normalization 1.1.0, manifest), generated types, integrity rules
     fhir-defs/           loading R4/R5 packages, element tree, path resolution
     fml/                 syntax tree, printer, project → FML generator, grammar check
     normalizer/          reference normalizer (port of tools/normalize.mjs)
@@ -948,7 +949,7 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 ## Technical rules
 - TypeScript strict everywhere, no `any`; model types are generated from the JSON Schemas in packages/model.
 - Domain packages (model, fhir-defs, fml, normalizer, export) do no I/O and do not import apps/* (ADR-0001).
-- The project (1.2.0), normalization (1.0.0) and manifest (1.0.0) schemas are contracts:
+- The project (1.3.0), normalization (1.1.0) and manifest (1.0.0) schemas are contracts:
   an incompatible change needs a new major version, a migration and my approval.
 - FML translation follows the "Translation rules" and "Generator contract" sections.
   The generator builds only FML tree nodes and never concatenates FML strings.

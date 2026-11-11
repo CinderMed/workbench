@@ -47,3 +47,9 @@ The API stores projects in PostgreSQL JSONB, which does not keep the key order o
 - Adding a property to the schema changes where it is written. This is a compatible change (a new minor), and existing keys keep their order.
 - A future major needs its migration registered in `PROJECT_MIGRATIONS` and tests from a file of the old major.
 - The `formatVersion` of an older-minor file changes when it is saved again, which shows up as a one-line diff.
+
+## Addendum (2026-11-11): reading 1.2.0 projects as 1.3.0
+
+Project format 1.3.0 adds `project.output.onInvalidValue` with default `fail`. A 1.2.0 file has no such field. It is read as an older minor, as decided above: read as it is and stamped 1.3.0, with no data migration. So a migrated project converts with `fail`, while the prototype that verified the examples behaved like `report-drop`.
+
+We accept this: no project is in production yet, and `fail` is the safe direction, because nothing is silently dropped. A project that wants the old behaviour sets `onInvalidValue: report-drop`, as the two example projects do. A test reads a real 1.2.0 file (the MOTU example without the field) and checks that it is stamped 1.3.0 and that `onInvalidValue` is left to its default.

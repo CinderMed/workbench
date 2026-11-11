@@ -1,6 +1,6 @@
 {
   "$schema": "./mapping-project.schema.json",
-  "formatVersion": "1.2.0",
+  "formatVersion": "1.3.0",
   "project": {
     "id": "prj_motu",
     "name": "MOTU",
@@ -10,7 +10,8 @@
     "output": {
       "bundleType": "transaction",
       "requestMethod": "PUT",
-      "fullUrlBase": "http://example.org/fhir/motu"
+      "fullUrlBase": "http://example.org/fhir/motu",
+      "onInvalidValue": "report-drop"
     },
     "terminology": {
       "provider": "bioportal",

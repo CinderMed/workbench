@@ -73,6 +73,32 @@ describe("planTable", () => {
     expect(normalizationSpec(motu, plan(motu, "src_fall"))).not.toHaveProperty("$schema");
   });
 
+  it("writes onInvalidValue from the project, fail by default", () => {
+    const changed = structuredCopy(motu);
+    expect(normalizationSpec(changed, plan(changed, "src_fall")).onInvalidValue).toBe(
+      "report-drop",
+    );
+    delete changed.project.output?.onInvalidValue;
+    expect(normalizationSpec(changed, plan(changed, "src_fall")).onInvalidValue).toBe("fail");
+    delete changed.project.output;
+    expect(normalizationSpec(changed, plan(changed, "src_fall")).onInvalidValue).toBe("fail");
+  });
+
+  it("writes decimalSeparator only when the column declares it", () => {
+    const changed = structuredCopy(metastra);
+    const hb = changed.sources[0].columns.find((c) => c.name === "obs_bloodt_hb");
+    if (hb === undefined) throw new Error("fixture changed");
+    expect(columnOf(changed, "obs_bloodt_hb")).not.toHaveProperty("decimalSeparator");
+    hb.decimalSeparator = ",";
+    expect(columnOf(changed, "obs_bloodt_hb")).toEqual({
+      name: "obs_bloodt_hb",
+      sourceName: "obs_bloodt_hb",
+      type: "decimal",
+      decimalSeparator: ",",
+      missingValues: ["NA"],
+    });
+  });
+
   it("uses the R5 base for R5 projects", () => {
     const r5 = { ...motu, project: { ...motu.project, fhirVersion: "5.0.0" as const } };
     const model = logicalModel(r5, plan(r5, "src_patient"));
@@ -223,4 +249,10 @@ describe("planTable", () => {
 
 function structuredCopy(file: ProjectFile): ProjectFile {
   return JSON.parse(JSON.stringify(file)) as ProjectFile;
+}
+
+function columnOf(file: ProjectFile, name: string): unknown {
+  return normalizationSpec(file, plan(file, "src_firstoverview")).columns.find(
+    (c) => c.name === name,
+  );
 }

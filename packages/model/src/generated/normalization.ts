@@ -14,7 +14,10 @@ export type ElementName = string;
  */
 export interface NormalizationSpec {
   $schema?: string;
-  formatVersion: "1.0.0";
+  /**
+   * Version of this specification format (semver). A reader of 1.x accepts every older 1.y; the major changes only with incompatible changes.
+   */
+  formatVersion: string;
   /**
    * Name of the table in the project (e.g. FirstOverview).
    */
@@ -34,9 +37,9 @@ export interface NormalizationSpec {
     headerRow?: number;
   };
   /**
-   * Value that cannot be converted (e.g. 'abc' in an integer column). report-drop: the value is omitted and reported; reject-row: the whole row is discarded and reported.
+   * Value that cannot be converted (e.g. 'abc' in an integer column). fail (1.1.0): the conversion stops at the first such value and reports it, producing no rows; report-drop: the value is omitted and reported; reject-row: the whole row is discarded and reported.
    */
-  onInvalidValue?: "report-drop" | "reject-row";
+  onInvalidValue?: "fail" | "report-drop" | "reject-row";
   /**
    * @minItems 1
    */

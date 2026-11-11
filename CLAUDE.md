@@ -20,7 +20,7 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 ## Technical rules
 - TypeScript strict everywhere, no `any`; model types are generated from the JSON Schemas in packages/model.
 - Domain packages (model, fhir-defs, fml, normalizer, export) do no I/O and do not import apps/* (ADR-0001).
-- The project (1.2.0), normalization (1.0.0) and manifest (1.0.0) schemas are contracts:
+- The project (1.3.0), normalization (1.1.0) and manifest (1.0.0) schemas are contracts:
   an incompatible change needs a new major version, a migration and my approval.
 - FML translation follows the "Translation rules" and "Generator contract" sections.
   The generator builds only FML tree nodes and never concatenates FML strings.
