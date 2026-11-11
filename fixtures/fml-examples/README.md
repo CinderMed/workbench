@@ -89,3 +89,12 @@ normalization specification come from the TypeScript generator. The HL7 validato
 (`compile … -version=4.0.1 -tx=n/a -ig=boolean-value-map`, line endings normalized to LF like the other compiled
 maps) and ran it on three rows: `Sì` → `valueBoolean: true`, `No` → `valueBoolean: false`, empty answer → no
 Observation. All three Bundles validate with 0 errors (best-practice warnings only). Suite: 12 of 12.
+
+## Canonical creation conditions (11 November 2026)
+The hand-written `motu/Fall.map` and `metastra/FirstOverview.map` wrapped a role's single creation condition in
+parentheses (`$this.id_AdverseEvent0.exists() and ($this.FallDate.exists())`). They are now in the printer's canonical
+form, with parentheses only around a nested `and`/`or` (as in `motu/HospitalStay.map`): four conditions changed (Fall
+AdverseEvent0; FirstOverview Encounter0, Observation1, Procedure0), nothing else. The HL7 validator 7.0.5 recompiled
+`StructureMap-Fall.json` and `StructureMap-FirstOverview.json` from a folder without the old compiled JSON (the engine
+otherwise loads the existing StructureMap instead of the `.map`); only the four `condition` strings and the narrative
+changed. The manifests carry the new SHA-256. Suite: 13 of 13, every Bundle identical.

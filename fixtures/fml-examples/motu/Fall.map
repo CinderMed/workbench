@@ -7,7 +7,7 @@ uses "http://hl7.org/fhir/StructureDefinition/AdverseEvent" alias AdverseEvent a
 group Fall(source src : FallRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";
   // AdverseEvent[0] · fall — created when: FallDate is not empty
-  src where ($this.id_AdverseEvent0.exists() and ($this.FallDate.exists())) -> bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {
+  src where ($this.id_AdverseEvent0.exists() and $this.FallDate.exists()) -> bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {
     src.id_AdverseEvent0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'AdverseEvent/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/AdverseEvent/' + $this) "AdverseEvent0-id";
     src then AdverseEvent0(src, res) "AdverseEvent0-body";
   } "AdverseEvent0";

@@ -20,7 +20,7 @@ group FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {
   } "Patient0";
 
   // Encounter[0] · first visit — created when: encounter_fo is not empty
-  src where ($this.id_Encounter0.exists() and ($this.encounter_fo.exists())) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
+  src where ($this.id_Encounter0.exists() and $this.encounter_fo.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
     src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Encounter/' + $this) "Encounter0-id";
     src then Encounter0(src, res) "Encounter0-body";
   } "Encounter0";
@@ -32,7 +32,7 @@ group FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {
   } "Observation0";
 
   // Observation[1] · haemoglobin — created when: obs_bloodt_hb is not empty
-  src where ($this.id_Observation1.exists() and ($this.obs_bloodt_hb.exists())) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+  src where ($this.id_Observation1.exists() and $this.obs_bloodt_hb.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
     src.id_Observation1 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Observation/' + $this) "Observation1-id";
     src then Observation1(src, res) "Observation1-body";
   } "Observation1";
@@ -44,7 +44,7 @@ group FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {
   } "Condition1";
 
   // Procedure[0] · previous spinal surgery — created when: proc_surg_yn = 1
-  src where ($this.id_Procedure0.exists() and ($this.proc_surg_yn.where($this = '1').exists())) -> bundle.entry as e, e.resource = create('Procedure') as res, e.request as req then {
+  src where ($this.id_Procedure0.exists() and $this.proc_surg_yn.where($this = '1').exists()) -> bundle.entry as e, e.resource = create('Procedure') as res, e.request as req then {
     src.id_Procedure0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Procedure/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Procedure/' + $this) "Procedure0-id";
     src then Procedure0(src, res) "Procedure0-body";
   } "Procedure0";

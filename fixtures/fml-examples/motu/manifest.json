@@ -163,12 +163,12 @@
     },
     {
       "path": "Fall.map",
-      "sha256": "9c68f7e8d0b7cec774b63797692f3120ecaf75b9732cbf6864c50dc8b9b51935",
+      "sha256": "60531741b8e086aeceb2a7c5c6040550f80d619ea0e076ea3389465292365611",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Fall.json",
-      "sha256": "794b8b421cddbb86659214be31a156b54179ddb8307c8b51a3ad382a63c93569",
+      "sha256": "55b8088af72e408934564498679d1c372ee1434b468fcd738cb8eded592ceb6a",
       "mediaType": "application/fhir+json"
     },
     {
