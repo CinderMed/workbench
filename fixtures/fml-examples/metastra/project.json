@@ -803,6 +803,28 @@
         "targetInstanceId": "ins_patient0",
         "auto": true
       }
+    },
+    {
+      "id": "map_0015",
+      "code": "R-015",
+      "instanceId": "ins_obs1",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0016",
+      "code": "R-016",
+      "instanceId": "ins_obs1",
+      "path": "encounter",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_encounter0",
+        "auto": true
+      }
     }
   ],
   "valueMaps": [
