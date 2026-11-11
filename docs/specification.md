@@ -863,6 +863,7 @@ Scopes are the packages and apps: `model`, `fhir-defs`, `fml`, `normalizer`, `ex
 | `changeset-check.yml` | Every PR | Changeset present if a package's code changes (unless labelled `no-changeset`) |
 | `docs.yml` | Every PR (build only) and every release tag | Builds the documentation site, checks links and examples; on a tag deploys it to GitHub Pages |
 | `e2e.yml` | Every push to `main` and nightly | Full Docker Compose and Playwright tests |
+| `nightly.yml` | Nightly and on demand | Long checks kept out of PRs: the normalizer memory test with 1,000,000 generated rows (100,000 in the PR checks) |
 | `release.yml` | Push to `main` | "Version Packages" PR with Changesets; on merge: tag, GitHub Release, npm publish, images on GHCR |
 | `codeql.yml` | Weekly and on PRs | Code security analysis |
 | Dependencies | Renovate (or Dependabot) | Weekly grouped updates, with the CI tests |

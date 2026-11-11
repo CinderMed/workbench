@@ -1,14 +1,15 @@
-// The streaming normalizer keeps memory flat: 1,000,000 generated rows (never committed or written
-// to disk) go through @cindermed/normalizer in byte chunks, and the heap after a full GC must not
-// grow between the first and the last checkpoint. Runs the probe in its own Node process with
+// The streaming normalizer keeps memory flat: generated rows (never committed or written to disk)
+// go through @cindermed/normalizer in byte chunks, and the heap after a full GC must not grow
+// between the first and the last checkpoint. Runs the probe in its own Node process with
 // --expose-gc, on the built package (CI builds packages before the tests).
+// PR checks use 100,000 rows (about 2 s); the nightly workflow sets NORMALIZER_MEMORY_ROWS=1000000.
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = resolve(import.meta.dirname, "..");
-const ROWS = 1_000_000;
-/** Allowed heap growth from 100,000 to 1,000,000 rows. Measured: under 1 MB. */
+const ROWS = Number(process.env["NORMALIZER_MEMORY_ROWS"] ?? 100_000);
+/** Allowed heap growth from the first to the last checkpoint. Measured: under 1 MB at 1,000,000 rows. */
 const MAX_GROWTH = 4 * 1024 * 1024;
 
 interface Probe {
