@@ -6,7 +6,7 @@ verification prototypes, not the final generator, which will be written in TypeS
 
 ## Contents
 - `mapping-project.schema.json` — project file schema, format 1.3.0
-- `normalization.schema.json` — normalization specification schema (1.1.0): deterministic per-row algorithms
+- `normalization.schema.json` — normalization specification schema (1.2.0): deterministic per-row algorithms
 - `manifest.schema.json` — schema of the exported package manifest (1.0.0)
 - `generator/` — the generator contract in TypeScript
   - `fml-ast.ts` — types of the syntax tree of the generated FML subset
@@ -73,6 +73,14 @@ identical to the verified one.
 The decimal separator is strict (same day, normalization 1.1.0 not yet released): with `decimalSeparator: ","`
 a value containing `.` (`1.234`, `1.234,5`) is invalid, and with `.` a value containing `,` is invalid.
 `tools/normalize.mjs` applies it; no example data is affected and the suite gives the same Bundles.
+
+Normalization schema 1.2.0 (compatible minor): the specification lists the allowed values of `categorical` and
+`multipleChoice` columns (`allowedValues`), compared after NFC and trim, case-sensitive; a value outside the list
+is an invalid value, so `onInvalidValue` applies. The five normalization specifications were regenerated with the
+TypeScript generator (only `formatVersion` and `allowedValues` changed) and the manifests carry their new SHA-256.
+`tests/fall-fail.json` stays at 1.1.0 on purpose. New check: `boolean-value-map/test-data/visit-si-lowercase.csv`
+(`sì`, lower case) stops the conversion with `onInvalidValue: fail`. The suite passed 13 of 13 with the HL7
+validator 7.0.5, and every produced Bundle is identical to the verified one.
 
 ## Golden case boolean-value-map (11 November 2026)
 Booleans written as words are a categorical column with a value map to boolean (project 1.3.0, rule 9). The map

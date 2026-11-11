@@ -25,6 +25,11 @@ export const IntegrityCode = {
   ID_RULE_NOT_REACHABLE: "ID_RULE_NOT_REACHABLE",
   /** Rule 6: a value map has a `sourceValue` that a column using it does not allow. */
   VALUE_MAP_SOURCE_VALUE_UNKNOWN: "VALUE_MAP_SOURCE_VALUE_UNKNOWN",
+  /**
+   * Rule 6: a categorical or multiple-choice column used by a value map has no allowed values, so
+   * a value outside the map would be lost silently (normalization 1.2.0 checks only listed values).
+   */
+  VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES: "VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES",
   /** Rule 7: the generated id can exceed 64 characters. */
   ID_TOO_LONG: "ID_TOO_LONG",
   /** Rule 7: a literal part or the separator of an `idRule` has characters outside `[A-Za-z0-9.-]`. */

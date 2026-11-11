@@ -37,6 +37,12 @@ v=lambda f:[e['resource'].get('valueBoolean') for e in json.load(open(f))['entry
 print(v('boolean-value-map/test-data/bundle-visit-si.json'), v('boolean-value-map/test-data/bundle-visit-no.json'))")
 if [ "$b" = "[True] [False]" ]; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
 printf '%-8s %-12s %-22s Sì → %s, No → %s\n' "$s" "boolean" "valueBoolean" "${b%% *}" "${b##* }"
+# Allowed values (normalization 1.2.0): "sì" is not one of the allowed values Sì/No (case-sensitive),
+# so with onInvalidValue = fail the conversion stops instead of creating an Observation without a value.
+aout=$(node tools/normalize.mjs boolean-value-map/normalization-Visit.json boolean-value-map/test-data/visit-si-lowercase.csv 2>/dev/null); acode=$?
+aerr=$(node tools/normalize.mjs boolean-value-map/normalization-Visit.json boolean-value-map/test-data/visit-si-lowercase.csv 2>&1 >/dev/null)
+if [ "$acode" -ne 0 ] && [ -z "$aout" ] && echo "$aerr" | grep -q 'fumatore: value "sì" is not an allowed value (onInvalidValue: fail)'; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
+printf '%-8s %-12s %-22s exit=%s rows=%s\n' "$s" "boolean" "sì not allowed (fail)" "$acode" "$([ -z "$aout" ] && echo 0 || echo some)"
 python3 - <<'PY'
 import json
 b={"resourceType":"Bundle","type":"transaction","entry":[]}

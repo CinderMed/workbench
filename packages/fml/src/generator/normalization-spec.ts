@@ -1,8 +1,8 @@
 /**
- * Normalization specification of a table (normalization.schema.json 1.1.0): how the conversion
+ * Normalization specification of a table (normalization.schema.json 1.2.0): how the conversion
  * module turns each CSV row into the normalized row the logical model describes. It is derived
- * from the column dictionary (`dateFormat`, `decimalSeparator`, `missingValues`, `multiValue`,
- * `originalName`), the roles' `idRule` and `project.output.onInvalidValue`, as in the verified
+ * from the column dictionary (`dateFormat`, `decimalSeparator`, `missingValues`, `allowedValues`,
+ * `multiValue`, `originalName`), the roles' `idRule` and `project.output.onInvalidValue`, as in the verified
  * examples (fixtures/fml-examples/*\/normalization-*.json).
  *
  * Locale handling is declared at the border (ADR-0009): inside the platform values are canonical
@@ -11,7 +11,9 @@
  * overrides it at run time.
  */
 import {
+  canonicalText,
   NORMALIZATION_FORMAT_VERSION,
+  type Column,
   type Normalization,
   type NormalizationSpec,
   type ProjectFile,
@@ -30,6 +32,20 @@ export interface NormalizationSpecOptions {
 /** Default of `project.output.onInvalidValue` (project schema 1.3.0): stop at the first invalid value. */
 export const DEFAULT_ON_INVALID_VALUE = "fail";
 
+/**
+ * Allowed values of a categorical or multiple-choice column, as the normalization compares them
+ * (normalization 1.2.0): canonical text (NFC, trim), case kept, without duplicates, in project
+ * order. Values that are also missing values stay missing, so they are left out. Other types, and
+ * columns without allowed values, give `undefined`: their values are not checked against a list.
+ */
+export function normalizationAllowedValues(column: Column): string[] | undefined {
+  if (column.dataType !== "categorical" && column.dataType !== "multipleChoice") return undefined;
+  if (column.allowedValues === undefined) return undefined;
+  const missing = new Set((column.missingValues ?? []).map(canonicalText));
+  const values = column.allowedValues.map((value) => canonicalText(value.code));
+  return [...new Set(values.filter((value) => value !== "" && !missing.has(value)))];
+}
+
 function columnSpec({ column, element }: PlannedColumn): Normalization.Column {
   const spec: Normalization.Column = {
     name: element,
@@ -39,6 +55,8 @@ function columnSpec({ column, element }: PlannedColumn): Normalization.Column {
   if (column.dateFormat !== undefined) spec.dateFormat = column.dateFormat;
   if (column.decimalSeparator !== undefined) spec.decimalSeparator = column.decimalSeparator;
   if (column.missingValues !== undefined) spec.missingValues = [...column.missingValues];
+  const allowedValues = normalizationAllowedValues(column);
+  if (allowedValues !== undefined) spec.allowedValues = allowedValues;
   if (column.multiValue?.encoding === "delimited")
     spec.multiValue = { separator: column.multiValue.separator };
   return spec;

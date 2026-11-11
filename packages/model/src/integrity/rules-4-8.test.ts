@@ -158,12 +158,42 @@ describe("rule 6: value map source values are allowed values of the columns", ()
     expect(only(IntegrityCode.VALUE_MAP_SOURCE_VALUE_UNKNOWN, results)).toHaveLength(1);
   });
 
-  it("does not check columns without allowed values", () => {
+  it("reports a categorical column used by a value map without allowed values, once", () => {
+    const results = check((p) => {
+      delete at(at(p.sources, 0).columns, 1).allowedValues;
+      at(valueMap(p, "vm_sex").entries, 0).sourceValue = "anything";
+      p.mappings.push({ ...row(p, "map_sex"), id: "map_sex_again", code: "R-099" });
+    });
+    expect(results).toEqual([
+      {
+        severity: "error",
+        code: IntegrityCode.VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES,
+        objectKind: "column",
+        id: "col_sex",
+        field: "allowedValues",
+        message:
+          "column 'sex' is used by value map 'sex' (row R-002) but has no allowed values: a value outside the map would be lost silently",
+      },
+    ]);
+  });
+
+  it("reports a multiple-choice column and the unit column of a quantity", () => {
+    const results = check((p) => {
+      const columns = at(p.sources, 0).columns;
+      delete at(columns, 2).allowedValues;
+      delete at(columns, 4).allowedValues;
+    });
+    expect(
+      only(IntegrityCode.VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES, results).map((r) => r.id),
+    ).toEqual(["col_hb_unit", "col_sites"]);
+  });
+
+  it("does not require allowed values on columns of other types", () => {
     expect(
       check((p) => {
-        delete at(at(p.sources, 0).columns, 1).allowedValues;
-        at(valueMap(p, "vm_sex").entries, 0).sourceValue = "anything";
-      }),
+        row(p, "map_pid").transform = { kind: "valueMap", valueMapId: "vm_sex" };
+        row(p, "map_pid").path = "gender";
+      }).filter((r) => r.code.startsWith("VALUE_MAP_")),
     ).toEqual([]);
   });
 });
