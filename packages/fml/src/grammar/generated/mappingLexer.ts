@@ -2,6 +2,7 @@
 // Do not edit: run `pnpm codegen`.
 
 import * as antlr from "antlr4ng";
+import { Token } from "antlr4ng";
 
 
 export class mappingLexer extends antlr.Lexer {

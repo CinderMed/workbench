@@ -1,0 +1,7 @@
+# CodeQL configuration (ADR-0004, ADR-0008).
+# Generated code is not analysed: it is never edited by hand, and its drift tests fail on any manual
+# change, so findings (and their autofixes) there cannot be acted on. Fix the generator instead.
+name: CinderMed CodeQL
+paths-ignore:
+  - packages/model/src/generated
+  - packages/fml/src/grammar/generated

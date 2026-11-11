@@ -68,6 +68,19 @@ describe("GitHub Actions", () => {
     expect(ci).toContain("sha256sum --check --strict --quiet fixtures/fml-examples.sha256");
   });
 
+  it("keeps the generated code out of CodeQL (ADR-0004, ADR-0008)", () => {
+    const codeql = load(".github/workflows/codeql.yml") as Workflow;
+    const init = codeql.jobs["analyze"]?.steps?.find((s) =>
+      s.uses?.startsWith("github/codeql-action/init@"),
+    );
+    expect(init?.with?.["config-file"]).toBe("./.github/codeql/codeql-config.yml");
+    const config = load(".github/codeql/codeql-config.yml") as { "paths-ignore"?: string[] };
+    expect(config["paths-ignore"]).toEqual([
+      "packages/model/src/generated",
+      "packages/fml/src/grammar/generated",
+    ]);
+  });
+
   it("accepts in PR titles exactly the scopes enforced by commitlint", () => {
     const prTitle = load(".github/workflows/pr-title.yml") as Workflow;
     const step = prTitle.jobs["conventional-commits"]?.steps?.find((s) =>
