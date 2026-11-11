@@ -4,6 +4,20 @@
 
 CinderMed (FHIR Mapping Workbench) is a multi-user web application for mapping a tabular dataset to FHIR by working in an Excel-like grid. Under the grid sits a structured model, which is compiled into FHIR Mapping Language (FML). A separate conversion module (V2) runs the FML on the data, for example with Matchbox.
 
+**Scope: any tabular dataset that can be mapped to FHIR.** CinderMed is not built around one dataset. It must work for registries, REDCap exports, EHR and ICU extracts, research databases and trial data, whatever their shape:
+
+| Shape | What it looks like | Example |
+| --- | --- | --- |
+| Wide table | One row per record (patient, visit), one column per variable | Metastra and MOTU, REDCap-style exports |
+| Long table | One row per measurement: a code column says what was measured, value columns hold it (value, unit, time) | MIMIC-IV `labevents` (`itemid`, `valuenum`, `valueuom`), with `d_labitems` as its dictionary |
+| Several related tables | Tables linked by keys, each mapped to its own resources, with references across them | MOTU (patients, stays, falls); MIMIC-IV (patients, admissions and dozens of event tables) |
+| Large volumes | Files too large to hold in memory, up to hundreds of millions of rows | MIMIC-IV `labevents` |
+| Any locale | Dates, decimals and encodings declared per column or per file, at the border | Italian dates and decimals (`17/09/2023`, `11,20`), windows-1252 files |
+
+Metastra, MOTU and MIMIC-IV appear in this document only as examples of these shapes. Every feature is checked against a wide table, a long table and several related tables.
+
+**Out of scope for now:** non-tabular sources, such as JSON or XML documents, HL7 v2 messages, free text and images. A database is in scope through its tables exported as CSV.
+
 **The name.** CinderMed joins *cinder*, an ember from the fire, and *Med*. FHIR is pronounced "fire": CinderMed takes medical datasets and carries them into FHIR.
 
 The spreadsheets used for MOTU ([Arcobelli et al., 2024](https://www.nature.com/articles/s41597-024-03593-6)) and for Metastra show that the spreadsheet works as a collaborative tool. They also show precise limits:
@@ -481,6 +495,8 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 
 Two of these problems (the empty `translate` and the capitalised columns) produce wrong results without any error. This is why verification level 4, the behaviour tests, is essential for the generator.
 
+**Golden cases cover shapes and features, not datasets.** Each golden case is chosen for a data shape (wide, long, several related tables, large volume, locale) or a translation feature that the existing cases do not cover. A proposal for a new golden case says which shape or feature it adds.
+
 **Reproducibility.** The `fml-examples` package contains projects, maps, logical models, ConceptMaps, normalization specifications, test rows, produced Bundles, the pinned grammar and the prototypes used for verification. These prototypes become the golden tests of the TypeScript generator.
 
 ## Generator contract
@@ -933,6 +949,10 @@ The 41 MVP features are split into 9 modules, plus a module 0 for the foundation
 
 Multi-user web workbench to map tabular datasets to FHIR (R4/R5) and generate FML.
 Full specification: docs/specification.md. Verified examples: fixtures/fml-examples.
+
+## Scope
+- Design for any tabular dataset that can be mapped to FHIR: check every new feature against a wide
+  table, a long table and several related tables; Metastra, MOTU and MIMIC-IV are only examples.
 
 ## Workflow
 - Work one module at a time, in the order of the "Incremental module plan".
