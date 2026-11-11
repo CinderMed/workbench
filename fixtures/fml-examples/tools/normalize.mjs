@@ -21,7 +21,8 @@ function parseCsv(text) {
   if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
   return rows;
 }
-let text = fs.readFileSync(process.argv[3], inp.encoding.startsWith('utf-8') ? 'utf8' : 'latin1');
+// WHATWG decoding (TextDecoder): 'iso-8859-1' is windows-1252 (0x80 → €); UTF-8 drops a leading BOM.
+let text = new TextDecoder(inp.encoding === 'utf-8-bom' ? 'utf-8' : inp.encoding).decode(fs.readFileSync(process.argv[3]));
 if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
 const table = parseCsv(text).filter(r => r.some(c => c !== ''));
 const header = table[inp.headerRow - 1].map(h => h.normalize('NFC').trim());
