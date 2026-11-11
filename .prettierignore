@@ -4,3 +4,4 @@ docs/specification.md
 CLAUDE.md
 .tmp/
 **/dist/
+packages/model/src/schemas/

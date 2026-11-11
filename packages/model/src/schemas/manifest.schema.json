@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fhir-mapping-workbench.example.org/schema/export-manifest/1.0.0",
+  "title": "Manifest of the exported mapping package",
+  "description": "Describes the content of the FML package exported by the workbench (G7) and everything the conversion module needs to run it without knowing the workbench: tables, load order, files with SHA-256 digests, versions and verification results.",
+  "type": "object",
+  "required": [
+    "formatVersion",
+    "package",
+    "project",
+    "fhirVersion",
+    "output",
+    "tables",
+    "files"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "formatVersion": {
+      "const": "1.0.0"
+    },
+    "package": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "createdAt",
+        "generator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]*$",
+          "examples": [
+            "metastra-mapping"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Package version (e.g. from the mapping release, A8)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generator": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "formatVersion",
+        "file"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "formatVersion": {
+          "type": "string",
+          "description": "Version of the project file schema (e.g. 1.2.0)."
+        },
+        "file": {
+          "type": "string",
+          "description": "Copy of the project file included in the package."
+        }
+      }
+    },
+    "fhirVersion": {
+      "enum": [
+        "4.0.1",
+        "5.0.0"
+      ]
+    },
+    "packages": {
+      "description": "Required FHIR packages (core + any IGs).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "version"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "bundleType",
+        "requestMethod",
+        "fullUrlBase"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "bundleType": {
+          "const": "transaction"
+        },
+        "requestMethod": {
+          "const": "PUT"
+        },
+        "fullUrlBase": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "loadOrder": {
+      "description": "Order in which to convert and load the tables: each table after the ones it references (topological sort of the relations; ties in alphabetical order). Tables in the same group do not depend on each other.",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "tables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "structureMap",
+          "logicalModel",
+          "normalization"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "structureMap": {
+            "type": "object",
+            "required": [
+              "url",
+              "fml",
+              "json"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "fml": {
+                "type": "string"
+              },
+              "json": {
+                "type": "string"
+              }
+            }
+          },
+          "logicalModel": {
+            "type": "object",
+            "required": [
+              "url",
+              "file"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "file": {
+                "type": "string"
+              }
+            }
+          },
+          "normalization": {
+            "type": "string",
+            "description": "File conforming to normalization.schema.json."
+          },
+          "creates": {
+            "description": "Roles created by the table (Type[n] · label), for human reading.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "conceptMaps": {
+      "description": "Value maps exported as documentation: the FML does not use them during conversion.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "url",
+          "file"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "file": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verification": {
+      "description": "Result of the checks run by the workbench before export (G10).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "grammar": {
+          "type": "object",
+          "required": [
+            "result"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "commit": {
+              "type": "string"
+            },
+            "result": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped"
+              ]
+            }
+          }
+        },
+        "compile": {
+          "type": "object",
+          "required": [
+            "result"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "engine": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "result": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped"
+              ]
+            }
+          }
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "files": {
+      "description": "All package files (except the manifest) with SHA-256 digests, to check that nothing was modified.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[^/].*"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "mediaType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
