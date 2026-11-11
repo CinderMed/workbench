@@ -5,8 +5,8 @@ datasets, how a project file is translated into FML and how the result is checke
 verification prototypes, not the final generator, which will be written in TypeScript.
 
 ## Contents
-- `mapping-project.schema.json` — project file schema, format 1.2.0
-- `normalization.schema.json` — normalization specification schema (1.0.0): deterministic per-row algorithms
+- `mapping-project.schema.json` — project file schema, format 1.3.0
+- `normalization.schema.json` — normalization specification schema (1.1.0): deterministic per-row algorithms
 - `manifest.schema.json` — schema of the exported package manifest (1.0.0)
 - `generator/` — the generator contract in TypeScript
   - `fml-ast.ts` — types of the syntax tree of the generated FML subset
@@ -30,7 +30,7 @@ verification prototypes, not the final generator, which will be written in TypeS
   - `verify-grammar.ts` — parsing with mapping.g4 (antlr-ng + antlr4ng, TypeScript)
   - `java/RunMap.java` — runs a map with the HL7 engine and validates the Bundle
 - `tests/` — the full suite plus focused cases: same id from different date formats, invalid values,
-  Italian number and boolean formats, FML reserved words
+  Italian number and boolean formats, FML reserved words, `onInvalidValue: fail` (`fall-fail.json`)
 
 ## Reproduce
 1. Grammar: `npx antlr-ng -Dlanguage=TypeScript -o tools/gen grammar/mapping.g4`, then
@@ -42,17 +42,26 @@ verification prototypes, not the final generator, which will be written in TypeS
    Needs the hl7.fhir.r4.core#4.0.1 package in the ~/.fhir/packages cache (downloaded automatically when online).
 4. Generator types: `cd generator && npx tsc -p tsconfig.json`, then `npx tsx example-hospitalstay.ts` prints `motu/HospitalStay.map`.
 
-Full suite: `VALIDATOR=/path/to/validator_cli.jar bash tests/run-all.sh` (7 checks, including negative cases and a row
-with an impossible date).
+Full suite: `VALIDATOR=/path/to/validator_cli.jar bash tests/run-all.sh` (8 checks, including negative cases, a row
+with an impossible date, and the same row stopping the conversion with `onInvalidValue: fail`).
 
 ## Results (9 November 2026)
 - Official grammar: 4/4 maps OK
 - HL7 engine: every transform ran
 - R4 validation: Metastra full row 0 errors (11 best-practice warnings); negative row 0 errors (creates only Patient);
   MOTU, three Bundles merged, 0 errors; Fall row with an impossible date → no resource (correct)
-- Suite: 7 of 7 passed
+- Suite: 7 of 7 passed (8 of 8 from 11 November 2026, see below)
 - TypeScript: `tsc --strict` with no errors; the HospitalStay map printed from the tree is byte-identical to the file
   and passes every check
 
 Note: these checks ran offline, with a copy of the R4 definitions taken from npm and a few empty auxiliary packages;
 use the official packages in production.
+
+## Format update (11 November 2026)
+Project schema 1.3.0 and normalization schema 1.1.0 (compatible minor versions): columns may declare
+`decimalSeparator`, `project.output.onInvalidValue` (`fail` by default) is written into every normalization
+specification, and normalization 1.1.0 adds `onInvalidValue: fail`. Both example projects set
+`onInvalidValue: report-drop`, the behaviour they were verified with. The logical models and normalization
+specifications were regenerated with the TypeScript generator (`@cindermed/fml`): only `version` and
+`formatVersion` changed. The suite passed 8 of 8 with the HL7 validator 7.0.5, and every produced Bundle is
+identical to the verified one.

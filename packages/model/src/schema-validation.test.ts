@@ -7,6 +7,9 @@ import motuFall from "../../../fixtures/fml-examples/motu/normalization-Fall.jso
 import motuHospitalStay from "../../../fixtures/fml-examples/motu/normalization-HospitalStay.json" with { type: "json" };
 import motuPatient from "../../../fixtures/fml-examples/motu/normalization-MotuPatient.json" with { type: "json" };
 import motuProject from "../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
+import fallFail from "../../../fixtures/fml-examples/tests/fall-fail.json" with { type: "json" };
+import fallIso from "../../../fixtures/fml-examples/tests/fall-iso.json" with { type: "json" };
+import types from "../../../fixtures/fml-examples/tests/types.json" with { type: "json" };
 import {
   SCHEMA_VIOLATION,
   isValid,
@@ -119,8 +122,30 @@ describe("validateNormalizationSchema", () => {
     ["motu Fall", motuFall],
     ["motu HospitalStay", motuHospitalStay],
     ["motu MotuPatient", motuPatient],
+    ["tests/fall-fail (onInvalidValue: fail)", fallFail],
   ])("accepts the %s normalization", (_name, normalization) => {
     expect(validateNormalizationSchema(normalization)).toEqual([]);
+  });
+
+  it.each([
+    ["tests/fall-iso", fallIso],
+    ["tests/types", types],
+  ])("still accepts the 1.0.0 specification %s (compatible minor)", (_name, normalization) => {
+    expect(normalization.formatVersion).toBe("1.0.0");
+    expect(validateNormalizationSchema(normalization)).toEqual([]);
+  });
+
+  it("rejects a newer major format and an unknown onInvalidValue", () => {
+    const newer = copy(motuFall);
+    newer["formatVersion"] = "2.0.0";
+    expect(validateNormalizationSchema(newer)).toContainEqual(
+      expect.objectContaining({ field: "formatVersion" }),
+    );
+    const unknown = copy(motuFall);
+    unknown["onInvalidValue"] = "ignore";
+    expect(validateNormalizationSchema(unknown)).toContainEqual(
+      expect.objectContaining({ field: "onInvalidValue" }),
+    );
   });
 
   it("rejects a normalization without formatVersion", () => {

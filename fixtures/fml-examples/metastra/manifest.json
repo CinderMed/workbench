@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_metastra",
     "name": "Metastra",
-    "formatVersion": "1.2.0",
+    "formatVersion": "1.3.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -94,7 +94,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "9b34f1b1773727319686dcfda9500138a882e48e90cfa9d731ed9cc0d531d83f",
+      "sha256": "df441bae20e95fa3f5822300d2614ff31edf46bd4dfbc603cb081165c4357576",
       "mediaType": "application/json"
     },
     {
@@ -109,12 +109,12 @@
     },
     {
       "path": "StructureDefinition-FirstOverviewRow.json",
-      "sha256": "a087f908c5034ba7bafd6ff5078000b4d7757bcdb2291044f3bfea604eae3264",
+      "sha256": "2cedc801260f7392b3bbefd106b59cac4785a347b1eb9f72d1cda99d9660fdd1",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "normalization-FirstOverview.json",
-      "sha256": "ca25e0479ba8b57597f6876b168089a2aedcead7fb28992fbb9426a5df32fbe3",
+      "sha256": "992fad08efcd3c1a41af901c5a56b153e5f1772e8ababe76412b22d0e6406035",
       "mediaType": "application/json"
     },
     {

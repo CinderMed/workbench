@@ -34,7 +34,7 @@ A valid project prints one line:
 
 ```text
 $ pnpm cindermed validate fixtures/fml-examples/metastra/project.json
-fixtures/fml-examples/metastra/project.json: valid (format 1.2.0)
+fixtures/fml-examples/metastra/project.json: valid (format 1.3.0)
 ```
 
 An invalid project lists one line per problem: severity, code, object kind and id, field inside the object, and the message.
@@ -54,7 +54,7 @@ The codes are stable, so scripts can rely on them.
 {
   "file": "fixtures/fml-examples/motu/project.json",
   "valid": true,
-  "formatVersion": "1.2.0",
+  "formatVersion": "1.3.0",
   "results": []
 }
 ```

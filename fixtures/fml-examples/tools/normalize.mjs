@@ -1,4 +1,4 @@
-// Deterministic normalization (specification normalization.schema.json 1.0.0).
+// Deterministic normalization (specification normalization.schema.json 1.1.0).
 // Reference prototype for the conversion module tests, not production code.
 // Usage: node normalize.mjs spec.json rows.csv > out.json     (errors on stderr)
 import fs from 'fs'; import crypto from 'crypto';
@@ -84,7 +84,12 @@ data.forEach((cells, r) => {
     const conv = [];
     for (const p of parts) {
       const x = convert(p, c);
-      if (x === undefined) { errors.push(`row ${r + 1}, ${c.sourceName}: invalid value "${p}" for ${c.type}`); if (onInvalid === 'reject-row') rejected = true; continue; }
+      if (x === undefined) {
+        const message = `row ${r + 1}, ${c.sourceName}: invalid value "${p}" for ${c.type}`;
+        // fail (normalization 1.1.0): stop at the first invalid value, report it, write no rows.
+        if (onInvalid === 'fail') { process.stderr.write(`${message} (onInvalidValue: fail)\n`); process.exit(1); }
+        errors.push(message); if (onInvalid === 'reject-row') rejected = true; continue;
+      }
       conv.push(x);
     }
     if (!conv.length) continue;

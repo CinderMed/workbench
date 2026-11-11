@@ -323,6 +323,10 @@ export interface Project {
      * Absolute base for Bundle.entry.fullUrl ({base}/{Type}/{id}), needed so that relative references resolve inside the Bundle. Usually the URL of the target FHIR server; canonicalBase is used when absent.
      */
     fullUrlBase?: Canonical;
+    /**
+     * What the conversion does with a value that cannot be converted to the column's type (e.g. 'abc' in an integer column, '31/02/2023' in a date column). fail: the conversion stops at the first such value and reports it; report-drop: the value is omitted and reported; reject-row: the whole row is discarded and reported. Written into every normalization specification.
+     */
+    onInvalidValue?: "fail" | "report-drop" | "reject-row";
   };
 }
 /**
@@ -410,6 +414,10 @@ export interface Column {
   order?: number;
   dataType: ColumnType;
   dateFormat?: string;
+  /**
+   * Only for dataType = decimal: decimal separator used in the data file (e.g. ',' for '11,20'). Inside the platform decimals always use '.'; the normalization converts at the border.
+   */
+  decimalSeparator?: "." | ",";
   /**
    * Fixed unit of the column, if known (e.g. kg).
    */

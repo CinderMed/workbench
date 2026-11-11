@@ -18,6 +18,14 @@ run motu MotuPatient MotuPatient bundle-MotuPatient 1
 run motu HospitalStay HospitalStay bundle-HospitalStay 1 external-refs
 run motu Fall Fall bundle-Fall 1 external-refs
 run motu Fall Fall-invalid bundle-Fall-invalid 0
+# onInvalidValue = fail (normalization 1.1.0): the conversion stops at the first invalid value,
+# reports it and writes no rows; valid rows are normalized exactly as with report-drop.
+fout=$(node tools/normalize.mjs tests/fall-fail.json motu/test-data/Fall-invalid.csv 2>/dev/null); fcode=$?
+ferr=$(node tools/normalize.mjs tests/fall-fail.json motu/test-data/Fall-invalid.csv 2>&1 >/dev/null)
+vout=$(node tools/normalize.mjs tests/fall-fail.json motu/test-data/Fall.csv 2>/dev/null)
+if [ "$fcode" -ne 0 ] && [ -z "$fout" ] && echo "$ferr" | grep -q 'AdmissionDate: invalid value "31/02/2023" for date (onInvalidValue: fail)' \
+   && [ "$vout" = "$(cat motu/test-data/Fall.normalized.json)" ]; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
+printf '%-8s %-12s %-22s exit=%s rows=%s\n' "$s" "motu" "Fall-invalid (fail)" "$fcode" "$([ -z "$fout" ] && echo 0 || echo some)"
 python3 - <<'PY'
 import json
 b={"resourceType":"Bundle","type":"transaction","entry":[]}
