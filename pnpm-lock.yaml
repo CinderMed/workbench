@@ -227,7 +227,11 @@ importers:
         specifier: ^5.12.8
         version: 5.12.8
 
-  apps/cli: {}
+  apps/cli:
+    dependencies:
+      '@cindermed/model':
+        specifier: workspace:*
+        version: link:../../packages/model
 
   apps/docs:
     dependencies:
