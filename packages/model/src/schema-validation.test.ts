@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import visitNormalization from "../../../fixtures/fml-examples/boolean-value-map/normalization-Visit.json" with { type: "json" };
 import metastraManifest from "../../../fixtures/fml-examples/metastra/manifest.json" with { type: "json" };
 import metastraNormalization from "../../../fixtures/fml-examples/metastra/normalization-FirstOverview.json" with { type: "json" };
 import metastraProject from "../../../fixtures/fml-examples/metastra/project.json" with { type: "json" };
@@ -122,9 +123,25 @@ describe("validateNormalizationSchema", () => {
     ["motu Fall", motuFall],
     ["motu HospitalStay", motuHospitalStay],
     ["motu MotuPatient", motuPatient],
-    ["tests/fall-fail (onInvalidValue: fail)", fallFail],
+    ["boolean-value-map Visit", visitNormalization],
   ])("accepts the %s normalization", (_name, normalization) => {
+    expect(normalization.formatVersion).toBe("1.2.0");
     expect(validateNormalizationSchema(normalization)).toEqual([]);
+  });
+
+  it("still accepts the 1.1.0 specification tests/fall-fail (compatible minor)", () => {
+    expect(fallFail.formatVersion).toBe("1.1.0");
+    expect(validateNormalizationSchema(fallFail)).toEqual([]);
+  });
+
+  it("rejects duplicate or empty allowed values", () => {
+    for (const allowedValues of [["Sì", "Sì"], [""]]) {
+      const normalization = copy(visitNormalization);
+      first(list(normalization, "columns").slice(-1))["allowedValues"] = allowedValues;
+      expect(validateNormalizationSchema(normalization)).toContainEqual(
+        expect.objectContaining({ objectKind: "normalization" }),
+      );
+    }
   });
 
   it.each([

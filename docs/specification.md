@@ -378,7 +378,7 @@ Each arrow is an `…Id` field that points to the internal id of another object.
 3. A row and its role belong to the same table, except references with `via`.
 4. `path` exists in the StructureDefinition of the chosen FHIR version, and the slices used in the path are declared in the role.
 5. A reference points to a role whose type is allowed by the element's `targetProfile`; the columns of the target `idRule` are reachable; towards a `perValue` role the source element is repeating.
-6. The `sourceValue`s of a value map match the allowed values of the columns that use it.
+6. The `sourceValue`s of a value map match the allowed values of the columns that use it. A `categorical` or `multipleChoice` column used by a value map must have allowed values (normalization 1.2.0, code `VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES`, error): the normalization rejects a value outside the list, so no value reaches the map without a rule and is lost silently.
 7. Generated ids respect the FHIR limit of 64 characters, fixed parts included.
 8. `repeat: eachValue` is used only with `multipleChoice` columns and towards repeating elements.
 9. The allowed values of a column fit its declared type (format 1.3.0, code `ALLOWED_VALUE_TYPE_MISMATCH`, error): `boolean` only in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive), so `Sì`/`No` needs a `categorical` column with a value map to `boolean`; `integer` an integer; `decimal` a number with the column's `decimalSeparator` (strict: `1.234` does not fit a `,` column); `date` and `dateTime` a valid date that matches `dateFormat`. Values listed in `missingValues` are ignored. The check uses the same parsers as the normalization, so a value accepted here is a value the conversion accepts.
@@ -490,7 +490,7 @@ For each table the generator produces artifacts described by their own schemas, 
 | Artifact | Format | Produced by | Used by |
 | --- | --- | --- | --- |
 | Project file | `mapping-project.schema.json` 1.3.0 | Workbench | Generator, export |
-| Normalization specification | `normalization.schema.json` 1.1.0 | Generator | Conversion module |
+| Normalization specification | `normalization.schema.json` 1.2.0 | Generator | Conversion module |
 | Logical model of the normalized row | `logical` StructureDefinition | Generator | FML engine |
 | StructureMap | FML, plus JSON compiled by the HL7 engine | Generator (syntax tree → printer) | FML engine |
 | ConceptMap | FHIR resources | Generator | Documentation and reuse |
@@ -505,6 +505,7 @@ The conversion module reads only the package: the normalization specification to
 1. Unicode NFC and removal of outer spaces.
 2. Empty cell or value in `missingValues` → element omitted.
 3. Multiple choice: split on the separator, empty parts dropped, duplicates removed, order kept.
+3b. Allowed values (format 1.2.0): for `categorical` and `multipleChoice` columns the specification lists the allowed values (`allowedValues`, missing values left out). Each value, or each part of a multiple choice, must be in the list, compared after step 1 and case-sensitive (`sì` is not `Sì`); otherwise it is an invalid value and step 5 applies. A column without allowed values is not checked.
 4. Conversion by type: integers without leading zeros; decimals with `decimalSeparator` (comma too) and digits kept (`11,20` → `11.20`), the separator strict and no thousands separators (with `,`, `1.234` and `1.234,5` are invalid values; with `.`, `1,234` is); booleans in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive; the generator never writes `trueValues`/`falseValues`, and words such as `Sì`/`No` go through a value map); dates according to `dateFormat` (`yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`) with a calendar check (`31/02/2023` is rejected), year-only and year-month included.
 5. Value that cannot be converted → `onInvalidValue`, taken from `project.output.onInvalidValue`: `fail` (the project default) stops the conversion at the first such value and reports it; `report-drop` omits it and reports it; `reject-row` discards the row and reports it. (The normalization schema's own default, for specifications that omit the field, stays `report-drop`.)
 6. Id: SHA-256 (or HMAC with a key kept outside the package) over the already normalized values, joined by U+001F; result = fixed parts + the first 24 hex characters. If a column of the id is missing, the id is not computed and the role is not created.
@@ -574,7 +575,7 @@ workbench/
     cli/                 `cindermed` command (validate, export); published to npm with the domain packages
     docs/                user documentation site (Astro Starlight): guides, worked examples, reference
   packages/
-    model/               JSON Schemas (project 1.3.0, normalization 1.1.0, manifest), generated types, integrity rules
+    model/               JSON Schemas (project 1.3.0, normalization 1.2.0, manifest), generated types, integrity rules
     fhir-defs/           loading R4/R5 packages, element tree, path resolution
     fml/                 syntax tree, printer, project → FML generator, grammar check
     normalizer/          reference normalizer (port of tools/normalize.mjs)
@@ -611,7 +612,7 @@ Validation runs in the API on every save (on the changed object and on those tha
 | Schema | Project JSON Schema (Ajv) | Error |
 | Integrity | The 9 rules listed in the JSON Schema section (ids, internal references, uniqueness, `via`, `repeat`, id length, allowed values that fit the column type) | Error |
 | FHIR | Existing path, type compatible with the transform, cardinality, type allowed for References, declared slices | Error |
-| Quality | Columns without a description, columns neither mapped nor excluded, roles without rows, `perGroup` roles fed by several rows, `manual` codes or codes with a different display | Warning |
+| Quality | Columns without a description, columns neither mapped nor excluded, roles without rows, `perGroup` roles fed by several rows, `manual` codes or codes with a different display, `categorical` or `multipleChoice` columns without allowed values and not used by a value map (`ALLOWED_VALUES_MISSING`: values will not be checked during conversion) | Warning |
 
 Every result has the shape `{severity, code, objectKind, id, field, message}`. Codes are stable (e.g. `PATH_NOT_FOUND`, `TYPE_MISMATCH`, `REF_TARGET_NOT_ALLOWED`), so the grid highlights the right cell. Errors block the export, warnings do not.
 
@@ -950,7 +951,7 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 ## Technical rules
 - TypeScript strict everywhere, no `any`; model types are generated from the JSON Schemas in packages/model.
 - Domain packages (model, fhir-defs, fml, normalizer, export) do no I/O and do not import apps/* (ADR-0001).
-- The project (1.3.0), normalization (1.1.0) and manifest (1.0.0) schemas are contracts:
+- The project (1.3.0), normalization (1.2.0) and manifest (1.0.0) schemas are contracts:
   an incompatible change needs a new major version, a migration and my approval.
 - FML translation follows the "Translation rules" and "Generator contract" sections.
   The generator builds only FML tree nodes and never concatenates FML strings.

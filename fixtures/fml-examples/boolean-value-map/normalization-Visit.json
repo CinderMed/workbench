@@ -1,6 +1,6 @@
 {
   "$schema": "../normalization.schema.json",
-  "formatVersion": "1.1.0",
+  "formatVersion": "1.2.0",
   "source": "Visit",
   "logicalModel": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
   "input": {
@@ -19,7 +19,11 @@
     {
       "name": "fumatore",
       "sourceName": "fumatore",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "Sì",
+        "No"
+      ]
     }
   ],
   "ids": [

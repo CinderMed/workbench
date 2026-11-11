@@ -23,10 +23,11 @@ Relative paths are resolved from the repository root.
 cindermed validate <project.json> [--format text|json]
 ```
 
-Reads a [project file](/workbench/reference/project-file/) and runs two levels of project validation:
+Reads a [project file](/workbench/reference/project-file/) and runs three levels of project validation:
 
 1. **Schema**: the file matches the project JSON Schema.
 2. **Integrity**: the nine rules the schema cannot express (unique ids, internal references, `via` relations, value map values, resource id length, `repeat`, allowed values that fit the column type). They run only when the schema check passes.
+3. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 
 The FHIR checks (paths, types, cardinality) come in a later version.
 

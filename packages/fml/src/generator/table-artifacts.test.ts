@@ -99,6 +99,21 @@ describe("planTable", () => {
     });
   });
 
+  it("writes the allowed values of categorical and multiple-choice columns", () => {
+    expect(columnOf(metastra, "proc_surg_loc")).toEqual({
+      name: "proc_surg_loc",
+      sourceName: "proc_surg_loc",
+      type: "string",
+      allowedValues: ["1", "2", "8", "20"],
+      multiValue: { separator: "," },
+    });
+    expect(columnOf(metastra, "patient_gender")).toHaveProperty("allowedValues", [
+      "Female",
+      "Male",
+    ]);
+    expect(columnOf(metastra, "obs_bloodt_hb")).not.toHaveProperty("allowedValues");
+  });
+
   it("uses the R5 base for R5 projects", () => {
     const r5 = { ...motu, project: { ...motu.project, fhirVersion: "5.0.0" as const } };
     const model = logicalModel(r5, plan(r5, "src_patient"));

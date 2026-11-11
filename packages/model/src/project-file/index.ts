@@ -4,6 +4,7 @@
  */
 import type { ProjectFile } from "../generated/project.js";
 import { checkIntegrity } from "../integrity/index.js";
+import { checkQuality } from "../quality/index.js";
 import { validateProjectSchema } from "../schema-validation.js";
 import { projectSchema } from "../schemas.js";
 import type { ValidationResult } from "../validation-result.js";
@@ -20,13 +21,18 @@ export {
 } from "./migrations.js";
 
 /**
- * Schema and integrity levels of project validation. Integrity runs only on a document that
- * passed the schema, because the rules rely on its shape.
+ * Schema, integrity and quality levels of project validation. Integrity and quality run only on
+ * a document that passed the schema, because they rely on its shape. Quality results are warnings.
  */
 export function validateProject(document: unknown): ValidationResult[] {
   const schemaResults = validateProjectSchema(document);
   if (schemaResults.length > 0) return schemaResults;
-  return checkIntegrity(document as ProjectFile);
+  return checkProject(document as ProjectFile);
+}
+
+/** Integrity errors, then quality warnings. */
+function checkProject(project: ProjectFile): ValidationResult[] {
+  return [...checkIntegrity(project), ...checkQuality(project)];
 }
 
 export interface ParsedProject {
@@ -66,7 +72,7 @@ export function parseProject(
   const schemaResults = validateProjectSchema(outcome.document);
   if (schemaResults.length > 0) return { ...migrated, results: schemaResults };
   const project = outcome.document as ProjectFile;
-  return { ...migrated, project, results: checkIntegrity(project) };
+  return { ...migrated, project, results: checkProject(project) };
 }
 
 /**

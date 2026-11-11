@@ -138,7 +138,7 @@
     },
     {
       "path": "normalization-MotuPatient.json",
-      "sha256": "05104b55c9ec60f4625fef12ec605fb9ed20d828d3a04b1cc729e29d65808038",
+      "sha256": "89777bca8ea4907615ac4a4ceab676176bba88b355131ee82749fb83daaf3b68",
       "mediaType": "application/json"
     },
     {
@@ -158,7 +158,7 @@
     },
     {
       "path": "normalization-HospitalStay.json",
-      "sha256": "3d85cbc2fd996dbd095513a24213fe187d0a9e1b073e621412153b79fd59fc9a",
+      "sha256": "8f1d605806ff54e18aca8ef459f8ccb62921638759439ab054ef653cfd0f09a7",
       "mediaType": "application/json"
     },
     {
@@ -178,7 +178,7 @@
     },
     {
       "path": "normalization-Fall.json",
-      "sha256": "c64da1189ad53ac036bd176ca03810eef3682a086d36b367700137dc97e27b4f",
+      "sha256": "840d1474654c1ff791d16472913eb04e307ed9f9454d527338f993a49f4ea8ae",
       "mediaType": "application/json"
     },
     {

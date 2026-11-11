@@ -57,7 +57,7 @@ export interface NormalizationSpec {
   };
 }
 /**
- * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept (the separator is strict and there are no thousands separators: with ',' a '.' is invalid, with '.' a ',' is invalid); boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss without time zone). Value that cannot be converted → onInvalidValue.
+ * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 3b) allowedValues (1.2.0) → every value (every part) must be in the list, case-sensitive, else it is invalid; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept (the separator is strict and there are no thousands separators: with ',' a '.' is invalid, with '.' a ',' is invalid); boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss without time zone). Value that cannot be converted → onInvalidValue.
  *
  * This interface was referenced by `NormalizationSpec`'s JSON-Schema
  * via the `definition` "Column".
@@ -80,6 +80,10 @@ export interface Column {
    * Values (after trimming) treated as missing, besides the empty cell.
    */
   missingValues?: string[];
+  /**
+   * Since 1.2.0. The only values a cell may hold (each part, with multiValue), compared after Unicode NFC and trim, case-sensitive. A value outside the list is an invalid value, so onInvalidValue applies. Missing values are removed before the check. Absent = not checked; written by the generator for categorical and multipleChoice columns.
+   */
+  allowedValues?: string[];
   /**
    * Multiple value in one cell: split on the separator, each part trimmed, empty parts dropped, order kept, duplicates removed.
    */

@@ -1,5 +1,5 @@
 /**
- * Cell parsers shared by the integrity rules and the normalizer (normalization.schema.json 1.1.0).
+ * Cell parsers shared by the integrity rules and the normalizer (normalization.schema.json 1.2.0).
  *
  * Inside the platform every value has one canonical form: ISO dates, `.` decimals, `true`/`false`.
  * These functions turn the text of one cell into that form, or return `undefined` when the text

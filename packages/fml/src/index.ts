@@ -64,6 +64,7 @@ export {
   type LogicalModelJson,
 } from "./generator/logical-model.js";
 export {
+  normalizationAllowedValues,
   normalizationSpec,
   type NormalizationSpecOptions,
 } from "./generator/normalization-spec.js";

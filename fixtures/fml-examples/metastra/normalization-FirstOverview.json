@@ -1,6 +1,6 @@
 {
   "$schema": "../normalization.schema.json",
-  "formatVersion": "1.1.0",
+  "formatVersion": "1.2.0",
   "source": "FirstOverview",
   "logicalModel": "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow",
   "input": {
@@ -25,12 +25,22 @@
     {
       "name": "proc_surg_yn",
       "sourceName": "proc_surg_yn",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "0"
+      ]
     },
     {
       "name": "proc_surg_loc",
       "sourceName": "proc_surg_loc",
       "type": "string",
+      "allowedValues": [
+        "1",
+        "2",
+        "8",
+        "20"
+      ],
       "multiValue": {
         "separator": ","
       }
@@ -38,7 +48,11 @@
     {
       "name": "patient_gender",
       "sourceName": "patient_gender",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "Female",
+        "Male"
+      ]
     },
     {
       "name": "patient_birthdate",
@@ -49,12 +63,24 @@
     {
       "name": "cond_osteoporosis_yn",
       "sourceName": "cond_osteoporosis_yn",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "0",
+        "-1"
+      ]
     },
     {
       "name": "obs_pain_axial_intervals",
       "sourceName": "obs_pain_axial_intervals",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "-1"
+      ]
     },
     {
       "name": "obs_pain_axial_nrs",
@@ -72,7 +98,12 @@
     {
       "name": "obs_bloodt_hb_spec",
       "sourceName": "obs_bloodt_hb_spec",
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "2",
+        "3"
+      ]
     }
   ],
   "ids": [

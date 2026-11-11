@@ -86,3 +86,13 @@ Project format 1.3.0 declares locale at the border (ADR-0009 addendum), so a col
 - A value is first canonicalized as the normalization does (NFC, trim). Empty values and values in `missingValues` are skipped.
 - **Shared parsers.** The check uses the cell parsers in `@cindermed/model` (`src/values/`). They are an exact port of the reference normalizer `tools/normalize.mjs`, proved by a differential test that runs the same values through both. The normalizer package (#75) imports the same parsers, so the rule and the conversion cannot disagree. They live in `model` because `normalizer` depends on `model`, so the reverse import would be a cycle.
 - The decimal separator is strict (decided in #89, ADR-0009 addendum "strict decimal separator"): in a `,` column a value with `.` (`1.234`, `11.20`) does not fit, so rule 9 reports it.
+
+## Addendum (2026-11-11): value-map columns need allowed values; first quality check
+
+Normalization 1.2.0 (ADR-0009 addendum "allowed values in the normalization") rejects a value that is not in a column's allowed values. That protects a value map only if its column has a list. This addendum revises rule 6.
+
+- **Rule 6, new code `VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES`**, error level (it blocks the export), objectKind `column`, field `allowedValues`. A `categorical` or `multipleChoice` column that a value map uses, through a `valueMap` transform or as the unit column of a `quantity`, must have allowed values. Without them, a value with no rule in the map would be lost silently. It is reported once per column, whatever the number of rows. Rule 6 used to skip such columns without a result.
+- Columns of other types used by a value map are not checked by this rule.
+- **Quality level, first check**, code `ALLOWED_VALUES_MISSING`, warning (it does not block the export). A `categorical` or `multipleChoice` column without allowed values that no value map uses gets the warning "values will not be checked during conversion". A column used by a value map gets the rule 6 error instead, never both.
+- **Where.** The quality checks live in `@cindermed/model` (`src/quality/`, `checkQuality`, `QualityCode`), next to the integrity rules. `validateProject` and `parseProject` return the integrity errors, then the quality warnings. Both run only after the schema check passes. `cindermed validate` already counts warnings separately and exits 0 when there are only warnings. The other quality checks of the specification come with the modules that need them.
+- **Next.** Rule 6 is revised again by #91: every allowed value not in `missingValues` must have an entry in each value map that uses the column.
