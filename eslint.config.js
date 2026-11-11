@@ -60,5 +60,10 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Output of json-schema-to-typescript (ADR-0004): index signatures are its style, not ours.
+    files: ["packages/model/src/generated/**/*.ts"],
+    rules: { "@typescript-eslint/consistent-indexed-object-style": "off" },
+  },
   prettier,
 );

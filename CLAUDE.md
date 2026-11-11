@@ -34,6 +34,7 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 
 ## Commands
 - pnpm install / pnpm -r build / pnpm -r test / pnpm lint / pnpm typecheck / pnpm changeset
+- pnpm codegen (regenerate the packages/model types after a schema change, ADR-0004)
 - docker compose up (full development stack)
 - pnpm cindermed validate <project.json> / pnpm cindermed export <project.json>
 - pnpm --filter docs dev (documentation site)

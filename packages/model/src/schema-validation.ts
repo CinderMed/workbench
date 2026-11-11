@@ -4,6 +4,9 @@
  */
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
+import type { ExportManifest } from "./generated/manifest.js";
+import type { NormalizationSpec } from "./generated/normalization.js";
+import type { ProjectFile } from "./generated/project.js";
 import { manifestSchema, normalizationSchema, projectSchema } from "./schemas.js";
 import type { ObjectKind, ValidationResult } from "./validation-result.js";
 
@@ -139,4 +142,19 @@ export function validateNormalizationSchema(document: unknown): ValidationResult
 /** Validates a parsed export manifest against its JSON Schema. */
 export function validateManifestSchema(document: unknown): ValidationResult[] {
   return run(manifestSchema, document, "manifest");
+}
+
+/** Type guard: true when the document is a valid project file for the schema (integrity not checked). */
+export function isProjectFile(document: unknown): document is ProjectFile {
+  return validateProjectSchema(document).length === 0;
+}
+
+/** Type guard: true when the document is a valid normalization specification. */
+export function isNormalizationSpec(document: unknown): document is NormalizationSpec {
+  return validateNormalizationSchema(document).length === 0;
+}
+
+/** Type guard: true when the document is a valid export manifest. */
+export function isExportManifest(document: unknown): document is ExportManifest {
+  return validateManifestSchema(document).length === 0;
 }
