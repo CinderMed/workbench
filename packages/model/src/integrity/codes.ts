@@ -15,6 +15,22 @@ export const IntegrityCode = {
   DUPLICATE_ROW_CODE: "DUPLICATE_ROW_CODE",
   /** Rule 3: a column or section belongs to another table than the object that uses it. */
   SOURCE_MISMATCH: "SOURCE_MISMATCH",
+  /** Rule 4: a path uses a named slice that the role does not declare. */
+  SLICE_NOT_DECLARED: "SLICE_NOT_DECLARED",
+  /** Rule 5: a reference to a role in another table has no `via` relation. */
+  REFERENCE_NEEDS_VIA: "REFERENCE_NEEDS_VIA",
+  /** Rule 5: the `via` relation does not link the table of the row to the table of the target. */
+  VIA_RELATION_MISMATCH: "VIA_RELATION_MISMATCH",
+  /** Rule 5: a column of the target `idRule` cannot be reached through the `via` relation. */
+  ID_RULE_NOT_REACHABLE: "ID_RULE_NOT_REACHABLE",
+  /** Rule 6: a value map has a `sourceValue` that a column using it does not allow. */
+  VALUE_MAP_SOURCE_VALUE_UNKNOWN: "VALUE_MAP_SOURCE_VALUE_UNKNOWN",
+  /** Rule 7: the generated id can exceed 64 characters. */
+  ID_TOO_LONG: "ID_TOO_LONG",
+  /** Rule 7: a literal part or the separator of an `idRule` has characters outside `[A-Za-z0-9.-]`. */
+  ID_INVALID_CHARACTERS: "ID_INVALID_CHARACTERS",
+  /** Rule 8: `repeat: eachValue` on a row whose column is not `multipleChoice`. */
+  REPEAT_REQUIRES_MULTIPLE_CHOICE: "REPEAT_REQUIRES_MULTIPLE_CHOICE",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];

@@ -111,6 +111,19 @@ export function rowColumns(row: MappingRow): { columnId: string; field: string }
   return columns;
 }
 
+/** Value maps a row uses, each with the column whose values it translates. */
+export function rowValueMaps(
+  row: MappingRow,
+): { valueMapId: string; columnId: string | undefined }[] {
+  const transform = row.transform;
+  if (transform.kind === "valueMap")
+    return [{ valueMapId: transform.valueMapId, columnId: row.columnId }];
+  if (transform.kind === "quantity" && transform.unitValueMapId !== undefined) {
+    return [{ valueMapId: transform.unitValueMapId, columnId: transform.unitColumnId }];
+  }
+  return [];
+}
+
 /** Column ids a role reads (multiplicity, creation condition, id rule), with their field paths. */
 export function instanceColumns(instance: Instance): { columnId: string; field: string }[] {
   const columns: { columnId: string; field: string }[] = [];

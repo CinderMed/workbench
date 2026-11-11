@@ -34,4 +34,4 @@ export type * as Normalization from "./generated/normalization.js";
 export type { ExportManifest } from "./generated/manifest.js";
 export type * as Manifest from "./generated/manifest.js";
 
-export { IntegrityCode, checkIntegrity } from "./integrity/index.js";
+export { IntegrityCode, MAX_ID_LENGTH, checkIntegrity, idLength } from "./integrity/index.js";
