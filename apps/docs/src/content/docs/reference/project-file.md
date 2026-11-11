@@ -34,6 +34,8 @@ A column of type `boolean` accepts only `true`/`false`, `1`/`0`, `yes`/`no` and 
 
 The allowed values of a `categorical` or `multipleChoice` column are also checked during conversion: a value that is not in the list, compared case-sensitively after trimming spaces, does not fit its column. In a column with `Sì` and `No`, the value `sì` is not allowed. This is why a `categorical` or `multipleChoice` column used by a value map must have allowed values (`VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES`, an error): otherwise a value without a rule in the map would be lost silently. A column with no allowed values and no value map only gets a warning (`ALLOWED_VALUES_MISSING`), because its values will not be checked. A list that is empty, or holds only missing values, is an error (`ALLOWED_VALUES_EMPTY`): it would reject every value.
 
+A value map can be used only by a `categorical`, `multipleChoice` or `boolean` column (`VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED` otherwise: declare the column categorical), and it needs an entry for every allowed value of the column that is not a missing value (`VALUE_MAP_INCOMPLETE`). An entry can give a code or an action: skip the resource (`skipInstance`), set another element (`setElement`) or treat the value as missing (`absent`).
+
 `project.output.onInvalidValue` sets what the conversion does with a value that does not fit its column, such as `31/02/2023` in a date column or `sì` in a column that allows only `Sì` and `No`:
 
 | Value            | What happens                                                |

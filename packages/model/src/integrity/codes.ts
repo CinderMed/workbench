@@ -30,6 +30,16 @@ export const IntegrityCode = {
    * a value outside the map would be lost silently (normalization 1.2.0 checks only listed values).
    */
   VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES: "VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES",
+  /**
+   * Rule 6: a value map is used by a column that is not categorical, multipleChoice or boolean:
+   * the column has no list of values to map, so it must be declared categorical.
+   */
+  VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED: "VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED",
+  /**
+   * Rule 6: an allowed value of a column (not a missing value) has no entry in a value map that the
+   * column uses; the entry may carry a code or an action.
+   */
+  VALUE_MAP_INCOMPLETE: "VALUE_MAP_INCOMPLETE",
   /** Rule 7: the generated id can exceed 64 characters. */
   ID_TOO_LONG: "ID_TOO_LONG",
   /** Rule 7: a literal part or the separator of an `idRule` has characters outside `[A-Za-z0-9.-]`. */
