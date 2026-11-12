@@ -1,0 +1,10 @@
+map "http://example.org/fhir/hl7-probes/StructureMap/P17Evaluate" = `P17Evaluate`
+
+uses "http://example.org/fhir/hl7-probes/StructureDefinition/Row" alias Row as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+
+group P17Evaluate(source src : Row, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  src -> bundle.entry as e, e.resource = create('Patient') as res, res.id = evaluate(src, $this.cc__mood) "r";
+}
