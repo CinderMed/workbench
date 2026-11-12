@@ -5,7 +5,7 @@
  * true/false, not codes, and the CSV/XLSX export documents them (H1).
  *
  * - `id` and the end of `url` are the value map's name; `name` is the same with a capital first
- *   letter; `version` is the logical model's (the project format version until #83); `status`
+ *   letter; `version` is the logical model's (the package version in an export, #83); `status`
  *   is `draft`; `description` only when the value map has one (FHIR does not allow empty strings).
  * - `use` entries are listed with their target, grouped by target system and version in sorted
  *   order; a `code` map has one group without a target system.
@@ -21,6 +21,8 @@ import type { ProjectFile, ValueMap, ValueMapEntry } from "@cindermed/model";
 
 export interface ConceptMapOptions {
   readonly fhirRelease: "R4" | "R5";
+  /** `version` of the ConceptMap: the package version, like the logical models (#83). Absent = the project format version. */
+  readonly version?: string;
 }
 
 interface TargetJson {
@@ -151,7 +153,7 @@ export function conceptMap(
     resourceType: "ConceptMap",
     id: valueMap.name,
     url: `${project.project.canonicalBase}/ConceptMap/${valueMap.name}`,
-    version: project.formatVersion,
+    version: options.version ?? project.formatVersion,
     name: `${valueMap.name.charAt(0).toUpperCase()}${valueMap.name.slice(1)}`,
     status: "draft",
     ...(description === undefined ? {} : { description }),

@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "labUnits",
   "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labUnits",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "LabUnits",
   "status": "draft",
   "description": "valueuom to the units code system of MIMIC-IV on FHIR (until the unit text can be copied from the column, #108).",

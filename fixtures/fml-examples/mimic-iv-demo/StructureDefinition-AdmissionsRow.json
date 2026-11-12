@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "AdmissionsRow",
   "url": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "AdmissionsRow",
   "title": "Normalized row of table Admissions",
   "status": "draft",

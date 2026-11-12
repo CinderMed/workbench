@@ -48,6 +48,14 @@ module.exports = {
       to: { path: FML_GRAMMAR },
     },
     {
+      name: "web-no-export",
+      comment:
+        "The export package carries the grammar check, so it runs in the backend only: apps/web never imports @cindermed/export (ADR-0012).",
+      severity: "error",
+      from: { path: "^apps/web/" },
+      to: { path: "^@cindermed/export$|^packages/export/" },
+    },
+    {
       name: "fml-root-without-grammar",
       comment:
         "The @cindermed/fml root entry never reaches the grammar check; it is exported from @cindermed/fml/grammar (ADR-0008).",

@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "osteoStatus",
   "url": "http://example.org/fhir/metastra/ConceptMap/osteoStatus",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "OsteoStatus",
   "status": "draft",
   "group": [

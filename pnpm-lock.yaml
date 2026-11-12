@@ -313,7 +313,20 @@ importers:
         specifier: ^8.3.7
         version: 8.3.7(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1)
 
-  packages/export: {}
+  packages/export:
+    dependencies:
+      '@cindermed/fml':
+        specifier: workspace:*
+        version: link:../fml
+      '@cindermed/model':
+        specifier: workspace:*
+        version: link:../model
+      '@noble/hashes':
+        specifier: 2.4.0
+        version: 2.4.0
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
 
   packages/fhir-defs: {}
 
@@ -2234,6 +2247,9 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  fflate@0.8.3:
+    resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
 
   file-entry-cache@11.1.5:
     resolution: {integrity: sha512-+PFTHITI08JIGhnNpGNI8T8inUpgZfk3GNEqfT9R2zZV2iFXg3CvqzSl/uEhs7TSGujYRELEANyDvS8Fj7+S7Q==}
@@ -6021,6 +6037,8 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
       picomatch: 4.0.7
+
+  fflate@0.8.3: {}
 
   file-entry-cache@11.1.5:
     dependencies:

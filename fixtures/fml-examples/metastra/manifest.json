@@ -6,8 +6,8 @@
     "version": "0.1.0",
     "createdAt": "2026-11-10T09:01:15Z",
     "generator": {
-      "name": "cindermed (verification prototype)",
-      "version": "0.0.1"
+      "name": "cindermed",
+      "version": "0.0.0"
     }
   },
   "project": {
@@ -86,15 +86,14 @@
       "result": "passed"
     },
     "compile": {
-      "engine": "HL7 validator (org.hl7.fhir.core)",
-      "version": "7.0.5",
-      "result": "passed"
-    }
+      "result": "skipped"
+    },
+    "checkedAt": "2026-11-10T09:01:15Z"
   },
   "files": [
     {
       "path": "project.json",
-      "sha256": "346a246a6e88ce9baec51f4acf8bad19c7c53359b40acb3f26ee65fd858ceea6",
+      "sha256": "6632d1d724db648de5106a619484cbf4e2b9bc6574e982e1e5a3e585ff4489d4",
       "mediaType": "application/json"
     },
     {
@@ -104,12 +103,12 @@
     },
     {
       "path": "StructureMap-FirstOverview.json",
-      "sha256": "fd4488b71f0203b5600a5192da195596ccf954c470d34393338a1eaf0aec9e9c",
+      "sha256": "89e0b4dfbc80cece7c48852f3d67681e3b4072f5a7de506480ebdeb23789fcdb",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-FirstOverviewRow.json",
-      "sha256": "f50140727056d7e201ae94c7c9e3cf8625442e47d2c5e2c055c21a54bf277e54",
+      "sha256": "df60f00be3860d8582c9482eb0ed57adbe14de6484019c67036c3c15fdf21d8d",
       "mediaType": "application/fhir+json"
     },
     {
@@ -119,28 +118,43 @@
     },
     {
       "path": "ConceptMap-administrativeGender.json",
-      "sha256": "061e218745cbd8092c3470f542ecd2c43c5331b789e41128cac765023a7594c0",
+      "sha256": "abefafbb0caff5368842f6149f2dabfc0b0cd5e46deab661683b60417ed46d84",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "ConceptMap-hbUnit.json",
-      "sha256": "b2463482a5d4020143d1740487b73edcda501585210e9394a52377f2aaf0ca69",
+      "sha256": "632d241a5d1c224ea5a350bf8a4e3766423fb1ac048922caecc3900cbbd4fe60",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "ConceptMap-osteoStatus.json",
-      "sha256": "280d0dd41155039df8a4faf22862e2ba839a98f125705228b64876e262993069",
+      "sha256": "f20a3341de552dd2ed491780cf38a4b2d94ef60263934e5a96d9f780a248491c",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "ConceptMap-painLevel.json",
-      "sha256": "10bb7ac159c498610fe42a6f318451466ce921dc74ed27d2f03a164705ac8a4f",
+      "sha256": "3a0c13ca7a8e7cd42234d794b367ee47a84a0a4bef8872fb4188039f2a4f6e0e",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "ConceptMap-spineLevel.json",
-      "sha256": "0b86e946dd176b3bcfc1c29c90487765dd98a6c42e78d8b16feeb464b8d36796",
+      "sha256": "6574202f313b714de4c1a28b6c3ff911c5832cf6fea082593638c46c677b9193",
       "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "schemas/mapping-project.schema.json",
+      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/normalization.schema.json",
+      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/manifest.schema.json",
+      "sha256": "4449ea8ad84c808ed623e1afc9b76cb661babc33e72a3fd44d06b4216903ce7c",
+      "mediaType": "application/json"
     }
   ]
 }

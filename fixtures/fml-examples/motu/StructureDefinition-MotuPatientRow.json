@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "MotuPatientRow",
   "url": "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "MotuPatientRow",
   "title": "Normalized row of table MotuPatient",
   "status": "draft",

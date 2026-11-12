@@ -116,7 +116,19 @@ function idElement(root: string, idField: PlannedIdField): ElementDefinitionJson
 }
 
 /** The logical StructureDefinition of the normalized row of a table. */
-export function logicalModel(project: ProjectFile, plan: TablePlan): LogicalModelJson {
+export interface LogicalModelOptions {
+  /**
+   * `version` of the StructureDefinition: the version of the exported package (#83, ADR-0012).
+   * Absent = the project format version, for callers outside an export.
+   */
+  readonly version?: string;
+}
+
+export function logicalModel(
+  project: ProjectFile,
+  plan: TablePlan,
+  options: LogicalModelOptions = {},
+): LogicalModelJson {
   const name = logicalModelName(plan);
   const url = logicalModelUrl(project, plan);
   const fhirVersion = project.project.fhirVersion;
@@ -137,7 +149,7 @@ export function logicalModel(project: ProjectFile, plan: TablePlan): LogicalMode
     resourceType: "StructureDefinition",
     id: name,
     url,
-    version: project.formatVersion,
+    version: options.version ?? project.formatVersion,
     name,
     title: `Normalized row of table ${plan.name}`,
     status: "draft",

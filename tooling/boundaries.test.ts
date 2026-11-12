@@ -97,6 +97,18 @@ describe("package boundaries (ADR-0001)", () => {
   });
 });
 
+describe("export package stays in the backend (ADR-0012)", () => {
+  it("rejects the web app importing @cindermed/export or its sources", async () => {
+    expect(
+      await cruiseRules({
+        "packages/export/src/index.ts": "export const exportPackage = 1;\n",
+        "apps/web/src/index.ts":
+          'import { exportPackage } from "@cindermed/export";\nimport { exportPackage as e } from "../../../packages/export/src/index";\nexport const x = [exportPackage, e];\n',
+      }),
+    ).toEqual(["not-to-unresolvable", "web-no-export", "web-no-export"]);
+  });
+});
+
 describe("FML grammar check stays in the backend (ADR-0008)", () => {
   const grammarSources = {
     "packages/fml/src/grammar/generated/mappingParser.ts": "export const parser = 1;\n",

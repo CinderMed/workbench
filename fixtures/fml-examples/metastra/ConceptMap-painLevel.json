@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "painLevel",
   "url": "http://example.org/fhir/metastra/ConceptMap/painLevel",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "PainLevel",
   "status": "draft",
   "description": "Pain intensity classes used in FirstOverview and LastOverview.",

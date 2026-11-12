@@ -21,14 +21,12 @@ const serialize = (value: unknown): string => JSON.stringify(value, null, 2);
 
 describe("conceptMaps (R4)", () => {
   it("reproduces the verified ConceptMaps byte for byte, in project order", () => {
-    expect(conceptMaps(project(metastraProject), { fhirRelease: "R4" }).map(serialize)).toEqual([
-      administrativeGender,
-      painLevel,
-      osteoStatus,
-      hbUnit,
-      spineLevel,
-    ]);
-    expect(conceptMaps(project(motuProject), { fhirRelease: "R4" }).map(serialize)).toEqual([sex]);
+    expect(
+      conceptMaps(project(metastraProject), { fhirRelease: "R4", version: "0.1.0" }).map(serialize),
+    ).toEqual([administrativeGender, painLevel, osteoStatus, hbUnit, spineLevel]);
+    expect(
+      conceptMaps(project(motuProject), { fhirRelease: "R4", version: "0.1.0" }).map(serialize),
+    ).toEqual([sex]);
   });
 
   it("writes no ConceptMap for a value map with a boolean target", () => {

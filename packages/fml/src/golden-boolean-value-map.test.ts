@@ -16,9 +16,9 @@ describe("golden case boolean-value-map", () => {
     if (!isProjectFile(projectDocument)) throw new Error("fixture is not a valid project");
     const planned = planTable(projectDocument, "src_visit");
     if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-    expect(JSON.stringify(logicalModel(projectDocument, planned.value), null, 2)).toBe(
-      expectedModel,
-    );
+    expect(
+      JSON.stringify(logicalModel(projectDocument, planned.value, { version: "0.1.0" }), null, 2),
+    ).toBe(expectedModel);
     const spec = normalizationSpec(projectDocument, planned.value, {
       schemaRef: "../normalization.schema.json",
     });

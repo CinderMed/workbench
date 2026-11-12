@@ -168,3 +168,11 @@ suite: 17 of 17.
 fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
 66 resources match. Not compared, each a gap: times (no time zone at the border, #107), Patient.birthDate (derived
 columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit (#108).
+
+## Manifests and versions from the exporter (12 November 2026, #83)
+The four `manifest.json` files are written by the exporter (`@cindermed/export`, ADR-0012) with package version 0.1.0,
+the fixtures' own `$schema` references and each folder's `createdAt`; `boolean-value-map` and `mimic-iv-demo` get one
+for the first time. Against the prototype's manifests (Metastra, MOTU) they differ only in `generator`, in
+`verification` (grammar `passed`, compile `skipped`, `checkedAt`), in the SHA-256 of the StructureMap JSON (the
+package carries our JSON, ADR-0007) and in the three `schemas/` entries. The logical models and ConceptMaps carry the
+package version, 0.1.0, instead of the project format version. The Bundles do not change.

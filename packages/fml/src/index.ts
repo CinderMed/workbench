@@ -61,6 +61,7 @@ export {
   logicalModelName,
   logicalModelUrl,
   type ElementDefinitionJson,
+  type LogicalModelOptions,
   type LogicalModelJson,
 } from "./generator/logical-model.js";
 export {

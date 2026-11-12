@@ -62,7 +62,7 @@ describe.each([
   });
 
   it("generates the committed logical model and normalization specification", () => {
-    expect(serialize(logicalModel(file, planned.value))).toBe(model);
+    expect(serialize(logicalModel(file, planned.value, { version: "0.1.0" }))).toBe(model);
     expect(
       serialize(
         normalizationSpec(file, planned.value, { schemaRef: "../normalization.schema.json" }),
@@ -73,7 +73,7 @@ describe.each([
 
 describe("long-format golden case, ConceptMaps", () => {
   it("generates the committed ConceptMaps byte for byte", () => {
-    expect(conceptMaps(file, { fhirRelease: "R4" }).map(serialize)).toEqual([
+    expect(conceptMaps(file, { fhirRelease: "R4", version: "0.1.0" }).map(serialize)).toEqual([
       gender,
       admissionClass,
       labItems,

@@ -44,7 +44,8 @@ describe.each(cases)("%s", (_name, file, sourceId, expectedModel, expectedNormal
   const planned = plan(file, sourceId);
 
   it("produces the verified logical model, byte for byte", () => {
-    expect(serialize(logicalModel(file, planned))).toBe(expectedModel);
+    // The fixtures carry the package version of their export (0.1.0, #83).
+    expect(serialize(logicalModel(file, planned, { version: "0.1.0" }))).toBe(expectedModel);
   });
 
   it("produces the verified normalization specification, byte for byte", () => {

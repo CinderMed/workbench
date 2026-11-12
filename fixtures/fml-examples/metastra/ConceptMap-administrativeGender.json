@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "administrativeGender",
   "url": "http://example.org/fhir/metastra/ConceptMap/administrativeGender",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "AdministrativeGender",
   "status": "draft",
   "group": [

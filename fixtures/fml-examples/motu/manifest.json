@@ -6,8 +6,8 @@
     "version": "0.1.0",
     "createdAt": "2026-11-10T09:01:15Z",
     "generator": {
-      "name": "cindermed (verification prototype)",
-      "version": "0.0.1"
+      "name": "cindermed",
+      "version": "0.0.0"
     }
   },
   "project": {
@@ -110,15 +110,14 @@
       "result": "passed"
     },
     "compile": {
-      "engine": "HL7 validator (org.hl7.fhir.core)",
-      "version": "7.0.5",
-      "result": "passed"
-    }
+      "result": "skipped"
+    },
+    "checkedAt": "2026-11-10T09:01:15Z"
   },
   "files": [
     {
       "path": "project.json",
-      "sha256": "e5e9a605ec191d0c62b9b2fbd1f781dafc7892f52383cd2adec6842f73f748cf",
+      "sha256": "a74fc7ae03d76d4e980ad40b121ddd5396cd7a71a7084a125b2c6ab12e76fcda",
       "mediaType": "application/json"
     },
     {
@@ -128,12 +127,12 @@
     },
     {
       "path": "StructureMap-MotuPatient.json",
-      "sha256": "7ff9e03a3406decf0e7f29ab700e89de421f890d40417a6b1d701b2f47a6872e",
+      "sha256": "a8c45a77f2510e2110c06eebd80fc16e65f3caa0507e9080470275b05eb6abbc",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-MotuPatientRow.json",
-      "sha256": "2159e6eeccbcc821d44ea117c131befb43c4fa4105fa6c61b3341f5f3afbbf55",
+      "sha256": "a87c2d310ceb1fce4fc7a3eb7d544cd31b1b02ebc32a49e98006b31d9fa0c131",
       "mediaType": "application/fhir+json"
     },
     {
@@ -148,12 +147,12 @@
     },
     {
       "path": "StructureMap-HospitalStay.json",
-      "sha256": "2c888d68b27e5255c5ee17356a1553895c5c96de06f4c8ca095f89fd52143daf",
+      "sha256": "01eca1572370a17e4b7dfbe3800a30954fe7ffcfefe9d8fa7f51592bb0e8c545",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-HospitalStayRow.json",
-      "sha256": "d4d73205c3c88cd714e70e750ed2962aa412b0f09146581db538a65cdbd9241d",
+      "sha256": "6ad6c8237075ec0b12bf634f3b925884b05bcc309065d61abb61cb70fca3d79e",
       "mediaType": "application/fhir+json"
     },
     {
@@ -168,12 +167,12 @@
     },
     {
       "path": "StructureMap-Fall.json",
-      "sha256": "829041327fea7390bdba43a3cad6cad5996fec78302ed5bbbef1782d6e834a05",
+      "sha256": "3789358e3032270c15e955abc57d27fda117176dd9ba6b6204b05d4a1a64b5ee",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-FallRow.json",
-      "sha256": "79a8437a6529abe5f87af16347679ae1f2b9adebc50a1042ce15cca0a59ac9bf",
+      "sha256": "134a1cf4c924bd876bf149fc1170715caae1163197de322461b4f2579f1c7a26",
       "mediaType": "application/fhir+json"
     },
     {
@@ -183,8 +182,23 @@
     },
     {
       "path": "ConceptMap-sex.json",
-      "sha256": "4a8b4712514fb9d1388106bdae2e86d83429470cc64e20d90631ddecb4ced0a4",
+      "sha256": "42d610124a49ce70baa20841a5602e1aff21c707d25f0eac8731676534a993b1",
       "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "schemas/mapping-project.schema.json",
+      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/normalization.schema.json",
+      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/manifest.schema.json",
+      "sha256": "4449ea8ad84c808ed623e1afc9b76cb661babc33e72a3fd44d06b4216903ce7c",
+      "mediaType": "application/json"
     }
   ]
 }
