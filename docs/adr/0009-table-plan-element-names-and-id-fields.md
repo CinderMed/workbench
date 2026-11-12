@@ -67,3 +67,8 @@ This addendum replaces the consequence above about `decimalSeparator`, `trueValu
 - **Compatibility.** A 1.2.0 reader accepts every 1.0.0 and 1.1.0 specification (`tests/fall-fail.json` stays at 1.1.0, and a test proves it). The project format does not change, so no project migration is needed. Specifications are generated, and the export regenerates them.
 - **Reference.** `tools/normalize.mjs` checks the list. The golden case `boolean-value-map/test-data/visit-si-lowercase.csv` (`sì`) stops with `onInvalidValue: fail`.
 - **Related.** A categorical column used by a value map without allowed values is an integrity error, and one without a value map is a quality warning (ADR-0005 addendum).
+
+## Addendum (2026-11-12): every element has a definition (#120)
+
+- The HL7 validator reported `sdf-3` ("Each element definition in a snapshot must have a formal definition and cardinalities") on every logical model: the root element had no `definition`. The root now gets the table description, or `Normalized row of table <name>` when there is none, in the snapshot and in the differential. Column and id elements already had one, and an id element without a role label no longer writes empty parentheses.
+- Every logical model of the examples validates with 0 errors. A generator test rejects empty strings in every generated resource (#12).

@@ -449,7 +449,7 @@ In the R5 specification FML has maturity 0 (Draft) and status Trial Use, and som
 | --- | --- |
 | `map`, `uses` source and target | Generated: logical model of the normalized row → Bundle; map name between backticks |
 | `///` metadata lines | Not generated (rejected by the HL7 7.0.5 parser) |
-| `uses` queried and produced, `imports` | `produced` for every created type; `imports` is a candidate for templates |
+| `uses` queried and produced, `imports` | `target` for every created type, because the role groups take the resource as a `target` parameter (with `produced` the HL7 validator reports a mode mismatch, #120); `imports` is a candidate for templates |
 | `group` with source and target parameters | Generated: one main group per table, one per role |
 | `extends`, default groups `<<types>>` and `<<type+>>` | Not used (they serve FHIR ↔ FHIR conversions) |
 | Source rule: element, alias, `where` | Generated from `createWhen`, row conditions, `skipInstance` actions, value maps |
@@ -469,7 +469,7 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 
 | Model element | Generated FML |
 | --- | --- |
-| Source table | One StructureMap: `uses` of the normalized-row logical model as source and of Bundle as target; main group with `bundle.type = 'transaction'` |
+| Source table | One StructureMap: `uses` of the normalized-row logical model as source, of Bundle as target and of each created resource type as target; main group with `bundle.type = 'transaction'` |
 | Role | Rule in the main group `src where (condition) -> bundle.entry as e, e.resource = create('Type') as res, e.request as req then { … }` + a `group` dedicated to the role |
 | Id, request, fullUrl | `src.id_Type0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Type/' + $this), e.fullUrl = evaluate(i, '<fullUrlBase>/Type/' + $this)` |
 | Creation condition | FHIRPath with `$this.` in front of every column: `notEmpty` → `$this.col.exists()`; `equals` / `in` → `$this.col.where($this = 'v').exists()`; `notEquals`, `notIn` and `skipInstance` → `.where(…).empty()`; then `and`, `or`, `not` |
@@ -478,7 +478,7 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 | Several rows on the same complex element (two or more rows writing the same parent element) | One shared block, created if at least one column has a value: `src where ($this.a.exists() or $this.b.exists()) -> res.period as p then { … }` |
 | One row on a complex element | Written inline: `src.col as v -> res.period as p, p.start = v` |
 | Named slice | `src where ($this.col.exists()) -> res.component as slc then { discriminator with cc(…); value }` |
-| Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes and booleans. Each rule is named `<row code>-<value>`, with characters outside `[A-Za-z0-9_.-]` replaced by `_` (`R-006-1`, `R-011--1`, `Sì` → `R-002-S_`); when two values of the same map get the same name, the later ones in entry order get a numeric suffix (`Sí` → `R-002-S_2`, `N A` after `N/A` → `R-002-N_A2`). ConceptMaps are exported only as documentation |
+| Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes and booleans. Each rule is named `<row code>-<value>`; a rule name is a FHIR `id` (`[A-Za-z0-9.-]{1,64}`), so characters outside `[A-Za-z0-9.-]` become `-` (`R-006-1`, `R-011--1`, `Sì` → `R-002-S-`) and the name is cut to 64 characters; when two values of the same map get the same name, the later ones in entry order get a numeric suffix, added after cutting so the name still fits (`Sí` → `R-002-S-2`; `N/A`, `N A`, `N-A` → `R-002-N-A`, `R-002-N-A2`, `R-002-N-A3`). ConceptMaps are exported only as documentation |
 | Quantity with unit from a column | `res.value = create('Quantity') as q then { value; one rule per unit with unit, system and code }` |
 | Multiple choice, `repeat: eachValue` | The normalization produces a list; each per-value rule fires for every item, so one repetition per selected value |
 | Reference in the same table | `src.id_Target as t -> res.subject as r, r.reference = evaluate(t, 'Type/' + $this)`, inside the creation condition of the target role |
@@ -555,7 +555,7 @@ The conversion module reads only the package: the normalization specification to
 
 | Node | Variants |
 | --- | --- |
-| Map | url, name, `uses` (source, target, produced), groups |
+| Map | url, name, `uses` (source, target), groups |
 | Group | name, at least two parameters, rules |
 | Rule | one source (element, alias, `where`), element targets, `then` with nested rules or a group call |
 | Transform | `literal`, `copy`, `create`, `c`, `cc`, `evaluate` |

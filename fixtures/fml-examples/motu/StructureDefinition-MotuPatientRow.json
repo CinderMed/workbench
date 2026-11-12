@@ -17,6 +17,7 @@
       {
         "id": "MotuPatientRow",
         "path": "MotuPatientRow",
+        "definition": "Demographics of amputee patients.",
         "min": 0,
         "max": "*",
         "base": {
@@ -104,6 +105,7 @@
       {
         "id": "MotuPatientRow",
         "path": "MotuPatientRow",
+        "definition": "Demographics of amputee patients.",
         "min": 0,
         "max": "*",
         "base": {

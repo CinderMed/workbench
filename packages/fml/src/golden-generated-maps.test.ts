@@ -4,7 +4,7 @@
 // the generator: the hand-written maps hold comments and blank lines the generator does not
 // reproduce. Only these differences are ignored:
 // - in the FML text, `//` comment lines and blank lines;
-// - in the StructureMap JSON, `status` and `text.div` (the narrative embeds the FML text).
+// - in the StructureMap JSON, `text.div` (the narrative embeds the FML text).
 // Every other byte must match. #97 removes this relaxation and compares the files whole.
 import { isProjectFile, type ProjectFile } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
@@ -31,10 +31,9 @@ const withoutComments = (text: string): string =>
     .filter((line) => line.trim() !== "" && !line.trimStart().startsWith("//"))
     .join("\n");
 
-/** StructureMap JSON without `status` and `text.div` (the relaxation tracked by #97). */
+/** StructureMap JSON without `text.div` (the relaxation tracked by #97). */
 function withoutNarrative(json: unknown): unknown {
   const rest = { ...(json as Record<string, unknown>) };
-  delete rest["status"];
   delete rest["text"];
   return rest;
 }
@@ -65,7 +64,7 @@ describe.each(cases)("generator golden case %s", (_name, file, sourceId, map, js
     expect(withoutComments(printMap(generated))).toBe(withoutComments(map));
   });
 
-  it("builds the StructureMap the HL7 engine compiled, status and narrative aside (#97)", () => {
+  it("builds the StructureMap the HL7 engine compiled, narrative aside (#97)", () => {
     expect(withoutNarrative(toStructureMap(generated, { fhirRelease: "R4" }))).toEqual(
       withoutNarrative(json),
     );

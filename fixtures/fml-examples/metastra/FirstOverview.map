@@ -2,11 +2,11 @@ map "http://example.org/fhir/metastra/StructureMap/FirstOverview" = `FirstOvervi
 
 uses "http://example.org/fhir/metastra/StructureDefinition/FirstOverviewRow" alias FirstOverviewRow as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
-uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as produced
-uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as produced
-uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as produced
-uses "http://hl7.org/fhir/StructureDefinition/Condition" alias Condition as produced
-uses "http://hl7.org/fhir/StructureDefinition/Procedure" alias Procedure as produced
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
+uses "http://hl7.org/fhir/StructureDefinition/Condition" alias Condition as target
+uses "http://hl7.org/fhir/StructureDefinition/Procedure" alias Procedure as target
 
 // Main group: one transaction Bundle per normalized record.
 // Each role becomes an entry with PUT on its deterministic id (computed by the normalization).

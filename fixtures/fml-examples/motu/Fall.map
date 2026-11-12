@@ -2,7 +2,7 @@ map "http://example.org/fhir/motu/StructureMap/Fall" = `Fall`
 
 uses "http://example.org/fhir/motu/StructureDefinition/FallRow" alias FallRow as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
-uses "http://hl7.org/fhir/StructureDefinition/AdverseEvent" alias AdverseEvent as produced
+uses "http://hl7.org/fhir/StructureDefinition/AdverseEvent" alias AdverseEvent as target
 
 group Fall(source src : FallRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";

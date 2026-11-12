@@ -3,10 +3,11 @@
   "id" : "Fall",
   "text" : {
     "status" : "additional",
-    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/motu/StructureMap/Fall&quot; = `Fall`\n\nuses &quot;http://example.org/fhir/motu/StructureDefinition/FallRow&quot; alias FallRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/AdverseEvent&quot; alias AdverseEvent as produced\n\ngroup Fall(source src : FallRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // AdverseEvent[0] · fall — created when: FallDate is not empty\n  src where ($this.id_AdverseEvent0.exists() and $this.FallDate.exists()) -&gt; bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {\n    src.id_AdverseEvent0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'AdverseEvent/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/AdverseEvent/' + $this) &quot;AdverseEvent0-id&quot;;\n    src then AdverseEvent0(src, res) &quot;AdverseEvent0-body&quot;;\n  } &quot;AdverseEvent0&quot;;\n}\n\ngroup AdverseEvent0(source src : FallRow, target res : AdverseEvent) {\n  src -&gt; res.actuality = 'actual' &quot;fixed-actuality&quot;;\n  src -&gt; res.event = cc('http://snomed.info/sct', '1912002', 'Fall') &quot;fixed-event&quot;;\n  src.FallDate as v -&gt; res.date = v &quot;R-007&quot;;\n  // R-008, R-009 references to other tables (via rel_fall_patient, rel_fall_stay)\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-008&quot;;\n  src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-009&quot;;\n}\n</pre></div>"
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/motu/StructureMap/Fall&quot; = `Fall`\n\nuses &quot;http://example.org/fhir/motu/StructureDefinition/FallRow&quot; alias FallRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/AdverseEvent&quot; alias AdverseEvent as target\n\ngroup Fall(source src : FallRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // AdverseEvent[0] · fall — created when: FallDate is not empty\n  src where ($this.id_AdverseEvent0.exists() and $this.FallDate.exists()) -&gt; bundle.entry as e, e.resource = create('AdverseEvent') as res, e.request as req then {\n    src.id_AdverseEvent0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'AdverseEvent/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/AdverseEvent/' + $this) &quot;AdverseEvent0-id&quot;;\n    src then AdverseEvent0(src, res) &quot;AdverseEvent0-body&quot;;\n  } &quot;AdverseEvent0&quot;;\n}\n\ngroup AdverseEvent0(source src : FallRow, target res : AdverseEvent) {\n  src -&gt; res.actuality = 'actual' &quot;fixed-actuality&quot;;\n  src -&gt; res.event = cc('http://snomed.info/sct', '1912002', 'Fall') &quot;fixed-event&quot;;\n  src.FallDate as v -&gt; res.date = v &quot;R-007&quot;;\n  // R-008, R-009 references to other tables (via rel_fall_patient, rel_fall_stay)\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-008&quot;;\n  src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-009&quot;;\n}\n</pre></div>"
   },
   "url" : "http://example.org/fhir/motu/StructureMap/Fall",
   "name" : "Fall",
+  "status" : "draft",
   "structure" : [{
     "url" : "http://example.org/fhir/motu/StructureDefinition/FallRow",
     "mode" : "source",
@@ -19,7 +20,7 @@
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/AdverseEvent",
-    "mode" : "produced",
+    "mode" : "target",
     "alias" : "AdverseEvent"
   }],
   "group" : [{

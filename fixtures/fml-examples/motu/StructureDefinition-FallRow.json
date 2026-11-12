@@ -17,6 +17,7 @@
       {
         "id": "FallRow",
         "path": "FallRow",
+        "definition": "Falls that happened during a stay.",
         "min": 0,
         "max": "*",
         "base": {
@@ -140,6 +141,7 @@
       {
         "id": "FallRow",
         "path": "FallRow",
+        "definition": "Falls that happened during a stay.",
         "min": 0,
         "max": "*",
         "base": {

@@ -49,3 +49,8 @@ The generator must be deterministic and must never need hand edits, and the fixt
 - **Rule names (#90).** The generator checks that the rules of each group, nested rules included, have different names (`DUPLICATE_RULE_NAME`). The check is per group, not per map: the verified Metastra map has `fixed-status` in four groups, and the line index and diagnostics identify a rule by group and name.
 - **Behaviour check of the generated maps.** `tooling/golden/run-examples.sh` has a second pass. It replaces every map of a copy of the fixtures with the generated FML and StructureMap JSON (`tooling/golden/generate-maps.mjs`) and runs the same suite. All 13 checks must pass, and every normalized row and Bundle must equal the committed one; only the maps may differ. The golden CI job now builds the packages.
 - **Known text differences until #97.** For MotuPatient, FirstOverview and Visit, `golden-generated-maps.test.ts` lists every difference: the single-row `identifier` block written inline (Option B), and Metastra's `subject-auto`/`encounter-auto` becoming `R-015`/`R-016` (#99). The verified text with exactly those substitutions applied must equal the generated text, comments and blank lines aside. HospitalStay and Fall have no differences.
+
+## Addendum (2026-11-12): rule names are FHIR ids; uses as target (#120)
+
+- `StructureMap.group.rule.name` is a FHIR `id` (`[A-Za-z0-9.-]{1,64}`). Value-map rule names replace other characters with `-` instead of `_`, are cut to 64 characters, and get the collision suffix after the cut, so the result never exceeds 64. `N/A`, `N A` and `N-A` now collide: `R-002-N-A`, `R-002-N-A2`, `R-002-N-A3`. `ruleName` accepts only FHIR ids.
+- The created resource types are declared with `uses … as target` (ADR-0007 addendum).

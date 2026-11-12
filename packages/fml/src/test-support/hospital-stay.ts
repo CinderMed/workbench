@@ -101,7 +101,7 @@ export const hospitalStay: StructureMapAst = {
     {
       url: "http://hl7.org/fhir/StructureDefinition/Encounter",
       alias: ident("Encounter"),
-      mode: "produced",
+      mode: "target",
     },
   ],
   groups: [

@@ -17,6 +17,7 @@
       {
         "id": "HospitalStayRow",
         "path": "HospitalStayRow",
+        "definition": "Rehabilitation stays: one or more per patient.",
         "min": 0,
         "max": "*",
         "base": {
@@ -122,6 +123,7 @@
       {
         "id": "HospitalStayRow",
         "path": "HospitalStayRow",
+        "definition": "Rehabilitation stays: one or more per patient.",
         "min": 0,
         "max": "*",
         "base": {
