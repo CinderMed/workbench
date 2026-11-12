@@ -23,3 +23,40 @@ jobs:
         env:
           NORMALIZER_MEMORY_ROWS: 1000000
         run: pnpm exec vitest run tooling/normalizer-memory.test.ts
+
+  generative-compile:
+    name: Generative maps compiled by the HL7 engine (20 seeds)
+    runs-on: ubuntu-latest
+    env:
+      VALIDATOR_VERSION: 7.0.5
+      VALIDATOR_SHA256: 9dfe9f305b0f9389eceade2a4a1c9a2740d7b0e614066fdf07a78b571c76d92f
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Build the domain packages
+        run: pnpm --filter "./packages/*" build
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Cache HL7 validator and FHIR packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .fhir/validator
+            ~/.fhir/packages
+          key: hl7-validator-${{ env.VALIDATOR_VERSION }}-r4core-4.0.1
+      - name: Download and verify the HL7 validator
+        run: |
+          jar=.fhir/validator/validator_cli-$VALIDATOR_VERSION.jar
+          if [ ! -f "$jar" ]; then
+            mkdir -p .fhir/validator
+            curl -fsSL -o "$jar" \
+              "https://github.com/hapifhir/org.hl7.fhir.core/releases/download/$VALIDATOR_VERSION/validator_cli.jar"
+          fi
+          echo "$VALIDATOR_SHA256  $jar" | sha256sum --check --strict
+          echo "VALIDATOR=$PWD/$jar" >> "$GITHUB_ENV"
+      - name: Compile 20 generated maps with the HL7 engine (#76)
+        env:
+          FML_GENERATIVE_COMPILE: "1"
+        run: pnpm exec vitest run tooling/generative-compile.test.ts

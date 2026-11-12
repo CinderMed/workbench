@@ -44,3 +44,36 @@ The verified examples hold the JSON the HL7 validator 7.0.5 compiled from each m
   - **Missing `status`:** the HL7 `compile` output has no `status`.
 - **Fixture StructureMap JSON** is now the HL7 `compile` output (line endings normalized to LF) plus `"status" : "draft"`, inserted after `name`, which is what our builder writes. The golden comparisons no longer ignore `status`. Until #97 they ignore only `text`, whose `div` embeds the FML text.
 - `tooling/golden/validate-resources.sh`, in the CI golden job, validates every FHIR resource of the examples with 0 errors: logical models, StructureMaps, ConceptMaps and Bundles. MOTU's HospitalStay and Fall Bundles are validated through `bundle-merged.json`, because their references cross tables.
+
+## Addendum (2026-11-12): golden tests in CI (#76)
+
+The CI golden job now proves the whole TypeScript chain, not only the stored fixtures:
+
+1. **Verified examples:** `tests/run-all.sh` on the committed maps, with the reference normalizer.
+2. **Export:** the real `cindermed export` (built CLI) on every example (`tooling/golden/export-examples.mjs`).
+   - Maps, logical models and ConceptMaps are byte-identical to the fixtures; normalization specifications too, apart from `$schema`.
+   - StructureMap JSON has the content of the HL7-compiled fixture.
+   - The manifest is the committed one apart from `$schema`, `generator` and the digests of the files whose `$schema` differs, and every digest matches the exported bytes.
+3. **Compile:** the HL7 engine compiles **every exported map in CI** (`tooling/golden/compile-check.sh`), from a folder holding only the map and the logical models. The result must equal the StructureMap JSON our builder wrote, **ignoring only `status`**: this is the condition of the first addendum. The manifest keeps `verification.compile = "skipped"`, because the package's JSON is built, not compiled.
+4. **TypeScript pipeline:** a second run of the suite on a copy of the fixtures.
+   - The exported maps and StructureMap JSON replace the committed ones.
+   - The test CSVs go through `@cindermed/normalizer`, by way of `tooling/golden/normalize-ts.mjs`, which has the reference's command line and messages. `tests/run-all.sh` now reads the normalizer command from `NORMALIZE`.
+   - All checks must pass, and maps, normalized rows and Bundles must equal the committed ones; the merged MOTU and MIMIC Bundles must have 0 errors. This replaces the earlier generated-maps pass (`generate-maps.mjs`, ADR-0011 addendum).
+
+**Generative tests** (`packages/fml/src/generative.test.ts`): 300 seeded random projects (`test-support/random-projects.ts`).
+
+- They are schema- and integrity-valid, and include the hard cases:
+  - reserved words and `id`/`extension`/`resourceType` as column names, leading digits, accents, emoji, names over 64 characters and names that collide after sanitizing;
+  - value-map values that collide as rule names, and very long values;
+  - a long-format table with a code column, and `via` references.
+- For every table they check that:
+  - the map generates and prints deterministically, and passes the grammar check;
+  - every rule name is a unique, valid FHIR id within its group;
+  - the normalization specification validates against its schema;
+  - no generated resource contains an empty string.
+- **Nightly** (`nightly.yml`), the HL7 engine compiles the maps of seeds 1–20 and compares them with our JSON (`tooling/generative-compile.test.ts`). Compilation-level generative tests in the PR checks come in module 3.
+- **First nightly result** (12 November 2026, run locally): 12 of the 20 seeds compile and match. Eight fail and are tracked:
+  - **#134** (seeds 4, 14, 17, 20): the HL7 FHIRPath parser rejects element names whose second character is `_` (`a_b`, `c___`) inside `where`, although the grammar accepts them.
+  - **#135** (seeds 1, 3, 16, 19): the narrative differs for characters outside the BMP (the engine writes `&#x1F600;`).
+
+  The nightly job stays red until both are fixed.
