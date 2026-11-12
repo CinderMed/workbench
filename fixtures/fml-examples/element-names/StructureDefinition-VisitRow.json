@@ -45,14 +45,14 @@
         ]
       },
       {
-        "id": "VisitRow.a_b",
-        "path": "VisitRow.a_b",
+        "id": "VisitRow.ca_b",
+        "path": "VisitRow.ca_b",
         "short": "Note",
         "definition": "Free-text note; the header has a space, so the element name has '_' as second character.",
         "min": 0,
         "max": "1",
         "base": {
-          "path": "VisitRow.a_b",
+          "path": "VisitRow.ca_b",
           "min": 0,
           "max": "1"
         },
@@ -133,14 +133,14 @@
         ]
       },
       {
-        "id": "VisitRow.a_b",
-        "path": "VisitRow.a_b",
+        "id": "VisitRow.ca_b",
+        "path": "VisitRow.ca_b",
         "short": "Note",
         "definition": "Free-text note; the header has a space, so the element name has '_' as second character.",
         "min": 0,
         "max": "1",
         "base": {
-          "path": "VisitRow.a_b",
+          "path": "VisitRow.ca_b",
           "min": 0,
           "max": "1"
         },

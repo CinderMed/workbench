@@ -17,7 +17,7 @@
       "type": "string"
     },
     {
-      "name": "a_b",
+      "name": "ca_b",
       "sourceName": "a b",
       "type": "string"
     }
