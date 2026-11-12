@@ -1,0 +1,20 @@
+[
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/PatientsRow",
+    "subject_id": "10031404",
+    "gender": "F",
+    "id_Patient0": "pat-654497824fddf8633975b18a"
+  },
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/PatientsRow",
+    "subject_id": "10019568",
+    "gender": "F",
+    "id_Patient0": "pat-2ebb7b3fb087c91f4379338d"
+  },
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/PatientsRow",
+    "subject_id": "10022281",
+    "gender": "M",
+    "id_Patient0": "pat-d36ba945d2c3b023ce8724c6"
+  }
+]

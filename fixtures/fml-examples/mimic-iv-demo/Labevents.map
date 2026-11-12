@@ -1,0 +1,101 @@
+map "http://example.org/fhir/mimic-iv-demo/StructureMap/Labevents" = `Labevents`
+
+uses "http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow" alias LabeventsRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Labevents(source src : LabeventsRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Observation[0] · lab event — always
+  src where ($this.id_Observation0.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/mimic-iv-demo/Observation/' + $this) "Observation0-id";
+    src then Observation0(src, res) "Observation0-body";
+  } "Observation0";
+}
+
+group Observation0(source src : LabeventsRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.category = cc('http://terminology.hl7.org/CodeSystem/observation-category', 'laboratory', 'Laboratory') "fixed-category";
+  // identifier: written by 2 rows (R-008, R-009) → one shared instance
+  src where ($this.labevent_id.exists()) -> res.identifier as p then {
+    src -> p.system = 'http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents' "R-008";
+    src.labevent_id as v -> p.value = v "R-009";
+  } "Observation0-identifier";
+  // R-010: value map labItems (one rule per value; ConceptMap exported separately)
+  src.itemid as v where ($this = '52033') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '52033', 'Specimen Type') "R-010-52033";
+  src.itemid as v where ($this = '50879') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50879', 'Barbiturate Screen') "R-010-50879";
+  src.itemid as v where ($this = '50981') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50981', 'Salicylate') "R-010-50981";
+  src.itemid as v where ($this = '50955') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50955', 'Light Green Top Hold') "R-010-50955";
+  src.itemid as v where ($this = '50999') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50999', 'Tricyclic Antidepressant Screen') "R-010-50999";
+  src.itemid as v where ($this = '50868') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50868', 'Anion Gap') "R-010-50868";
+  src.itemid as v where ($this = '50922') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50922', 'Ethanol') "R-010-50922";
+  src.itemid as v where ($this = '50861') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50861', 'Alanine Aminotransferase (ALT)') "R-010-50861";
+  src.itemid as v where ($this = '50863') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50863', 'Alkaline Phosphatase') "R-010-50863";
+  src.itemid as v where ($this = '50933') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50933', 'Green Top Hold (plasma)') "R-010-50933";
+  src.itemid as v where ($this = '50931') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50931', 'Glucose') "R-010-50931";
+  src.itemid as v where ($this = '50954') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50954', 'Lactate Dehydrogenase (LD)') "R-010-50954";
+  src.itemid as v where ($this = '50912') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50912', 'Creatinine') "R-010-50912";
+  src.itemid as v where ($this = '51006') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51006', 'Urea Nitrogen') "R-010-51006";
+  src.itemid as v where ($this = '51003') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51003', 'Troponin T') "R-010-51003";
+  src.itemid as v where ($this = '50956') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50956', 'Lipase') "R-010-50956";
+  src.itemid as v where ($this = '50880') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50880', 'Benzodiazepine Screen') "R-010-50880";
+  src.itemid as v where ($this = '50920') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50920', 'Estimated GFR (MDRD equation)') "R-010-50920";
+  src.itemid as v where ($this = '50856') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50856', 'Acetaminophen') "R-010-50856";
+  src.itemid as v where ($this = '51035') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51035', 'LD, Body Fluid') "R-010-51035";
+  src.itemid as v where ($this = '51043') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51043', 'Total Protein, Body Fluid') "R-010-51043";
+  src.itemid as v where ($this = '51034') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51034', 'Glucose, Body Fluid') "R-010-51034";
+  src.itemid as v where ($this = '51254') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51254', 'Monocytes') "R-010-51254";
+  src.itemid as v where ($this = '51279') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51279', 'Red Blood Cells') "R-010-51279";
+  src.itemid as v where ($this = '51244') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51244', 'Lymphocytes') "R-010-51244";
+  src.itemid as v where ($this = '51214') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51214', 'Fibrinogen, Functional') "R-010-51214";
+  src.itemid as v where ($this = '51146') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51146', 'Basophils') "R-010-51146";
+  src.itemid as v where ($this = '51249') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51249', 'MCHC') "R-010-51249";
+  src.itemid as v where ($this = '51237') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51237', 'INR(PT)') "R-010-51237";
+  src.itemid as v where ($this = '51222') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51222', 'Hemoglobin') "R-010-51222";
+  src.itemid as v where ($this = '51265') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51265', 'Platelet Count') "R-010-51265";
+  src.itemid as v where ($this = '51221') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51221', 'Hematocrit') "R-010-51221";
+  src.itemid as v where ($this = '51277') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51277', 'RDW') "R-010-51277";
+  src.itemid as v where ($this = '51200') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51200', 'Eosinophils') "R-010-51200";
+  src.itemid as v where ($this = '51256') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51256', 'Neutrophils') "R-010-51256";
+  src.itemid as v where ($this = '51250') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51250', 'MCV') "R-010-51250";
+  src.itemid as v where ($this = '51274') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51274', 'PT') "R-010-51274";
+  src.itemid as v where ($this = '51275') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51275', 'PTT') "R-010-51275";
+  src.itemid as v where ($this = '51248') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51248', 'MCH') "R-010-51248";
+  src.itemid as v where ($this = '51301') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51301', 'White Blood Cells') "R-010-51301";
+  src.itemid as v where ($this = '51427') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51427', 'Lymphocytes') "R-010-51427";
+  src.itemid as v where ($this = '51436') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51436', 'Polys') "R-010-51436";
+  src.itemid as v where ($this = '51428') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51428', 'Macrophage') "R-010-51428";
+  src.itemid as v where ($this = '51438') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51438', 'RBC, Other Fluid') "R-010-51438";
+  src.itemid as v where ($this = '52369') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '52369', 'Total Nucleated Cells, Other') "R-010-52369";
+  src.itemid as v where ($this = '51431') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51431', 'Monos') "R-010-51431";
+  src.valuenum as v -> res.value = create('Quantity') as q then {
+    v -> q.value = v "R-011-value";
+    // R-011-unit: unit from column valueuom, value map labUnits
+    src.valueuom as u where ($this = '#/uL') -> q.unit = '#/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '#/uL' "R-011-unit---uL";
+    src.valueuom as u where ($this = '%') -> q.unit = '%', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '%' "R-011-unit--";
+    src.valueuom as u where ($this = 'IU/L') -> q.unit = 'IU/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'IU/L' "R-011-unit-IU-L";
+    src.valueuom as u where ($this = 'K/uL') -> q.unit = 'K/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'K/uL' "R-011-unit-K-uL";
+    src.valueuom as u where ($this = 'fL') -> q.unit = 'fL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'fL' "R-011-unit-fL";
+    src.valueuom as u where ($this = 'g/dL') -> q.unit = 'g/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'g/dL' "R-011-unit-g-dL";
+    src.valueuom as u where ($this = 'm/uL') -> q.unit = 'm/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'm/uL' "R-011-unit-m-uL";
+    src.valueuom as u where ($this = 'mEq/L') -> q.unit = 'mEq/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mEq/L' "R-011-unit-mEq-L";
+    src.valueuom as u where ($this = 'mg/dL') -> q.unit = 'mg/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mg/dL' "R-011-unit-mg-dL";
+    src.valueuom as u where ($this = 'ng/mL') -> q.unit = 'ng/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ng/mL' "R-011-unit-ng-mL";
+    src.valueuom as u where ($this = 'pg') -> q.unit = 'pg', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'pg' "R-011-unit-pg";
+    src.valueuom as u where ($this = 'sec') -> q.unit = 'sec', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'sec' "R-011-unit-sec";
+    src.valueuom as u where ($this = 'ug/mL') -> q.unit = 'ug/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ug/mL' "R-011-unit-ug-mL";
+  } "R-011";
+  src where (($this.valuenum.exists()).not()) then {
+    src.value as v -> res.value = v "R-012";
+  } "R-012-guard";
+  src.comments as v -> res.note as p, p.text = v "R-013";
+  // R-014 reference to Patient[0] in another table (via rel_lab_patients): the resource must already be loaded
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-014";
+  // R-015 reference to Encounter[0] in another table (via rel_lab_admissions): the resource must already be loaded
+  src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "R-015";
+  src where (($this.valuenum.exists()).not() and ($this.value.exists()).not()) then {
+    src.comments as v -> res.value = v "R-016";
+  } "R-016-guard";
+}

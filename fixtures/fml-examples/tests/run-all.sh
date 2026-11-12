@@ -3,7 +3,7 @@
 set -u; cd "$(dirname "$0")/.."
 J=${VALIDATOR:?set VALIDATOR to the path of validator_cli.jar}; ok=0; ko=0
 [ -f tools/java/RunMap.class ] || javac -proc:none -cp "$J" tools/java/RunMap.java 2>&1 | grep -v JAVA_TOOL
-rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json
+rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json
 run(){ # folder map input output expected_entries [external-refs]
   node tools/normalize.mjs "$1/normalization-$2.json" "$1/test-data/$3.csv" > "$1/test-data/$3.normalized.json" 2>/dev/null
   res=$(java -Xmx2g -cp "$J:tools/java" RunMap "$1" "http://example.org/fhir/$1/StructureMap/$2" "$1/test-data/$3.normalized.json" "$1/test-data/$4.json" 2>&1 | grep -E "Bundle validation|\[error\]")
@@ -52,4 +52,19 @@ PY
 m=$(java -Xmx2g -jar "$J" motu/test-data/bundle-merged.json -version 4.0.1 -tx n/a 2>&1 | grep -E "^(Success|\*FAILURE\*)")
 echo "MOTU merged (order MotuPatient → HospitalStay → Fall): $m"
 echo "$m" | grep -q "0 errors" && ok=$((ok+1)) || ko=$((ko+1))
+# Long table (#105): MIMIC-IV demo slice, one Observation per lab event row. Each file is normalized
+# into an array of rows; RunMap joins the Bundles of the rows. References cross tables, so the three
+# Bundles are validated together, in load order Patients → Admissions → Labevents.
+run mimic-iv-demo Patients patients bundle-Patients 3
+run mimic-iv-demo Admissions admissions bundle-Admissions 3 external-refs
+run mimic-iv-demo Labevents labevents bundle-Labevents 60 external-refs
+python3 - <<'PY'
+import json
+b={"resourceType":"Bundle","type":"transaction","entry":[]}
+for t in ['Patients','Admissions','Labevents']: b['entry']+=json.load(open(f'mimic-iv-demo/test-data/bundle-{t}.json'))['entry']
+json.dump(b,open('mimic-iv-demo/test-data/bundle-merged.json','w'),indent=2)
+PY
+mm=$(java -Xmx2g -jar "$J" mimic-iv-demo/test-data/bundle-merged.json -version 4.0.1 -tx n/a -ig mimic-iv-demo 2>&1 | grep -E "^(Success|\*FAILURE\*)")
+echo "MIMIC-IV demo merged (order Patients → Admissions → Labevents): $mm"
+echo "$mm" | grep -q "0 errors" && ok=$((ok+1)) || ko=$((ko+1))
 echo "Total: $ok passed, $ko failed"

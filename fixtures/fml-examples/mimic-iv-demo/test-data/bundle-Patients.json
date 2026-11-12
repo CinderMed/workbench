@@ -1,0 +1,52 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Patient/pat-654497824fddf8633975b18a",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-654497824fddf8633975b18a",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/patient",
+        "value" : "10031404"
+      }],
+      "gender" : "female"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-654497824fddf8633975b18a"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Patient/pat-2ebb7b3fb087c91f4379338d",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-2ebb7b3fb087c91f4379338d",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/patient",
+        "value" : "10019568"
+      }],
+      "gender" : "female"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Patient/pat-d36ba945d2c3b023ce8724c6",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-d36ba945d2c3b023ce8724c6",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/patient",
+        "value" : "10022281"
+      }],
+      "gender" : "male"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+    }
+  }]
+}

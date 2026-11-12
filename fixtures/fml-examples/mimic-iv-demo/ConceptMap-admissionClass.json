@@ -1,0 +1,36 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "admissionClass",
+  "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/admissionClass",
+  "version": "1.3.0",
+  "name": "AdmissionClass",
+  "status": "draft",
+  "description": "Encounter class as the MIMIC-IV on FHIR demo writes it for these admission types.",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "URGENT",
+          "target": [
+            {
+              "code": "AMB",
+              "equivalence": "equivalent",
+              "display": "ambulatory"
+            }
+          ]
+        },
+        {
+          "code": "EW EMER.",
+          "target": [
+            {
+              "code": "EMER",
+              "equivalence": "equivalent",
+              "display": "emergency"
+            }
+          ]
+        }
+      ],
+      "target": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+    }
+  ]
+}

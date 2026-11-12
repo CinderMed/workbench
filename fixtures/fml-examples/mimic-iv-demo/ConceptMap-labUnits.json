@@ -1,0 +1,146 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "labUnits",
+  "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labUnits",
+  "version": "1.3.0",
+  "name": "LabUnits",
+  "status": "draft",
+  "description": "valueuom to the units code system of MIMIC-IV on FHIR (until the unit text can be copied from the column, #108).",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "#/uL",
+          "target": [
+            {
+              "code": "#/uL",
+              "equivalence": "equivalent",
+              "display": "#/uL"
+            }
+          ]
+        },
+        {
+          "code": "%",
+          "target": [
+            {
+              "code": "%",
+              "equivalence": "equivalent",
+              "display": "%"
+            }
+          ]
+        },
+        {
+          "code": "IU/L",
+          "target": [
+            {
+              "code": "IU/L",
+              "equivalence": "equivalent",
+              "display": "IU/L"
+            }
+          ]
+        },
+        {
+          "code": "K/uL",
+          "target": [
+            {
+              "code": "K/uL",
+              "equivalence": "equivalent",
+              "display": "K/uL"
+            }
+          ]
+        },
+        {
+          "code": "fL",
+          "target": [
+            {
+              "code": "fL",
+              "equivalence": "equivalent",
+              "display": "fL"
+            }
+          ]
+        },
+        {
+          "code": "g/dL",
+          "target": [
+            {
+              "code": "g/dL",
+              "equivalence": "equivalent",
+              "display": "g/dL"
+            }
+          ]
+        },
+        {
+          "code": "m/uL",
+          "target": [
+            {
+              "code": "m/uL",
+              "equivalence": "equivalent",
+              "display": "m/uL"
+            }
+          ]
+        },
+        {
+          "code": "mEq/L",
+          "target": [
+            {
+              "code": "mEq/L",
+              "equivalence": "equivalent",
+              "display": "mEq/L"
+            }
+          ]
+        },
+        {
+          "code": "mg/dL",
+          "target": [
+            {
+              "code": "mg/dL",
+              "equivalence": "equivalent",
+              "display": "mg/dL"
+            }
+          ]
+        },
+        {
+          "code": "ng/mL",
+          "target": [
+            {
+              "code": "ng/mL",
+              "equivalence": "equivalent",
+              "display": "ng/mL"
+            }
+          ]
+        },
+        {
+          "code": "pg",
+          "target": [
+            {
+              "code": "pg",
+              "equivalence": "equivalent",
+              "display": "pg"
+            }
+          ]
+        },
+        {
+          "code": "sec",
+          "target": [
+            {
+              "code": "sec",
+              "equivalence": "equivalent",
+              "display": "sec"
+            }
+          ]
+        },
+        {
+          "code": "ug/mL",
+          "target": [
+            {
+              "code": "ug/mL",
+              "equivalence": "equivalent",
+              "display": "ug/mL"
+            }
+          ]
+        }
+      ],
+      "target": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+    }
+  ]
+}

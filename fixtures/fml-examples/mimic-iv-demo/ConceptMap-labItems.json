@@ -1,0 +1,522 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "labItems",
+  "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labItems",
+  "version": "1.3.0",
+  "name": "LabItems",
+  "status": "draft",
+  "description": "itemid to the d_labitems code system of MIMIC-IV on FHIR (one entry per item until a code column can be written as a Coding, #106).",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "52033",
+          "display": "Specimen Type",
+          "target": [
+            {
+              "code": "52033",
+              "equivalence": "equivalent",
+              "display": "Specimen Type"
+            }
+          ]
+        },
+        {
+          "code": "50879",
+          "display": "Barbiturate Screen",
+          "target": [
+            {
+              "code": "50879",
+              "equivalence": "equivalent",
+              "display": "Barbiturate Screen"
+            }
+          ]
+        },
+        {
+          "code": "50981",
+          "display": "Salicylate",
+          "target": [
+            {
+              "code": "50981",
+              "equivalence": "equivalent",
+              "display": "Salicylate"
+            }
+          ]
+        },
+        {
+          "code": "50955",
+          "display": "Light Green Top Hold",
+          "target": [
+            {
+              "code": "50955",
+              "equivalence": "equivalent",
+              "display": "Light Green Top Hold"
+            }
+          ]
+        },
+        {
+          "code": "50999",
+          "display": "Tricyclic Antidepressant Screen",
+          "target": [
+            {
+              "code": "50999",
+              "equivalence": "equivalent",
+              "display": "Tricyclic Antidepressant Screen"
+            }
+          ]
+        },
+        {
+          "code": "50868",
+          "display": "Anion Gap",
+          "target": [
+            {
+              "code": "50868",
+              "equivalence": "equivalent",
+              "display": "Anion Gap"
+            }
+          ]
+        },
+        {
+          "code": "50922",
+          "display": "Ethanol",
+          "target": [
+            {
+              "code": "50922",
+              "equivalence": "equivalent",
+              "display": "Ethanol"
+            }
+          ]
+        },
+        {
+          "code": "50861",
+          "display": "Alanine Aminotransferase (ALT)",
+          "target": [
+            {
+              "code": "50861",
+              "equivalence": "equivalent",
+              "display": "Alanine Aminotransferase (ALT)"
+            }
+          ]
+        },
+        {
+          "code": "50863",
+          "display": "Alkaline Phosphatase",
+          "target": [
+            {
+              "code": "50863",
+              "equivalence": "equivalent",
+              "display": "Alkaline Phosphatase"
+            }
+          ]
+        },
+        {
+          "code": "50933",
+          "display": "Green Top Hold (plasma)",
+          "target": [
+            {
+              "code": "50933",
+              "equivalence": "equivalent",
+              "display": "Green Top Hold (plasma)"
+            }
+          ]
+        },
+        {
+          "code": "50931",
+          "display": "Glucose",
+          "target": [
+            {
+              "code": "50931",
+              "equivalence": "equivalent",
+              "display": "Glucose"
+            }
+          ]
+        },
+        {
+          "code": "50954",
+          "display": "Lactate Dehydrogenase (LD)",
+          "target": [
+            {
+              "code": "50954",
+              "equivalence": "equivalent",
+              "display": "Lactate Dehydrogenase (LD)"
+            }
+          ]
+        },
+        {
+          "code": "50912",
+          "display": "Creatinine",
+          "target": [
+            {
+              "code": "50912",
+              "equivalence": "equivalent",
+              "display": "Creatinine"
+            }
+          ]
+        },
+        {
+          "code": "51006",
+          "display": "Urea Nitrogen",
+          "target": [
+            {
+              "code": "51006",
+              "equivalence": "equivalent",
+              "display": "Urea Nitrogen"
+            }
+          ]
+        },
+        {
+          "code": "51003",
+          "display": "Troponin T",
+          "target": [
+            {
+              "code": "51003",
+              "equivalence": "equivalent",
+              "display": "Troponin T"
+            }
+          ]
+        },
+        {
+          "code": "50956",
+          "display": "Lipase",
+          "target": [
+            {
+              "code": "50956",
+              "equivalence": "equivalent",
+              "display": "Lipase"
+            }
+          ]
+        },
+        {
+          "code": "50880",
+          "display": "Benzodiazepine Screen",
+          "target": [
+            {
+              "code": "50880",
+              "equivalence": "equivalent",
+              "display": "Benzodiazepine Screen"
+            }
+          ]
+        },
+        {
+          "code": "50920",
+          "display": "Estimated GFR (MDRD equation)",
+          "target": [
+            {
+              "code": "50920",
+              "equivalence": "equivalent",
+              "display": "Estimated GFR (MDRD equation)"
+            }
+          ]
+        },
+        {
+          "code": "50856",
+          "display": "Acetaminophen",
+          "target": [
+            {
+              "code": "50856",
+              "equivalence": "equivalent",
+              "display": "Acetaminophen"
+            }
+          ]
+        },
+        {
+          "code": "51035",
+          "display": "LD, Body Fluid",
+          "target": [
+            {
+              "code": "51035",
+              "equivalence": "equivalent",
+              "display": "LD, Body Fluid"
+            }
+          ]
+        },
+        {
+          "code": "51043",
+          "display": "Total Protein, Body Fluid",
+          "target": [
+            {
+              "code": "51043",
+              "equivalence": "equivalent",
+              "display": "Total Protein, Body Fluid"
+            }
+          ]
+        },
+        {
+          "code": "51034",
+          "display": "Glucose, Body Fluid",
+          "target": [
+            {
+              "code": "51034",
+              "equivalence": "equivalent",
+              "display": "Glucose, Body Fluid"
+            }
+          ]
+        },
+        {
+          "code": "51254",
+          "display": "Monocytes",
+          "target": [
+            {
+              "code": "51254",
+              "equivalence": "equivalent",
+              "display": "Monocytes"
+            }
+          ]
+        },
+        {
+          "code": "51279",
+          "display": "Red Blood Cells",
+          "target": [
+            {
+              "code": "51279",
+              "equivalence": "equivalent",
+              "display": "Red Blood Cells"
+            }
+          ]
+        },
+        {
+          "code": "51244",
+          "display": "Lymphocytes",
+          "target": [
+            {
+              "code": "51244",
+              "equivalence": "equivalent",
+              "display": "Lymphocytes"
+            }
+          ]
+        },
+        {
+          "code": "51214",
+          "display": "Fibrinogen, Functional",
+          "target": [
+            {
+              "code": "51214",
+              "equivalence": "equivalent",
+              "display": "Fibrinogen, Functional"
+            }
+          ]
+        },
+        {
+          "code": "51146",
+          "display": "Basophils",
+          "target": [
+            {
+              "code": "51146",
+              "equivalence": "equivalent",
+              "display": "Basophils"
+            }
+          ]
+        },
+        {
+          "code": "51249",
+          "display": "MCHC",
+          "target": [
+            {
+              "code": "51249",
+              "equivalence": "equivalent",
+              "display": "MCHC"
+            }
+          ]
+        },
+        {
+          "code": "51237",
+          "display": "INR(PT)",
+          "target": [
+            {
+              "code": "51237",
+              "equivalence": "equivalent",
+              "display": "INR(PT)"
+            }
+          ]
+        },
+        {
+          "code": "51222",
+          "display": "Hemoglobin",
+          "target": [
+            {
+              "code": "51222",
+              "equivalence": "equivalent",
+              "display": "Hemoglobin"
+            }
+          ]
+        },
+        {
+          "code": "51265",
+          "display": "Platelet Count",
+          "target": [
+            {
+              "code": "51265",
+              "equivalence": "equivalent",
+              "display": "Platelet Count"
+            }
+          ]
+        },
+        {
+          "code": "51221",
+          "display": "Hematocrit",
+          "target": [
+            {
+              "code": "51221",
+              "equivalence": "equivalent",
+              "display": "Hematocrit"
+            }
+          ]
+        },
+        {
+          "code": "51277",
+          "display": "RDW",
+          "target": [
+            {
+              "code": "51277",
+              "equivalence": "equivalent",
+              "display": "RDW"
+            }
+          ]
+        },
+        {
+          "code": "51200",
+          "display": "Eosinophils",
+          "target": [
+            {
+              "code": "51200",
+              "equivalence": "equivalent",
+              "display": "Eosinophils"
+            }
+          ]
+        },
+        {
+          "code": "51256",
+          "display": "Neutrophils",
+          "target": [
+            {
+              "code": "51256",
+              "equivalence": "equivalent",
+              "display": "Neutrophils"
+            }
+          ]
+        },
+        {
+          "code": "51250",
+          "display": "MCV",
+          "target": [
+            {
+              "code": "51250",
+              "equivalence": "equivalent",
+              "display": "MCV"
+            }
+          ]
+        },
+        {
+          "code": "51274",
+          "display": "PT",
+          "target": [
+            {
+              "code": "51274",
+              "equivalence": "equivalent",
+              "display": "PT"
+            }
+          ]
+        },
+        {
+          "code": "51275",
+          "display": "PTT",
+          "target": [
+            {
+              "code": "51275",
+              "equivalence": "equivalent",
+              "display": "PTT"
+            }
+          ]
+        },
+        {
+          "code": "51248",
+          "display": "MCH",
+          "target": [
+            {
+              "code": "51248",
+              "equivalence": "equivalent",
+              "display": "MCH"
+            }
+          ]
+        },
+        {
+          "code": "51301",
+          "display": "White Blood Cells",
+          "target": [
+            {
+              "code": "51301",
+              "equivalence": "equivalent",
+              "display": "White Blood Cells"
+            }
+          ]
+        },
+        {
+          "code": "51427",
+          "display": "Lymphocytes",
+          "target": [
+            {
+              "code": "51427",
+              "equivalence": "equivalent",
+              "display": "Lymphocytes"
+            }
+          ]
+        },
+        {
+          "code": "51436",
+          "display": "Polys",
+          "target": [
+            {
+              "code": "51436",
+              "equivalence": "equivalent",
+              "display": "Polys"
+            }
+          ]
+        },
+        {
+          "code": "51428",
+          "display": "Macrophage",
+          "target": [
+            {
+              "code": "51428",
+              "equivalence": "equivalent",
+              "display": "Macrophage"
+            }
+          ]
+        },
+        {
+          "code": "51438",
+          "display": "RBC, Other Fluid",
+          "target": [
+            {
+              "code": "51438",
+              "equivalence": "equivalent",
+              "display": "RBC, Other Fluid"
+            }
+          ]
+        },
+        {
+          "code": "52369",
+          "display": "Total Nucleated Cells, Other",
+          "target": [
+            {
+              "code": "52369",
+              "equivalence": "equivalent",
+              "display": "Total Nucleated Cells, Other"
+            }
+          ]
+        },
+        {
+          "code": "51431",
+          "display": "Monos",
+          "target": [
+            {
+              "code": "51431",
+              "equivalence": "equivalent",
+              "display": "Monos"
+            }
+          ]
+        }
+      ],
+      "target": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+    }
+  ]
+}

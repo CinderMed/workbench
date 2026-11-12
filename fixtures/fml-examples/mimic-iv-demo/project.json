@@ -1,0 +1,1511 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.3.0",
+  "project": {
+    "id": "prj_mimic_demo",
+    "name": "MimicDemo",
+    "description": "Long-format golden case (#105): a slice of the MIMIC-IV Clinical Database Demo v2.2 (PhysioNet, ODbL v1.0): three patients, their admissions and 60 lab events, one Observation per lab event row.",
+    "fhirVersion": "4.0.1",
+    "canonicalBase": "http://example.org/fhir/mimic-iv-demo",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/mimic-iv-demo",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_patients",
+      "name": "Patients",
+      "description": "MIMIC-IV hosp.patients: one row per patient.",
+      "rowKey": [
+        "col_pt_subject"
+      ],
+      "columns": [
+        {
+          "id": "col_pt_subject",
+          "name": "subject_id",
+          "label": "subject_id",
+          "description": "Patient identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_pt_gender",
+          "name": "gender",
+          "label": "gender",
+          "description": "Administrative gender.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "F",
+              "label": "female"
+            },
+            {
+              "code": "M",
+              "label": "male"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src_admissions",
+      "name": "Admissions",
+      "description": "MIMIC-IV hosp.admissions: one row per hospital admission.",
+      "rowKey": [
+        "col_ad_hadm"
+      ],
+      "columns": [
+        {
+          "id": "col_ad_subject",
+          "name": "subject_id",
+          "label": "subject_id",
+          "description": "Patient identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_ad_hadm",
+          "name": "hadm_id",
+          "label": "hadm_id",
+          "description": "Hospital admission identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_ad_admit",
+          "name": "admittime",
+          "label": "admittime",
+          "description": "Admission time.",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd HH:mm:ss"
+        },
+        {
+          "id": "col_ad_disch",
+          "name": "dischtime",
+          "label": "dischtime",
+          "description": "Discharge time.",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd HH:mm:ss"
+        },
+        {
+          "id": "col_ad_type",
+          "name": "admission_type",
+          "label": "admission_type",
+          "description": "Type of admission.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "URGENT"
+            },
+            {
+              "code": "EW EMER."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src_labevents",
+      "name": "Labevents",
+      "description": "MIMIC-IV hosp.labevents: one row per laboratory measurement (long format).",
+      "rowKey": [
+        "col_le_id"
+      ],
+      "columns": [
+        {
+          "id": "col_le_id",
+          "name": "labevent_id",
+          "label": "labevent_id",
+          "description": "Lab event identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_le_subject",
+          "name": "subject_id",
+          "label": "subject_id",
+          "description": "Patient identifier.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_le_hadm",
+          "name": "hadm_id",
+          "label": "hadm_id",
+          "description": "Hospital admission identifier; empty for outpatient tests.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_le_item",
+          "name": "itemid",
+          "label": "itemid",
+          "description": "What was measured: a code of d_labitems.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "52033",
+              "label": "Specimen Type"
+            },
+            {
+              "code": "50879",
+              "label": "Barbiturate Screen"
+            },
+            {
+              "code": "50981",
+              "label": "Salicylate"
+            },
+            {
+              "code": "50955",
+              "label": "Light Green Top Hold"
+            },
+            {
+              "code": "50999",
+              "label": "Tricyclic Antidepressant Screen"
+            },
+            {
+              "code": "50868",
+              "label": "Anion Gap"
+            },
+            {
+              "code": "50922",
+              "label": "Ethanol"
+            },
+            {
+              "code": "50861",
+              "label": "Alanine Aminotransferase (ALT)"
+            },
+            {
+              "code": "50863",
+              "label": "Alkaline Phosphatase"
+            },
+            {
+              "code": "50933",
+              "label": "Green Top Hold (plasma)"
+            },
+            {
+              "code": "50931",
+              "label": "Glucose"
+            },
+            {
+              "code": "50954",
+              "label": "Lactate Dehydrogenase (LD)"
+            },
+            {
+              "code": "50912",
+              "label": "Creatinine"
+            },
+            {
+              "code": "51006",
+              "label": "Urea Nitrogen"
+            },
+            {
+              "code": "51003",
+              "label": "Troponin T"
+            },
+            {
+              "code": "50956",
+              "label": "Lipase"
+            },
+            {
+              "code": "50880",
+              "label": "Benzodiazepine Screen"
+            },
+            {
+              "code": "50920",
+              "label": "Estimated GFR (MDRD equation)"
+            },
+            {
+              "code": "50856",
+              "label": "Acetaminophen"
+            },
+            {
+              "code": "51035",
+              "label": "LD, Body Fluid"
+            },
+            {
+              "code": "51043",
+              "label": "Total Protein, Body Fluid"
+            },
+            {
+              "code": "51034",
+              "label": "Glucose, Body Fluid"
+            },
+            {
+              "code": "51254",
+              "label": "Monocytes"
+            },
+            {
+              "code": "51279",
+              "label": "Red Blood Cells"
+            },
+            {
+              "code": "51244",
+              "label": "Lymphocytes"
+            },
+            {
+              "code": "51214",
+              "label": "Fibrinogen, Functional"
+            },
+            {
+              "code": "51146",
+              "label": "Basophils"
+            },
+            {
+              "code": "51249",
+              "label": "MCHC"
+            },
+            {
+              "code": "51237",
+              "label": "INR(PT)"
+            },
+            {
+              "code": "51222",
+              "label": "Hemoglobin"
+            },
+            {
+              "code": "51265",
+              "label": "Platelet Count"
+            },
+            {
+              "code": "51221",
+              "label": "Hematocrit"
+            },
+            {
+              "code": "51277",
+              "label": "RDW"
+            },
+            {
+              "code": "51200",
+              "label": "Eosinophils"
+            },
+            {
+              "code": "51256",
+              "label": "Neutrophils"
+            },
+            {
+              "code": "51250",
+              "label": "MCV"
+            },
+            {
+              "code": "51274",
+              "label": "PT"
+            },
+            {
+              "code": "51275",
+              "label": "PTT"
+            },
+            {
+              "code": "51248",
+              "label": "MCH"
+            },
+            {
+              "code": "51301",
+              "label": "White Blood Cells"
+            },
+            {
+              "code": "51427",
+              "label": "Lymphocytes"
+            },
+            {
+              "code": "51436",
+              "label": "Polys"
+            },
+            {
+              "code": "51428",
+              "label": "Macrophage"
+            },
+            {
+              "code": "51438",
+              "label": "RBC, Other Fluid"
+            },
+            {
+              "code": "52369",
+              "label": "Total Nucleated Cells, Other"
+            },
+            {
+              "code": "51431",
+              "label": "Monos"
+            }
+          ]
+        },
+        {
+          "id": "col_le_time",
+          "name": "charttime",
+          "label": "charttime",
+          "description": "Time the specimen was charted.",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd HH:mm:ss"
+        },
+        {
+          "id": "col_le_value",
+          "name": "value",
+          "label": "value",
+          "description": "Result as text.",
+          "dataType": "string"
+        },
+        {
+          "id": "col_le_valuenum",
+          "name": "valuenum",
+          "label": "valuenum",
+          "description": "Numeric result; empty when the result is text only.",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_le_unit",
+          "name": "valueuom",
+          "label": "valueuom",
+          "description": "Unit of the numeric result.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "#/uL"
+            },
+            {
+              "code": "%"
+            },
+            {
+              "code": "IU/L"
+            },
+            {
+              "code": "K/uL"
+            },
+            {
+              "code": "fL"
+            },
+            {
+              "code": "g/dL"
+            },
+            {
+              "code": "m/uL"
+            },
+            {
+              "code": "mEq/L"
+            },
+            {
+              "code": "mg/dL"
+            },
+            {
+              "code": "ng/mL"
+            },
+            {
+              "code": "pg"
+            },
+            {
+              "code": "sec"
+            },
+            {
+              "code": "ug/mL"
+            }
+          ]
+        },
+        {
+          "id": "col_le_comments",
+          "name": "comments",
+          "label": "comments",
+          "description": "Free-text comments.",
+          "dataType": "string"
+        }
+      ]
+    }
+  ],
+  "sourceRelations": [
+    {
+      "id": "rel_admissions_patients",
+      "from": {
+        "sourceId": "src_admissions",
+        "columnIds": [
+          "col_ad_subject"
+        ]
+      },
+      "to": {
+        "sourceId": "src_patients",
+        "columnIds": [
+          "col_pt_subject"
+        ]
+      }
+    },
+    {
+      "id": "rel_lab_patients",
+      "from": {
+        "sourceId": "src_labevents",
+        "columnIds": [
+          "col_le_subject"
+        ]
+      },
+      "to": {
+        "sourceId": "src_patients",
+        "columnIds": [
+          "col_pt_subject"
+        ]
+      }
+    },
+    {
+      "id": "rel_lab_admissions",
+      "from": {
+        "sourceId": "src_labevents",
+        "columnIds": [
+          "col_le_hadm"
+        ]
+      },
+      "to": {
+        "sourceId": "src_admissions",
+        "columnIds": [
+          "col_ad_hadm"
+        ]
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_patients",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_pt_subject"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ins_encounter0",
+      "resourceType": "Encounter",
+      "index": 0,
+      "label": "hospital admission",
+      "sourceId": "src_admissions",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "enc"
+          },
+          {
+            "columnId": "col_ad_hadm"
+          }
+        ]
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "finished"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "lab event",
+      "sourceId": "src_labevents",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "lab"
+          },
+          {
+            "columnId": "col_le_id"
+          }
+        ]
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "category",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+              "code": "laboratory",
+              "display": "Laboratory"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "instanceId": "ins_patient0",
+      "path": "identifier.system",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "uri",
+          "value": "http://mimic.mit.edu/fhir/mimic/identifier/patient"
+        }
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_pt_subject",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "columnId": "col_pt_gender",
+      "instanceId": "ins_patient0",
+      "path": "gender",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_gender"
+      }
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "instanceId": "ins_encounter0",
+      "path": "identifier.system",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "uri",
+          "value": "http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp"
+        }
+      }
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "columnId": "col_ad_hadm",
+      "instanceId": "ins_encounter0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0006",
+      "code": "R-006",
+      "columnId": "col_ad_type",
+      "instanceId": "ins_encounter0",
+      "path": "class",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_admission_class"
+      }
+    },
+    {
+      "id": "map_0007",
+      "code": "R-007",
+      "instanceId": "ins_encounter0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "via": "rel_admissions_patients"
+      }
+    },
+    {
+      "id": "map_0008",
+      "code": "R-008",
+      "instanceId": "ins_obs0",
+      "path": "identifier.system",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "uri",
+          "value": "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents"
+        }
+      }
+    },
+    {
+      "id": "map_0009",
+      "code": "R-009",
+      "columnId": "col_le_id",
+      "instanceId": "ins_obs0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0010",
+      "code": "R-010",
+      "columnId": "col_le_item",
+      "instanceId": "ins_obs0",
+      "path": "code",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_labitems"
+      }
+    },
+    {
+      "id": "map_0011",
+      "code": "R-011",
+      "columnId": "col_le_valuenum",
+      "instanceId": "ins_obs0",
+      "path": "valueQuantity",
+      "transform": {
+        "kind": "quantity",
+        "unitColumnId": "col_le_unit",
+        "unitValueMapId": "vm_units"
+      }
+    },
+    {
+      "id": "map_0012",
+      "code": "R-012",
+      "columnId": "col_le_value",
+      "instanceId": "ins_obs0",
+      "path": "valueString",
+      "transform": {
+        "kind": "copy"
+      },
+      "condition": {
+        "op": "empty",
+        "columnId": "col_le_valuenum"
+      }
+    },
+    {
+      "id": "map_0013",
+      "code": "R-013",
+      "columnId": "col_le_comments",
+      "instanceId": "ins_obs0",
+      "path": "note.text",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0014",
+      "code": "R-014",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "via": "rel_lab_patients"
+      }
+    },
+    {
+      "id": "map_0015",
+      "code": "R-015",
+      "instanceId": "ins_obs0",
+      "path": "encounter",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_encounter0",
+        "via": "rel_lab_admissions"
+      }
+    },
+    {
+      "id": "map_0016",
+      "code": "R-016",
+      "columnId": "col_le_comments",
+      "instanceId": "ins_obs0",
+      "path": "valueString",
+      "transform": {
+        "kind": "copy"
+      },
+      "condition": {
+        "op": "and",
+        "conditions": [
+          {
+            "op": "empty",
+            "columnId": "col_le_valuenum"
+          },
+          {
+            "op": "empty",
+            "columnId": "col_le_value"
+          }
+        ]
+      }
+    }
+  ],
+  "valueMaps": [
+    {
+      "id": "vm_gender",
+      "name": "gender",
+      "target": "code",
+      "entries": [
+        {
+          "sourceValue": "F",
+          "target": {
+            "value": "female"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "M",
+          "target": {
+            "value": "male"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_admission_class",
+      "name": "admissionClass",
+      "description": "Encounter class as the MIMIC-IV on FHIR demo writes it for these admission types.",
+      "target": "Coding",
+      "entries": [
+        {
+          "sourceValue": "URGENT",
+          "target": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "ambulatory"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "EW EMER.",
+          "target": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "EMER",
+            "display": "emergency"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_labitems",
+      "name": "labItems",
+      "description": "itemid to the d_labitems code system of MIMIC-IV on FHIR (one entry per item until a code column can be written as a Coding, #106).",
+      "target": "CodeableConcept",
+      "entries": [
+        {
+          "sourceValue": "52033",
+          "sourceLabel": "Specimen Type",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "52033",
+            "display": "Specimen Type"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50879",
+          "sourceLabel": "Barbiturate Screen",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50879",
+            "display": "Barbiturate Screen"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50981",
+          "sourceLabel": "Salicylate",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50981",
+            "display": "Salicylate"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50955",
+          "sourceLabel": "Light Green Top Hold",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50955",
+            "display": "Light Green Top Hold"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50999",
+          "sourceLabel": "Tricyclic Antidepressant Screen",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50999",
+            "display": "Tricyclic Antidepressant Screen"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50868",
+          "sourceLabel": "Anion Gap",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50868",
+            "display": "Anion Gap"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50922",
+          "sourceLabel": "Ethanol",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50922",
+            "display": "Ethanol"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50861",
+          "sourceLabel": "Alanine Aminotransferase (ALT)",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50861",
+            "display": "Alanine Aminotransferase (ALT)"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50863",
+          "sourceLabel": "Alkaline Phosphatase",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50863",
+            "display": "Alkaline Phosphatase"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50933",
+          "sourceLabel": "Green Top Hold (plasma)",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50933",
+            "display": "Green Top Hold (plasma)"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50931",
+          "sourceLabel": "Glucose",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50931",
+            "display": "Glucose"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50954",
+          "sourceLabel": "Lactate Dehydrogenase (LD)",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50954",
+            "display": "Lactate Dehydrogenase (LD)"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50912",
+          "sourceLabel": "Creatinine",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50912",
+            "display": "Creatinine"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51006",
+          "sourceLabel": "Urea Nitrogen",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51006",
+            "display": "Urea Nitrogen"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51003",
+          "sourceLabel": "Troponin T",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51003",
+            "display": "Troponin T"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50956",
+          "sourceLabel": "Lipase",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50956",
+            "display": "Lipase"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50880",
+          "sourceLabel": "Benzodiazepine Screen",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50880",
+            "display": "Benzodiazepine Screen"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50920",
+          "sourceLabel": "Estimated GFR (MDRD equation)",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50920",
+            "display": "Estimated GFR (MDRD equation)"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "50856",
+          "sourceLabel": "Acetaminophen",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "50856",
+            "display": "Acetaminophen"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51035",
+          "sourceLabel": "LD, Body Fluid",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51035",
+            "display": "LD, Body Fluid"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51043",
+          "sourceLabel": "Total Protein, Body Fluid",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51043",
+            "display": "Total Protein, Body Fluid"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51034",
+          "sourceLabel": "Glucose, Body Fluid",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51034",
+            "display": "Glucose, Body Fluid"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51254",
+          "sourceLabel": "Monocytes",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51254",
+            "display": "Monocytes"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51279",
+          "sourceLabel": "Red Blood Cells",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51279",
+            "display": "Red Blood Cells"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51244",
+          "sourceLabel": "Lymphocytes",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51244",
+            "display": "Lymphocytes"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51214",
+          "sourceLabel": "Fibrinogen, Functional",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51214",
+            "display": "Fibrinogen, Functional"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51146",
+          "sourceLabel": "Basophils",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51146",
+            "display": "Basophils"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51249",
+          "sourceLabel": "MCHC",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51249",
+            "display": "MCHC"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51237",
+          "sourceLabel": "INR(PT)",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51237",
+            "display": "INR(PT)"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51222",
+          "sourceLabel": "Hemoglobin",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51222",
+            "display": "Hemoglobin"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51265",
+          "sourceLabel": "Platelet Count",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51265",
+            "display": "Platelet Count"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51221",
+          "sourceLabel": "Hematocrit",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51221",
+            "display": "Hematocrit"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51277",
+          "sourceLabel": "RDW",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51277",
+            "display": "RDW"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51200",
+          "sourceLabel": "Eosinophils",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51200",
+            "display": "Eosinophils"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51256",
+          "sourceLabel": "Neutrophils",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51256",
+            "display": "Neutrophils"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51250",
+          "sourceLabel": "MCV",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51250",
+            "display": "MCV"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51274",
+          "sourceLabel": "PT",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51274",
+            "display": "PT"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51275",
+          "sourceLabel": "PTT",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51275",
+            "display": "PTT"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51248",
+          "sourceLabel": "MCH",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51248",
+            "display": "MCH"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51301",
+          "sourceLabel": "White Blood Cells",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51301",
+            "display": "White Blood Cells"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51427",
+          "sourceLabel": "Lymphocytes",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51427",
+            "display": "Lymphocytes"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51436",
+          "sourceLabel": "Polys",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51436",
+            "display": "Polys"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51428",
+          "sourceLabel": "Macrophage",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51428",
+            "display": "Macrophage"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51438",
+          "sourceLabel": "RBC, Other Fluid",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51438",
+            "display": "RBC, Other Fluid"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "52369",
+          "sourceLabel": "Total Nucleated Cells, Other",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "52369",
+            "display": "Total Nucleated Cells, Other"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "51431",
+          "sourceLabel": "Monos",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+            "code": "51431",
+            "display": "Monos"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    },
+    {
+      "id": "vm_units",
+      "name": "labUnits",
+      "description": "valueuom to the units code system of MIMIC-IV on FHIR (until the unit text can be copied from the column, #108).",
+      "target": "Quantity.unit",
+      "entries": [
+        {
+          "sourceValue": "#/uL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "#/uL",
+            "display": "#/uL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "%",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "%",
+            "display": "%"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "IU/L",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "IU/L",
+            "display": "IU/L"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "K/uL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "K/uL",
+            "display": "K/uL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "fL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "fL",
+            "display": "fL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "g/dL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "g/dL",
+            "display": "g/dL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "m/uL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "m/uL",
+            "display": "m/uL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "mEq/L",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "mEq/L",
+            "display": "mEq/L"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "mg/dL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "mg/dL",
+            "display": "mg/dL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "ng/mL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "ng/mL",
+            "display": "ng/mL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "pg",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "pg",
+            "display": "pg"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "sec",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "sec",
+            "display": "sec"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "ug/mL",
+          "target": {
+            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+            "code": "ug/mL",
+            "display": "ug/mL"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    }
+  ]
+}

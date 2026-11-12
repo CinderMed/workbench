@@ -1,0 +1,27 @@
+map "http://example.org/fhir/mimic-iv-demo/StructureMap/Patients" = `Patients`
+
+uses "http://example.org/fhir/mimic-iv-demo/StructureDefinition/PatientsRow" alias PatientsRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Patients(source src : PatientsRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/mimic-iv-demo/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+}
+
+group Patient0(source src : PatientsRow, target res : Patient) {
+  // identifier: written by 2 rows (R-001, R-002) → one shared instance
+  src where ($this.subject_id.exists()) -> res.identifier as p then {
+    src -> p.system = 'http://mimic.mit.edu/fhir/mimic/identifier/patient' "R-001";
+    src.subject_id as v -> p.value = v "R-002";
+  } "Patient0-identifier";
+  // R-003: value map gender (one rule per value; ConceptMap exported separately)
+  src.gender as v where ($this = 'F') -> res.gender = 'female' "R-003-F";
+  src.gender as v where ($this = 'M') -> res.gender = 'male' "R-003-M";
+}

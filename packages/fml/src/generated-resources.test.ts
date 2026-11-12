@@ -4,6 +4,7 @@
 import { isProjectFile, type ProjectFile } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
 import visitProject from "../../../fixtures/fml-examples/boolean-value-map/project.json" with { type: "json" };
+import mimicProject from "../../../fixtures/fml-examples/mimic-iv-demo/project.json" with { type: "json" };
 import metastraProject from "../../../fixtures/fml-examples/metastra/project.json" with { type: "json" };
 import motuProject from "../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
 import { conceptMaps } from "./generator/concept-map.js";
@@ -53,6 +54,7 @@ describe.each([
   ["Metastra", metastraProject],
   ["MOTU", motuProject],
   ["boolean-value-map", visitProject],
+  ["MIMIC-IV demo", mimicProject],
 ])("generated resources of %s", (_name, document) => {
   it.each(resources(document))("%s has no empty string", (_label, resource) => {
     expect(emptyStrings(resource)).toEqual([]);

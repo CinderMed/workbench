@@ -1,0 +1,479 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "LabeventsRow",
+  "url": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow",
+  "version": "1.3.0",
+  "name": "LabeventsRow",
+  "title": "Normalized row of table Labevents",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "LabeventsRow",
+        "path": "LabeventsRow",
+        "definition": "MIMIC-IV hosp.labevents: one row per laboratory measurement (long format).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "LabeventsRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "LabeventsRow.labevent_id",
+        "path": "LabeventsRow.labevent_id",
+        "short": "labevent_id",
+        "definition": "Lab event identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.labevent_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.subject_id",
+        "path": "LabeventsRow.subject_id",
+        "short": "subject_id",
+        "definition": "Patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.subject_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.hadm_id",
+        "path": "LabeventsRow.hadm_id",
+        "short": "hadm_id",
+        "definition": "Hospital admission identifier; empty for outpatient tests.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.hadm_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.itemid",
+        "path": "LabeventsRow.itemid",
+        "short": "itemid",
+        "definition": "What was measured: a code of d_labitems.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.itemid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.charttime",
+        "path": "LabeventsRow.charttime",
+        "short": "charttime",
+        "definition": "Time the specimen was charted.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.charttime",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.value",
+        "path": "LabeventsRow.value",
+        "short": "value",
+        "definition": "Result as text.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.value",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.valuenum",
+        "path": "LabeventsRow.valuenum",
+        "short": "valuenum",
+        "definition": "Numeric result; empty when the result is text only.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.valuenum",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.valueuom",
+        "path": "LabeventsRow.valueuom",
+        "short": "valueuom",
+        "definition": "Unit of the numeric result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.valueuom",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.comments",
+        "path": "LabeventsRow.comments",
+        "short": "comments",
+        "definition": "Free-text comments.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.comments",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Observation0",
+        "path": "LabeventsRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (lab event), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Patient0",
+        "path": "LabeventsRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Encounter0",
+        "path": "LabeventsRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital admission), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "LabeventsRow",
+        "path": "LabeventsRow",
+        "definition": "MIMIC-IV hosp.labevents: one row per laboratory measurement (long format).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "LabeventsRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "LabeventsRow.labevent_id",
+        "path": "LabeventsRow.labevent_id",
+        "short": "labevent_id",
+        "definition": "Lab event identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.labevent_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.subject_id",
+        "path": "LabeventsRow.subject_id",
+        "short": "subject_id",
+        "definition": "Patient identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.subject_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.hadm_id",
+        "path": "LabeventsRow.hadm_id",
+        "short": "hadm_id",
+        "definition": "Hospital admission identifier; empty for outpatient tests.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.hadm_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.itemid",
+        "path": "LabeventsRow.itemid",
+        "short": "itemid",
+        "definition": "What was measured: a code of d_labitems.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.itemid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.charttime",
+        "path": "LabeventsRow.charttime",
+        "short": "charttime",
+        "definition": "Time the specimen was charted.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.charttime",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.value",
+        "path": "LabeventsRow.value",
+        "short": "value",
+        "definition": "Result as text.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.value",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.valuenum",
+        "path": "LabeventsRow.valuenum",
+        "short": "valuenum",
+        "definition": "Numeric result; empty when the result is text only.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.valuenum",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.valueuom",
+        "path": "LabeventsRow.valueuom",
+        "short": "valueuom",
+        "definition": "Unit of the numeric result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.valueuom",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.comments",
+        "path": "LabeventsRow.comments",
+        "short": "comments",
+        "definition": "Free-text comments.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.comments",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Observation0",
+        "path": "LabeventsRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (lab event), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Patient0",
+        "path": "LabeventsRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.id_Encounter0",
+        "path": "LabeventsRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (hospital admission), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

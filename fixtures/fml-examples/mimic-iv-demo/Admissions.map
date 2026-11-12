@@ -1,0 +1,30 @@
+map "http://example.org/fhir/mimic-iv-demo/StructureMap/Admissions" = `Admissions`
+
+uses "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow" alias AdmissionsRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Admissions(source src : AdmissionsRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Encounter[0] · hospital admission — always
+  src where ($this.id_Encounter0.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
+    src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/mimic-iv-demo/Encounter/' + $this) "Encounter0-id";
+    src then Encounter0(src, res) "Encounter0-body";
+  } "Encounter0";
+}
+
+group Encounter0(source src : AdmissionsRow, target res : Encounter) {
+  src -> res.status = 'finished' "fixed-status";
+  // identifier: written by 2 rows (R-004, R-005) → one shared instance
+  src where ($this.hadm_id.exists()) -> res.identifier as p then {
+    src -> p.system = 'http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp' "R-004";
+    src.hadm_id as v -> p.value = v "R-005";
+  } "Encounter0-identifier";
+  // R-006: value map admissionClass (one rule per value; ConceptMap exported separately)
+  src.admission_type as v where ($this = 'URGENT') -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') "R-006-URGENT";
+  src.admission_type as v where ($this = 'EW EMER.') -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'EMER', 'emergency') "R-006-EW-EMER.";
+  // R-007 reference to Patient[0] in another table (via rel_admissions_patients): the resource must already be loaded
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-007";
+}
