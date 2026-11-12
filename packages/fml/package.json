@@ -1,6 +1,6 @@
 {
   "name": "@cindermed/fml",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "FML syntax tree, printer, project-to-FML generator and grammar check",
   "license": "Apache-2.0",
