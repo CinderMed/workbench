@@ -1,5 +1,20 @@
 # @cindermed/model
 
+## 0.3.0
+
+### Minor Changes
+
+- fb6d6a8: Add integrity rule 9 (`ALLOWED_VALUE_TYPE_MISMATCH`): the allowed values of a column must fit its type, and export the cell parsers shared with the normalization.
+- 5724d33: Rule 9 reports a categorical or multiple-choice column whose allowed values are empty once missing values are removed (`ALLOWED_VALUES_EMPTY`); the normalization schema requires at least one allowed value, and the generator refuses to write an empty list.
+- 2940d8e: Normalization format 1.2.0: the generator writes the allowed values of categorical and multiple-choice columns into the normalization specification, and a value outside the list is an invalid value (`onInvalidValue` applies). Rule 6 reports a categorical or multiple-choice column used by a value map without allowed values (`VALUE_MAP_COLUMN_WITHOUT_ALLOWED_VALUES`), and the new quality level warns about such columns without a value map (`ALLOWED_VALUES_MISSING`).
+- 4d77491: Project format 1.3.0 adds a column's `decimalSeparator` and `project.output.onInvalidValue` (default `fail`); normalization format 1.1.0 adds `onInvalidValue: fail`. The generator writes both into every normalization specification.
+- 5724d33: Rule 6 reports a value map without an entry for an allowed value of a column that uses it (`VALUE_MAP_INCOMPLETE`; an entry with an action counts), and a value map used by a column that is not categorical, multipleChoice or boolean (`VALUE_MAP_COLUMN_TYPE_NOT_ALLOWED`).
+
+### Patch Changes
+
+- 7111d06: First release of the reference normalizer: `normalize(spec, input, options)` turns CSV text or bytes into normalized rows and issues (normalization 1.2.0), with SHA-256 or HMAC-SHA256 ids, WHATWG decoding, `serializeRows` byte-identical to the reference `normalize.mjs`, and the CSV reader `parseCsv`. The normalization schema describes the WHATWG decoding of `input.encoding`.
+- 391d212: The decimal separator is strict: with `decimalSeparator: ","` a value containing `.` (`1.234`, `1.234,5`) is not a decimal, and with `.` a value containing `,` is not. Rule 9 (`ALLOWED_VALUE_TYPE_MISMATCH`) reports such allowed values.
+
 ## 0.2.0
 
 ### Minor Changes
