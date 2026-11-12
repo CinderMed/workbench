@@ -39,3 +39,16 @@
 - Decoding with `iso-8859-1` differs from a strict Latin-1 reader for bytes 0x80–0x9F. That is the decision, and the schema says so. A file that really holds C1 control characters is not supported.
 - A 20-digit integer or `11.20` stays exact in memory. A caller that needs a JavaScript number must convert it and accept the loss.
 - Revisit the hashing library if the platform gets a synchronous WebCrypto digest, or if a FIPS-validated implementation becomes a requirement.
+
+## Addendum (2026-11-11): streaming, row by row
+
+CinderMed must handle any tabular dataset. Long tables such as an ICU lab-event extract can hold hundreds of millions of rows, so the normalizer must not hold a whole file in memory.
+
+- **Core per row.** `normalizeRow(spec, record, context)` normalizes one record. The record maps each header (NFC, trimmed) to its cell, and the context gives the row number and the HMAC key. It is pure and synchronous, and it returns a row (with its issues), a row rejected under `reject-row`, or the failure of `fail`. Nothing is kept between records.
+- **Incremental CSV.** `CsvReader` takes text in chunks of any size and returns only the records each chunk completes. It is a state machine (in a field, in a quoted part, after a quote inside a quoted part, after a CR), so a quote, a doubled quote or a CR LF split by a chunk boundary is read as if the text were whole. `parseCsv` uses the same reader on a whole text.
+- **Incremental decoding.** `createDecoder(encoding)` decodes byte chunks with `TextDecoder` in stream mode, so a multi-byte character split across chunks is decoded once. It drops a byte order mark only at the start of the file.
+- **Stream API.** `createNormalizer(spec, options)` returns `push(chunk)` and `end()`, which give events (`row`, `issue`, `failed`). `normalizeStream` wraps it for async or sync iterables, such as a Node stream. After `failed`, the rest of the file is ignored.
+- **Built on top.** The whole-file `normalize()` and `serializeRows()` use the stream API and stay byte-identical to `normalize.mjs`. The differential test and the fixtures are unchanged. `serializeRowNdjson` writes one compact row per line (NDJSON) for streaming output.
+- **Tests.**
+  - Every split of a sample's bytes into two chunks, one-byte chunks and one-character chunks give the same events as the whole input. The sample has quoted cells with delimiters, doubled quotes and line breaks, CRLF and CR, a BOM, and 2-, 3- and 4-byte UTF-8 characters.
+  - `tooling/normalizer-memory.test.ts` streams generated rows of a long lab-event shape, never committed or written to disk, through the built package. The heap after a full GC must not grow by more than 4 MB between the first and the last checkpoint. PR checks use 100,000 rows (about 2 seconds); the nightly workflow (`nightly.yml`) uses 1,000,000 rows. Measured at 1,000,000 rows: flat at about 5.4 MB, in about 16 seconds.

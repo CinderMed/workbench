@@ -516,7 +516,7 @@ For each table the generator produces artifacts described by their own schemas, 
 
 The conversion module reads only the package: the normalization specification to prepare each row, the StructureMap to produce the Bundle, the manifest for the table order.
 
-**Normalization: what happens to each cell.** The algorithm is fixed in the schema, so two implementations produce the same JSON byte for byte. The reference implementation is `@cindermed/normalizer` (ADR-0010), kept byte-identical to `tools/normalize.mjs` by a differential test. The data file is decoded as the WHATWG Encoding Standard says: `iso-8859-1` is read as windows-1252 (0x80 is `€`), and UTF-8 drops a leading byte order mark.
+**Normalization: what happens to each cell.** The algorithm is fixed in the schema, so two implementations produce the same JSON byte for byte. The reference implementation is `@cindermed/normalizer` (ADR-0010), kept byte-identical to `tools/normalize.mjs` by a differential test. It works row by row on a stream of chunks, so memory does not grow with the number of rows, and can write NDJSON, one row per line. The data file is decoded as the WHATWG Encoding Standard says: `iso-8859-1` is read as windows-1252 (0x80 is `€`), and UTF-8 drops a leading byte order mark.
 
 1. Unicode NFC and removal of outer spaces.
 2. Empty cell or value in `missingValues` → element omitted.
@@ -879,6 +879,7 @@ Scopes are the packages and apps: `model`, `fhir-defs`, `fml`, `normalizer`, `ex
 | `changeset-check.yml` | Every PR | Changeset present if a package's code changes (unless labelled `no-changeset`) |
 | `docs.yml` | Every PR (build only) and every release tag | Builds the documentation site, checks links and examples; on a tag deploys it to GitHub Pages |
 | `e2e.yml` | Every push to `main` and nightly | Full Docker Compose and Playwright tests |
+| `nightly.yml` | Nightly and on demand | Long checks kept out of PRs: the normalizer memory test with 1,000,000 generated rows (100,000 in the PR checks) |
 | `release.yml` | Push to `main` | "Version Packages" PR with Changesets; on merge: tag, GitHub Release, npm publish, images on GHCR |
 | `codeql.yml` | Weekly and on PRs | Code security analysis |
 | Dependencies | Renovate (or Dependabot) | Weekly grouped updates, with the CI tests |

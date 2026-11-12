@@ -43,6 +43,7 @@ describe("GitHub Actions", () => {
       "ci.yml",
       "codeql.yml",
       "docs.yml",
+      "nightly.yml",
       "pr-title.yml",
       "release.yml",
     ]);
@@ -61,6 +62,13 @@ describe("GitHub Actions", () => {
     expect(Object.keys(ci.jobs).sort()).toEqual(
       ["build", "compose", "fixtures", "golden", "lint", "test", "typecheck"].sort(),
     );
+  });
+
+  it("runs the 1,000,000-row memory test of the normalizer nightly", () => {
+    const nightly = readFileSync(join(workflowsDir, "nightly.yml"), "utf8");
+    expect(nightly).toContain("schedule:");
+    expect(nightly).toContain("NORMALIZER_MEMORY_ROWS: 1000000");
+    expect(nightly).toContain("tooling/normalizer-memory.test.ts");
   });
 
   it("checks the fixtures against the checksum file", () => {

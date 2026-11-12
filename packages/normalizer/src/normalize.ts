@@ -1,8 +1,9 @@
 /**
  * Reference implementation of the normalization specification (normalization.schema.json 1.2.0,
- * specification "Normalization: what happens to each cell"). It reproduces
+ * specification "Normalization: what happens to each cell"), one record at a time. It reproduces
  * fixtures/fml-examples/tools/normalize.mjs exactly; a differential test keeps the two in step.
- * No I/O (ADR-0001): text or bytes in, rows and reports out.
+ * No I/O (ADR-0001) and no state between records, so memory does not grow with the file:
+ * `stream.ts` reads the file in chunks and calls `normalizeRow` for each record.
  */
 import {
   canonicalText,
@@ -14,8 +15,7 @@ import {
   type Normalization,
   type NormalizationSpec,
 } from "@cindermed/model";
-import { parseCsv } from "./csv.js";
-import { decodeInput, type InputSettings } from "./decode.js";
+import type { InputSettings } from "./decode.js";
 import { computeId, type HashKey } from "./ids.js";
 
 /** An integer or decimal, kept as its canonical text: never a JS number (digits are kept). */
@@ -60,6 +60,23 @@ export type NormalizeResult =
   | { readonly ok: true; readonly rows: NormalizedRow[]; readonly issues: NormalizationIssue[] }
   | { readonly ok: false; readonly failure: NormalizationIssue };
 
+/** What `normalizeRow` needs besides the specification and the record. */
+export interface RowContext {
+  /** Data row, from 1 (rows with only empty cells are not counted). */
+  readonly row: number;
+  /** HMAC key, when the specification has `hash.keyId` (see `resolveHashKey`). */
+  readonly key?: HashKey;
+}
+
+/**
+ * The outcome of one record: a normalized row (with the issues of values left out under
+ * `report-drop`), a row discarded under `reject-row`, or the first invalid value under `fail`.
+ */
+export type RowOutcome =
+  | { readonly kind: "row"; readonly row: NormalizedRow; readonly issues: NormalizationIssue[] }
+  | { readonly kind: "rejected"; readonly issues: NormalizationIssue[] }
+  | { readonly kind: "failed"; readonly failure: NormalizationIssue };
+
 const DEFAULT_TRUE = ["1", "true", "yes", "y"];
 const DEFAULT_FALSE = ["0", "false", "no", "n"];
 
@@ -99,113 +116,103 @@ function convert(value: string, column: Normalization.Column): CellValue | undef
 const canonical = (value: CellValue): string =>
   typeof value === "object" ? value.text : String(value);
 
-/** Normalizes every data row of a CSV file according to the specification. */
-export function normalize(
+/**
+ * The HMAC key of the specification (`hash.keyId`), from the caller. `undefined` without `keyId`;
+ * a failure (`hmacKeyMissing`) when the caller has no key. The key never appears in an issue.
+ */
+export function resolveHashKey(
   spec: NormalizationSpec,
-  input: string | Uint8Array,
-  options: NormalizeOptions = {},
-): NormalizeResult {
+  options: Pick<NormalizeOptions, "hmacKey">,
+): { readonly key?: HashKey } | { readonly failure: NormalizationIssue } {
   const keyId = spec.hash?.keyId;
-  let key: HashKey | undefined;
-  if (keyId !== undefined) {
-    key = options.hmacKey?.(keyId);
-    if (key === undefined) {
-      return {
-        ok: false,
-        failure: {
-          kind: "hmacKeyMissing",
-          message: `no HMAC key for the key id of the specification (hash.keyId)`,
-        },
-      };
-    }
-  }
-
-  const settings: InputSettings = {
-    delimiter: ",",
-    quote: '"',
-    encoding: "utf-8",
-    headerRow: 1,
-    ...spec.input,
-    ...options.input,
+  if (keyId === undefined) return {};
+  const key = options.hmacKey?.(keyId);
+  if (key !== undefined) return { key };
+  return {
+    failure: {
+      kind: "hmacKeyMissing",
+      message: "no HMAC key for the key id of the specification (hash.keyId)",
+    },
   };
-  const table = parseCsv(decodeInput(input, settings.encoding), settings).filter((cells) =>
-    cells.some((cell) => cell !== ""),
-  );
-  const header = (table[settings.headerRow - 1] ?? []).map(canonicalText);
+}
+
+/**
+ * Normalizes one record: `record` maps each (NFC, trimmed) column header to the cell text. Pure and
+ * synchronous: the same specification, record and context always give the same outcome.
+ */
+export function normalizeRow(
+  spec: NormalizationSpec,
+  record: ReadonlyMap<string, string>,
+  context: RowContext,
+): RowOutcome {
+  const rowNumber = context.row;
   const onInvalid = spec.onInvalidValue ?? "report-drop";
-  const rows: NormalizedRow[] = [];
+  const row: Record<string, NormalizedValue> = { resourceType: spec.logicalModel };
+  const canonicalValues = new Map<string, string>();
   const issues: NormalizationIssue[] = [];
+  let rejected = false;
 
-  for (const [index, cells] of table.slice(settings.headerRow).entries()) {
-    const rowNumber = index + 1;
-    const raw = new Map(header.map((name, i) => [name, cells[i] ?? ""]));
-    const row: Record<string, NormalizedValue> = { resourceType: spec.logicalModel };
-    const canonicalValues = new Map<string, string>();
-    let rejected = false;
-
-    for (const column of spec.columns) {
-      const cell = raw.get(column.sourceName);
-      if (cell === undefined) continue;
-      const value = canonicalText(cell);
-      if (value === "" || (column.missingValues ?? []).includes(value)) continue;
-      const parts = column.multiValue
-        ? [...new Set(value.split(column.multiValue.separator).map(canonicalText))].filter(
-            (part) => part !== "",
-          )
-        : [value];
-      const converted: CellValue[] = [];
-      for (const part of parts) {
-        const allowed = column.allowedValues?.includes(part) ?? true;
-        const result = allowed ? convert(part, column) : undefined;
-        if (result !== undefined) {
-          converted.push(result);
-          continue;
-        }
-        const issue: NormalizationIssue = {
-          kind: allowed ? "invalidValue" : "notAllowed",
-          row: rowNumber,
-          column: column.sourceName,
-          value: part,
-          message: allowed
-            ? `row ${String(rowNumber)}, column "${column.sourceName}": the value is not a valid ${column.type}`
-            : `row ${String(rowNumber)}, column "${column.sourceName}": the value is not an allowed value`,
-        };
-        if (onInvalid === "fail") {
-          return {
-            ok: false,
-            failure: { ...issue, message: `${issue.message} (onInvalidValue: fail)` },
-          };
-        }
-        issues.push(issue);
-        if (onInvalid === "reject-row") rejected = true;
-      }
-      const [first] = converted;
-      if (first === undefined) continue;
-      row[column.name] = column.multiValue ? converted : first;
-      canonicalValues.set(
-        column.name,
-        column.multiValue ? converted.map(canonical).join(",") : canonical(first),
-      );
-    }
-    if (rejected) continue;
-
-    for (const idField of spec.ids) {
-      const values = idField.columns.map((name) => canonicalValues.get(name));
-      if (values.some((value) => value === undefined)) continue;
-      const id = computeId(idField, values as string[], key);
-      if (!/^[A-Za-z0-9.-]{1,64}$/.test(id)) {
-        issues.push({
-          kind: "invalidId",
-          row: rowNumber,
-          idField: idField.field,
-          value: id,
-          message: `row ${String(rowNumber)}: the id computed for "${idField.field}" is not a valid FHIR id`,
-        });
+  for (const column of spec.columns) {
+    const cell = record.get(column.sourceName);
+    if (cell === undefined) continue;
+    const value = canonicalText(cell);
+    if (value === "" || (column.missingValues ?? []).includes(value)) continue;
+    const parts = column.multiValue
+      ? [...new Set(value.split(column.multiValue.separator).map(canonicalText))].filter(
+          (part) => part !== "",
+        )
+      : [value];
+    const converted: CellValue[] = [];
+    for (const part of parts) {
+      const allowed = column.allowedValues?.includes(part) ?? true;
+      const result = allowed ? convert(part, column) : undefined;
+      if (result !== undefined) {
+        converted.push(result);
         continue;
       }
-      row[idField.field] = id;
+      const issue: NormalizationIssue = {
+        kind: allowed ? "invalidValue" : "notAllowed",
+        row: rowNumber,
+        column: column.sourceName,
+        value: part,
+        message: allowed
+          ? `row ${String(rowNumber)}, column "${column.sourceName}": the value is not a valid ${column.type}`
+          : `row ${String(rowNumber)}, column "${column.sourceName}": the value is not an allowed value`,
+      };
+      if (onInvalid === "fail") {
+        return {
+          kind: "failed",
+          failure: { ...issue, message: `${issue.message} (onInvalidValue: fail)` },
+        };
+      }
+      issues.push(issue);
+      if (onInvalid === "reject-row") rejected = true;
     }
-    rows.push(row);
+    const [first] = converted;
+    if (first === undefined) continue;
+    row[column.name] = column.multiValue ? converted : first;
+    canonicalValues.set(
+      column.name,
+      column.multiValue ? converted.map(canonical).join(",") : canonical(first),
+    );
   }
-  return { ok: true, rows, issues };
+  if (rejected) return { kind: "rejected", issues };
+
+  for (const idField of spec.ids) {
+    const values = idField.columns.map((name) => canonicalValues.get(name));
+    if (values.some((value) => value === undefined)) continue;
+    const id = computeId(idField, values as string[], context.key);
+    if (!/^[A-Za-z0-9.-]{1,64}$/.test(id)) {
+      issues.push({
+        kind: "invalidId",
+        row: rowNumber,
+        idField: idField.field,
+        value: id,
+        message: `row ${String(rowNumber)}: the id computed for "${idField.field}" is not a valid FHIR id`,
+      });
+      continue;
+    }
+    row[idField.field] = id;
+  }
+  return { kind: "row", row, issues };
 }
