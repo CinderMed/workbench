@@ -1,0 +1,692 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Row",
+  "url": "http://example.org/fhir/hl7-probes/StructureDefinition/Row",
+  "version": "0.1.0",
+  "name": "Row",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/hl7-probes/StructureDefinition/Row",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Row",
+        "path": "Row",
+        "definition": "Row",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Row",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "Row.pid",
+        "path": "Row.pid",
+        "definition": "Row.pid",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.pid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a_b",
+        "path": "Row.a_b",
+        "definition": "Row.a_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ab_c",
+        "path": "Row.ab_c",
+        "definition": "Row.ab_c",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ab_c",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a__",
+        "path": "Row.a__",
+        "definition": "Row.a__",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a__",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a1_b",
+        "path": "Row.a1_b",
+        "definition": "Row.a1_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a1_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.A_B",
+        "path": "Row.A_B",
+        "definition": "Row.A_B",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.A_B",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.x_",
+        "path": "Row.x_",
+        "definition": "Row.x_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.x_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row._a",
+        "path": "Row._a",
+        "definition": "Row._a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row._a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a_",
+        "path": "Row.a_",
+        "definition": "Row.a_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.aB_c",
+        "path": "Row.aB_c",
+        "definition": "Row.aB_c",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.aB_c",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.c__mood",
+        "path": "Row.c__mood",
+        "definition": "Row.c__mood",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.c__mood",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a",
+        "path": "Row.a",
+        "definition": "Row.a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.X",
+        "path": "Row.X",
+        "definition": "Row.X",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.X",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ab",
+        "path": "Row.ab",
+        "definition": "Row.ab",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ab",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a1",
+        "path": "Row.a1",
+        "definition": "Row.a1",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ca_b",
+        "path": "Row.ca_b",
+        "definition": "Row.ca_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ca_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cx_",
+        "path": "Row.cx_",
+        "definition": "Row.cx_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cx_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cc_a",
+        "path": "Row.cc_a",
+        "definition": "Row.cc_a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cc_a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cc__mood",
+        "path": "Row.cc__mood",
+        "definition": "Row.cc__mood",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cc__mood",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "Row",
+        "path": "Row",
+        "definition": "Row",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Row",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "Row.pid",
+        "path": "Row.pid",
+        "definition": "Row.pid",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.pid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a_b",
+        "path": "Row.a_b",
+        "definition": "Row.a_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ab_c",
+        "path": "Row.ab_c",
+        "definition": "Row.ab_c",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ab_c",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a__",
+        "path": "Row.a__",
+        "definition": "Row.a__",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a__",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a1_b",
+        "path": "Row.a1_b",
+        "definition": "Row.a1_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a1_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.A_B",
+        "path": "Row.A_B",
+        "definition": "Row.A_B",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.A_B",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.x_",
+        "path": "Row.x_",
+        "definition": "Row.x_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.x_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row._a",
+        "path": "Row._a",
+        "definition": "Row._a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row._a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a_",
+        "path": "Row.a_",
+        "definition": "Row.a_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.aB_c",
+        "path": "Row.aB_c",
+        "definition": "Row.aB_c",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.aB_c",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.c__mood",
+        "path": "Row.c__mood",
+        "definition": "Row.c__mood",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.c__mood",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a",
+        "path": "Row.a",
+        "definition": "Row.a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.X",
+        "path": "Row.X",
+        "definition": "Row.X",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.X",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ab",
+        "path": "Row.ab",
+        "definition": "Row.ab",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ab",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.a1",
+        "path": "Row.a1",
+        "definition": "Row.a1",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.a1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.ca_b",
+        "path": "Row.ca_b",
+        "definition": "Row.ca_b",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.ca_b",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cx_",
+        "path": "Row.cx_",
+        "definition": "Row.cx_",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cx_",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cc_a",
+        "path": "Row.cc_a",
+        "definition": "Row.cc_a",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cc_a",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Row.cc__mood",
+        "path": "Row.cc__mood",
+        "definition": "Row.cc__mood",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Row.cc__mood",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

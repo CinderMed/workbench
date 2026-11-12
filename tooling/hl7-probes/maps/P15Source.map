@@ -1,0 +1,10 @@
+map "http://example.org/fhir/hl7-probes/StructureMap/P15Source" = `P15Source`
+
+uses "http://example.org/fhir/hl7-probes/StructureDefinition/Row" alias Row as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+
+group P15Source(source src : Row, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  src.cx_ as v -> bundle.entry as e, e.resource = create('Patient') as res, res.id = v "r";
+}

@@ -1,0 +1,542 @@
+[
+  {
+    "map": "P00Where",
+    "name": "a_b",
+    "case": "where",
+    "expectedId": "val0"
+  },
+  {
+    "map": "P00WhereD",
+    "name": "a_b",
+    "case": "where-delimited",
+    "expectedId": "val0"
+  },
+  {
+    "map": "P00Evaluate",
+    "name": "a_b",
+    "case": "evaluate",
+    "expectedId": "val0"
+  },
+  {
+    "map": "P00EvaluateD",
+    "name": "a_b",
+    "case": "evaluate-delimited",
+    "expectedId": "val0"
+  },
+  {
+    "map": "P00Source",
+    "name": "a_b",
+    "case": "source",
+    "expectedId": "val0"
+  },
+  {
+    "map": "P01Where",
+    "name": "ab_c",
+    "case": "where",
+    "expectedId": "val1"
+  },
+  {
+    "map": "P01WhereD",
+    "name": "ab_c",
+    "case": "where-delimited",
+    "expectedId": "val1"
+  },
+  {
+    "map": "P01Evaluate",
+    "name": "ab_c",
+    "case": "evaluate",
+    "expectedId": "val1"
+  },
+  {
+    "map": "P01EvaluateD",
+    "name": "ab_c",
+    "case": "evaluate-delimited",
+    "expectedId": "val1"
+  },
+  {
+    "map": "P01Source",
+    "name": "ab_c",
+    "case": "source",
+    "expectedId": "val1"
+  },
+  {
+    "map": "P02Where",
+    "name": "a__",
+    "case": "where",
+    "expectedId": "val2"
+  },
+  {
+    "map": "P02WhereD",
+    "name": "a__",
+    "case": "where-delimited",
+    "expectedId": "val2"
+  },
+  {
+    "map": "P02Evaluate",
+    "name": "a__",
+    "case": "evaluate",
+    "expectedId": "val2"
+  },
+  {
+    "map": "P02EvaluateD",
+    "name": "a__",
+    "case": "evaluate-delimited",
+    "expectedId": "val2"
+  },
+  {
+    "map": "P02Source",
+    "name": "a__",
+    "case": "source",
+    "expectedId": "val2"
+  },
+  {
+    "map": "P03Where",
+    "name": "a1_b",
+    "case": "where",
+    "expectedId": "val3"
+  },
+  {
+    "map": "P03WhereD",
+    "name": "a1_b",
+    "case": "where-delimited",
+    "expectedId": "val3"
+  },
+  {
+    "map": "P03Evaluate",
+    "name": "a1_b",
+    "case": "evaluate",
+    "expectedId": "val3"
+  },
+  {
+    "map": "P03EvaluateD",
+    "name": "a1_b",
+    "case": "evaluate-delimited",
+    "expectedId": "val3"
+  },
+  {
+    "map": "P03Source",
+    "name": "a1_b",
+    "case": "source",
+    "expectedId": "val3"
+  },
+  {
+    "map": "P04Where",
+    "name": "A_B",
+    "case": "where",
+    "expectedId": "val4"
+  },
+  {
+    "map": "P04WhereD",
+    "name": "A_B",
+    "case": "where-delimited",
+    "expectedId": "val4"
+  },
+  {
+    "map": "P04Evaluate",
+    "name": "A_B",
+    "case": "evaluate",
+    "expectedId": "val4"
+  },
+  {
+    "map": "P04EvaluateD",
+    "name": "A_B",
+    "case": "evaluate-delimited",
+    "expectedId": "val4"
+  },
+  {
+    "map": "P04Source",
+    "name": "A_B",
+    "case": "source",
+    "expectedId": "val4"
+  },
+  {
+    "map": "P05Where",
+    "name": "x_",
+    "case": "where",
+    "expectedId": "val5"
+  },
+  {
+    "map": "P05WhereD",
+    "name": "x_",
+    "case": "where-delimited",
+    "expectedId": "val5"
+  },
+  {
+    "map": "P05Evaluate",
+    "name": "x_",
+    "case": "evaluate",
+    "expectedId": "val5"
+  },
+  {
+    "map": "P05EvaluateD",
+    "name": "x_",
+    "case": "evaluate-delimited",
+    "expectedId": "val5"
+  },
+  {
+    "map": "P05Source",
+    "name": "x_",
+    "case": "source",
+    "expectedId": "val5"
+  },
+  {
+    "map": "P06Where",
+    "name": "_a",
+    "case": "where",
+    "expectedId": "val6"
+  },
+  {
+    "map": "P06WhereD",
+    "name": "_a",
+    "case": "where-delimited",
+    "expectedId": "val6"
+  },
+  {
+    "map": "P06Evaluate",
+    "name": "_a",
+    "case": "evaluate",
+    "expectedId": "val6"
+  },
+  {
+    "map": "P06EvaluateD",
+    "name": "_a",
+    "case": "evaluate-delimited",
+    "expectedId": "val6"
+  },
+  {
+    "map": "P06Source",
+    "name": "_a",
+    "case": "source",
+    "expectedId": "val6"
+  },
+  {
+    "map": "P07Where",
+    "name": "a_",
+    "case": "where",
+    "expectedId": "val7"
+  },
+  {
+    "map": "P07WhereD",
+    "name": "a_",
+    "case": "where-delimited",
+    "expectedId": "val7"
+  },
+  {
+    "map": "P07Evaluate",
+    "name": "a_",
+    "case": "evaluate",
+    "expectedId": "val7"
+  },
+  {
+    "map": "P07EvaluateD",
+    "name": "a_",
+    "case": "evaluate-delimited",
+    "expectedId": "val7"
+  },
+  {
+    "map": "P07Source",
+    "name": "a_",
+    "case": "source",
+    "expectedId": "val7"
+  },
+  {
+    "map": "P08Where",
+    "name": "aB_c",
+    "case": "where",
+    "expectedId": "val8"
+  },
+  {
+    "map": "P08WhereD",
+    "name": "aB_c",
+    "case": "where-delimited",
+    "expectedId": "val8"
+  },
+  {
+    "map": "P08Evaluate",
+    "name": "aB_c",
+    "case": "evaluate",
+    "expectedId": "val8"
+  },
+  {
+    "map": "P08EvaluateD",
+    "name": "aB_c",
+    "case": "evaluate-delimited",
+    "expectedId": "val8"
+  },
+  {
+    "map": "P08Source",
+    "name": "aB_c",
+    "case": "source",
+    "expectedId": "val8"
+  },
+  {
+    "map": "P09Where",
+    "name": "c__mood",
+    "case": "where",
+    "expectedId": "val9"
+  },
+  {
+    "map": "P09WhereD",
+    "name": "c__mood",
+    "case": "where-delimited",
+    "expectedId": "val9"
+  },
+  {
+    "map": "P09Evaluate",
+    "name": "c__mood",
+    "case": "evaluate",
+    "expectedId": "val9"
+  },
+  {
+    "map": "P09EvaluateD",
+    "name": "c__mood",
+    "case": "evaluate-delimited",
+    "expectedId": "val9"
+  },
+  {
+    "map": "P09Source",
+    "name": "c__mood",
+    "case": "source",
+    "expectedId": "val9"
+  },
+  {
+    "map": "P10Where",
+    "name": "a",
+    "case": "where",
+    "expectedId": "val10"
+  },
+  {
+    "map": "P10WhereD",
+    "name": "a",
+    "case": "where-delimited",
+    "expectedId": "val10"
+  },
+  {
+    "map": "P10Evaluate",
+    "name": "a",
+    "case": "evaluate",
+    "expectedId": "val10"
+  },
+  {
+    "map": "P10EvaluateD",
+    "name": "a",
+    "case": "evaluate-delimited",
+    "expectedId": "val10"
+  },
+  {
+    "map": "P10Source",
+    "name": "a",
+    "case": "source",
+    "expectedId": "val10"
+  },
+  {
+    "map": "P11Where",
+    "name": "X",
+    "case": "where",
+    "expectedId": "val11"
+  },
+  {
+    "map": "P11WhereD",
+    "name": "X",
+    "case": "where-delimited",
+    "expectedId": "val11"
+  },
+  {
+    "map": "P11Evaluate",
+    "name": "X",
+    "case": "evaluate",
+    "expectedId": "val11"
+  },
+  {
+    "map": "P11EvaluateD",
+    "name": "X",
+    "case": "evaluate-delimited",
+    "expectedId": "val11"
+  },
+  {
+    "map": "P11Source",
+    "name": "X",
+    "case": "source",
+    "expectedId": "val11"
+  },
+  {
+    "map": "P12Where",
+    "name": "ab",
+    "case": "where",
+    "expectedId": "val12"
+  },
+  {
+    "map": "P12WhereD",
+    "name": "ab",
+    "case": "where-delimited",
+    "expectedId": "val12"
+  },
+  {
+    "map": "P12Evaluate",
+    "name": "ab",
+    "case": "evaluate",
+    "expectedId": "val12"
+  },
+  {
+    "map": "P12EvaluateD",
+    "name": "ab",
+    "case": "evaluate-delimited",
+    "expectedId": "val12"
+  },
+  {
+    "map": "P12Source",
+    "name": "ab",
+    "case": "source",
+    "expectedId": "val12"
+  },
+  {
+    "map": "P13Where",
+    "name": "a1",
+    "case": "where",
+    "expectedId": "val13"
+  },
+  {
+    "map": "P13WhereD",
+    "name": "a1",
+    "case": "where-delimited",
+    "expectedId": "val13"
+  },
+  {
+    "map": "P13Evaluate",
+    "name": "a1",
+    "case": "evaluate",
+    "expectedId": "val13"
+  },
+  {
+    "map": "P13EvaluateD",
+    "name": "a1",
+    "case": "evaluate-delimited",
+    "expectedId": "val13"
+  },
+  {
+    "map": "P13Source",
+    "name": "a1",
+    "case": "source",
+    "expectedId": "val13"
+  },
+  {
+    "map": "P14Where",
+    "name": "ca_b",
+    "case": "where",
+    "expectedId": "val14"
+  },
+  {
+    "map": "P14WhereD",
+    "name": "ca_b",
+    "case": "where-delimited",
+    "expectedId": "val14"
+  },
+  {
+    "map": "P14Evaluate",
+    "name": "ca_b",
+    "case": "evaluate",
+    "expectedId": "val14"
+  },
+  {
+    "map": "P14EvaluateD",
+    "name": "ca_b",
+    "case": "evaluate-delimited",
+    "expectedId": "val14"
+  },
+  {
+    "map": "P14Source",
+    "name": "ca_b",
+    "case": "source",
+    "expectedId": "val14"
+  },
+  {
+    "map": "P15Where",
+    "name": "cx_",
+    "case": "where",
+    "expectedId": "val15"
+  },
+  {
+    "map": "P15WhereD",
+    "name": "cx_",
+    "case": "where-delimited",
+    "expectedId": "val15"
+  },
+  {
+    "map": "P15Evaluate",
+    "name": "cx_",
+    "case": "evaluate",
+    "expectedId": "val15"
+  },
+  {
+    "map": "P15EvaluateD",
+    "name": "cx_",
+    "case": "evaluate-delimited",
+    "expectedId": "val15"
+  },
+  {
+    "map": "P15Source",
+    "name": "cx_",
+    "case": "source",
+    "expectedId": "val15"
+  },
+  {
+    "map": "P16Where",
+    "name": "cc_a",
+    "case": "where",
+    "expectedId": "val16"
+  },
+  {
+    "map": "P16WhereD",
+    "name": "cc_a",
+    "case": "where-delimited",
+    "expectedId": "val16"
+  },
+  {
+    "map": "P16Evaluate",
+    "name": "cc_a",
+    "case": "evaluate",
+    "expectedId": "val16"
+  },
+  {
+    "map": "P16EvaluateD",
+    "name": "cc_a",
+    "case": "evaluate-delimited",
+    "expectedId": "val16"
+  },
+  {
+    "map": "P16Source",
+    "name": "cc_a",
+    "case": "source",
+    "expectedId": "val16"
+  },
+  {
+    "map": "P17Where",
+    "name": "cc__mood",
+    "case": "where",
+    "expectedId": "val17"
+  },
+  {
+    "map": "P17WhereD",
+    "name": "cc__mood",
+    "case": "where-delimited",
+    "expectedId": "val17"
+  },
+  {
+    "map": "P17Evaluate",
+    "name": "cc__mood",
+    "case": "evaluate",
+    "expectedId": "val17"
+  },
+  {
+    "map": "P17EvaluateD",
+    "name": "cc__mood",
+    "case": "evaluate-delimited",
+    "expectedId": "val17"
+  },
+  {
+    "map": "P17Source",
+    "name": "cc__mood",
+    "case": "source",
+    "expectedId": "val17"
+  }
+]

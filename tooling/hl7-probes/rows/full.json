@@ -1,0 +1,22 @@
+{
+  "resourceType": "http://example.org/fhir/hl7-probes/StructureDefinition/Row",
+  "pid": "p1",
+  "a_b": "val0",
+  "ab_c": "val1",
+  "a__": "val2",
+  "a1_b": "val3",
+  "A_B": "val4",
+  "x_": "val5",
+  "_a": "val6",
+  "a_": "val7",
+  "aB_c": "val8",
+  "c__mood": "val9",
+  "a": "val10",
+  "X": "val11",
+  "ab": "val12",
+  "a1": "val13",
+  "ca_b": "val14",
+  "cx_": "val15",
+  "cc_a": "val16",
+  "cc__mood": "val17"
+}

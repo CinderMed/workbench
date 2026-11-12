@@ -1,0 +1,4 @@
+{
+  "resourceType": "http://example.org/fhir/hl7-probes/StructureDefinition/Row",
+  "pid": "p1"
+}
