@@ -22,16 +22,13 @@ group Visit(source src : VisitRow, target bundle : Bundle) {
 }
 
 group Patient0(source src : VisitRow, target res : Patient) {
-  // identifier: repeating element without a slice → one shared repetition
-  src where ($this.patient_id.exists()) -> res.identifier as rep then {
-    src.patient_id as v -> rep.value = v "R-001";
-  } "Patient0-identifier";
+  src.patient_id as v -> res.identifier as p, p.value = v "R-001";
 }
 
 group Observation0(source src : VisitRow, target res : Observation) {
   src -> res.status = 'final' "fixed-status";
   src -> res.code = cc('http://snomed.info/sct', '77176002', 'Smoker') "fixed-code";
-  // R-002: value map siNo to boolean (one rule per value; ConceptMap exported separately)
+  // R-002: value map siNo (one rule per value; ConceptMap exported separately)
   src.fumatore as v where ($this = 'Sì') -> res.value = true "R-002-S-";
   src.fumatore as v where ($this = 'No') -> res.value = false "R-002-No";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-003";

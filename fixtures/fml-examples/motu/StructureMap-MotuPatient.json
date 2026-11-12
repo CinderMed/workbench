@@ -3,7 +3,7 @@
   "id" : "MotuPatient",
   "text" : {
     "status" : "additional",
-    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/motu/StructureMap/MotuPatient&quot; = `MotuPatient`\n\nuses &quot;http://example.org/fhir/motu/StructureDefinition/MotuPatientRow&quot; alias MotuPatientRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\n\ngroup MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n}\n\ngroup Patient0(source src : MotuPatientRow, target res : Patient) {\n  src where ($this.AnonymousID.exists()) -&gt; res.identifier as rep then {\n    src.AnonymousID as v -&gt; rep.value = v &quot;R-001&quot;;\n  } &quot;Patient0-identifier&quot;;\n  // R-002: value map sex (one rule per value)\n  src.Sex as v where ($this = 'M') -&gt; res.gender = 'male' &quot;R-002-M&quot;;\n  src.Sex as v where ($this = 'F') -&gt; res.gender = 'female' &quot;R-002-F&quot;;\n  src.BirthDay as v -&gt; res.birthDate = v &quot;R-003&quot;;\n}\n</pre></div>"
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/motu/StructureMap/MotuPatient&quot; = `MotuPatient`\n\nuses &quot;http://example.org/fhir/motu/StructureDefinition/MotuPatientRow&quot; alias MotuPatientRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/motu/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n}\n\ngroup Patient0(source src : MotuPatientRow, target res : Patient) {\n  src.AnonymousID as v -&gt; res.identifier as p, p.value = v &quot;R-001&quot;;\n  // R-002: value map sex (one rule per value; ConceptMap exported separately)\n  src.Sex as v where ($this = 'M') -&gt; res.gender = 'male' &quot;R-002-M&quot;;\n  src.Sex as v where ($this = 'F') -&gt; res.gender = 'female' &quot;R-002-F&quot;;\n  src.BirthDay as v -&gt; res.birthDate = v &quot;R-003&quot;;\n}\n</pre></div>"
   },
   "url" : "http://example.org/fhir/motu/StructureMap/MotuPatient",
   "name" : "MotuPatient",
@@ -156,32 +156,25 @@
       "mode" : "target"
     }],
     "rule" : [{
-      "name" : "Patient0-identifier",
+      "name" : "R-001",
       "source" : [{
         "context" : "src",
-        "condition" : "($this.AnonymousID.exists())"
+        "element" : "AnonymousID",
+        "variable" : "v"
       }],
       "target" : [{
         "context" : "res",
         "contextType" : "variable",
         "element" : "identifier",
-        "variable" : "rep"
-      }],
-      "rule" : [{
-        "name" : "R-001",
-        "source" : [{
-          "context" : "src",
-          "element" : "AnonymousID",
-          "variable" : "v"
-        }],
-        "target" : [{
-          "context" : "rep",
-          "contextType" : "variable",
-          "element" : "value",
-          "transform" : "copy",
-          "parameter" : [{
-            "valueId" : "v"
-          }]
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
         }]
       }]
     },

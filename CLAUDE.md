@@ -32,6 +32,7 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 - Type compatibility follows the table in the Architecture section; every new combination needs a golden case.
 - Golden tests (fixtures/fml-examples) must stay green on every commit.
 - Tests never write into fixtures/: outputs go to .tmp/ (git-ignored); expected files change only in a dedicated PR.
+- Fixture maps (fixtures/fml-examples/*/*.map) are produced only by the generator, never edited by hand.
 - Docs examples live in fixtures/ and run in CI; update the docs when user-visible behaviour changes.
 - No patient data in the database or logs; no credentials in code, packages or logs.
 - Every technical decision not covered by the specification goes in docs/adr/NNNN-title.md.

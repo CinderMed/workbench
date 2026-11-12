@@ -63,3 +63,9 @@ The generator must be deterministic and must never need hand edits, and the fixt
   - value maps with a `boolean` target produce no ConceptMap; the CSV/XLSX export (H1, #15) lists them with all entries and actions.
 - R5 projects get the R5 form: `relationship: equivalent` instead of `equivalence`, and the version in `group.target` (`system|version`) instead of `group.targetVersion`. Until the R5 golden case (#78) it is checked structurally only.
 - Entries with `absent`, `skipInstance` or `setElement` are listed as deliberately unmapped (#119): R4 `equivalence: unmatched` with a comment naming the action, R5 `noMap: true` (R5's `not-related-to` needs a target code). They join the only group, or a group without a target system when the map has several. In the examples, `painLevel` and `osteoStatus` gained one element each; both validate with 0 errors.
+
+## Addendum (2026-11-12): fixture maps produced by the generator; strict golden tests (#97)
+
+- The five fixture maps are now generator output and are never edited by hand (CLAUDE.md). The StructureMap JSON next to each map is what the HL7 engine compiles from it, plus `status: draft` (ADR-0007).
+- The relaxed comparison is gone. `golden-generated-maps.test.ts` requires the printed map to equal the committed `.map` byte for byte, and the StructureMap JSON to equal the committed JSON, narrative included, for all five maps. The second pass of `tooling/golden/run-examples.sh` also requires the generated `.map` files to equal the committed ones.
+- The hand-built tree of the Visit map (`test-support/boolean-value-map.ts`) is removed, since the generator now produces that map. The HospitalStay tree stays as the printer's own test input, byte-identical to the generated map.

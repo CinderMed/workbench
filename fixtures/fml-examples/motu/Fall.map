@@ -4,6 +4,8 @@ uses "http://example.org/fhir/motu/StructureDefinition/FallRow" alias FallRow as
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
 uses "http://hl7.org/fhir/StructureDefinition/AdverseEvent" alias AdverseEvent as target
 
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
 group Fall(source src : FallRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";
   // AdverseEvent[0] · fall — created when: FallDate is not empty
@@ -17,7 +19,8 @@ group AdverseEvent0(source src : FallRow, target res : AdverseEvent) {
   src -> res.actuality = 'actual' "fixed-actuality";
   src -> res.event = cc('http://snomed.info/sct', '1912002', 'Fall') "fixed-event";
   src.FallDate as v -> res.date = v "R-007";
-  // R-008, R-009 references to other tables (via rel_fall_patient, rel_fall_stay)
+  // R-008 reference to Patient[0] in another table (via rel_fall_patient): the resource must already be loaded
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-008";
+  // R-009 reference to Encounter[0] in another table (via rel_fall_stay): the resource must already be loaded
   src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "R-009";
 }

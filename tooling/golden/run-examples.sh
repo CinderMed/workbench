@@ -38,9 +38,11 @@ fi
 
 echo "golden: $expected_checks of $expected_checks checks passed; regenerated files match the fixtures"
 
-# Second pass: the maps produced by the generator (@cindermed/fml) must give the same normalized
-# rows and Bundles. Only the maps themselves may differ from the verified ones until #97
-# regenerates the fixtures (comments, blank lines, single-row blocks, rule names; ADR-0011).
+# Second pass: the maps produced by the generator (@cindermed/fml) replace the committed ones. Since
+# #97 the committed maps are generator output, so the .map files must be identical, and so must
+# every normalized row and Bundle. The StructureMap JSON is excluded from this diff only because
+# the committed one is in the HL7 engine's formatting; its content is compared exactly by
+# packages/fml/src/golden-generated-maps.test.ts.
 generated="$out/generated/fml-examples"
 mkdir -p "$out/generated"
 cp -R "$source_dir" "$generated"
@@ -52,11 +54,11 @@ if ! grep -qx "Total: $expected_checks passed, 0 failed" "$out/run-all-generated
   exit 1
 fi
 
-if ! diff -r --exclude='*.class' --exclude='*.map' --exclude='StructureMap-*.json' \
+if ! diff -r --exclude='*.class' --exclude='StructureMap-*.json' \
   "$source_dir" "$generated" >"$out/diff-generated.txt"; then
-  echo "golden (generated maps): normalized rows or Bundles differ from fixtures/fml-examples:" >&2
+  echo "golden (generated maps): maps, normalized rows or Bundles differ from fixtures/fml-examples:" >&2
   cat "$out/diff-generated.txt" >&2
   exit 1
 fi
 
-echo "golden (generated maps): $expected_checks of $expected_checks checks passed; the generated maps give the committed Bundles"
+echo "golden (generated maps): $expected_checks of $expected_checks checks passed; the generated maps are the committed ones and give the committed Bundles"

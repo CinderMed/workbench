@@ -1,7 +1,9 @@
 /**
  * FML tree of the MOTU HospitalStay table (port of fixtures/fml-examples/generator/
  * example-hospitalstay.ts), built the way the generator builds it from the project file.
- * Printed, it is byte-identical to fixtures/fml-examples/motu/HospitalStay.map.
+ * Printed, it is byte-identical to fixtures/fml-examples/motu/HospitalStay.map, which the generator
+ * produces (#97): the printer and StructureMap tests use this tree to stay independent of the
+ * generator, and the golden test checks the generator against the same file.
  */
 import {
   groupName,
@@ -107,6 +109,8 @@ export const hospitalStay: StructureMapAst = {
   groups: [
     {
       name: groupName("HospitalStay"),
+      comment:
+        "Main group: one transaction Bundle per normalized record.\nEach role becomes an entry with PUT on its deterministic id (computed by the normalization).",
       params: [
         { mode: "source", name: src, type: ident("HospitalStayRow") },
         { mode: "target", name: ident("bundle"), type: ident("Bundle") },
@@ -167,8 +171,7 @@ export const hospitalStay: StructureMapAst = {
         },
         {
           name: ruleName("Encounter0-period"),
-          comment:
-            "period: non-repeating element written by two rows (R-004, R-005) → one shared instance",
+          comment: "period: written by 2 rows (R-004, R-005) → one shared instance",
           source: {
             context: src,
             where: {

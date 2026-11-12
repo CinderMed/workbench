@@ -3,7 +3,7 @@
   "id" : "Visit",
   "text" : {
     "status" : "additional",
-    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/boolean-value-map/StructureMap/Visit&quot; = `Visit`\n\nuses &quot;http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow&quot; alias VisitRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Visit(source src : VisitRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n  // Observation[0] · smoker — created when: fumatore is not empty\n  src where ($this.id_Observation0.exists() and $this.fumatore.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n}\n\ngroup Patient0(source src : VisitRow, target res : Patient) {\n  // identifier: repeating element without a slice → one shared repetition\n  src where ($this.patient_id.exists()) -&gt; res.identifier as rep then {\n    src.patient_id as v -&gt; rep.value = v &quot;R-001&quot;;\n  } &quot;Patient0-identifier&quot;;\n}\n\ngroup Observation0(source src : VisitRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://snomed.info/sct', '77176002', 'Smoker') &quot;fixed-code&quot;;\n  // R-002: value map siNo to boolean (one rule per value; ConceptMap exported separately)\n  src.fumatore as v where ($this = 'Sì') -&gt; res.value = true &quot;R-002-S-&quot;;\n  src.fumatore as v where ($this = 'No') -&gt; res.value = false &quot;R-002-No&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-003&quot;;\n}\n</pre></div>"
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/boolean-value-map/StructureMap/Visit&quot; = `Visit`\n\nuses &quot;http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow&quot; alias VisitRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Visit(source src : VisitRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n  // Observation[0] · smoker — created when: fumatore is not empty\n  src where ($this.id_Observation0.exists() and $this.fumatore.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/boolean-value-map/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n}\n\ngroup Patient0(source src : VisitRow, target res : Patient) {\n  src.patient_id as v -&gt; res.identifier as p, p.value = v &quot;R-001&quot;;\n}\n\ngroup Observation0(source src : VisitRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://snomed.info/sct', '77176002', 'Smoker') &quot;fixed-code&quot;;\n  // R-002: value map siNo (one rule per value; ConceptMap exported separately)\n  src.fumatore as v where ($this = 'Sì') -&gt; res.value = true &quot;R-002-S-&quot;;\n  src.fumatore as v where ($this = 'No') -&gt; res.value = false &quot;R-002-No&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-003&quot;;\n}\n</pre></div>"
   },
   "url" : "http://example.org/fhir/boolean-value-map/StructureMap/Visit",
   "name" : "Visit",
@@ -251,32 +251,25 @@
       "mode" : "target"
     }],
     "rule" : [{
-      "name" : "Patient0-identifier",
+      "name" : "R-001",
       "source" : [{
         "context" : "src",
-        "condition" : "($this.patient_id.exists())"
+        "element" : "patient_id",
+        "variable" : "v"
       }],
       "target" : [{
         "context" : "res",
         "contextType" : "variable",
         "element" : "identifier",
-        "variable" : "rep"
-      }],
-      "rule" : [{
-        "name" : "R-001",
-        "source" : [{
-          "context" : "src",
-          "element" : "patient_id",
-          "variable" : "v"
-        }],
-        "target" : [{
-          "context" : "rep",
-          "contextType" : "variable",
-          "element" : "value",
-          "transform" : "copy",
-          "parameter" : [{
-            "valueId" : "v"
-          }]
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "value",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
         }]
       }]
     }]
