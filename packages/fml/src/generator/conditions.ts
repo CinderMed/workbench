@@ -191,4 +191,9 @@ export function conditionExpr(condition: Condition, columns: ColumnNames): Expr 
   return toExpr(condition, columns);
 }
 
+/** A condition in words, as in the map comments (`col is not empty`, `col in {'a', 'b'}`, …). */
+export function conditionText(condition: Condition, columns: ColumnNames): string {
+  return toText(condition, columns);
+}
+
 export { hasExpression };

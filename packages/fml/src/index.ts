@@ -80,6 +80,12 @@ export {
 export { baseValueRuleName, valueRuleNames } from "./generator/rule-names.js";
 export { MAIN_GROUP_COMMENT, fmlElement, generateMap } from "./generator/generate-map.js";
 export {
+  conditionText,
+  roleCondition,
+  type ColumnNames,
+  type RoleCondition,
+} from "./generator/conditions.js";
+export {
   conceptMap,
   conceptMaps,
   type ConceptMapJson,
