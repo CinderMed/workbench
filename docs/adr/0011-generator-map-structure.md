@@ -54,3 +54,12 @@ The generator must be deterministic and must never need hand edits, and the fixt
 
 - `StructureMap.group.rule.name` is a FHIR `id` (`[A-Za-z0-9.-]{1,64}`). Value-map rule names replace other characters with `-` instead of `_`, are cut to 64 characters, and get the collision suffix after the cut, so the result never exceeds 64. `N/A`, `N A` and `N-A` now collide: `R-002-N-A`, `R-002-N-A2`, `R-002-N-A3`. `ruleName` accepts only FHIR ids.
 - The created resource types are declared with `uses … as target` (ADR-0007 addendum).
+
+## Addendum (2026-11-12): ConceptMaps (G3, #12)
+
+- One ConceptMap per value map, as documentation (the StructureMap writes one rule per value). The rules follow the Python prototype that produced the verified ConceptMaps, which the generator reproduces byte for byte (#118), with three decisions:
+  - `version` is the logical model's (the project format version until #83);
+  - `description` is omitted when the value map has none. FHIR does not allow empty strings, and a test walks every generated resource (logical models, StructureMaps, ConceptMaps, normalization specifications, R4 and R5) and fails on any empty string;
+  - value maps with a `boolean` target produce no ConceptMap; the CSV/XLSX export (H1, #15) lists them with all entries and actions.
+- R5 projects get the R5 form: `relationship: equivalent` instead of `equivalence`, and the version in `group.target` (`system|version`) instead of `group.targetVersion`. Until the R5 golden case (#78) it is checked structurally only.
+- Entries with `absent`, `skipInstance` or `setElement` are not listed yet; #119 adds them as deliberately unmapped.
