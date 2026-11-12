@@ -1,0 +1,12 @@
+map "http://example.org/fhir/hl7-probes/StructureMap/P12WhereD" = `P12WhereD`
+
+uses "http://example.org/fhir/hl7-probes/StructureDefinition/Row" alias Row as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+
+group P12WhereD(source src : Row, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  src where ($this.`ab`.exists()) -> bundle.entry as e, e.resource = create('Patient') as res then {
+    src.pid as v -> res.id = v "id";
+  } "r";
+}

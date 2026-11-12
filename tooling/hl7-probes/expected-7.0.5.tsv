@@ -1,0 +1,91 @@
+map	name	case	mapping.g4	hl7 compile	run from text (full | empty)	expression in JSON	run from JSON (full | empty)
+P00Where	a_b	where	ok	Error @9, 23: Found a_b expecting a token name	-	-	-
+P00WhereD	a_b	where-delimited	ok	ok	p1 | none	$this.a_b.exists()	error: Error @1, 10: Found a_b expecting a token name | error: Error @1, 10: Found a_b expecting a token name
+P00Evaluate	a_b	evaluate	ok	Error @9, 100: Found a_b expecting a token name	-	-	-
+P00EvaluateD	a_b	evaluate-delimited	ok	ok	val0 | none	$this.a_b	error: Error @1, 10: Found a_b expecting a token name | error: Error @1, 10: Found a_b expecting a token name
+P00Source	a_b	source	ok	ok	val0 | none	-	val0 | none
+P01Where	ab_c	where	ok	ok	p1 | none	$this.ab_c.exists()	p1 | none
+P01WhereD	ab_c	where-delimited	ok	ok	p1 | none	$this.ab_c.exists()	p1 | none
+P01Evaluate	ab_c	evaluate	ok	ok	val1 | none	$this.ab_c	val1 | none
+P01EvaluateD	ab_c	evaluate-delimited	ok	ok	val1 | none	$this.ab_c	val1 | none
+P01Source	ab_c	source	ok	ok	val1 | none	-	val1 | none
+P02Where	a__	where	ok	Error @9, 23: Found a__ expecting a token name	-	-	-
+P02WhereD	a__	where-delimited	ok	ok	p1 | none	$this.a__.exists()	error: Error @1, 10: Found a__ expecting a token name | error: Error @1, 10: Found a__ expecting a token name
+P02Evaluate	a__	evaluate	ok	Error @9, 100: Found a__ expecting a token name	-	-	-
+P02EvaluateD	a__	evaluate-delimited	ok	ok	val2 | none	$this.a__	error: Error @1, 10: Found a__ expecting a token name | error: Error @1, 10: Found a__ expecting a token name
+P02Source	a__	source	ok	ok	val2 | none	-	val2 | none
+P03Where	a1_b	where	ok	ok	p1 | none	$this.a1_b.exists()	p1 | none
+P03WhereD	a1_b	where-delimited	ok	ok	p1 | none	$this.a1_b.exists()	p1 | none
+P03Evaluate	a1_b	evaluate	ok	ok	val3 | none	$this.a1_b	val3 | none
+P03EvaluateD	a1_b	evaluate-delimited	ok	ok	val3 | none	$this.a1_b	val3 | none
+P03Source	a1_b	source	ok	ok	val3 | none	-	val3 | none
+P04Where	A_B	where	ok	Error @9, 23: Found A_B expecting a token name	-	-	-
+P04WhereD	A_B	where-delimited	ok	ok	p1 | none	$this.A_B.exists()	error: Error @1, 10: Found A_B expecting a token name | error: Error @1, 10: Found A_B expecting a token name
+P04Evaluate	A_B	evaluate	ok	Error @9, 100: Found A_B expecting a token name	-	-	-
+P04EvaluateD	A_B	evaluate-delimited	ok	ok	val4 | none	$this.A_B	error: Error @1, 10: Found A_B expecting a token name | error: Error @1, 10: Found A_B expecting a token name
+P04Source	A_B	source	ok	ok	val4 | none	-	val4 | none
+P05Where	x_	where	ok	Error @9, 22: Found x_ expecting a token name	-	-	-
+P05WhereD	x_	where-delimited	ok	ok	p1 | none	$this.x_.exists()	error: Error @1, 9: Found x_ expecting a token name | error: Error @1, 9: Found x_ expecting a token name
+P05Evaluate	x_	evaluate	ok	Error @9, 99: Found x_ expecting a token name	-	-	-
+P05EvaluateD	x_	evaluate-delimited	ok	ok	val5 | none	$this.x_	error: Error @1, 9: Found x_ expecting a token name | error: Error @1, 9: Found x_ expecting a token name
+P05Source	x_	source	ok	ok	val5 | none	-	val5 | none
+P06Where	_a	where	ok	Error @9, 21: Found _ expecting a token name	-	-	-
+P06WhereD	_a	where-delimited	ok	ok	p1 | none	$this._a.exists()	error: Error @1, 8: Found _ expecting a token name | error: Error @1, 8: Found _ expecting a token name
+P06Evaluate	_a	evaluate	ok	Error @9, 98: Found _ expecting a token name	-	-	-
+P06EvaluateD	_a	evaluate-delimited	ok	ok	val6 | none	$this._a	error: Error @1, 8: Found _ expecting a token name | error: Error @1, 8: Found _ expecting a token name
+P06Source	_a	source	ok	Error @9, 9: Found "a" expecting ";"	-	-	-
+P07Where	a_	where	ok	Error @9, 22: Found a_ expecting a token name	-	-	-
+P07WhereD	a_	where-delimited	ok	ok	p1 | none	$this.a_.exists()	error: Error @1, 9: Found a_ expecting a token name | error: Error @1, 9: Found a_ expecting a token name
+P07Evaluate	a_	evaluate	ok	Error @9, 99: Found a_ expecting a token name	-	-	-
+P07EvaluateD	a_	evaluate-delimited	ok	ok	val7 | none	$this.a_	error: Error @1, 9: Found a_ expecting a token name | error: Error @1, 9: Found a_ expecting a token name
+P07Source	a_	source	ok	ok	val7 | none	-	val7 | none
+P08Where	aB_c	where	ok	ok	p1 | none	$this.aB_c.exists()	p1 | none
+P08WhereD	aB_c	where-delimited	ok	ok	p1 | none	$this.aB_c.exists()	p1 | none
+P08Evaluate	aB_c	evaluate	ok	ok	val8 | none	$this.aB_c	val8 | none
+P08EvaluateD	aB_c	evaluate-delimited	ok	ok	val8 | none	$this.aB_c	val8 | none
+P08Source	aB_c	source	ok	ok	val8 | none	-	val8 | none
+P09Where	c__mood	where	ok	Error @9, 27: Found c__mood expecting a token name	-	-	-
+P09WhereD	c__mood	where-delimited	ok	ok	p1 | none	$this.c__mood.exists()	error: Error @1, 14: Found c__mood expecting a token name | error: Error @1, 14: Found c__mood expecting a token name
+P09Evaluate	c__mood	evaluate	ok	Error @9, 104: Found c__mood expecting a token name	-	-	-
+P09EvaluateD	c__mood	evaluate-delimited	ok	ok	val9 | none	$this.c__mood	error: Error @1, 14: Found c__mood expecting a token name | error: Error @1, 14: Found c__mood expecting a token name
+P09Source	c__mood	source	ok	ok	val9 | none	-	val9 | none
+P10Where	a	where	ok	ok	p1 | none	$this.a.exists()	p1 | none
+P10WhereD	a	where-delimited	ok	ok	p1 | none	$this.a.exists()	p1 | none
+P10Evaluate	a	evaluate	ok	ok	val10 | none	$this.a	val10 | none
+P10EvaluateD	a	evaluate-delimited	ok	ok	val10 | none	$this.a	val10 | none
+P10Source	a	source	ok	ok	val10 | none	-	val10 | none
+P11Where	X	where	ok	ok	p1 | none	$this.X.exists()	p1 | none
+P11WhereD	X	where-delimited	ok	ok	p1 | none	$this.X.exists()	p1 | none
+P11Evaluate	X	evaluate	ok	ok	val11 | none	$this.X	val11 | none
+P11EvaluateD	X	evaluate-delimited	ok	ok	val11 | none	$this.X	val11 | none
+P11Source	X	source	ok	ok	val11 | none	-	val11 | none
+P12Where	ab	where	ok	ok	p1 | none	$this.ab.exists()	p1 | none
+P12WhereD	ab	where-delimited	ok	ok	p1 | none	$this.ab.exists()	p1 | none
+P12Evaluate	ab	evaluate	ok	ok	val12 | none	$this.ab	val12 | none
+P12EvaluateD	ab	evaluate-delimited	ok	ok	val12 | none	$this.ab	val12 | none
+P12Source	ab	source	ok	ok	val12 | none	-	val12 | none
+P13Where	a1	where	ok	ok	p1 | none	$this.a1.exists()	p1 | none
+P13WhereD	a1	where-delimited	ok	ok	p1 | none	$this.a1.exists()	p1 | none
+P13Evaluate	a1	evaluate	ok	ok	val13 | none	$this.a1	val13 | none
+P13EvaluateD	a1	evaluate-delimited	ok	ok	val13 | none	$this.a1	val13 | none
+P13Source	a1	source	ok	ok	val13 | none	-	val13 | none
+P14Where	ca_b	where	ok	ok	p1 | none	$this.ca_b.exists()	p1 | none
+P14WhereD	ca_b	where-delimited	ok	ok	p1 | none	$this.ca_b.exists()	p1 | none
+P14Evaluate	ca_b	evaluate	ok	ok	val14 | none	$this.ca_b	val14 | none
+P14EvaluateD	ca_b	evaluate-delimited	ok	ok	val14 | none	$this.ca_b	val14 | none
+P14Source	ca_b	source	ok	ok	val14 | none	-	val14 | none
+P15Where	cx_	where	ok	ok	p1 | none	$this.cx_.exists()	p1 | none
+P15WhereD	cx_	where-delimited	ok	ok	p1 | none	$this.cx_.exists()	p1 | none
+P15Evaluate	cx_	evaluate	ok	ok	val15 | none	$this.cx_	val15 | none
+P15EvaluateD	cx_	evaluate-delimited	ok	ok	val15 | none	$this.cx_	val15 | none
+P15Source	cx_	source	ok	ok	val15 | none	-	val15 | none
+P16Where	cc_a	where	ok	ok	p1 | none	$this.cc_a.exists()	p1 | none
+P16WhereD	cc_a	where-delimited	ok	ok	p1 | none	$this.cc_a.exists()	p1 | none
+P16Evaluate	cc_a	evaluate	ok	ok	val16 | none	$this.cc_a	val16 | none
+P16EvaluateD	cc_a	evaluate-delimited	ok	ok	val16 | none	$this.cc_a	val16 | none
+P16Source	cc_a	source	ok	ok	val16 | none	-	val16 | none
+P17Where	cc__mood	where	ok	ok	p1 | none	$this.cc__mood.exists()	p1 | none
+P17WhereD	cc__mood	where-delimited	ok	ok	p1 | none	$this.cc__mood.exists()	p1 | none
+P17Evaluate	cc__mood	evaluate	ok	ok	val17 | none	$this.cc__mood	val17 | none
+P17EvaluateD	cc__mood	evaluate-delimited	ok	ok	val17 | none	$this.cc__mood	val17 | none
+P17Source	cc__mood	source	ok	ok	val17 | none	-	val17 | none
