@@ -166,7 +166,7 @@ describe("generateMap errors", () => {
     return map.ok ? [] : map.results.map((r) => [r.code, r.id, r.field]);
   };
 
-  it("refuses expressions, concatenations and (until #11, #12) value maps", () => {
+  it("refuses expressions and concatenations", () => {
     const file = copy(motuProject);
     row(file, "R-007").transform = {
       kind: "expression",
@@ -184,9 +184,7 @@ describe("generateMap errors", () => {
     expect(codes(file)).toEqual([
       [GeneratorCode.TRANSFORM_UNSUPPORTED, "map_07", "transform.kind"],
     ]);
-    expect(codes(copy(motuProject), "src_patient")).toEqual([
-      [GeneratorCode.TRANSFORM_UNSUPPORTED, "map_02", "transform.kind"],
-    ]);
+    expect(codes(copy(motuProject), "src_patient")).toEqual([]);
   });
 
   it("refuses perValue roles, deep paths, nested fixed values and Quantity constants", () => {
@@ -234,5 +232,106 @@ describe("generateMap errors", () => {
     expect(printed(file, "src_fall")).toContain(
       "  src -> res.outcome = cc('http://s', 'x') \"R-099\";",
     );
+  });
+});
+
+describe("value maps", () => {
+  const sex = (file: ProjectFile) => {
+    const map = file.valueMaps.find((m) => m.id === "vm_sex");
+    if (map === undefined) throw new Error("fixture changed");
+    return map;
+  };
+
+  it("writes Coding targets, setElement and use.also actions, and no rule for absent", () => {
+    const file = copy(motuProject);
+    const map = sex(file);
+    map.target = "Coding";
+    map.entries = [
+      {
+        sourceValue: "M",
+        target: { system: "http://hl7.org/fhir/administrative-gender", code: "male" },
+        action: {
+          kind: "use",
+          also: [{ path: "active", value: { type: "boolean", value: true } }],
+        },
+      },
+      {
+        sourceValue: "F",
+        action: {
+          kind: "setElement",
+          set: [{ path: "active", value: { type: "boolean", value: false } }],
+        },
+      },
+      { sourceValue: "X", action: { kind: "absent" } },
+    ];
+    const text = printed(file, "src_patient");
+    expect(text).toContain(
+      "  src.Sex as v where ($this = 'M') -> res.gender = c('http://hl7.org/fhir/administrative-gender', 'male'), res.active = true \"R-002-M\";",
+    );
+    expect(text).toContain("  src.Sex as v where ($this = 'F') -> res.active = false \"R-002-F\";");
+    expect(text).not.toContain("R-002-X");
+    expect(text).toContain(
+      "  // R-002: value map sex (one rule per value; ConceptMap exported separately)\n",
+    );
+  });
+
+  it("comments a repeat eachValue row (Metastra R-013)", () => {
+    const text = printed(copy(metastraProject), "src_firstoverview");
+    expect(text).toContain(
+      "  // R-013 repeat eachValue: the normalized column is a list; each rule fires for every matching value\n  // R-013: value map spineLevel",
+    );
+  });
+
+  it("writes a quantity with a fixed unit", () => {
+    const file = copy(metastraProject);
+    row(file, "R-010").transform = {
+      kind: "quantity",
+      unit: { system: "http://unitsofmeasure.org", code: "g/dL" },
+    };
+    expect(printed(file, "src_firstoverview")).toContain(
+      "    src -> q.unit = 'g/dL', q.system = 'http://unitsofmeasure.org', q.code = 'g/dL' \"R-010-unit\";",
+    );
+  });
+
+  it("reports an entry without a target and a Quantity.unit map on a value-map row", () => {
+    const file = copy(motuProject);
+    delete sex(file).entries[0].target;
+    const map = generate(file, "src_patient");
+    expect(map.ok ? [] : map.results.map((r) => r.code)).toEqual([
+      GeneratorCode.VALUE_MAP_ENTRY_WITHOUT_TARGET,
+    ]);
+    const units = copy(metastraProject);
+    row(units, "R-006").transform = { kind: "valueMap", valueMapId: "vm_hb_unit" };
+    const result = generate(units, "src_firstoverview");
+    expect(result.ok ? [] : result.results.map((r) => [r.code, r.id])).toContainEqual([
+      GeneratorCode.TRANSFORM_UNSUPPORTED,
+      "map_0006",
+    ]);
+  });
+
+  it("reports two rules of a group with the same name (#90)", () => {
+    const file = copy(metastraProject);
+    // A value map on R-010 itself with the value "unit-1" collides with the unit rule R-010-unit-1.
+    file.mappings.push({
+      id: "map_0099",
+      code: "R-010",
+      columnId: "col_hb_unit",
+      instanceId: "ins_obs1",
+      path: "interpretation",
+      transform: { kind: "valueMap", valueMapId: "vm_extra" },
+    });
+    file.valueMaps.push({
+      id: "vm_extra",
+      name: "extra",
+      target: "code",
+      entries: [{ sourceValue: "unit-1", target: { value: "x" }, action: { kind: "use" } }],
+    });
+    const map = generate(file, "src_firstoverview");
+    expect(map.ok ? [] : map.results.map((r) => [r.code, r.message])).toEqual([
+      [
+        GeneratorCode.DUPLICATE_RULE_NAME,
+        'Group Observation1: two rules are named "R-010-unit-1". Rename a row code or a value so that every rule of the group has its own name.',
+      ],
+    ]);
   });
 });

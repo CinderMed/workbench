@@ -37,3 +37,15 @@ The generator must be deterministic and must never need hand edits, and the fixt
 - The fixture maps change at #97 (comments, blank lines, single-row `identifier` blocks, and the Metastra rule names `subject-auto`/`encounter-auto`, which become `R-015`/`R-016`). The Bundles must not change. From then on the maps are only produced by the generator.
 - Element paths deeper than two levels, `perValue` roles and expert expressions need new golden cases before they are supported.
 - The choice-element list is a stopgap until module 3; an unknown choice element is written as it is and fails at compilation (verification level 3), not silently.
+
+## Addendum (2026-11-12): value maps, quantities and rule names
+
+- **Value maps.** One rule per entry, `src.col as v where ($this = 'value') -> <target>`, named with `valueRuleNames` over every entry of the map, so a name does not change when an action changes.
+  - `use` writes the target (a constant, `c(…)` or `cc(…)`) plus its `also` elements.
+  - `setElement` writes only its elements.
+  - `skipInstance` and `absent` get no rule; `skipInstance` joins the role's condition.
+  - The first rule carries the value-map comment, preceded by the `repeat eachValue` comment when the row has one.
+- **Quantities.** `create('Quantity') as q`, then `v -> q.value = v "<code>-value"` and the unit rules: a fixed unit (`<code>-unit`) or one rule per value of the unit column's `Quantity.unit` map (`<code>-unit-<value>`). The unit text is the Coding display, or its code when there is no display.
+- **Rule names (#90).** The generator checks that the rules of each group, nested rules included, have different names (`DUPLICATE_RULE_NAME`). The check is per group, not per map: the verified Metastra map has `fixed-status` in four groups, and the line index and diagnostics identify a rule by group and name.
+- **Behaviour check of the generated maps.** `tooling/golden/run-examples.sh` has a second pass. It replaces every map of a copy of the fixtures with the generated FML and StructureMap JSON (`tooling/golden/generate-maps.mjs`) and runs the same suite. All 13 checks must pass, and every normalized row and Bundle must equal the committed one; only the maps may differ. The golden CI job now builds the packages.
+- **Known text differences until #97.** For MotuPatient, FirstOverview and Visit, `golden-generated-maps.test.ts` lists every difference: the single-row `identifier` block written inline (Option B), and Metastra's `subject-auto`/`encounter-auto` becoming `R-015`/`R-016` (#99). The verified text with exactly those substitutions applied must equal the generated text, comments and blank lines aside. HospitalStay and Fall have no differences.

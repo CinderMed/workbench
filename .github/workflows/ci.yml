@@ -83,9 +83,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
+      - uses: ./.github/actions/setup
+      # The second golden pass runs the maps produced by the generator (tooling/golden/generate-maps.mjs).
+      - name: Build the domain packages
+        run: pnpm --filter "./packages/*" build
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
@@ -107,7 +108,7 @@ jobs:
           fi
           echo "$VALIDATOR_SHA256  $jar" | sha256sum --check --strict
           echo "VALIDATOR=$PWD/$jar" >> "$GITHUB_ENV"
-      - name: Run the verified examples (fixtures/fml-examples)
+      - name: Run the verified examples and the generated maps (fixtures/fml-examples)
         run: bash tooling/golden/run-examples.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()

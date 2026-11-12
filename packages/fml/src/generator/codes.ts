@@ -23,6 +23,10 @@ export const GeneratorCode = {
   PATH_UNSUPPORTED: "PATH_UNSUPPORTED",
   /** A fixed value the FML subset cannot write (a Quantity, or a CodeableConcept with text). */
   FIXED_VALUE_UNSUPPORTED: "FIXED_VALUE_UNSUPPORTED",
+  /** A value-map entry whose action writes a value (`use`) has no target. */
+  VALUE_MAP_ENTRY_WITHOUT_TARGET: "VALUE_MAP_ENTRY_WITHOUT_TARGET",
+  /** Two rules of the same map get the same name (#90): rule names identify rules in diagnostics. */
+  DUPLICATE_RULE_NAME: "DUPLICATE_RULE_NAME",
 } as const;
 
 export type GeneratorCode = (typeof GeneratorCode)[keyof typeof GeneratorCode];

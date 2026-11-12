@@ -494,11 +494,14 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 | Named slice | `<element>[<slice>]: named slice, created only if the column has a value` |
 | Guarded reference | `<code> the reference honours the creation condition of <Type>[<i>]` |
 | Reference to another table | `<code> reference to <Type>[<i>] in another table (via <relation id>): the resource must already be loaded` |
-| Value map | `<code>: value map <name> (one rule per value; ConceptMap exported separately)` |
+| Value map | `<code>: value map <name> (one rule per value; ConceptMap exported separately)`, preceded by `<code> repeat eachValue: the normalized column is a list; each rule fires for every matching value` for a `repeat: eachValue` row |
+| Quantity unit | `<code>-unit: unit from column <column>, value map <name>` |
 
 Plain copies, constants, fixed values and references to a role that is always created get no comment.
 
-**Generator errors.** Features the schema accepts but the generator does not translate are errors that block the export: `TRANSFORM_UNSUPPORTED` (the expert expression for the whole MVP; concatenation until #98), `CONDITION_EXPRESSION_UNSUPPORTED`, `MULTIPLICITY_PER_VALUE_UNSUPPORTED`, `PATH_UNSUPPORTED` (more than two levels, or a nested fixed value), `FIXED_VALUE_UNSUPPORTED` (a Quantity, or a CodeableConcept with text).
+**Generator errors.** Features the schema accepts but the generator does not translate are errors that block the export: `TRANSFORM_UNSUPPORTED` (the expert expression for the whole MVP; concatenation until #98), `CONDITION_EXPRESSION_UNSUPPORTED`, `MULTIPLICITY_PER_VALUE_UNSUPPORTED`, `PATH_UNSUPPORTED` (more than two levels, or a nested fixed value), `FIXED_VALUE_UNSUPPORTED` (a Quantity, or a CodeableConcept with text), `VALUE_MAP_ENTRY_WITHOUT_TARGET` (a `use` entry with no target), `DUPLICATE_RULE_NAME` (two rules of the same group with the same name, nested rules included; names repeat across groups by design, such as `fixed-status`).
+
+**Value-map actions.** `use` writes the entry's target (a constant for `code` and `boolean`, `c(…)` or `cc(…)` for Coding and CodeableConcept) plus the `also` elements; `setElement` writes only its elements; `skipInstance` writes nothing and joins the role's creation condition; `absent` writes nothing. A quantity is `src.col as v -> res.value = create('Quantity') as q then { v -> q.value = v; unit rules }`, with the unit fixed (`unit`) or taken from a column through a `Quantity.unit` value map (`q.unit`, `q.system`, `q.code`), each unit rule named `<code>-unit-<value>`.
 
 **What the verification revealed.** Six problems were not visible from reading the specification, and each became a generator rule.
 
