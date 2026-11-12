@@ -6,7 +6,7 @@ J=${VALIDATOR:?set VALIDATOR to the path of validator_cli.jar}; ok=0; ko=0
 # TypeScript normalizer (tooling/golden/normalize-ts.mjs). Same command line, output and messages.
 NORMALIZE=${NORMALIZE:-node tools/normalize.mjs}
 [ -f tools/java/RunMap.class ] || javac -proc:none -cp "$J" tools/java/RunMap.java 2>&1 | grep -v JAVA_TOOL
-rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json
+rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json element-names/test-data/bundle-*.json
 run(){ # folder map input output expected_entries [external-refs]
   $NORMALIZE "$1/normalization-$2.json" "$1/test-data/$3.csv" > "$1/test-data/$3.normalized.json" 2>/dev/null
   res=$(java -Xmx2g -cp "$J:tools/java" RunMap "$1" "http://example.org/fhir/$1/StructureMap/$2" "$1/test-data/$3.normalized.json" "$1/test-data/$4.json" 2>&1 | grep -E "Bundle validation|\[error\]")
@@ -46,6 +46,10 @@ aout=$($NORMALIZE boolean-value-map/normalization-Visit.json boolean-value-map/t
 aerr=$($NORMALIZE boolean-value-map/normalization-Visit.json boolean-value-map/test-data/visit-si-lowercase.csv 2>&1 >/dev/null)
 if [ "$acode" -ne 0 ] && [ -z "$aout" ] && echo "$aerr" | grep -q 'fumatore: value "sì" is not an allowed value (onInvalidValue: fail)'; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
 printf '%-8s %-12s %-22s exit=%s rows=%s\n' "$s" "boolean" "sì not allowed (fail)" "$acode" "$([ -z "$aout" ] && echo 0 || echo some)"
+# Element names (#134): a column named "a b" is used in a creation condition. Its element name must be
+# accepted by the HL7 FHIRPath parser, which rejects names whose second character is "_".
+run element-names Visit visit-note bundle-visit-note 2
+run element-names Visit visit-empty bundle-visit-empty 1
 python3 - <<'PY'
 import json
 b={"resourceType":"Bundle","type":"transaction","entry":[]}

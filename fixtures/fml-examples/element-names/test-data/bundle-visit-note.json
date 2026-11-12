@@ -1,0 +1,41 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/element-names/Patient/pat-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-e2505a26bb5ff0304b7ecf81",
+      "identifier" : [{
+        "value" : "P-001"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/element-names/Observation/obs-note-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-note-e2505a26bb5ff0304b7ecf81",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+      },
+      "valueString" : "Follow-up in two weeks"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-note-e2505a26bb5ff0304b7ecf81"
+    }
+  }]
+}

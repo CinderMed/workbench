@@ -17,6 +17,8 @@ verification prototypes, not the final generator, which will be written in TypeS
 - `boolean-value-map/` — 1 table (Visit): an Italian yes/no column (`Sì`/`No`) is categorical, with a value map to
   boolean on `Observation.valueBoolean`. `Visit.map` is printed from the syntax tree in
   `packages/fml/src/test-support/boolean-value-map.ts` (not written by hand) and compiled with the HL7 engine
+- `element-names/` — 1 table (Visit): a column named `a b` is used in a creation condition. Its element name must
+  be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
   - `project.json` — project file
   - `*.map` — StructureMaps in FML (written by applying the generator rules)
   - `StructureDefinition-*Row.json` — logical model of the normalized row

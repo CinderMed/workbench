@@ -1,0 +1,6 @@
+{
+  "resourceType": "http://example.org/fhir/element-names/StructureDefinition/VisitRow",
+  "patient_id": "P-002",
+  "id_Patient0": "pat-f1e9457858515eb756b1cc98",
+  "id_Observation0": "obs-note-f1e9457858515eb756b1cc98"
+}

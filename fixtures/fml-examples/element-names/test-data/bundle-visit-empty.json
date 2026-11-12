@@ -1,0 +1,18 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/element-names/Patient/pat-f1e9457858515eb756b1cc98",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-f1e9457858515eb756b1cc98",
+      "identifier" : [{
+        "value" : "P-002"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-f1e9457858515eb756b1cc98"
+    }
+  }]
+}

@@ -1,9 +1,11 @@
-// Golden test of the export package (G7, ADR-0012) on the four verified examples. The fixtures'
+// Golden test of the export package (G7, ADR-0012) on the verified examples. The fixtures'
 // manifests were written by this exporter with packageVersion 0.1.0, the fixtures' own $schema
 // references and each manifest's createdAt; the generated artifacts must equal the fixture files.
 import { parseProject, serializeProject, type ExportManifest } from "@cindermed/model";
 import { strFromU8 } from "fflate";
 import { describe, expect, it } from "vitest";
+import namesManifest from "../../../fixtures/fml-examples/element-names/manifest.json?raw";
+import namesProject from "../../../fixtures/fml-examples/element-names/project.json?raw";
 import visitManifest from "../../../fixtures/fml-examples/boolean-value-map/manifest.json?raw";
 import visitProject from "../../../fixtures/fml-examples/boolean-value-map/project.json?raw";
 import manifestSchemaText from "../../../fixtures/fml-examples/manifest.schema.json?raw";
@@ -45,6 +47,7 @@ describe.each([
   ["motu", motuProject, motuManifest],
   ["boolean-value-map", visitProject, visitManifest],
   ["mimic-iv-demo", mimicProject, mimicManifest],
+  ["element-names", namesProject, namesManifest],
 ])("export of %s", (folder, projectText, manifestText) => {
   const expected = JSON.parse(manifestText) as ExportManifest;
   const result = exportPackage(projectText, {

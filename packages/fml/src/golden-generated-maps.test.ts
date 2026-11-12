@@ -5,6 +5,9 @@
 // maps give the committed Bundles (tooling/golden/run-examples.sh).
 import { isProjectFile, type ProjectFile } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
+import namesJson from "../../../fixtures/fml-examples/element-names/StructureMap-Visit.json" with { type: "json" };
+import namesMap from "../../../fixtures/fml-examples/element-names/Visit.map?raw";
+import namesProject from "../../../fixtures/fml-examples/element-names/project.json" with { type: "json" };
 import visitJson from "../../../fixtures/fml-examples/boolean-value-map/StructureMap-Visit.json" with { type: "json" };
 import visitMap from "../../../fixtures/fml-examples/boolean-value-map/Visit.map?raw";
 import visitProject from "../../../fixtures/fml-examples/boolean-value-map/project.json" with { type: "json" };
@@ -49,6 +52,7 @@ const cases = [
   ["MOTU HospitalStay", motuProject, "src_stay", stayMap, stayJson],
   ["MOTU Fall", motuProject, "src_fall", fallMap, fallJson],
   ["boolean-value-map Visit", visitProject, "src_visit", visitMap, visitJson],
+  ["element-names Visit", namesProject, "src_visit", namesMap, namesJson],
 ] as const;
 
 describe.each(cases)("generator golden case %s", (_name, document, sourceId, map, json) => {

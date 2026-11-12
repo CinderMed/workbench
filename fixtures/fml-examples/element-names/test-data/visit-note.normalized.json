@@ -1,0 +1,7 @@
+{
+  "resourceType": "http://example.org/fhir/element-names/StructureDefinition/VisitRow",
+  "patient_id": "P-001",
+  "ca_b": "Follow-up in two weeks",
+  "id_Patient0": "pat-e2505a26bb5ff0304b7ecf81",
+  "id_Observation0": "obs-note-e2505a26bb5ff0304b7ecf81"
+}

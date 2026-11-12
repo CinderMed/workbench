@@ -19,6 +19,11 @@ import { HARD_COLUMN_NAMES, HARD_VALUES, randomProject } from "./test-support/ra
 
 export const SEEDS = 300;
 const FHIR_ID = /^[A-Za-z0-9.-]{1,64}$/;
+/**
+ * Element names the HL7 FHIRPath parser accepts: a letter, then (if there is more) a letter or a
+ * digit (#134; tooling/hl7-probes). mapping.g4 accepts more, so the grammar check cannot see this.
+ */
+const HL7_ELEMENT_NAME = /^[A-Za-z](?:[A-Za-z0-9][A-Za-z0-9_]*)?$/;
 
 /** Rule names of each group, nested rules included, that are repeated or not FHIR ids. */
 function badRuleNames(map: StructureMapAst): string[] {
@@ -53,6 +58,11 @@ describe("generative: random projects translate to grammar-valid FML", () => {
         }),
       ).toEqual([]);
       expect(badRuleNames(map.value)).toEqual([]);
+      const names = [
+        ...planned.value.columns.map((c) => c.element),
+        ...planned.value.idFields.map((f) => f.field),
+      ];
+      expect(names.filter((name) => !HL7_ELEMENT_NAME.test(name))).toEqual([]);
       const spec = normalizationSpec(project, planned.value);
       expect(validateNormalizationSchema(spec)).toEqual([]);
       for (const resource of [

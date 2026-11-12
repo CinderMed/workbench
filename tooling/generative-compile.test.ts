@@ -22,16 +22,11 @@ const validator = process.env["VALIDATOR"];
 const enabled = process.env["FML_GENERATIVE_COMPILE"] === "1" && validator !== undefined;
 const SEEDS = 20;
 /**
- * Seeds the HL7 engine is known to reject: element names whose second character is `_` inside a
- * FHIRPath `where` (#134). They must keep failing until #134 is fixed: a known failure that starts
- * passing fails the job too, so this list cannot go stale.
+ * Seeds the HL7 engine is known to reject, with the issue that tracks each one. A known failure
+ * must keep failing: one that starts passing fails the job too, so this list cannot go stale.
+ * Empty since #134 (seeds 4, 14, 17 and 20) was fixed.
  */
-const KNOWN_FAILURES: ReadonlyMap<number, string> = new Map([
-  [4, "#134"],
-  [14, "#134"],
-  [17, "#134"],
-  [20, "#134"],
-]);
+const KNOWN_FAILURES: ReadonlyMap<number, string> = new Map<number, string>();
 
 describe.runIf(enabled)("generative: the HL7 engine compiles the generated maps", () => {
   rmSync(work, { recursive: true, force: true });
