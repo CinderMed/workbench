@@ -110,6 +110,8 @@ jobs:
           echo "VALIDATOR=$PWD/$jar" >> "$GITHUB_ENV"
       - name: Run the verified examples and the generated maps (fixtures/fml-examples)
         run: bash tooling/golden/run-examples.sh
+      - name: Validate the FHIR resources of the examples (0 errors)
+        run: bash tooling/golden/validate-resources.sh
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
