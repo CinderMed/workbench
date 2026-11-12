@@ -8,7 +8,8 @@
  *
  * - `id` and `name` are the map name; no metadata, as in the compiled output, except `status`,
  *   which FHIR requires and the compiled output lacks: always `draft` (ADR-0007 addendum);
- * - the narrative is the FML text, XML-escaped inside `<pre>`;
+ * - the narrative is the FML text, XML-escaped inside `<pre>`, with code points above U+FFFF as
+ *   numeric references, as the engine writes them;
  * - constants become a `copy` transform with a `value[x]` parameter, variables `valueId`;
  * - `where` conditions are FHIRPath rendered the way the HL7 engine renders a parsed expression:
  *   the clause keeps its outer parentheses, and the operands of a chain that mixes `=` with
@@ -241,10 +242,19 @@ function groupJson(group: Group, release: StructureMapFhirRelease): StructureMap
   };
 }
 
+/**
+ * The narrative text as the HL7 engine writes it: the four XML markup characters as entities, and
+ * code points above U+FFFF (emoji, for example) as numeric references in upper-case hexadecimal
+ * (`&#x1F600;`). Everything else, accented letters included, stays as it is (#135).
+ */
 function escapeXml(text: string): string {
-  return text.replace(/[&<>"]/g, (ch) =>
-    ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : ch === ">" ? "&gt;" : "&quot;",
-  );
+  return text.replace(/[&<>"]|[\u{10000}-\u{10FFFF}]/gu, (ch) => {
+    if (ch === "&") return "&amp;";
+    if (ch === "<") return "&lt;";
+    if (ch === ">") return "&gt;";
+    if (ch === '"') return "&quot;";
+    return `&#x${(ch.codePointAt(0) ?? 0).toString(16).toUpperCase()};`;
+  });
 }
 
 /** StructureMap resource for the map, equivalent to what the HL7 engine compiles from its printed text. */

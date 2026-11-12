@@ -11,7 +11,7 @@ The generator contract lists, for every table, the StructureMap "as FML, plus JS
 The verified examples hold the JSON the HL7 validator 7.0.5 compiled from each map (`fixtures/fml-examples/*/StructureMap-*.json`). The compiled form is regular:
 
 - `id` and `name` are the map name. It has no `status` and no metadata, because the printed FML has none.
-- The narrative is the FML text, XML-escaped inside `<pre>`.
+- The narrative is the FML text, XML-escaped inside `<pre>`. Code points above U+FFFF (emoji, for example) are written as numeric references in upper-case hexadecimal (`&#x1F600;`), as the HL7 engine writes them; every other character, accented letters included, stays as it is (#135).
 - Constants become a `copy` transform with a `value[x]` parameter; variables become `valueId`.
 - Conditions and `evaluate` expressions are FHIRPath re-rendered by the engine. The `where` clause keeps its outer parentheses, and when `=` sits next to `and`/`or`, its operands are grouped: `($this = '1') or ($this = '-1')`.
 

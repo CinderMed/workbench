@@ -76,6 +76,18 @@ describe("toStructureMap (R4)", () => {
     );
   });
 
+  it("writes code points above U+FFFF as numeric references and keeps accents (#135)", () => {
+    const map = oneRuleMap({
+      name: ruleName("x"),
+      comment: "Sì, è più 😀 and 𝄞",
+      source: { context: src },
+      targets: [],
+    });
+    expect(toStructureMap(map, { fhirRelease: "R4" }).text.div).toContain(
+      "// Sì, è più &#x1F600; and &#x1D11E;",
+    );
+  });
+
   it("keeps a source without condition and a group input without type", () => {
     const json = toStructureMap(
       oneRuleMap({ name: ruleName("x"), source: { context: src }, targets: [] }),
