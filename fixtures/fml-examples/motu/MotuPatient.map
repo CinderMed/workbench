@@ -2,7 +2,7 @@ map "http://example.org/fhir/motu/StructureMap/MotuPatient" = `MotuPatient`
 
 uses "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow" alias MotuPatientRow as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
-uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as produced
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
 
 group MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";

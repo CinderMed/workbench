@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Validates the FHIR resources of the verified examples with the HL7 validator (R4, no
+# Validates every FHIR resource of the verified examples with the HL7 validator (R4, no
 # terminology server), each example folder loaded as an implementation guide so maps and logical
-# models resolve. Every resource must validate with 0 errors (warnings are reported, not fatal).
+# models resolve: logical models, compiled StructureMaps, ConceptMaps and the produced Bundles.
+# Every resource must validate with 0 errors (warnings are reported, not fatal).
 #
-# Kinds checked: ConceptMap-*.json. StructureDefinition-*Row.json and StructureMap-*.json join
-# when the generator writes them as valid FHIR (#120).
+# Bundles whose references point to another table (MOTU HospitalStay and Fall) resolve only
+# together: they are validated through the committed bundle-merged.json (load order MotuPatient →
+# HospitalStay → Fall), not alone.
 #
 # Usage: VALIDATOR=/abs/path/validator_cli.jar bash tooling/golden/validate-resources.sh
 set -euo pipefail
@@ -13,7 +15,9 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 fixtures="$root/fixtures/fml-examples"
 out="$root/.tmp/golden-resources"
-patterns=("ConceptMap-*.json")
+patterns=("StructureDefinition-*.json" "StructureMap-*.json" "ConceptMap-*.json" "test-data/*bundle*.json")
+# Validated through bundle-merged.json (references across tables).
+cross_table=("motu/test-data/bundle-HospitalStay.json" "motu/test-data/bundle-Fall.json")
 
 rm -rf "$out"
 mkdir -p "$out"
@@ -22,7 +26,12 @@ for folder in "$fixtures"/*/; do
   name=$(basename "$folder")
   files=()
   for pattern in "${patterns[@]}"; do
-    for file in "$folder"$pattern; do [ -f "$file" ] && files+=("$file"); done
+    for file in "$folder"$pattern; do
+      [ -f "$file" ] || continue
+      relative=${file#"$fixtures"/}
+      [[ " ${cross_table[*]} " == *" $relative "* ]] && continue
+      files+=("$file")
+    done
   done
   [ ${#files[@]} -eq 0 ] && continue
   log="$out/$name.log"

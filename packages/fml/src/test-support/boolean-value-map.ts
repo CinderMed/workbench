@@ -129,12 +129,12 @@ export const booleanValueMap: StructureMapAst = {
     {
       url: "http://hl7.org/fhir/StructureDefinition/Patient",
       alias: ident("Patient"),
-      mode: "produced",
+      mode: "target",
     },
     {
       url: "http://hl7.org/fhir/StructureDefinition/Observation",
       alias: ident("Observation"),
-      mode: "produced",
+      mode: "target",
     },
   ],
   groups: [

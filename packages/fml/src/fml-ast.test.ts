@@ -9,7 +9,14 @@ describe("name constructors", () => {
     expect(ident("_private")).toBe("_private");
     expect(ruleName("R-006-1")).toBe("R-006-1");
     expect(ruleName("Encounter0-id")).toBe("Encounter0-id");
-    expect(ruleName("slice.nrs_code")).toBe("slice.nrs_code");
+    expect(ruleName("slice.nrs-code")).toBe("slice.nrs-code");
+  });
+
+  it("accept only FHIR ids as rule names (StructureMap.group.rule.name, #120)", () => {
+    expect(ruleName("x".repeat(64))).toHaveLength(64);
+    for (const bad of ["R-002-S_", "x".repeat(65), "", "a b"]) {
+      expect(() => ruleName(bad)).toThrow(FmlNameError);
+    }
   });
 
   it("reject group names with underscores, leading digits or other characters", () => {

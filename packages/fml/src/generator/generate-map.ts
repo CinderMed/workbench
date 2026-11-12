@@ -825,7 +825,7 @@ export function generateMap(project: ProjectFile, plan: TablePlan): Planned<Stru
         ...types.map((type) => ({
           url: `${HL7_SD}/${type}`,
           alias: ident(type),
-          mode: "produced" as const,
+          mode: "target" as const,
         })),
       ],
       groups,

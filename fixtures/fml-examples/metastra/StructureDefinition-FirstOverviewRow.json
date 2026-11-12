@@ -17,6 +17,7 @@
       {
         "id": "FirstOverviewRow",
         "path": "FirstOverviewRow",
+        "definition": "First visit of the patient: demographics, pain, blood tests, comorbidities.",
         "min": 0,
         "max": "*",
         "base": {
@@ -338,6 +339,7 @@
       {
         "id": "FirstOverviewRow",
         "path": "FirstOverviewRow",
+        "definition": "First visit of the patient: demographics, pain, blood tests, comorbidities.",
         "min": 0,
         "max": "*",
         "base": {

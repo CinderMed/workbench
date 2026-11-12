@@ -21,10 +21,8 @@ describe("golden case boolean-value-map", () => {
     expect(printMap(booleanValueMap)).toBe(visitMap);
   });
 
-  it("builds the StructureMap the HL7 engine compiled from that text, status aside", () => {
-    const { status, ...built } = toStructureMap(booleanValueMap, { fhirRelease: "R4" });
-    expect(status).toBe("draft");
-    expect(built).toEqual(compiled);
+  it("builds the StructureMap the HL7 engine compiled from that text (+ status draft)", () => {
+    expect(toStructureMap(booleanValueMap, { fhirRelease: "R4" })).toEqual(compiled);
   });
 
   it("passes the grammar check", () => {

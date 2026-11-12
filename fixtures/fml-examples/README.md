@@ -122,3 +122,13 @@ the ConceptMaps now carry the same version as the logical models, as the TypeScr
 Four of them also had `"description": ""` (the prototype wrote an empty string for a value map without a
 description); FHIR does not allow empty strings, and the HL7 validator reported 2 errors in each. The empty
 `description` is removed; the six ConceptMaps now validate with 0 errors (`tooling/golden/validate-resources.sh`).
+
+## Valid FHIR resources (12 November 2026, #120)
+The HL7 validator found errors in the logical models and the compiled StructureMaps. Fixed in the generator and
+here: the maps declare the resource types they create with `uses … as target` (with `as produced` the validator
+reports a mode mismatch against the role groups' `target` parameter, and then cannot resolve the target variables);
+value-map rule names are FHIR ids (`R-002-S_` → `R-002-S-`, Visit); the logical models have a `definition` on the
+root element; the compiled StructureMaps (HL7 `compile`, line endings normalized) carry `status: draft`. The five maps
+were recompiled from folders without the old JSON. `tooling/golden/validate-resources.sh` validates every FHIR
+resource here (logical models, StructureMaps, ConceptMaps, Bundles; MOTU HospitalStay and Fall through
+`bundle-merged.json`): 0 errors. Suite: 13 of 13, Bundles unchanged.

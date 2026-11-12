@@ -33,10 +33,8 @@ function oneRuleMap(rule: StructureMapAst["groups"][number]["rules"][number]): S
 }
 
 describe("toStructureMap (R4)", () => {
-  it("equals the StructureMap compiled by the HL7 engine from the HospitalStay map, status aside", () => {
-    const { status, ...compiled } = toStructureMap(hospitalStay, { fhirRelease: "R4" });
-    expect(status).toBe("draft");
-    expect(compiled).toEqual(compiledHospitalStay);
+  it("equals the StructureMap compiled by the HL7 engine from the HospitalStay map (+ status draft)", () => {
+    expect(toStructureMap(hospitalStay, { fhirRelease: "R4" })).toEqual(compiledHospitalStay);
   });
 
   it("writes number and boolean constants with their value type", () => {

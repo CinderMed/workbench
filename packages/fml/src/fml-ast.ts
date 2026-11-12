@@ -159,7 +159,8 @@ export type Expr =
 const patterns = {
   group: /^[A-Za-z][A-Za-z0-9]*$/,
   identifier: /^[A-Za-z_][A-Za-z0-9_]*$/,
-  rule: /^[A-Za-z0-9_.-]+$/,
+  /** A FHIR `id`: `StructureMap.group.rule.name` (#120). */
+  rule: /^[A-Za-z0-9.-]{1,64}$/,
 };
 
 /**

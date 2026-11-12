@@ -123,17 +123,17 @@
     },
     {
       "path": "MotuPatient.map",
-      "sha256": "68e71381efbb539a8674e8b5b1187f5aef3f4cf7f910de0375e2dc40c191d9c6",
+      "sha256": "fcdfa8ccbd468c41c323119696cf7d80fa203d154e2d5662f26a1374f622a610",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-MotuPatient.json",
-      "sha256": "13350ebe689673bd57a3bd89f2f02d6785b9908891429c2f4d0e0696d64d27c5",
+      "sha256": "2407a864327285623f0742a4b314bea0b58f511868e238da6fd530e8e3be8829",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-MotuPatientRow.json",
-      "sha256": "b9e0e719e4db6df10fa0a629a4d2be15fe1ca773a7cc8381a192b8fe6a733de7",
+      "sha256": "2159e6eeccbcc821d44ea117c131befb43c4fa4105fa6c61b3341f5f3afbbf55",
       "mediaType": "application/fhir+json"
     },
     {
@@ -143,17 +143,17 @@
     },
     {
       "path": "HospitalStay.map",
-      "sha256": "00b3d11866a341e42e0d96c7bde738eac51dc9913f2bc206b57940d072ee768a",
+      "sha256": "304e330f234d984118ae73e4e0a3270b5bc119c9d45f1a2f1e221d5b06f8d66e",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-HospitalStay.json",
-      "sha256": "004a8692266f99ae58bf3432829f445e10acff8eccdfb176d8f581d06f4f3837",
+      "sha256": "01e19a1efc7642800bdf3bb27b148b24f23eed12c211eb781bac3e1190f18b5f",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-HospitalStayRow.json",
-      "sha256": "76145fc7aea3c59e55f679925c5d8964c68e1b18bc05fdb86d51bd44f1b129ba",
+      "sha256": "d4d73205c3c88cd714e70e750ed2962aa412b0f09146581db538a65cdbd9241d",
       "mediaType": "application/fhir+json"
     },
     {
@@ -163,17 +163,17 @@
     },
     {
       "path": "Fall.map",
-      "sha256": "60531741b8e086aeceb2a7c5c6040550f80d619ea0e076ea3389465292365611",
+      "sha256": "b219244bfd25ebc281961a93240d7aa8c8c224b7705f83c4cadd967031c89ef4",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Fall.json",
-      "sha256": "55b8088af72e408934564498679d1c372ee1434b468fcd738cb8eded592ceb6a",
+      "sha256": "e504640ad1d3f7e12e8d39313a78886f4b54b11beaba865d7cae4e6fb3286874",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-FallRow.json",
-      "sha256": "5030b936f14f6efa157928799bb808a9ffea3c428d476103e97e8c5c11cfebc5",
+      "sha256": "79a8437a6529abe5f87af16347679ae1f2b9adebc50a1042ce15cca0a59ac9bf",
       "mediaType": "application/fhir+json"
     },
     {

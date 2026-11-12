@@ -2,8 +2,8 @@ map "http://example.org/fhir/boolean-value-map/StructureMap/Visit" = `Visit`
 
 uses "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow" alias VisitRow as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
-uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as produced
-uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as produced
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
 
 // Main group: one transaction Bundle per normalized record.
 // Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
@@ -32,7 +32,7 @@ group Observation0(source src : VisitRow, target res : Observation) {
   src -> res.status = 'final' "fixed-status";
   src -> res.code = cc('http://snomed.info/sct', '77176002', 'Smoker') "fixed-code";
   // R-002: value map siNo to boolean (one rule per value; ConceptMap exported separately)
-  src.fumatore as v where ($this = 'Sì') -> res.value = true "R-002-S_";
+  src.fumatore as v where ($this = 'Sì') -> res.value = true "R-002-S-";
   src.fumatore as v where ($this = 'No') -> res.value = false "R-002-No";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-003";
 }

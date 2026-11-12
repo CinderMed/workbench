@@ -109,7 +109,7 @@ function idElement(root: string, idField: PlannedIdField): ElementDefinitionJson
     root,
     idField.field,
     `Computed id of ${key}`,
-    `Deterministic id of the resource of role ${key} (${instance.label ?? ""}), computed by the normalization.`,
+    `Deterministic id of the resource of role ${key}${instance.label === undefined || instance.label === "" ? "" : ` (${instance.label})`}, computed by the normalization.`,
     "1",
     "id",
   );
@@ -121,7 +121,15 @@ export function logicalModel(project: ProjectFile, plan: TablePlan): LogicalMode
   const url = logicalModelUrl(project, plan);
   const fhirVersion = project.project.fhirVersion;
   const elements: ElementDefinitionJson[] = [
-    { id: name, path: name, min: 0, max: "*", base: { path: name, min: 0, max: "*" } },
+    {
+      id: name,
+      path: name,
+      // Every element has a non-empty definition (FHIR sdf-3, #120).
+      definition: nonEmpty(plan.source.description) ?? `Normalized row of table ${plan.name}`,
+      min: 0,
+      max: "*",
+      base: { path: name, min: 0, max: "*" },
+    },
     ...plan.columns.map((column) => columnElement(name, column)),
     ...plan.idFields.map((idField) => idElement(name, idField)),
   ];

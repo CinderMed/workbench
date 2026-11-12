@@ -17,6 +17,7 @@
       {
         "id": "VisitRow",
         "path": "VisitRow",
+        "definition": "One row per visit.",
         "min": 0,
         "max": "*",
         "base": {
@@ -104,6 +105,7 @@
       {
         "id": "VisitRow",
         "path": "VisitRow",
+        "definition": "One row per visit.",
         "min": 0,
         "max": "*",
         "base": {
