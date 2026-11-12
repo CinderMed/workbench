@@ -50,3 +50,21 @@ G7 exports a project as a package that the conversion module (V2) can run withou
 - The fixture manifests are exporter output, with version 0.1.0 and each folder's `createdAt`. They hash our StructureMap JSON, not the HL7 JSON stored next to them in the fixture folder, and they list the three `schemas/` files, which live one level up in the fixtures. The fixture logical models and ConceptMaps carry version 0.1.0.
 - A fixed `createdAt` is part of the input. The CLI (`cindermed export`) takes it from the clock unless `--created-at` is given, and the golden tests always pass it.
 - When A8 (mapping releases) arrives, it supplies the package version.
+
+## Addendum (2026-11-12): mapping table, CSV and XLSX (H1, #15)
+
+- **Content.** `mappingTables(project)` has four sheets of text cells: Mapping, Value maps, Roles and Columns, with the columns listed in the specification.
+  - **Value maps** lists every entry of every value map, boolean ones included. Value maps with a boolean target have no ConceptMap, so this is where they are documented.
+  - Code **verification** (verified, manual, displayMismatch, notFound) appears for value-map targets and for the fixed values of roles, so reviewers see which codes were never checked.
+  - **Review status** and **notes** are included; reviewer identities, comments and provenance never are. A test fills them and checks that they do not appear.
+- **CSV.** One file per sheet, RFC 4180, UTF-8 with a byte order mark and CRLF line ends, so spreadsheet programs read accented text. The delimiter is `,` by default, or another single character, such as `;` for Excel set to Italian, whose list separator is `;`.
+  - **Formula injection.** A cell starting with `=`, `+`, `@`, a tab or a carriage return, or with `-` not followed by a digit, gets a leading `'`, so codes such as `-1` stay as they are. The escape is applied only in CSV.
+- **XLSX.** Our own minimal SpreadsheetML writer, with no spreadsheet library:
+  - every cell is an inline string (never a formula, never escaped);
+  - characters XML does not allow are written as OOXML `_xHHHH_` escapes;
+  - a bold, frozen header row, an autofilter and column widths from the content;
+  - `docProps/core.xml` dated `createdAt`.
+
+  The parts go into the deterministic zip above, so the same project and date give the same bytes. A tooling test parses every part with Python's XML parser.
+
+- **Tests.** Snapshots of the four examples live in the package (`packages/export/src/__snapshots__`), not in `fixtures/`. They store the CSV in readable form (LF, no byte order mark); the exact bytes are tested separately.

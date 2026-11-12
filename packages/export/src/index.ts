@@ -11,3 +11,6 @@ export {
 } from "./export-package.js";
 export { loadOrder, type LoadOrder } from "./load-order.js";
 export { deterministicZip } from "./zip.js";
+export { mappingTables, type Sheet } from "./mapping-table.js";
+export { looksLikeFormula, toCsv, type CsvOptions } from "./table-csv.js";
+export { columnName, toXlsx, xlsxParts, xmlText, type XlsxOptions } from "./table-xlsx.js";

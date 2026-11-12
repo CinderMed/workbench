@@ -1,0 +1,261 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mapping table of boolean-value-map > matches the snapshot of every sheet (CSV) > Columns 1`] = `
+"Table,Name,Original name,Label,Description,Type,Format,Allowed values,Missing values,Used by,Review status
+Visit,patient_id,,Patient ID,,string,,,,"R-001, Patient[0] · patient, Observation[0] · smoker",
+Visit,fumatore,,Fumatore,"Smoking status at the visit, answered in Italian.",categorical,,Sì (smoker); No (non-smoker),,"R-002, Observation[0] · smoker",
+"
+`;
+
+exports[`mapping table of boolean-value-map > matches the snapshot of every sheet (CSV) > Mapping 1`] = `
+"Code,Table,Column,Column label,Column type,Role,Element,Transform,Condition,Repeat,Notes,Review status
+R-001,Visit,patient_id,Patient ID,string,Patient[0] · patient,identifier.value,copy,,,,
+R-002,Visit,fumatore,Fumatore,categorical,Observation[0] · smoker,valueBoolean,value map siNo,,,,
+R-003,Visit,,,,Observation[0] · smoker,subject,reference to Patient[0] · patient (automatic),,,,
+"
+`;
+
+exports[`mapping table of boolean-value-map > matches the snapshot of every sheet (CSV) > Roles 1`] = `
+"Role,Table,Description,Multiplicity,Created when,Id rule,Fixed values,Fixed values verification,Review status
+Patient[0] · patient,Visit,,perRow,always,'pat' + patient_id (hash),,,
+Observation[0] · smoker,Visit,,perRow,fumatore is not empty,'obs-smoker' + patient_id (hash),status = final; code = http://snomed.info/sct|77176002 (Smoker),code: manual,
+"
+`;
+
+exports[`mapping table of boolean-value-map > matches the snapshot of every sheet (CSV) > Value maps 1`] = `
+"Map,Target type,Source value,Source label,Target system,Target code or value,Target display,Verification,Action,Action detail,Used by
+siNo,boolean,Sì,,,true,,,use,,R-002
+siNo,boolean,No,,,false,,,use,,R-002
+"
+`;
+
+exports[`mapping table of metastra > matches the snapshot of every sheet (CSV) > Columns 1`] = `
+"Table,Name,Original name,Label,Description,Type,Format,Allowed values,Missing values,Used by,Review status
+FirstOverview,patient_id,,1. Patient ID,"Pseudonymised patient identifier, unique in the registry.",string,,,,"R-001, Patient[0] · patient, Encounter[0] · first visit, Observation[0] · axial pain, Observation[1] · haemoglobin, Condition[1] · osteoporosis, Procedure[0] · previous spinal surgery",
+FirstOverview,encounter_fo,,2. Visit Date,Date of the first visit (baseline).,date,date dd/MM/yyyy,,,"R-004, Encounter[0] · first visit, Observation[0] · axial pain, Observation[1] · haemoglobin",
+FirstOverview,proc_surg_yn,,"3. At baseline, has the patient been hospitalized for a surgical spinal treatment?",Whether at baseline the patient has already had spinal surgery.,categorical,,1 (yes); 0 (no),,Procedure[0] · previous spinal surgery,
+FirstOverview,proc_surg_loc,,5.1 Localization of surgically treated lesion,Surgically treated spinal levels; several levels possible.,multipleChoice,"multiple values separated by ','",1 (C1); 2 (C2); 8 (T1); 20 (L1),,R-013,
+FirstOverview,patient_gender,,6. Gender,Administrative gender of the patient.,categorical,,Female (Female); Male (Male),,R-002,
+FirstOverview,patient_birthdate,,7. Date of birth,Date of birth of the patient.,date,date dd/MM/yyyy,,,R-003,
+FirstOverview,cond_osteoporosis_yn,,14. Osteoporosis,Osteoporosis diagnosis of the patient at the first visit.,categorical,,1 (yes); 0 (no); -1 (unknown),,"R-011, Condition[1] · osteoporosis",
+FirstOverview,obs_pain_axial_intervals,,17.1 Pain level axial,"Axial (spine) pain level reported by the patient, in four classes.",categorical,,0 (no pain); 1 (low); 2 (medium); 3 (high); -1 (unknown),,"R-006, Observation[0] · axial pain",
+FirstOverview,obs_pain_axial_nrs,,17.2 NRS (if available) axial,"Numerical Rating Scale score of axial pain, from 0 to 10.",integer,,,,R-007,
+FirstOverview,obs_bloodt_hb,,24.1 Hb,Haemoglobin concentration in blood; unit in column obs_bloodt_hb_spec.,decimal,,,NA,"R-010, Observation[1] · haemoglobin",
+FirstOverview,obs_bloodt_hb_spec,,Specify unity measure used,Unit of measure used for obs_bloodt_hb.,categorical,,1 (g/dL); 2 (g/L); 3 (mmol/L),,R-010,
+"
+`;
+
+exports[`mapping table of metastra > matches the snapshot of every sheet (CSV) > Mapping 1`] = `
+"Code,Table,Column,Column label,Column type,Role,Element,Transform,Condition,Repeat,Notes,Review status
+R-001,FirstOverview,patient_id,1. Patient ID,string,Patient[0] · patient,identifier.value,copy,,,,approved
+R-002,FirstOverview,patient_gender,6. Gender,categorical,Patient[0] · patient,gender,value map administrativeGender,,,,approved
+R-003,FirstOverview,patient_birthdate,7. Date of birth,date,Patient[0] · patient,birthDate,cast to date (from dd/MM/yyyy),,,,approved
+R-004,FirstOverview,encounter_fo,2. Visit Date,date,Encounter[0] · first visit,period.start,cast to dateTime (from dd/MM/yyyy),,,,approved
+R-005,FirstOverview,,,,Encounter[0] · first visit,subject,reference to Patient[0] · patient (automatic),,,,
+R-006,FirstOverview,obs_pain_axial_intervals,17.1 Pain level axial,categorical,Observation[0] · axial pain,valueCodeableConcept,value map painLevel,,,,toReview
+R-007,FirstOverview,obs_pain_axial_nrs,17.2 NRS (if available) axial,integer,Observation[0] · axial pain,component[nrs].valueInteger,copy,,,,toReview
+R-008,FirstOverview,,,,Observation[0] · axial pain,subject,reference to Patient[0] · patient (automatic),,,,
+R-009,FirstOverview,,,,Observation[0] · axial pain,encounter,reference to Encounter[0] · first visit (automatic),,,,
+R-010,FirstOverview,obs_bloodt_hb,24.1 Hb,decimal,Observation[1] · haemoglobin,valueQuantity,"quantity, unit from obs_bloodt_hb_spec (value map hbUnit)",,,,approved
+R-011,FirstOverview,cond_osteoporosis_yn,14. Osteoporosis,categorical,Condition[1] · osteoporosis,verificationStatus,value map osteoStatus,,,,approved
+R-012,FirstOverview,,,,Condition[1] · osteoporosis,subject,reference to Patient[0] · patient (automatic),,,,
+R-013,FirstOverview,proc_surg_loc,5.1 Localization of surgically treated lesion,multipleChoice,Procedure[0] · previous spinal surgery,bodySite,value map spineLevel,,eachValue,,draft
+R-014,FirstOverview,,,,Procedure[0] · previous spinal surgery,subject,reference to Patient[0] · patient (automatic),,,,
+R-015,FirstOverview,,,,Observation[1] · haemoglobin,subject,reference to Patient[0] · patient (automatic),,,,
+R-016,FirstOverview,,,,Observation[1] · haemoglobin,encounter,reference to Encounter[0] · first visit (automatic),,,,
+"
+`;
+
+exports[`mapping table of metastra > matches the snapshot of every sheet (CSV) > Roles 1`] = `
+"Role,Table,Description,Multiplicity,Created when,Id rule,Fixed values,Fixed values verification,Review status
+Patient[0] · patient,FirstOverview,The registry patient: one resource per record.,perRow,always,'pat' + patient_id (hash),,,
+Encounter[0] · first visit,FirstOverview,,"perGroup by patient_id, encounter_fo",encounter_fo is not empty,'enc' + patient_id + encounter_fo (hash),status = finished; class = http://terminology.hl7.org/CodeSystem/v3-ActCode|AMB (ambulatory),class: not checked,
+Observation[0] · axial pain,FirstOverview,Axial pain assessment at the first visit: intensity class + NRS as a component.,perRow,obs_pain_axial_intervals is not empty and obs_pain_axial_intervals is not '-1','obs-pain-axial' + patient_id + encounter_fo (hash),status = final; code = http://snomed.info/sct|279039007 (Low back pain),code: manual,toReview
+Observation[1] · haemoglobin,FirstOverview,,perRow,obs_bloodt_hb is not empty,'obs-hb' + patient_id + encounter_fo (hash),status = final; code = http://snomed.info/sct|38082009,code: manual,
+Condition[1] · osteoporosis,FirstOverview,Osteoporosis: created if the answer is yes (confirmed) or unknown (unconfirmed); not created if no.,perRow,"cond_osteoporosis_yn in {'1', '-1'} and cond_osteoporosis_yn is not '0' (skipInstance)",'cond-osteoporosis' + patient_id (hash),code = http://snomed.info/sct|64859006,code: manual,
+Procedure[0] · previous spinal surgery,FirstOverview,"Spinal surgery before baseline, with the treated levels.",perRow,proc_surg_yn = '1','proc-spine-surgery' + patient_id (hash),status = completed,,
+"
+`;
+
+exports[`mapping table of metastra > matches the snapshot of every sheet (CSV) > Value maps 1`] = `
+"Map,Target type,Source value,Source label,Target system,Target code or value,Target display,Verification,Action,Action detail,Used by
+administrativeGender,code,Female,,,female,,,use,,R-002
+administrativeGender,code,Male,,,male,,,use,,R-002
+painLevel,CodeableConcept,0,no pain,http://snomed.info/sct,373067005,No,manual,use,,R-006
+painLevel,CodeableConcept,1,low,http://snomed.info/sct,62482003,Low,manual,use,,R-006
+painLevel,CodeableConcept,2,medium,http://loinc.org,LA6751-7,Moderate,verified,use,,R-006
+painLevel,CodeableConcept,3,high,http://snomed.info/sct,75540009,High,manual,use,,R-006
+painLevel,CodeableConcept,-1,unknown,,,,,skipInstance,,R-006
+osteoStatus,CodeableConcept,1,yes,http://terminology.hl7.org/CodeSystem/condition-ver-status,confirmed,,,use,,R-011
+osteoStatus,CodeableConcept,-1,unknown,http://terminology.hl7.org/CodeSystem/condition-ver-status,unconfirmed,,,use,,R-011
+osteoStatus,CodeableConcept,0,no,,,,,skipInstance,,R-011
+hbUnit,Quantity.unit,1,g/dL,http://unitsofmeasure.org,g/dL,g/dL,,use,,R-010
+hbUnit,Quantity.unit,2,g/L,http://unitsofmeasure.org,g/L,g/L,,use,,R-010
+hbUnit,Quantity.unit,3,mmol/L,http://unitsofmeasure.org,mmol/L,mmol/L,,use,,R-010
+spineLevel,CodeableConcept,1,C1,http://snomed.info/sct,14806007,,manual,use,,R-013
+spineLevel,CodeableConcept,2,C2,http://snomed.info/sct,731673003,,manual,use,,R-013
+spineLevel,CodeableConcept,8,T1,http://snomed.info/sct,731692001,,manual,use,,R-013
+spineLevel,CodeableConcept,20,L1,http://snomed.info/sct,731695004,,manual,use,,R-013
+"
+`;
+
+exports[`mapping table of mimic-iv-demo > matches the snapshot of every sheet (CSV) > Columns 1`] = `
+"Table,Name,Original name,Label,Description,Type,Format,Allowed values,Missing values,Used by,Review status
+Patients,subject_id,,subject_id,Patient identifier.,string,,,,"R-002, Patient[0] · patient",
+Patients,gender,,gender,Administrative gender.,categorical,,F (female); M (male),,R-003,
+Admissions,subject_id,,subject_id,Patient identifier.,string,,,,,
+Admissions,hadm_id,,hadm_id,Hospital admission identifier.,string,,,,"R-005, Encounter[0] · hospital admission",
+Admissions,admittime,,admittime,Admission time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
+Admissions,dischtime,,dischtime,Discharge time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
+Admissions,admission_type,,admission_type,Type of admission.,categorical,,URGENT; EW EMER.,,R-006,
+Labevents,labevent_id,,labevent_id,Lab event identifier.,string,,,,"R-009, Observation[0] · lab event",
+Labevents,subject_id,,subject_id,Patient identifier.,string,,,,,
+Labevents,hadm_id,,hadm_id,Hospital admission identifier; empty for outpatient tests.,string,,,,,
+Labevents,itemid,,itemid,What was measured: a code of d_labitems.,categorical,,"52033 (Specimen Type); 50879 (Barbiturate Screen); 50981 (Salicylate); 50955 (Light Green Top Hold); 50999 (Tricyclic Antidepressant Screen); 50868 (Anion Gap); 50922 (Ethanol); 50861 (Alanine Aminotransferase (ALT)); 50863 (Alkaline Phosphatase); 50933 (Green Top Hold (plasma)); 50931 (Glucose); 50954 (Lactate Dehydrogenase (LD)); 50912 (Creatinine); 51006 (Urea Nitrogen); 51003 (Troponin T); 50956 (Lipase); 50880 (Benzodiazepine Screen); 50920 (Estimated GFR (MDRD equation)); 50856 (Acetaminophen); 51035 (LD, Body Fluid); 51043 (Total Protein, Body Fluid); 51034 (Glucose, Body Fluid); 51254 (Monocytes); 51279 (Red Blood Cells); 51244 (Lymphocytes); 51214 (Fibrinogen, Functional); 51146 (Basophils); 51249 (MCHC); 51237 (INR(PT)); 51222 (Hemoglobin); 51265 (Platelet Count); 51221 (Hematocrit); 51277 (RDW); 51200 (Eosinophils); 51256 (Neutrophils); 51250 (MCV); 51274 (PT); 51275 (PTT); 51248 (MCH); 51301 (White Blood Cells); 51427 (Lymphocytes); 51436 (Polys); 51428 (Macrophage); 51438 (RBC, Other Fluid); 52369 (Total Nucleated Cells, Other); 51431 (Monos)",,R-010,
+Labevents,charttime,,charttime,Time the specimen was charted.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
+Labevents,value,,value,Result as text.,string,,,,"R-012, R-016",
+Labevents,valuenum,,valuenum,Numeric result; empty when the result is text only.,decimal,,,,"R-011, R-012, R-016",
+Labevents,valueuom,,valueuom,Unit of the numeric result.,categorical,,#/uL; %; IU/L; K/uL; fL; g/dL; m/uL; mEq/L; mg/dL; ng/mL; pg; sec; ug/mL,,R-011,
+Labevents,comments,,comments,Free-text comments.,string,,,,"R-013, R-016",
+"
+`;
+
+exports[`mapping table of mimic-iv-demo > matches the snapshot of every sheet (CSV) > Mapping 1`] = `
+"Code,Table,Column,Column label,Column type,Role,Element,Transform,Condition,Repeat,Notes,Review status
+R-001,Patients,,,,Patient[0] · patient,identifier.system,constant http://mimic.mit.edu/fhir/mimic/identifier/patient,,,,
+R-002,Patients,subject_id,subject_id,string,Patient[0] · patient,identifier.value,copy,,,,
+R-003,Patients,gender,gender,categorical,Patient[0] · patient,gender,value map gender,,,,
+R-004,Admissions,,,,Encounter[0] · hospital admission,identifier.system,constant http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp,,,,
+R-005,Admissions,hadm_id,hadm_id,string,Encounter[0] · hospital admission,identifier.value,copy,,,,
+R-006,Admissions,admission_type,admission_type,categorical,Encounter[0] · hospital admission,class,value map admissionClass,,,,
+R-007,Admissions,,,,Encounter[0] · hospital admission,subject,reference to Patient[0] · patient via rel_admissions_patients,,,,
+R-008,Labevents,,,,Observation[0] · lab event,identifier.system,constant http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents,,,,
+R-009,Labevents,labevent_id,labevent_id,string,Observation[0] · lab event,identifier.value,copy,,,,
+R-010,Labevents,itemid,itemid,categorical,Observation[0] · lab event,code,value map labItems,,,,
+R-011,Labevents,valuenum,valuenum,decimal,Observation[0] · lab event,valueQuantity,"quantity, unit from valueuom (value map labUnits)",,,,
+R-012,Labevents,value,value,string,Observation[0] · lab event,valueString,copy,valuenum is empty,,,
+R-013,Labevents,comments,comments,string,Observation[0] · lab event,note.text,copy,,,,
+R-014,Labevents,,,,Observation[0] · lab event,subject,reference to Patient[0] · patient via rel_lab_patients,,,,
+R-015,Labevents,,,,Observation[0] · lab event,encounter,reference to Encounter[0] · hospital admission via rel_lab_admissions,,,,
+R-016,Labevents,comments,comments,string,Observation[0] · lab event,valueString,copy,valuenum is empty and value is empty,,,
+"
+`;
+
+exports[`mapping table of mimic-iv-demo > matches the snapshot of every sheet (CSV) > Roles 1`] = `
+"Role,Table,Description,Multiplicity,Created when,Id rule,Fixed values,Fixed values verification,Review status
+Patient[0] · patient,Patients,,perRow,always,'pat' + subject_id (hash),,,
+Encounter[0] · hospital admission,Admissions,,perRow,always,'enc' + hadm_id (hash),status = finished,,
+Observation[0] · lab event,Labevents,,perRow,always,'lab' + labevent_id (hash),status = final; category = http://terminology.hl7.org/CodeSystem/observation-category|laboratory (Laboratory),category: not checked,
+"
+`;
+
+exports[`mapping table of mimic-iv-demo > matches the snapshot of every sheet (CSV) > Value maps 1`] = `
+"Map,Target type,Source value,Source label,Target system,Target code or value,Target display,Verification,Action,Action detail,Used by
+gender,code,F,,,female,,,use,,R-003
+gender,code,M,,,male,,,use,,R-003
+admissionClass,Coding,URGENT,,http://terminology.hl7.org/CodeSystem/v3-ActCode,AMB,ambulatory,,use,,R-006
+admissionClass,Coding,EW EMER.,,http://terminology.hl7.org/CodeSystem/v3-ActCode,EMER,emergency,,use,,R-006
+labItems,CodeableConcept,52033,Specimen Type,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,52033,Specimen Type,,use,,R-010
+labItems,CodeableConcept,50879,Barbiturate Screen,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50879,Barbiturate Screen,,use,,R-010
+labItems,CodeableConcept,50981,Salicylate,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50981,Salicylate,,use,,R-010
+labItems,CodeableConcept,50955,Light Green Top Hold,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50955,Light Green Top Hold,,use,,R-010
+labItems,CodeableConcept,50999,Tricyclic Antidepressant Screen,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50999,Tricyclic Antidepressant Screen,,use,,R-010
+labItems,CodeableConcept,50868,Anion Gap,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50868,Anion Gap,,use,,R-010
+labItems,CodeableConcept,50922,Ethanol,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50922,Ethanol,,use,,R-010
+labItems,CodeableConcept,50861,Alanine Aminotransferase (ALT),http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50861,Alanine Aminotransferase (ALT),,use,,R-010
+labItems,CodeableConcept,50863,Alkaline Phosphatase,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50863,Alkaline Phosphatase,,use,,R-010
+labItems,CodeableConcept,50933,Green Top Hold (plasma),http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50933,Green Top Hold (plasma),,use,,R-010
+labItems,CodeableConcept,50931,Glucose,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50931,Glucose,,use,,R-010
+labItems,CodeableConcept,50954,Lactate Dehydrogenase (LD),http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50954,Lactate Dehydrogenase (LD),,use,,R-010
+labItems,CodeableConcept,50912,Creatinine,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50912,Creatinine,,use,,R-010
+labItems,CodeableConcept,51006,Urea Nitrogen,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51006,Urea Nitrogen,,use,,R-010
+labItems,CodeableConcept,51003,Troponin T,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51003,Troponin T,,use,,R-010
+labItems,CodeableConcept,50956,Lipase,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50956,Lipase,,use,,R-010
+labItems,CodeableConcept,50880,Benzodiazepine Screen,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50880,Benzodiazepine Screen,,use,,R-010
+labItems,CodeableConcept,50920,Estimated GFR (MDRD equation),http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50920,Estimated GFR (MDRD equation),,use,,R-010
+labItems,CodeableConcept,50856,Acetaminophen,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,50856,Acetaminophen,,use,,R-010
+labItems,CodeableConcept,51035,"LD, Body Fluid",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51035,"LD, Body Fluid",,use,,R-010
+labItems,CodeableConcept,51043,"Total Protein, Body Fluid",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51043,"Total Protein, Body Fluid",,use,,R-010
+labItems,CodeableConcept,51034,"Glucose, Body Fluid",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51034,"Glucose, Body Fluid",,use,,R-010
+labItems,CodeableConcept,51254,Monocytes,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51254,Monocytes,,use,,R-010
+labItems,CodeableConcept,51279,Red Blood Cells,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51279,Red Blood Cells,,use,,R-010
+labItems,CodeableConcept,51244,Lymphocytes,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51244,Lymphocytes,,use,,R-010
+labItems,CodeableConcept,51214,"Fibrinogen, Functional",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51214,"Fibrinogen, Functional",,use,,R-010
+labItems,CodeableConcept,51146,Basophils,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51146,Basophils,,use,,R-010
+labItems,CodeableConcept,51249,MCHC,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51249,MCHC,,use,,R-010
+labItems,CodeableConcept,51237,INR(PT),http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51237,INR(PT),,use,,R-010
+labItems,CodeableConcept,51222,Hemoglobin,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51222,Hemoglobin,,use,,R-010
+labItems,CodeableConcept,51265,Platelet Count,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51265,Platelet Count,,use,,R-010
+labItems,CodeableConcept,51221,Hematocrit,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51221,Hematocrit,,use,,R-010
+labItems,CodeableConcept,51277,RDW,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51277,RDW,,use,,R-010
+labItems,CodeableConcept,51200,Eosinophils,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51200,Eosinophils,,use,,R-010
+labItems,CodeableConcept,51256,Neutrophils,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51256,Neutrophils,,use,,R-010
+labItems,CodeableConcept,51250,MCV,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51250,MCV,,use,,R-010
+labItems,CodeableConcept,51274,PT,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51274,PT,,use,,R-010
+labItems,CodeableConcept,51275,PTT,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51275,PTT,,use,,R-010
+labItems,CodeableConcept,51248,MCH,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51248,MCH,,use,,R-010
+labItems,CodeableConcept,51301,White Blood Cells,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51301,White Blood Cells,,use,,R-010
+labItems,CodeableConcept,51427,Lymphocytes,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51427,Lymphocytes,,use,,R-010
+labItems,CodeableConcept,51436,Polys,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51436,Polys,,use,,R-010
+labItems,CodeableConcept,51428,Macrophage,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51428,Macrophage,,use,,R-010
+labItems,CodeableConcept,51438,"RBC, Other Fluid",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51438,"RBC, Other Fluid",,use,,R-010
+labItems,CodeableConcept,52369,"Total Nucleated Cells, Other",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,52369,"Total Nucleated Cells, Other",,use,,R-010
+labItems,CodeableConcept,51431,Monos,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51431,Monos,,use,,R-010
+labUnits,Quantity.unit,#/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,#/uL,#/uL,,use,,R-011
+labUnits,Quantity.unit,%,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,%,%,,use,,R-011
+labUnits,Quantity.unit,IU/L,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,IU/L,IU/L,,use,,R-011
+labUnits,Quantity.unit,K/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,K/uL,K/uL,,use,,R-011
+labUnits,Quantity.unit,fL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,fL,fL,,use,,R-011
+labUnits,Quantity.unit,g/dL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,g/dL,g/dL,,use,,R-011
+labUnits,Quantity.unit,m/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,m/uL,m/uL,,use,,R-011
+labUnits,Quantity.unit,mEq/L,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,mEq/L,mEq/L,,use,,R-011
+labUnits,Quantity.unit,mg/dL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,mg/dL,mg/dL,,use,,R-011
+labUnits,Quantity.unit,ng/mL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,ng/mL,ng/mL,,use,,R-011
+labUnits,Quantity.unit,pg,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,pg,pg,,use,,R-011
+labUnits,Quantity.unit,sec,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,sec,sec,,use,,R-011
+labUnits,Quantity.unit,ug/mL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,ug/mL,ug/mL,,use,,R-011
+"
+`;
+
+exports[`mapping table of motu > matches the snapshot of every sheet (CSV) > Columns 1`] = `
+"Table,Name,Original name,Label,Description,Type,Format,Allowed values,Missing values,Used by,Review status
+MotuPatient,AnonymousID,,AnonymousID,"Anonymous patient identifier, shared by all tables.",string,,,,"R-001, Patient[0] · patient",
+MotuPatient,Sex,,Sex,Sex of the patient.,categorical,,M; F,,R-002,
+MotuPatient,BirthDay,,BirthDay,Date of birth.,date,date dd/MM/yyyy,,,R-003,
+HospitalStay,AnonymousID,,,Anonymous patient identifier.,string,,,,Encounter[0] · hospital stay,
+HospitalStay,AdmissionDate,,,Admission date of the stay.,date,date dd/MM/yyyy,,,"R-004, Encounter[0] · hospital stay",
+HospitalStay,DischargeDate,,,Discharge date.,date,date dd/MM/yyyy,,,R-005,
+Fall,AnonymousID,,,Anonymous patient identifier.,string,,,,AdverseEvent[0] · fall,
+Fall,AdmissionDate,,,Admission date of the stay during which the fall happened.,date,date dd/MM/yyyy,,,AdverseEvent[0] · fall,
+Fall,FallDate,,,Date of the fall; must be after AdmissionDate.,date,date dd/MM/yyyy,,,"R-007, AdverseEvent[0] · fall",
+"
+`;
+
+exports[`mapping table of motu > matches the snapshot of every sheet (CSV) > Mapping 1`] = `
+"Code,Table,Column,Column label,Column type,Role,Element,Transform,Condition,Repeat,Notes,Review status
+R-001,MotuPatient,AnonymousID,AnonymousID,string,Patient[0] · patient,identifier.value,copy,,,,
+R-002,MotuPatient,Sex,Sex,categorical,Patient[0] · patient,gender,value map sex,,,,
+R-003,MotuPatient,BirthDay,BirthDay,date,Patient[0] · patient,birthDate,copy,,,,
+R-004,HospitalStay,AdmissionDate,,date,Encounter[0] · hospital stay,period.start,copy,,,,
+R-005,HospitalStay,DischargeDate,,date,Encounter[0] · hospital stay,period.end,copy,,,,
+R-006,HospitalStay,,,,Encounter[0] · hospital stay,subject,reference to Patient[0] · patient via rel_stay_patient (automatic),,,,
+R-007,Fall,FallDate,,date,AdverseEvent[0] · fall,date,copy,,,,
+R-008,Fall,,,,AdverseEvent[0] · fall,subject,reference to Patient[0] · patient via rel_fall_patient (automatic),,,,
+R-009,Fall,,,,AdverseEvent[0] · fall,encounter,reference to Encounter[0] · hospital stay via rel_fall_stay,,,,
+"
+`;
+
+exports[`mapping table of motu > matches the snapshot of every sheet (CSV) > Roles 1`] = `
+"Role,Table,Description,Multiplicity,Created when,Id rule,Fixed values,Fixed values verification,Review status
+Patient[0] · patient,MotuPatient,,perRow,always,'pat' + AnonymousID (hash),,,
+Encounter[0] · hospital stay,HospitalStay,,"perGroup by AnonymousID, AdmissionDate",AdmissionDate is not empty,'enc' + AnonymousID + AdmissionDate (hash),status = finished; class = http://terminology.hl7.org/CodeSystem/v3-ActCode|IMP (inpatient encounter),class: not checked,
+AdverseEvent[0] · fall,Fall,,perRow,FallDate is not empty,'fall' + AnonymousID + AdmissionDate + FallDate (hash),actuality = actual; event = http://snomed.info/sct|1912002 (Fall),event: manual,
+"
+`;
+
+exports[`mapping table of motu > matches the snapshot of every sheet (CSV) > Value maps 1`] = `
+"Map,Target type,Source value,Source label,Target system,Target code or value,Target display,Verification,Action,Action detail,Used by
+sex,code,M,,,male,,,use,,R-002
+sex,code,F,,,female,,,use,,R-002
+"
+`;
