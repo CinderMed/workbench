@@ -5,7 +5,7 @@
  * Columns. It holds review statuses and notes, never reviewer identities, comments or provenance.
  * The writers (`toCsv`, `toXlsx`) turn the sheets into files.
  */
-import { conditionText, planTable, roleCondition, type ColumnNames } from "@cindermed/fml";
+import { conditionText, roleCondition, type ColumnNames, type Identifier } from "@cindermed/fml";
 import type {
   Coding,
   Column,
@@ -61,26 +61,36 @@ function actionDetail(entry: ValueMapEntry): string {
   return "";
 }
 
+/** How an id that points to nothing is written: the table must stay readable on a broken project. */
+export const unknown = (kind: string, id: string): string => `unknown ${kind} ${id}`;
+
+interface ColumnName {
+  readonly element: Identifier;
+  readonly name: string;
+}
+
+/**
+ * Column names for the condition texts. A condition may name a column that does not exist (the
+ * table is written even for projects with integrity errors): it reads "unknown column <id>".
+ */
+class ColumnNamesOrUnknown extends Map<Id, ColumnName> {
+  override get(id: Id): ColumnName {
+    const name = unknown("column", id);
+    return super.get(id) ?? { element: id as Identifier, name };
+  }
+}
+
 /** Columns of every table, by id, with their table, and the names the condition texts use. */
 function columnIndex(project: ProjectFile) {
   const byId = new Map<Id, { column: Column; table: string }>();
+  const names = new ColumnNamesOrUnknown();
   for (const source of project.sources) {
-    for (const column of source.columns) byId.set(column.id, { column, table: source.name });
+    for (const column of source.columns) {
+      byId.set(column.id, { column, table: source.name });
+      names.set(column.id, { element: column.name as Identifier, name: column.name });
+    }
   }
-  const names = new Map<Id, ColumnNames>();
-  for (const source of project.sources) {
-    const planned = planTable(project, source.id);
-    const columns: ColumnNames = planned.ok
-      ? new Map(
-          planned.value.columns.map((c) => [
-            c.column.id,
-            { element: c.element, name: c.column.name },
-          ]),
-        )
-      : new Map();
-    names.set(source.id, columns);
-  }
-  return { byId, names };
+  return { byId, names: names as ColumnNames };
 }
 
 /** Columns a condition reads, at any depth. */
@@ -124,7 +134,8 @@ function transformText(
   columnName: (id: Id) => string,
 ): string {
   const t = row.transform;
-  const mapName = (id: Id) => project.valueMaps.find((m) => m.id === id)?.name ?? id;
+  const mapName = (id: Id) =>
+    project.valueMaps.find((m) => m.id === id)?.name ?? unknown("value map", id);
   switch (t.kind) {
     case "copy":
       return "copy";
@@ -142,7 +153,7 @@ function transformText(
     case "reference": {
       const target = project.instances.find((i) => i.id === t.targetInstanceId);
       const via = t.via === undefined ? "" : ` via ${t.via}`;
-      return `reference to ${target === undefined ? t.targetInstanceId : role(target)}${via}${t.auto === true ? " (automatic)" : ""}`;
+      return `reference to ${target === undefined ? unknown("role", t.targetInstanceId) : role(target)}${via}${t.auto === true ? " (automatic)" : ""}`;
     }
     case "expression":
       return `expression (${t.language})`;
@@ -152,10 +163,13 @@ function transformText(
 /** The four sheets of the mapping table. */
 export function mappingTables(project: ProjectFile): Sheet[] {
   const { byId, names } = columnIndex(project);
-  const columnName = (id: Id) => byId.get(id)?.column.name ?? id;
+  const columnName = (id: Id) => byId.get(id)?.column.name ?? unknown("column", id);
   const instances = new Map(project.instances.map((i) => [i.id, i]));
   const tableOf = (instance: Instance | undefined) =>
-    project.sources.find((s) => s.id === instance?.sourceId)?.name ?? "";
+    instance === undefined
+      ? ""
+      : (project.sources.find((s) => s.id === instance.sourceId)?.name ??
+        unknown("table", instance.sourceId));
   const usedBy = (predicate: (row: MappingRow) => boolean) =>
     project.mappings
       .filter(predicate)
@@ -181,17 +195,16 @@ export function mappingTables(project: ProjectFile): Sheet[] {
     rows: project.mappings.map((row) => {
       const instance = instances.get(row.instanceId);
       const column = row.columnId === undefined ? undefined : byId.get(row.columnId)?.column;
-      const columns = names.get(instance?.sourceId ?? "") ?? new Map();
       return [
         row.code,
         tableOf(instance),
-        column?.name ?? "",
+        row.columnId === undefined ? "" : (column?.name ?? unknown("column", row.columnId)),
         column?.label ?? "",
         column?.dataType ?? "",
-        instance === undefined ? row.instanceId : role(instance),
+        instance === undefined ? unknown("role", row.instanceId) : role(instance),
         row.path,
         transformText(project, row, columnName),
-        row.condition === undefined ? "" : conditionText(row.condition, columns),
+        row.condition === undefined ? "" : conditionText(row.condition, names),
         row.repeat?.kind ?? "",
         row.notes ?? "",
         row.review?.status ?? "",
@@ -254,7 +267,6 @@ export function mappingTables(project: ProjectFile): Sheet[] {
       "Review status",
     ],
     rows: project.instances.map((instance) => {
-      const columns = names.get(instance.sourceId) ?? new Map();
       const m = instance.multiplicity;
       const multiplicity =
         m.kind === "perGroup"
@@ -262,7 +274,7 @@ export function mappingTables(project: ProjectFile): Sheet[] {
           : m.kind === "perValue"
             ? `perValue of ${columnName(m.columnId)}`
             : m.kind;
-      const condition = roleCondition(project, instance, columns, []);
+      const condition = roleCondition(project, instance, names, []);
       const rule = instance.idRule;
       const idRule =
         rule === undefined

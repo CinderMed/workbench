@@ -126,6 +126,56 @@ describe("mapping table content", () => {
   });
 });
 
+describe("mapping table of a broken project", () => {
+  /** MOTU with dangling references of every kind and a duplicate row code. */
+  function broken(): ProjectFile {
+    const file = project(motuProject);
+    const [r1, r2, r3, r4] = file.mappings;
+    const fall = file.instances.find((i) => i.id === "ins_ae0");
+    if (
+      r1 === undefined ||
+      r2 === undefined ||
+      r3 === undefined ||
+      r4 === undefined ||
+      fall === undefined
+    ) {
+      throw new Error("fixture changed");
+    }
+    r1.columnId = "col_ghost";
+    r1.condition = { op: "notEmpty", columnId: "col_lost" };
+    r2.transform = { kind: "valueMap", valueMapId: "vm_ghost" };
+    r3.instanceId = "ins_ghost";
+    r4.code = r1.code;
+    fall.createWhen = { op: "equals", columnId: "col_lost", value: "x" };
+    fall.idRule = { parts: [{ literal: "ae" }, { columnId: "col_lost" }] };
+    file.mappings.push({
+      id: "map_ref",
+      code: "R-090",
+      instanceId: "ins_ae0",
+      path: "subject",
+      transform: { kind: "reference", targetInstanceId: "ins_ghost", via: "rel_ghost" },
+    });
+    return file;
+  }
+
+  it("is written without errors and names every dangling reference", () => {
+    const sheets = mappingTables(broken());
+    const mapping = sheet(sheets, "Mapping").rows;
+    expect(mapping[0]?.slice(0, 3)).toEqual(["R-001", "MotuPatient", "unknown column col_ghost"]);
+    expect(mapping[0]?.[8]).toBe("unknown column col_lost is not empty");
+    expect(mapping[1]?.[7]).toBe("value map unknown value map vm_ghost");
+    expect(mapping[2]?.slice(1, 2)).toEqual([""]);
+    expect(mapping[2]?.[5]).toBe("unknown role ins_ghost");
+    expect(mapping[3]?.[0]).toBe("R-001");
+    expect(mapping.at(-1)?.[7]).toBe("reference to unknown role ins_ghost via rel_ghost");
+    const fallRole = sheet(sheets, "Roles").rows.find((r) => r[0]?.startsWith("AdverseEvent[0]"));
+    expect(fallRole?.slice(4, 6)).toEqual([
+      "unknown column col_lost = 'x'",
+      "'ae' + unknown column col_lost (hash)",
+    ]);
+  });
+});
+
 describe("CSV", () => {
   const table: Sheet = {
     name: "T",

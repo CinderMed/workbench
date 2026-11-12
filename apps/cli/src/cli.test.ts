@@ -325,6 +325,27 @@ describe("cindermed mapping-table", () => {
     expect(invalid.written.size).toBe(0);
   });
 
+  it("writes the table of a project with dangling references and lists the findings", async () => {
+    const broken = JSON.parse(await exampleText("motu")) as {
+      mappings: { code: string; columnId?: string; instanceId: string }[];
+    };
+    const [first, second, third] = broken.mappings;
+    if (first === undefined || second === undefined || third === undefined)
+      throw new Error("fixture changed");
+    first.columnId = "col_ghost";
+    second.instanceId = "ins_ghost";
+    third.code = first.code;
+    const cli = capture({ "broken.json": JSON.stringify(broken) });
+    expect(await run(["mapping-table", "broken.json", "--format", "csv"], cli.io)).toBe(
+      ExitCode.OK,
+    );
+    const csv = new TextDecoder().decode(cli.written.get("motu-mapping-table/mapping.csv"));
+    expect(csv).toContain("unknown column col_ghost");
+    expect(csv).toContain("unknown role ins_ghost");
+    expect(cli.stdout()).toContain("DANGLING_REFERENCE");
+    expect(cli.stdout()).toContain("DUPLICATE_ROW_CODE");
+  });
+
   it.each([
     [
       ["mapping-table", "p.json", "--format", "json"],
