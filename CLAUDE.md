@@ -3,6 +3,10 @@
 Multi-user web workbench to map tabular datasets to FHIR (R4/R5) and generate FML.
 Full specification: docs/specification.md. Verified examples: fixtures/fml-examples.
 
+## Scope
+- Design for any tabular dataset that can be mapped to FHIR: check every new feature against a wide
+  table, a long table and several related tables; Metastra, MOTU and MIMIC-IV are only examples.
+
 ## Workflow
 - Work one module at a time, in the order of the "Incremental module plan".
 - One feature per branch: feature/<id>-<name> (fix/, chore/, docs/, refactor/, ci/ for the rest).
