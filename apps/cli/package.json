@@ -23,6 +23,10 @@
     "cindermed": "./dist/bin.js"
   },
   "dependencies": {
+    "@cindermed/export": "workspace:*",
     "@cindermed/model": "workspace:*"
+  },
+  "devDependencies": {
+    "fflate": "0.8.3"
   }
 }

@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { exportPackage } from "@cindermed/export";
+import { unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { type CliIo, ExitCode, USAGE, packageName, run } from "./index.js";
 
@@ -9,20 +11,30 @@ interface Captured {
   readonly io: CliIo;
   readonly stdout: () => string;
   readonly stderr: () => string;
+  /** Files written by the command, kept in memory (nothing reaches the disk). */
+  readonly written: Map<string, Uint8Array>;
 }
 
-/** Real file reads (fixtures only, never written), captured output. */
+/** Real file reads (fixtures only, never written), captured output and writes, a fixed clock. */
 function capture(files: Readonly<Record<string, string>> = {}): Captured {
   let out = "";
   let err = "";
+  const written = new Map<string, Uint8Array>();
   return {
     io: {
       readFile: async (path) => files[path] ?? (await readFile(path, "utf8")),
       stdout: (text) => (out += text),
       stderr: (text) => (err += text),
+      writeFile: (path, data) => {
+        written.set(path, data);
+        return Promise.resolve();
+      },
+      now: () => new Date("2026-11-12T08:30:15.987Z"),
+      version: "9.9.9",
     },
     stdout: () => out,
     stderr: () => err,
+    written,
   };
 }
 
@@ -118,7 +130,7 @@ describe("cindermed usage", () => {
 
   it.each([
     [[], "missing command"],
-    [["export", "p.json"], "unknown command 'export'"],
+    [["convert", "p.json"], "unknown command 'convert'"],
     [["validate"], "validate needs a project file"],
     [["validate", "a.json", "b.json"], "unexpected argument 'b.json'"],
     [["validate", "a.json", "--format", "xml"], "unknown format 'xml'"],
@@ -133,5 +145,106 @@ describe("cindermed usage", () => {
 
   it("exposes its package name", () => {
     expect(packageName).toBe("@cindermed/cli");
+  });
+});
+
+describe("cindermed export", () => {
+  const motu = `${examples}motu/project.json`;
+  const fixed = ["--package-version", "0.1.0", "--created-at", "2026-11-12T00:00:00Z"];
+
+  it("writes the deterministic zip of the export package", async () => {
+    const cli = capture();
+    expect(await run(["export", motu, ...fixed, "--out", "out/motu.zip"], cli.io)).toBe(
+      ExitCode.OK,
+    );
+    const expected = exportPackage(await exampleText("motu"), {
+      createdAt: "2026-11-12T00:00:00Z",
+      packageVersion: "0.1.0",
+      generator: { name: "cindermed", version: "9.9.9" },
+    });
+    if (!expected.ok) throw new Error("fixture export failed");
+    expect([...cli.written.keys()]).toEqual(["out/motu.zip"]);
+    expect(cli.written.get("out/motu.zip")).toEqual(expected.zip);
+    expect(cli.stdout()).toBe(`${motu}: exported motu-mapping 0.1.0 to out/motu.zip (18 files)\n`);
+  });
+
+  it("writes the files into a folder when --out does not end in .zip", async () => {
+    const cli = capture();
+    expect(await run(["export", motu, ...fixed, "--out", "pkg/"], cli.io)).toBe(ExitCode.OK);
+    const paths = [...cli.written.keys()];
+    expect(paths).toContain("pkg/manifest.json");
+    expect(paths).toContain("pkg/schemas/manifest.schema.json");
+    expect(paths).toHaveLength(18);
+    const manifest = JSON.parse(new TextDecoder().decode(cli.written.get("pkg/manifest.json"))) as {
+      package: { generator: { version: string } };
+    };
+    expect(manifest.package.generator).toEqual({ name: "cindermed", version: "9.9.9" });
+  });
+
+  it("uses a dev version from the project, the clock and the package name by default", async () => {
+    const cli = capture();
+    expect(await run(["export", motu], cli.io)).toBe(ExitCode.OK);
+    const [out] = [...cli.written.keys()];
+    expect(out).toMatch(/^motu-mapping-0\.0\.0-dev\.[0-9a-f]{12}\.zip$/);
+    const entries = unzipSync(cli.written.get(out ?? "") ?? new Uint8Array());
+    const manifest = JSON.parse(new TextDecoder().decode(entries["manifest.json"])) as {
+      package: { createdAt: string };
+    };
+    expect(manifest.package.createdAt).toBe("2026-11-12T08:30:15Z");
+  });
+
+  it("reports in JSON", async () => {
+    const cli = capture();
+    expect(await run(["export", motu, ...fixed, "--format", "json"], cli.io)).toBe(ExitCode.OK);
+    expect(JSON.parse(cli.stdout())).toMatchObject({
+      file: motu,
+      ok: true,
+      out: "motu-mapping-0.1.0.zip",
+      package: { name: "motu-mapping", version: "0.1.0", createdAt: "2026-11-12T00:00:00Z" },
+      warnings: [],
+    });
+  });
+
+  it("blocks a project with errors, writes nothing and exits with 1", async () => {
+    const broken = JSON.parse(await exampleText("motu")) as { mappings: { code: string }[] };
+    const [first, second] = broken.mappings;
+    if (first === undefined || second === undefined) throw new Error("fixture changed");
+    second.code = first.code;
+    const cli = capture({ "broken.json": JSON.stringify(broken) });
+    expect(await run(["export", "broken.json", ...fixed], cli.io)).toBe(ExitCode.INVALID);
+    expect(cli.written.size).toBe(0);
+    expect(cli.stdout()).toMatch(
+      /^broken\.json: export blocked, 1 error\n {2}error DUPLICATE_ROW_CODE/,
+    );
+    const json = capture({ "broken.json": JSON.stringify(broken) });
+    await run(["export", "broken.json", "--format", "json"], json.io);
+    expect(JSON.parse(json.stdout())).toMatchObject({
+      ok: false,
+      results: [{ code: "DUPLICATE_ROW_CODE" }],
+    });
+  });
+
+  it.each([
+    [["export"], "export needs a project file"],
+    [["export", "p.json", "--package-version", "latest"], "--package-version must be a version"],
+    [
+      ["export", "p.json", "--created-at", "2026-11-12"],
+      "--created-at must be an ISO 8601 date-time",
+    ],
+    [["validate", "p.json", "--out", "x.zip"], "--out only applies to export"],
+  ])("rejects %j", async (args, message) => {
+    const cli = capture();
+    expect(await run(args, cli.io)).toBe(ExitCode.USAGE);
+    expect(cli.stderr()).toContain(message);
+  });
+
+  it("reports a file it cannot write", async () => {
+    const cli = capture();
+    const io = {
+      ...cli.io,
+      writeFile: () => Promise.reject(Object.assign(new Error("denied"), { code: "EACCES" })),
+    };
+    expect(await run(["export", motu, ...fixed], io)).toBe(ExitCode.USAGE);
+    expect(cli.stderr()).toBe("cindermed: cannot write motu-mapping-0.1.0.zip (EACCES)\n");
   });
 });
