@@ -3,7 +3,7 @@
  * without a process; bin.ts wires it to the real process.
  */
 import { parseArgs } from "node:util";
-import { exportPackage } from "@cindermed/export";
+import { exportPackage, mappingTables, toCsv, toXlsx } from "@cindermed/export";
 import {
   PROJECT_FORMAT_VERSION,
   type ValidationResult,
@@ -29,6 +29,20 @@ export interface CliIo {
 
 const FORMATS = ["text", "json"] as const;
 type Format = (typeof FORMATS)[number];
+const TABLE_FORMATS = ["csv", "xlsx"] as const;
+type TableFormat = (typeof TABLE_FORMATS)[number];
+
+/** Options each command accepts (besides --help). */
+const COMMAND_OPTIONS = {
+  validate: ["format"],
+  export: ["format", "out", "package-version", "created-at"],
+  "mapping-table": ["format", "delimiter", "out", "created-at"],
+} as const;
+type Command = keyof typeof COMMAND_OPTIONS;
+
+function isCommand(value: string): value is Command {
+  return Object.hasOwn(COMMAND_OPTIONS, value);
+}
 
 export const USAGE = `Usage: cindermed <command> [options]
 
@@ -36,13 +50,22 @@ Commands:
   validate <project.json>   Check a project file (schema, integrity and quality rules)
   export <project.json>     Write the export package (maps, logical models, normalization
                             specifications, ConceptMaps, schemas, manifest)
+  mapping-table <project.json>
+                            Write the mapping table for documentation and review (sheets
+                            Mapping, Value maps, Roles, Columns)
 
 Options:
-  --format text|json        Output format (default: text)
+  --format text|json        validate, export: output format (default: text)
+  --format xlsx|csv         mapping-table: one XLSX workbook (default; use it for Excel), or one
+                            CSV file per sheet in a folder
+  --delimiter <char>        mapping-table, csv: field delimiter (default: ","; ";" for Excel in Italian)
   --out <file.zip|folder>   export: where to write the package (default: <name>-mapping-<version>.zip);
                             a path not ending in .zip is a folder
+  --out <file.xlsx|folder>  mapping-table: where to write it (default: <name>-mapping-table.xlsx,
+                            or the folder <name>-mapping-table for csv)
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
-  --created-at <date-time>  export: package date, ISO 8601 with time zone (default: now)
+  --created-at <date-time>  export, mapping-table: date of the package or workbook, ISO 8601 with
+                            time zone (default: now)
   -h, --help                Show this help
 
 Exit codes: 0 done, 1 the project has errors (nothing is written), 2 the command could not run.
@@ -187,6 +210,68 @@ async function exportProject(
   return ExitCode.OK;
 }
 
+const TABLE_FILES: Readonly<Record<string, string>> = {
+  Mapping: "mapping.csv",
+  "Value maps": "value-maps.csv",
+  Roles: "roles.csv",
+  Columns: "columns.csv",
+};
+
+async function mappingTable(
+  path: string,
+  format: TableFormat,
+  flags: { readonly out?: string; readonly delimiter?: string; readonly createdAt?: string },
+  io: CliIo,
+): Promise<ExitCode> {
+  const text = await readProject(path, io);
+  if (text === undefined) return ExitCode.USAGE;
+  const parsed = parseProject(text);
+  if (parsed.project === undefined) {
+    const lines = [`${path}: not written, ${plural(parsed.results.length, "error")}`];
+    lines.push(...parsed.results.map(describeResult));
+    io.stdout(`${lines.join("\n")}\n`);
+    return ExitCode.INVALID;
+  }
+  const sheets = mappingTables(parsed.project);
+  const base = `${parsed.project.project.name.toLowerCase()}-mapping-table`;
+  const out = flags.out ?? (format === "xlsx" ? `${base}.xlsx` : base);
+  const encoder = new TextEncoder();
+  try {
+    if (format === "xlsx") {
+      await io.writeFile(
+        out,
+        toXlsx(sheets, { createdAt: flags.createdAt ?? isoSecond(io.now()) }),
+      );
+    } else {
+      for (const sheet of sheets) {
+        const csv = toCsv(
+          sheet,
+          flags.delimiter === undefined ? {} : { delimiter: flags.delimiter },
+        );
+        await io.writeFile(
+          `${out.replace(/\/+$/, "")}/${TABLE_FILES[sheet.name] ?? `${sheet.name}.csv`}`,
+          encoder.encode(csv),
+        );
+      }
+    }
+  } catch (error) {
+    io.stderr(`cindermed: cannot write ${out} (${errorCode(error, "write error")})\n`);
+    return ExitCode.USAGE;
+  }
+  const lines = sheets.map((sheet) => `${String(sheet.rows.length).padStart(5)} ${sheet.name}`);
+  const findings =
+    parsed.results.length === 0
+      ? []
+      : [
+          `  note: written although the project has ${plural(parsed.results.length, "finding")}:`,
+          ...parsed.results.map(describeResult),
+        ];
+  io.stdout(
+    `${[`${path}: wrote the mapping table to ${out}`, ...lines, ...findings].join("\n")}\n`,
+  );
+  return ExitCode.OK;
+}
+
 function usageError(message: string, io: CliIo): ExitCode {
   io.stderr(`cindermed: ${message}\n\n${USAGE}`);
   return ExitCode.USAGE;
@@ -196,7 +281,8 @@ function parseCommandLine(args: readonly string[]) {
   return parseArgs({
     args: [...args],
     options: {
-      format: { type: "string", default: "text" },
+      format: { type: "string" },
+      delimiter: { type: "string" },
       out: { type: "string" },
       "package-version": { type: "string" },
       "created-at": { type: "string" },
@@ -222,44 +308,72 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
   }
   const [command, ...operands] = positionals;
   if (command === undefined) return usageError("missing command", io);
-  if (command !== "validate" && command !== "export") {
-    return usageError(`unknown command '${command}'`, io);
-  }
-  if (!isFormat(values.format)) return usageError(`unknown format '${values.format}'`, io);
+  if (!isCommand(command)) return usageError(`unknown command '${command}'`, io);
   const [path, ...rest] = operands;
   if (path === undefined) return usageError(`${command} needs a project file`, io);
   if (rest.length > 0) return usageError(`unexpected argument '${rest.join(" ")}'`, io);
+  const given = Object.entries(values)
+    .filter(([key]) => key !== "help")
+    .map(([key]) => key);
+  const allowed: readonly string[] = COMMAND_OPTIONS[command];
+  const foreign = given.filter((key) => !allowed.includes(key)).map((key) => `--${key}`);
+  if (foreign.length > 0) {
+    return usageError(`${foreign.join(", ")} does not apply to ${command}`, io);
+  }
   const flags = {
     out: values.out,
     packageVersion: values["package-version"],
     createdAt: values["created-at"],
   };
-  if (command === "validate") {
-    const used = Object.entries({
-      out: flags.out,
-      "package-version": flags.packageVersion,
-      "created-at": flags.createdAt,
-    })
-      .filter(([, value]) => value !== undefined)
-      .map(([key]) => `--${key}`);
-    if (used.length > 0) return usageError(`${used.join(", ")} only applies to export`, io);
-    return validate(path, values.format, io);
-  }
-  if (flags.packageVersion !== undefined && !SEMVER.test(flags.packageVersion)) {
-    return usageError(
-      `--package-version must be a version such as 1.2.0, not '${flags.packageVersion}'`,
-      io,
-    );
-  }
   if (flags.createdAt !== undefined && !DATE_TIME.test(flags.createdAt)) {
     return usageError(
       `--created-at must be an ISO 8601 date-time with a time zone, not '${flags.createdAt}'`,
       io,
     );
   }
+
+  if (command === "mapping-table") {
+    const format = values.format ?? "xlsx";
+    if (!(TABLE_FORMATS as readonly string[]).includes(format)) {
+      return usageError(`mapping-table writes xlsx or csv, not '${format}'`, io);
+    }
+    const delimiter = values.delimiter;
+    if (delimiter !== undefined && format !== "csv") {
+      return usageError("--delimiter only applies to --format csv", io);
+    }
+    if (
+      delimiter !== undefined &&
+      (Array.from(delimiter).length !== 1 || /["\r\n]/.test(delimiter))
+    ) {
+      return usageError(
+        `--delimiter must be one character other than a quote or a line end, not '${delimiter}'`,
+        io,
+      );
+    }
+    return mappingTable(
+      path,
+      format as TableFormat,
+      {
+        ...(flags.out === undefined ? {} : { out: flags.out }),
+        ...(delimiter === undefined ? {} : { delimiter }),
+        ...(flags.createdAt === undefined ? {} : { createdAt: flags.createdAt }),
+      },
+      io,
+    );
+  }
+
+  const format = values.format ?? "text";
+  if (!isFormat(format)) return usageError(`unknown format '${format}'`, io);
+  if (command === "validate") return validate(path, format, io);
+  if (flags.packageVersion !== undefined && !SEMVER.test(flags.packageVersion)) {
+    return usageError(
+      `--package-version must be a version such as 1.2.0, not '${flags.packageVersion}'`,
+      io,
+    );
+  }
   return exportProject(
     path,
-    values.format,
+    format,
     {
       ...(flags.out === undefined ? {} : { out: flags.out }),
       ...(flags.packageVersion === undefined ? {} : { packageVersion: flags.packageVersion }),

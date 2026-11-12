@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { exportPackage } from "@cindermed/export";
+import { exportPackage, mappingTables, toCsv, toXlsx } from "@cindermed/export";
+import { parseProject } from "@cindermed/model";
 import { unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { type CliIo, ExitCode, USAGE, packageName, run } from "./index.js";
@@ -231,7 +232,7 @@ describe("cindermed export", () => {
       ["export", "p.json", "--created-at", "2026-11-12"],
       "--created-at must be an ISO 8601 date-time",
     ],
-    [["validate", "p.json", "--out", "x.zip"], "--out only applies to export"],
+    [["validate", "p.json", "--out", "x.zip"], "--out does not apply to validate"],
   ])("rejects %j", async (args, message) => {
     const cli = capture();
     expect(await run(args, cli.io)).toBe(ExitCode.USAGE);
@@ -246,5 +247,103 @@ describe("cindermed export", () => {
     };
     expect(await run(["export", motu, ...fixed], io)).toBe(ExitCode.USAGE);
     expect(cli.stderr()).toBe("cindermed: cannot write motu-mapping-0.1.0.zip (EACCES)\n");
+  });
+});
+
+describe("cindermed mapping-table", () => {
+  const metastra = `${examples}metastra/project.json`;
+  const sheetsOf = async (name: string) => {
+    const project = parseProject(await exampleText(name)).project;
+    if (project === undefined) throw new Error("fixture project is not valid");
+    return mappingTables(project);
+  };
+
+  it("writes one XLSX workbook by default, dated --created-at", async () => {
+    const cli = capture();
+    const args = ["mapping-table", metastra, "--created-at", "2026-11-12T00:00:00Z"];
+    expect(await run(args, cli.io)).toBe(ExitCode.OK);
+    const expected = toXlsx(await sheetsOf("metastra"), { createdAt: "2026-11-12T00:00:00Z" });
+    expect([...cli.written.keys()]).toEqual(["metastra-mapping-table.xlsx"]);
+    expect(cli.written.get("metastra-mapping-table.xlsx")).toEqual(expected);
+    expect(cli.stdout()).toBe(
+      `${metastra}: wrote the mapping table to metastra-mapping-table.xlsx\n` +
+        "   16 Mapping\n   17 Value maps\n    6 Roles\n   11 Columns\n",
+    );
+  });
+
+  it("writes one CSV file per sheet into a folder, with the chosen delimiter", async () => {
+    const cli = capture();
+    const args = [
+      "mapping-table",
+      metastra,
+      "--format",
+      "csv",
+      "--delimiter",
+      ";",
+      "--out",
+      "table/",
+    ];
+    expect(await run(args, cli.io)).toBe(ExitCode.OK);
+    expect([...cli.written.keys()]).toEqual([
+      "table/mapping.csv",
+      "table/value-maps.csv",
+      "table/roles.csv",
+      "table/columns.csv",
+    ]);
+    const [mapping] = await sheetsOf("metastra");
+    if (mapping === undefined) throw new Error("no sheet");
+    expect(
+      new TextDecoder("utf-8", { ignoreBOM: true }).decode(cli.written.get("table/mapping.csv")),
+    ).toBe(toCsv(mapping, { delimiter: ";" }));
+  });
+
+  it("uses the clock and the default folder for csv", async () => {
+    const cli = capture();
+    expect(await run(["mapping-table", metastra, "--format", "csv"], cli.io)).toBe(ExitCode.OK);
+    expect([...cli.written.keys()][0]).toBe("metastra-mapping-table/mapping.csv");
+    const xlsx = capture();
+    await run(["mapping-table", metastra], xlsx.io);
+    const core = unzipSync(xlsx.written.get("metastra-mapping-table.xlsx") ?? new Uint8Array())[
+      "docProps/core.xml"
+    ];
+    expect(new TextDecoder().decode(core)).toContain("2026-11-12T08:30:15Z");
+  });
+
+  it("writes the table of a project with integrity errors and lists them; not of an invalid file", async () => {
+    const broken = JSON.parse(await exampleText("motu")) as { mappings: { code: string }[] };
+    const [first, second] = broken.mappings;
+    if (first === undefined || second === undefined) throw new Error("fixture changed");
+    second.code = first.code;
+    const cli = capture({ "broken.json": JSON.stringify(broken) });
+    expect(await run(["mapping-table", "broken.json"], cli.io)).toBe(ExitCode.OK);
+    expect(cli.written.size).toBe(1);
+    expect(cli.stdout()).toContain(
+      "  note: written although the project has 1 finding:\n  error DUPLICATE_ROW_CODE",
+    );
+    const invalid = capture({ "bad.json": "{}" });
+    expect(await run(["mapping-table", "bad.json"], invalid.io)).toBe(ExitCode.INVALID);
+    expect(invalid.written.size).toBe(0);
+  });
+
+  it.each([
+    [
+      ["mapping-table", "p.json", "--format", "json"],
+      "mapping-table writes xlsx or csv, not 'json'",
+    ],
+    [["mapping-table", "p.json", "--delimiter", ";"], "--delimiter only applies to --format csv"],
+    [
+      ["mapping-table", "p.json", "--format", "csv", "--delimiter", ";;"],
+      "--delimiter must be one character",
+    ],
+    [
+      ["mapping-table", "p.json", "--package-version", "1.0.0"],
+      "--package-version does not apply to mapping-table",
+    ],
+    [["export", "p.json", "--delimiter", ";"], "--delimiter does not apply to export"],
+    [["validate", "p.json", "--format", "csv"], "unknown format 'csv'"],
+  ])("rejects %j", async (args, message) => {
+    const cli = capture();
+    expect(await run(args, cli.io)).toBe(ExitCode.USAGE);
+    expect(cli.stderr()).toContain(message);
   });
 });

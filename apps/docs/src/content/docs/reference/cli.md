@@ -1,9 +1,9 @@
 ---
 title: Command line
-description: The cindermed command, its two subcommands and their exit codes.
+description: The cindermed command, its subcommands and their exit codes.
 ---
 
-`cindermed` checks project files and writes their export packages from a terminal or a CI job, without the web app.
+`cindermed` checks project files and writes their export packages and mapping tables from a terminal or a CI job, without the web app.
 
 ## Run it from the repository
 
@@ -98,10 +98,44 @@ The same project, version and date always give the same zip, byte for byte, on a
 
 `--format json` prints `file`, `ok`, `out`, `package` (name, version, date, generator), the list of `files` and the `warnings`. A blocked export prints `ok: false` and the `results`.
 
+## `cindermed mapping-table`
+
+```text
+cindermed mapping-table <project.json> [--format xlsx|csv] [--delimiter <char>]
+                        [--out <file.xlsx|folder>] [--created-at <date-time>]
+```
+
+Writes the mapping table of a project, a flat view for documentation and review, in the style of Table 1 of the MOTU paper. It has four sheets:
+
+| Sheet      | One line per                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------- |
+| Mapping    | Mapping row: column, role, element, transform, condition, notes and review status                          |
+| Value maps | Entry of every value map, including maps to `true`/`false`: target, code verification, action              |
+| Roles      | Role: description, how many resources, when they are created, id rule, fixed values and their verification |
+| Columns    | Source column: description, type, formats, allowed and missing values, and the rows and roles that use it  |
+
+The table shows review statuses and notes, but not who reviewed, the comments or where an object came from.
+
+```text
+$ pnpm cindermed mapping-table fixtures/fml-examples/metastra/project.json
+fixtures/fml-examples/metastra/project.json: wrote the mapping table to metastra-mapping-table.xlsx
+   16 Mapping
+   17 Value maps
+    6 Roles
+   11 Columns
+```
+
+- `--format xlsx` (the default) writes one workbook. **For Excel, use XLSX**: it opens with the right characters and columns whatever the language settings.
+- `--format csv` writes one file per sheet into a folder (`mapping.csv`, `value-maps.csv`, `roles.csv`, `columns.csv`). The files are UTF-8 with a byte order mark and Windows line ends. The delimiter is a comma; use `--delimiter ";"` for Excel set to Italian or another language whose list separator is `;`. A cell that a spreadsheet would read as a formula (starting with `=`, `+`, `@`, or `-` not followed by a digit) starts with `'`.
+- `--out`: the workbook or folder to write. Without it: `<name>-mapping-table.xlsx`, or the folder `<name>-mapping-table`.
+- `--created-at`: the document date of the workbook; without it, the current time. The same project and date give the same file, byte for byte.
+
+The project must match the schema. A project with integrity errors or quality warnings still gets its table, because the table helps to review exactly those projects; the findings are listed after the summary.
+
 ## Exit codes
 
-| Code | Meaning                                                                            |
-| ---- | ---------------------------------------------------------------------------------- |
-| 0    | The project is valid (`validate`), or the package was written (`export`)           |
-| 1    | The project has errors, including a file that is not JSON; `export` writes nothing |
-| 2    | The command could not run: wrong arguments, or a file it cannot read or write      |
+| Code | Meaning                                                                                            |
+| ---- | -------------------------------------------------------------------------------------------------- |
+| 0    | The project is valid (`validate`), or the package or table was written (`export`, `mapping-table`) |
+| 1    | The project has errors, including a file that is not JSON; `export` writes nothing                 |
+| 2    | The command could not run: wrong arguments, or a file it cannot read or write                      |
