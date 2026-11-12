@@ -71,6 +71,11 @@ describe("GitHub Actions", () => {
     expect(nightly).toContain("tooling/normalizer-memory.test.ts");
   });
 
+  it("validates the FHIR resources of the examples in the golden job", () => {
+    const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf8");
+    expect(ci).toContain("bash tooling/golden/validate-resources.sh");
+  });
+
   it("checks the fixtures against the checksum file", () => {
     const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf8");
     expect(ci).toContain("sha256sum --check --strict --quiet fixtures/fml-examples.sha256");

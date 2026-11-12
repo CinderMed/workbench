@@ -119,3 +119,6 @@ The six ConceptMaps (`metastra/ConceptMap-*.json`, `motu/ConceptMap-sex.json`) h
 format version of the prototype `tools/artifacts.py`. The logical models moved to 1.3.0 with project format 1.3.0;
 the ConceptMaps now carry the same version as the logical models, as the TypeScript generator writes them. Only
 `version` changed; the manifests carry the new SHA-256. Suite: 13 of 13, Bundles unchanged.
+Four of them also had `"description": ""` (the prototype wrote an empty string for a value map without a
+description); FHIR does not allow empty strings, and the HL7 validator reported 2 errors in each. The empty
+`description` is removed; the six ConceptMaps now validate with 0 errors (`tooling/golden/validate-resources.sh`).
