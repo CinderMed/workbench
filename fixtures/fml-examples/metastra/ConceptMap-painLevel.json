@@ -10,6 +10,20 @@
     {
       "element": [
         {
+          "code": "-1",
+          "display": "unknown",
+          "target": [
+            {
+              "equivalence": "unmatched",
+              "comment": "skipInstance: this value does not create the resource"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "element": [
+        {
           "code": "2",
           "display": "medium",
           "target": [

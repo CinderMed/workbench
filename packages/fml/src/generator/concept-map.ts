@@ -7,8 +7,12 @@
  * - `id` and the end of `url` are the value map's name; `name` is the same with a capital first
  *   letter; `version` is the logical model's (the project format version until #83); `status`
  *   is `draft`; `description` only when the value map has one (FHIR does not allow empty strings).
- * - Only `use` entries are listed (#119 adds the deliberately unmapped ones), grouped by target
- *   system and version in sorted order; a `code` map has one group without a target system.
+ * - `use` entries are listed with their target, grouped by target system and version in sorted
+ *   order; a `code` map has one group without a target system.
+ * - Entries with another action are listed as deliberately unmapped (#119), so the ConceptMap
+ *   records every mapping decision: R4 `target: [{ equivalence: "unmatched", comment }]`, the
+ *   comment naming the action; R5 `noMap: true`. They join the only group when there is one, else
+ *   a group without a target system. Within a group, elements follow the value map's entry order.
  * - R4: `target: [{ code, equivalence: "equivalent", display? }]`, `group.targetVersion`.
  *   R5: `relationship: "equivalent"` instead of `equivalence`, the version in `group.target`
  *   (`system|version`).
@@ -20,16 +24,18 @@ export interface ConceptMapOptions {
 }
 
 interface TargetJson {
-  readonly code: string;
-  readonly equivalence?: "equivalent";
+  readonly code?: string;
+  readonly equivalence?: "equivalent" | "unmatched";
   readonly relationship?: "equivalent";
   readonly display?: string;
+  readonly comment?: string;
 }
 
 interface ElementJson {
   readonly code: string;
   readonly display?: string;
-  readonly target: readonly TargetJson[];
+  readonly noMap?: true;
+  readonly target?: readonly TargetJson[];
 }
 
 interface GroupJson {
@@ -77,6 +83,13 @@ function mapped(entry: ValueMapEntry): Mapped | undefined {
   };
 }
 
+/** Comment of a deliberately unmapped entry (R4 `equivalence: unmatched`), by action. */
+const UNMAPPED: Readonly<Record<"skipInstance" | "absent" | "setElement", string>> = {
+  skipInstance: "skipInstance: this value does not create the resource",
+  absent: "absent: this value is treated as missing",
+  setElement: "setElement: this value sets other elements instead of a code",
+};
+
 /** The ConceptMap of a value map, or `undefined` for a value map with a boolean target. */
 export function conceptMap(
   project: ProjectFile,
@@ -85,23 +98,47 @@ export function conceptMap(
 ): ConceptMapJson | undefined {
   if (valueMap.target === "boolean") return undefined;
   const entries = valueMap.entries.map(mapped).filter((m): m is Mapped => m !== undefined);
-  const keys = [...new Set(entries.map((m) => `${m.system}|${m.version}`))].sort();
+  const keyOf = (m: Mapped) => `${m.system}|${m.version}`;
+  const keys = [...new Set(entries.map(keyOf))].sort();
+  const unmapped = valueMap.entries.filter((entry) => entry.action.kind !== "use");
+  // Unmapped entries join the only group, or a group without a target system.
+  const [onlyKey] = keys;
+  const unmappedKey = keys.length === 1 && onlyKey !== undefined ? onlyKey : "|";
+  if (unmapped.length > 0 && !keys.includes(unmappedKey)) keys.unshift(unmappedKey);
   const group = keys.map((key): GroupJson => {
-    const members = entries.filter((m) => `${m.system}|${m.version}` === key);
     const [system = "", version = ""] = key.split("|");
-    const element = members.map((m): ElementJson => {
-      const label = nonEmpty(m.entry.sourceLabel);
+    const element = valueMap.entries.flatMap((entry): ElementJson[] => {
+      const label = nonEmpty(entry.sourceLabel);
+      const head = { code: entry.sourceValue, ...(label === undefined ? {} : { display: label }) };
+      if (entry.action.kind !== "use") {
+        if (key !== unmappedKey) return [];
+        return [
+          options.fhirRelease === "R4"
+            ? {
+                ...head,
+                target: [{ equivalence: "unmatched", comment: UNMAPPED[entry.action.kind] }],
+              }
+            : { ...head, noMap: true },
+        ];
+      }
+      const m = entries.find((candidate) => candidate.entry === entry);
+      if (m === undefined || keyOf(m) !== key) return [];
       const relation =
         options.fhirRelease === "R4"
           ? { equivalence: "equivalent" as const }
           : { relationship: "equivalent" as const };
-      return {
-        code: m.entry.sourceValue,
-        ...(label === undefined ? {} : { display: label }),
-        target: [
-          { code: m.code, ...relation, ...(m.display === undefined ? {} : { display: m.display }) },
-        ],
-      };
+      return [
+        {
+          ...head,
+          target: [
+            {
+              code: m.code,
+              ...relation,
+              ...(m.display === undefined ? {} : { display: m.display }),
+            },
+          ],
+        },
+      ];
     });
     if (system === "") return { element };
     if (options.fhirRelease === "R5") {

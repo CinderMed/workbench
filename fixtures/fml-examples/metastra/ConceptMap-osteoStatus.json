@@ -27,6 +27,16 @@
               "equivalence": "equivalent"
             }
           ]
+        },
+        {
+          "code": "0",
+          "display": "no",
+          "target": [
+            {
+              "equivalence": "unmatched",
+              "comment": "skipInstance: this value does not create the resource"
+            }
+          ]
         }
       ],
       "target": "http://terminology.hl7.org/CodeSystem/condition-ver-status"

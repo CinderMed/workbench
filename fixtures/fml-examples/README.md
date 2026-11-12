@@ -132,3 +132,10 @@ root element; the compiled StructureMaps (HL7 `compile`, line endings normalized
 were recompiled from folders without the old JSON. `tooling/golden/validate-resources.sh` validates every FHIR
 resource here (logical models, StructureMaps, ConceptMaps, Bundles; MOTU HospitalStay and Fall through
 `bundle-merged.json`): 0 errors. Suite: 13 of 13, Bundles unchanged.
+
+## Unmapped entries in the ConceptMaps (12 November 2026, #119)
+The ConceptMaps record every mapping decision: entries whose action is not `use` (`skipInstance`, `absent`,
+`setElement`) are listed as deliberately unmapped, with `equivalence: unmatched` and a comment that names the action
+(R5: `noMap: true`). `metastra/ConceptMap-painLevel.json` gains `-1` (skipInstance, in a group without a target system,
+since the map has two target systems) and `metastra/ConceptMap-osteoStatus.json` gains `0` (skipInstance, in its only
+group). The other ConceptMaps, the maps and the Bundles do not change. Every FHIR resource still validates with 0 errors.

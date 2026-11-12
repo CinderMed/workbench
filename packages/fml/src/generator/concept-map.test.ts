@@ -74,10 +74,12 @@ describe("conceptMaps (R5)", () => {
     const file = project(metastraProject);
     const pain = conceptMaps(file, { fhirRelease: "R5" })[1];
     expect(pain?.group.map((g) => g.target)).toEqual([
+      undefined,
       "http://loinc.org",
       "http://snomed.info/sct",
     ]);
-    const targets = pain?.group.flatMap((g) => g.element.flatMap((e) => e.target)) ?? [];
+    expect(pain?.group[0]?.element).toEqual([{ code: "-1", display: "unknown", noMap: true }]);
+    const targets = pain?.group.flatMap((g) => g.element.flatMap((e) => e.target ?? [])) ?? [];
     expect(targets).toHaveLength(4);
     for (const target of targets) {
       expect(target).toHaveProperty("relationship", "equivalent");
@@ -98,5 +100,84 @@ describe("conceptMaps (R5)", () => {
         target: "http://s|2",
       },
     ]);
+  });
+});
+
+describe("deliberately unmapped entries (#119)", () => {
+  function sexWith(entries: ProjectFile["valueMaps"][number]["entries"]) {
+    const file = project(motuProject);
+    const map = file.valueMaps[0];
+    if (map === undefined) throw new Error("fixture changed");
+    map.entries = entries;
+    return { file, map };
+  }
+  const entries: ProjectFile["valueMaps"][number]["entries"] = [
+    { sourceValue: "M", target: { value: "male" }, action: { kind: "use" } },
+    { sourceValue: "X", action: { kind: "absent" } },
+    {
+      sourceValue: "U",
+      sourceLabel: "unknown",
+      action: {
+        kind: "setElement",
+        set: [{ path: "active", value: { type: "boolean", value: false } }],
+      },
+    },
+    { sourceValue: "N", action: { kind: "skipInstance" } },
+  ];
+
+  it("lists them as unmatched in R4, in entry order, with the action in the comment", () => {
+    const { file, map } = sexWith(entries);
+    expect(conceptMap(file, map, { fhirRelease: "R4" })?.group).toEqual([
+      {
+        element: [
+          { code: "M", target: [{ code: "male", equivalence: "equivalent" }] },
+          {
+            code: "X",
+            target: [
+              { equivalence: "unmatched", comment: "absent: this value is treated as missing" },
+            ],
+          },
+          {
+            code: "U",
+            display: "unknown",
+            target: [
+              {
+                equivalence: "unmatched",
+                comment: "setElement: this value sets other elements instead of a code",
+              },
+            ],
+          },
+          {
+            code: "N",
+            target: [
+              {
+                equivalence: "unmatched",
+                comment: "skipInstance: this value does not create the resource",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("writes noMap in R5", () => {
+    const { file, map } = sexWith(entries);
+    const elements = conceptMap(file, map, { fhirRelease: "R5" })?.group[0]?.element ?? [];
+    expect(elements.slice(1)).toEqual([
+      { code: "X", noMap: true },
+      { code: "U", display: "unknown", noMap: true },
+      { code: "N", noMap: true },
+    ]);
+  });
+
+  it("puts them in a group without a target system when the map has several systems", () => {
+    const pain = conceptMaps(project(metastraProject), { fhirRelease: "R4" })[1];
+    expect(pain?.group.map((g) => g.target)).toEqual([
+      undefined,
+      "http://loinc.org",
+      "http://snomed.info/sct",
+    ]);
+    expect(pain?.group[0]?.element.map((e) => e.code)).toEqual(["-1"]);
   });
 });
