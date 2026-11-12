@@ -1,0 +1,8 @@
+map "http://example.org/StructureMap/Repro2" = "Repro2"
+
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias Basic as source
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias Basic as target
+
+group Repro2(source src : Basic, target tgt : Basic) {
+  src where ($this.`a_b`.exists()) -> tgt.id = 'x' "r1";
+}

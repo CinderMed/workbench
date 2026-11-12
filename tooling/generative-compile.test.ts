@@ -6,7 +6,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   generateMap,
   logicalModel,
@@ -29,7 +29,11 @@ const SEEDS = 20;
 const KNOWN_FAILURES: ReadonlyMap<number, string> = new Map<number, string>();
 
 describe.runIf(enabled)("generative: the HL7 engine compiles the generated maps", () => {
-  rmSync(work, { recursive: true, force: true });
+  // In beforeAll, not in the describe body: the body runs at collection even when the suite is
+  // skipped, so a parallel `pnpm test` would delete the folder of a running nightly job.
+  beforeAll(() => {
+    rmSync(work, { recursive: true, force: true });
+  });
 
   const seeds = Array.from({ length: SEEDS }, (_, i) => i + 1);
   const check = (seed: number) => {
