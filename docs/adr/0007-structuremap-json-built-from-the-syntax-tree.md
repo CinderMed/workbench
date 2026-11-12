@@ -76,4 +76,4 @@ The CI golden job now proves the whole TypeScript chain, not only the stored fix
   - **#134** (seeds 4, 14, 17, 20): the HL7 FHIRPath parser rejects element names whose second character is `_` (`a_b`, `c___`) inside `where`, although the grammar accepts them.
   - **#135** (seeds 1, 3, 16, 19): the narrative differs for characters outside the BMP (the engine writes `&#x1F600;`).
 
-  The nightly job stays red until both are fixed.
+  Seeds 4, 14, 17 and 20 are listed as expected failures referencing #134 (`it.fails`): the job fails on any new failure, and on a known one that starts passing. Seeds 1, 3, 16 and 19 pass once #135 is fixed.
