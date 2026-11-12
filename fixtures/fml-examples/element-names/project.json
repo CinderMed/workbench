@@ -1,0 +1,151 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.3.0",
+  "project": {
+    "id": "prj_element_names",
+    "name": "Element names",
+    "description": "Golden case (#134): a column named 'a b' is used in a creation condition. Its element name must be accepted by the HL7 FHIRPath parser, which rejects names whose second character is '_'.",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/element-names",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/element-names",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One row per visit.",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "Patient ID",
+          "dataType": "string"
+        },
+        {
+          "id": "col_note",
+          "name": "a b",
+          "label": "Note",
+          "description": "Free-text note; the header has a space, so the element name has '_' as second character.",
+          "dataType": "string"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "note",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "createWhen": {
+        "op": "notEmpty",
+        "columnId": "col_note"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-note"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation comment [Interpretation] Narrative",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "columnId": "col_patient_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_note",
+      "instanceId": "ins_obs0",
+      "path": "valueString",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": []
+}

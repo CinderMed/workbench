@@ -1,0 +1,474 @@
+{
+  "resourceType": "StructureMap",
+  "id": "Visit",
+  "text": {
+    "status": "additional",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/element-names/StructureMap/Visit&quot; = `Visit`\n\nuses &quot;http://example.org/fhir/element-names/StructureDefinition/VisitRow&quot; alias VisitRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Visit(source src : VisitRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/element-names/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n  // Observation[0] · note — created when: a b is not empty\n  src where ($this.id_Observation0.exists() and $this.a_b.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/element-names/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n}\n\ngroup Patient0(source src : VisitRow, target res : Patient) {\n  src.patient_id as v -&gt; res.identifier as p, p.value = v &quot;R-001&quot;;\n}\n\ngroup Observation0(source src : VisitRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://loinc.org', '48767-8', 'Annotation comment [Interpretation] Narrative') &quot;fixed-code&quot;;\n  src.a_b as v -&gt; res.value = v &quot;R-002&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-003&quot;;\n}\n</pre></div>"
+  },
+  "url": "http://example.org/fhir/element-names/StructureMap/Visit",
+  "name": "Visit",
+  "status": "draft",
+  "structure": [
+    {
+      "url": "http://example.org/fhir/element-names/StructureDefinition/VisitRow",
+      "mode": "source",
+      "alias": "VisitRow"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Bundle",
+      "mode": "target",
+      "alias": "Bundle"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Patient",
+      "mode": "target",
+      "alias": "Patient"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Observation",
+      "mode": "target",
+      "alias": "Observation"
+    }
+  ],
+  "group": [
+    {
+      "name": "Visit",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "bundle",
+          "type": "Bundle",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "bundle-type",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "type",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "transaction"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Patient0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Patient0.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "contextType": "variable",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Patient"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "contextType": "variable",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Patient0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Patient0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "contextType": "variable",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "contextType": "variable",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "contextType": "variable",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Patient/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "contextType": "variable",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/element-names/Patient/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Patient0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Patient0",
+                  "variable": [
+                    "src",
+                    "res"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Observation0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Observation0.exists() and $this.a_b.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "contextType": "variable",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Observation"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "contextType": "variable",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Observation0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Observation0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "contextType": "variable",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "contextType": "variable",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "contextType": "variable",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Observation/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "contextType": "variable",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/element-names/Observation/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Observation0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Observation0",
+                  "variable": [
+                    "src",
+                    "res"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Patient0",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Patient",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "R-001",
+          "source": [
+            {
+              "context": "src",
+              "element": "patient_id",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "contextType": "variable",
+              "element": "identifier",
+              "variable": "p"
+            },
+            {
+              "context": "p",
+              "contextType": "variable",
+              "element": "value",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueId": "v"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Observation0",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Observation",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "fixed-status",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "contextType": "variable",
+              "element": "status",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "final"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fixed-code",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "contextType": "variable",
+              "element": "code",
+              "transform": "cc",
+              "parameter": [
+                {
+                  "valueString": "http://loinc.org"
+                },
+                {
+                  "valueString": "48767-8"
+                },
+                {
+                  "valueString": "Annotation comment [Interpretation] Narrative"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-002",
+          "source": [
+            {
+              "context": "src",
+              "element": "a_b",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "contextType": "variable",
+              "element": "value",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueId": "v"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-003",
+          "source": [
+            {
+              "context": "src",
+              "element": "id_Patient0",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "contextType": "variable",
+              "element": "subject",
+              "variable": "r"
+            },
+            {
+              "context": "r",
+              "contextType": "variable",
+              "element": "reference",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "t"
+                },
+                {
+                  "valueString": "'Patient/' + $this"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
