@@ -1,0 +1,25 @@
+name: Nightly
+
+# Long checks that would slow down every pull request. PR checks run the same tests at a smaller
+# size (the normalizer memory test with 100,000 rows).
+on:
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  normalizer-memory:
+    name: Normalizer memory (1,000,000 rows)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Build the domain packages
+        run: pnpm --filter "./packages/*" build
+      - name: Stream 1,000,000 generated rows with a flat heap (ADR-0010)
+        env:
+          NORMALIZER_MEMORY_ROWS: 1000000
+        run: pnpm exec vitest run tooling/normalizer-memory.test.ts

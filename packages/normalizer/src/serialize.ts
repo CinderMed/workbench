@@ -2,7 +2,8 @@
  * Text of the normalized rows, byte for byte as the reference normalizer writes it: two-space
  * JSON, one row as an object and any other number of rows as an array, a final newline. Integers
  * and decimals are JSON numbers written with their canonical digits (`11.20`, 20-digit integers):
- * this is the only place where a `NumberText` becomes a number.
+ * this is the only place where a `NumberText` becomes a number. For streaming, `serializeRowNdjson`
+ * writes one row per line (NDJSON), with the same values and no spaces.
  */
 import type { CellValue, NormalizedRow, NormalizedValue } from "./normalize.js";
 
@@ -34,4 +35,15 @@ export function serializeRows(rows: readonly NormalizedRow[]): string {
   if (rows.length === 1 && only !== undefined) return `${row(only, "")}\n`;
   if (rows.length === 0) return "[]\n";
   return `[\n${rows.map((item) => `  ${row(item, "  ")}`).join(",\n")}\n]\n`;
+}
+
+/** One row as a line of NDJSON: compact JSON, numbers with their canonical digits, then `\n`. */
+export function serializeRowNdjson(value: NormalizedRow): string {
+  const entries = Object.entries(value).map(([name, item]) => {
+    const text = Array.isArray(item)
+      ? `[${(item as readonly CellValue[]).map(cell).join(",")}]`
+      : cell(item as CellValue);
+    return `${JSON.stringify(name)}:${text}`;
+  });
+  return `{${entries.join(",")}}\n`;
 }
