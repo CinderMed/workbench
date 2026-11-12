@@ -24,7 +24,9 @@
   },
   "dependencies": {
     "@cindermed/export": "workspace:*",
-    "@cindermed/model": "workspace:*"
+    "@cindermed/fhir-defs": "workspace:*",
+    "@cindermed/model": "workspace:*",
+    "tar": "7.5.22"
   },
   "devDependencies": {
     "fflate": "0.8.3"

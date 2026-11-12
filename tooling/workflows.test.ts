@@ -73,6 +73,13 @@ describe("GitHub Actions", () => {
     expect(nightly).toContain("tooling/generative-compile.test.ts");
   });
 
+  it("builds the definition index from the real FHIR core packages in the unit-test job", () => {
+    const ci = load(".github/workflows/ci.yml") as Workflow;
+    const steps = JSON.stringify(ci.jobs["test"]);
+    expect(steps).toContain('"FHIR_CORE_PACKAGES":"1"');
+    expect(steps).toContain("~/.fhir/packages");
+  });
+
   it("validates the FHIR resources of the examples in the golden job", () => {
     const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf8");
     expect(ci).toContain("bash tooling/golden/validate-resources.sh");

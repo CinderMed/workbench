@@ -645,7 +645,7 @@ Given a project (FHIR version and packages), the engine loads the StructureDefin
 | `resolvePath(typeOrProfile, path, slices)` | The element found, with type and cardinality, or the error | Inline validation (D7) |
 | `referenceTargets(typeOrProfile, path)` | Resource types allowed for a Reference | Reference choice (F1, F4) |
 
-Rules: choice types `value[x]` are exposed with their concrete name (`valueQuantity`, `valueCodeableConcept`); a named slice (`component[nrs]`) is allowed only on elements whose maximum cardinality is greater than 1; FHIR extensions cannot be mapped in the MVP. Trees are kept in memory per version-type pair; packages sit on a volume and are downloaded only the first time.
+Rules: choice types `value[x]` are exposed with their concrete name (`valueQuantity`, `valueCodeableConcept`); a named slice (`component[nrs]`) is allowed only on elements whose maximum cardinality is greater than 1; FHIR extensions cannot be mapped in the MVP. Trees are kept in memory per version-type pair; packages sit on a volume and are downloaded only the first time. The engine reads the packages through a **compact definition index** (ADR-0013): a manifest of the version's types and profiles, and one small document per type (only the element fields the workbench uses), built from the packages in the CLI or the API and served by the API. The browser loads the manifest and the documents of the types it shows, never a whole core package. Core packages are checked against a pinned SHA-256 when downloaded, and the cache is the shared FHIR package cache (`~/.fhir/packages`).
 
 ### Project validation
 

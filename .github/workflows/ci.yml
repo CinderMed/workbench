@@ -60,8 +60,17 @@ jobs:
       # Apps import the domain packages through their dist/ exports, so build those first.
       - name: Build the domain packages
         run: pnpm --filter "./packages/*" build
+      # The FHIR core packages, for the definition index test (tooling/fhir-core-index.test.ts,
+      # ADR-0013). On a cold cache the test downloads them and checks their pinned SHA-256.
+      - name: Cache the FHIR core packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.fhir/packages
+          key: fhir-core-r4-4.0.1-r5-5.0.0
       - name: Unit tests with coverage thresholds
         run: pnpm test
+        env:
+          FHIR_CORE_PACKAGES: "1"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
