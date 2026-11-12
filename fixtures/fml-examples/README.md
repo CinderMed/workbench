@@ -176,3 +176,8 @@ for the first time. Against the prototype's manifests (Metastra, MOTU) they diff
 `verification` (grammar `passed`, compile `skipped`, `checkedAt`), in the SHA-256 of the StructureMap JSON (the
 package carries our JSON, ADR-0007) and in the three `schemas/` entries. The logical models and ConceptMaps carry the
 package version, 0.1.0, instead of the project format version. The Bundles do not change.
+
+## Normalizer command (12 November 2026, #76)
+`tests/run-all.sh` reads the normalizer command from `NORMALIZE` (default `node tools/normalize.mjs`). The golden
+suite also runs it with the TypeScript normalizer (`tooling/golden/normalize-ts.mjs`, same command line, output and
+messages) on the maps of the exported packages; maps, normalized rows and Bundles are identical.

@@ -13,17 +13,7 @@ import { logicalModel } from "./generator/logical-model.js";
 import { normalizationSpec } from "./generator/normalization-spec.js";
 import { planTable } from "./generator/table-plan.js";
 import { toStructureMap } from "./structure-map.js";
-
-/** JSON paths of every empty string in a value. */
-export function emptyStrings(value: unknown, path = "$"): string[] {
-  if (value === "") return [path];
-  if (Array.isArray(value))
-    return value.flatMap((item, i) => emptyStrings(item, `${path}[${String(i)}]`));
-  if (value !== null && typeof value === "object") {
-    return Object.entries(value).flatMap(([key, item]) => emptyStrings(item, `${path}.${key}`));
-  }
-  return [];
-}
+import { emptyStrings } from "./test-support/empty-strings.js";
 
 function resources(document: unknown): [string, unknown][] {
   if (!isProjectFile(document)) throw new Error("fixture is not a valid project");
