@@ -123,12 +123,12 @@
     },
     {
       "path": "MotuPatient.map",
-      "sha256": "fcdfa8ccbd468c41c323119696cf7d80fa203d154e2d5662f26a1374f622a610",
+      "sha256": "be406cecf6a423d3d8523e74fb267e46d2fe3441e5136e6efc9e28f6024f0523",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-MotuPatient.json",
-      "sha256": "2407a864327285623f0742a4b314bea0b58f511868e238da6fd530e8e3be8829",
+      "sha256": "7ff9e03a3406decf0e7f29ab700e89de421f890d40417a6b1d701b2f47a6872e",
       "mediaType": "application/fhir+json"
     },
     {
@@ -143,12 +143,12 @@
     },
     {
       "path": "HospitalStay.map",
-      "sha256": "304e330f234d984118ae73e4e0a3270b5bc119c9d45f1a2f1e221d5b06f8d66e",
+      "sha256": "0c2a5909da11c700161ffef6f405281269c4353e088f9b7ea09ed0f531695c3c",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-HospitalStay.json",
-      "sha256": "01e19a1efc7642800bdf3bb27b148b24f23eed12c211eb781bac3e1190f18b5f",
+      "sha256": "2c888d68b27e5255c5ee17356a1553895c5c96de06f4c8ca095f89fd52143daf",
       "mediaType": "application/fhir+json"
     },
     {
@@ -163,12 +163,12 @@
     },
     {
       "path": "Fall.map",
-      "sha256": "b219244bfd25ebc281961a93240d7aa8c8c224b7705f83c4cadd967031c89ef4",
+      "sha256": "7cb0c59f3889db6b708b8430dcc6dcf5f32c3f1ef476a77ba9049223c4685592",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Fall.json",
-      "sha256": "e504640ad1d3f7e12e8d39313a78886f4b54b11beaba865d7cae4e6fb3286874",
+      "sha256": "829041327fea7390bdba43a3cad6cad5996fec78302ed5bbbef1782d6e834a05",
       "mediaType": "application/fhir+json"
     },
     {

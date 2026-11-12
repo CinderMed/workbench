@@ -4,6 +4,8 @@ uses "http://example.org/fhir/motu/StructureDefinition/MotuPatientRow" alias Mot
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
 
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
 group MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";
   // Patient[0] · patient — always
@@ -14,10 +16,8 @@ group MotuPatient(source src : MotuPatientRow, target bundle : Bundle) {
 }
 
 group Patient0(source src : MotuPatientRow, target res : Patient) {
-  src where ($this.AnonymousID.exists()) -> res.identifier as rep then {
-    src.AnonymousID as v -> rep.value = v "R-001";
-  } "Patient0-identifier";
-  // R-002: value map sex (one rule per value)
+  src.AnonymousID as v -> res.identifier as p, p.value = v "R-001";
+  // R-002: value map sex (one rule per value; ConceptMap exported separately)
   src.Sex as v where ($this = 'M') -> res.gender = 'male' "R-002-M";
   src.Sex as v where ($this = 'F') -> res.gender = 'female' "R-002-F";
   src.BirthDay as v -> res.birthDate = v "R-003";

@@ -12,38 +12,32 @@ uses "http://hl7.org/fhir/StructureDefinition/Procedure" alias Procedure as targ
 // Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
 group FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";
-
   // Patient[0] · patient — always
   src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
     src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Patient/' + $this) "Patient0-id";
     src then Patient0(src, res) "Patient0-body";
   } "Patient0";
-
   // Encounter[0] · first visit — created when: encounter_fo is not empty
   src where ($this.id_Encounter0.exists() and $this.encounter_fo.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
     src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Encounter/' + $this) "Encounter0-id";
     src then Encounter0(src, res) "Encounter0-body";
   } "Encounter0";
-
-  // Observation[0] · axial pain — created when: value present and not -1 (skipInstance)
+  // Observation[0] · axial pain — created when: obs_pain_axial_intervals is not empty and obs_pain_axial_intervals is not '-1'
   src where ($this.id_Observation0.exists() and ($this.obs_pain_axial_intervals.exists() and $this.obs_pain_axial_intervals.where($this = '-1').empty())) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
     src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Observation/' + $this) "Observation0-id";
     src then Observation0(src, res) "Observation0-body";
   } "Observation0";
-
   // Observation[1] · haemoglobin — created when: obs_bloodt_hb is not empty
   src where ($this.id_Observation1.exists() and $this.obs_bloodt_hb.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
     src.id_Observation1 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Observation/' + $this) "Observation1-id";
     src then Observation1(src, res) "Observation1-body";
   } "Observation1";
-
-  // Condition[1] · osteoporosis — created when: value in {1, -1} and not 0 (skipInstance)
+  // Condition[1] · osteoporosis — created when: cond_osteoporosis_yn in {'1', '-1'} and cond_osteoporosis_yn is not '0' (skipInstance)
   src where ($this.id_Condition1.exists() and ($this.cond_osteoporosis_yn.where($this = '1' or $this = '-1').exists() and $this.cond_osteoporosis_yn.where($this = '0').empty())) -> bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {
     src.id_Condition1 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Condition/' + $this) "Condition1-id";
     src then Condition1(src, res) "Condition1-body";
   } "Condition1";
-
-  // Procedure[0] · previous spinal surgery — created when: proc_surg_yn = 1
+  // Procedure[0] · previous spinal surgery — created when: proc_surg_yn = '1'
   src where ($this.id_Procedure0.exists() and $this.proc_surg_yn.where($this = '1').exists()) -> bundle.entry as e, e.resource = create('Procedure') as res, e.request as req then {
     src.id_Procedure0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Procedure/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/metastra/Procedure/' + $this) "Procedure0-id";
     src then Procedure0(src, res) "Procedure0-body";
@@ -51,10 +45,7 @@ group FirstOverview(source src : FirstOverviewRow, target bundle : Bundle) {
 }
 
 group Patient0(source src : FirstOverviewRow, target res : Patient) {
-  // identifier: repeating element without a slice → one shared repetition
-  src where ($this.patient_id.exists()) -> res.identifier as rep then {
-    src.patient_id as v -> rep.value = v "R-001";
-  } "Patient0-identifier";
+  src.patient_id as v -> res.identifier as p, p.value = v "R-001";
   // R-002: value map administrativeGender (one rule per value; ConceptMap exported separately)
   src.patient_gender as v where ($this = 'Female') -> res.gender = 'female' "R-002-Female";
   src.patient_gender as v where ($this = 'Male') -> res.gender = 'male' "R-002-Male";
@@ -65,7 +56,6 @@ group Encounter0(source src : FirstOverviewRow, target res : Encounter) {
   src -> res.status = 'finished' "fixed-status";
   src -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') "fixed-class";
   src.encounter_fo as v -> res.period as p, p.start = v "R-004";
-  // R-005 automatic (context) reference to Patient[0]: Patient[0] is always created
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-005";
 }
 
@@ -94,15 +84,16 @@ group Observation1(source src : FirstOverviewRow, target res : Observation) {
   src -> res.code = cc('http://snomed.info/sct', '38082009') "fixed-code";
   src.obs_bloodt_hb as v -> res.value = create('Quantity') as q then {
     v -> q.value = v "R-010-value";
-    // R-010-unit: unit from the auxiliary column, value map hbUnit
+    // R-010-unit: unit from column obs_bloodt_hb_spec, value map hbUnit
     src.obs_bloodt_hb_spec as u where ($this = '1') -> q.unit = 'g/dL', q.system = 'http://unitsofmeasure.org', q.code = 'g/dL' "R-010-unit-1";
     src.obs_bloodt_hb_spec as u where ($this = '2') -> q.unit = 'g/L', q.system = 'http://unitsofmeasure.org', q.code = 'g/L' "R-010-unit-2";
     src.obs_bloodt_hb_spec as u where ($this = '3') -> q.unit = 'mmol/L', q.system = 'http://unitsofmeasure.org', q.code = 'mmol/L' "R-010-unit-3";
   } "R-010";
-  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "subject-auto";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-015";
+  // R-016 the reference honours the creation condition of Encounter[0]
   src where ($this.encounter_fo.exists()) then {
-    src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "encounter-auto";
-  } "encounter-auto-guard";
+    src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "R-016";
+  } "R-016-guard";
 }
 
 group Condition1(source src : FirstOverviewRow, target res : Condition) {

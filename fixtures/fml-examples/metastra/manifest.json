@@ -99,12 +99,12 @@
     },
     {
       "path": "FirstOverview.map",
-      "sha256": "1bfa947d54069680765191e69026f51305b02c9578c69919c6c74ad73e892b21",
+      "sha256": "fb11cd075bac9b8c22b124a6b59ba40e7b8d2948733e34224afd50d04906638b",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-FirstOverview.json",
-      "sha256": "d7a49b97f397e0b0231f711f18af54f0aaae753df3d4d51633063ff8636d52a2",
+      "sha256": "fd4488b71f0203b5600a5192da195596ccf954c470d34393338a1eaf0aec9e9c",
       "mediaType": "application/fhir+json"
     },
     {

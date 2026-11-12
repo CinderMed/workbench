@@ -4,6 +4,8 @@ uses "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow" alias Ho
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
 uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as target
 
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
 group HospitalStay(source src : HospitalStayRow, target bundle : Bundle) {
   src -> bundle.type = 'transaction' "bundle-type";
   // Encounter[0] · hospital stay — created when: AdmissionDate is not empty
@@ -16,7 +18,7 @@ group HospitalStay(source src : HospitalStayRow, target bundle : Bundle) {
 group Encounter0(source src : HospitalStayRow, target res : Encounter) {
   src -> res.status = 'finished' "fixed-status";
   src -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'IMP', 'inpatient encounter') "fixed-class";
-  // period: non-repeating element written by two rows (R-004, R-005) → one shared instance
+  // period: written by 2 rows (R-004, R-005) → one shared instance
   src where ($this.AdmissionDate.exists() or $this.DischargeDate.exists()) -> res.period as p then {
     src.AdmissionDate as v -> p.start = v "R-004";
     src.DischargeDate as v -> p.end = v "R-005";

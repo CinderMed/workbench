@@ -139,3 +139,13 @@ The ConceptMaps record every mapping decision: entries whose action is not `use`
 (R5: `noMap: true`). `metastra/ConceptMap-painLevel.json` gains `-1` (skipInstance, in a group without a target system,
 since the map has two target systems) and `metastra/ConceptMap-osteoStatus.json` gains `0` (skipInstance, in its only
 group). The other ConceptMaps, the maps and the Bundles do not change. Every FHIR resource still validates with 0 errors.
+
+## Maps produced by the generator (12 November 2026, #97)
+The five maps (`metastra/FirstOverview.map`, `motu/MotuPatient.map`, `motu/HospitalStay.map`, `motu/Fall.map`,
+`boolean-value-map/Visit.map`) are now produced by the TypeScript generator (`@cindermed/fml`, `generateMap` and
+`printMap`) from the project files, and **are never edited by hand**. Against the hand-written maps they differ only
+in comments (the templates of the specification, "Translation rules"), blank lines (none inside groups), the
+single-row `identifier` written inline instead of a block (ADR-0011), and Metastra's `subject-auto`/`encounter-auto`
+rules, now the rows `R-015`/`R-016`. The HL7 validator 7.0.5 recompiled the five StructureMaps from folders without
+the old JSON (line endings normalized, `status: draft` added). The suite passed 13 of 13 in both passes, every
+Bundle is identical, and every FHIR resource validates with 0 errors.
