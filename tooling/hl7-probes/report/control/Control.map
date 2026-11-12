@@ -1,0 +1,8 @@
+map "http://example.org/StructureMap/Control" = "Control"
+
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias Basic as source
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias Basic as target
+
+group Control(source src : Basic, target tgt : Basic) {
+  src where ($this.ab_c.exists()) -> tgt.id = 'x' "r1";
+}
