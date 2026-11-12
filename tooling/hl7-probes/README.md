@@ -40,6 +40,11 @@ For each map, `run.sh` records:
 - Names that the element-name rule gives for the rejected ones (`ca_b`, `cx_`, `cc_a`, `cc__mood`)
   pass every case.
 
+## Report to HL7
+
+`report/` holds the draft of a report to HL7 about both findings, with a minimal reproduction (three
+maps on the core `Basic` resource, no data). See `report/README.md`.
+
 ## Run
 
 Needs Java 21 and `@cindermed/fml` built (`pnpm --filter @cindermed/fml build`).
