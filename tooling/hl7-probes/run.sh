@@ -16,9 +16,19 @@ out="$root/.tmp/hl7-probes"
 rm -rf "$out"
 mkdir -p "$out/classes"
 
-javac -proc:none -cp "$VALIDATOR" -d "$out/classes" "$here/Probe.java" 2>&1 | grep -v JAVA_TOOL || true
-java -Xmx2g -cp "$VALIDATOR:$out/classes" Probe "$here/ig" "$here/maps" "$here/rows/full.json" "$here/rows/empty.json" \
-  2>"$out/engine.log" | grep -P '^(map|P\d\d)' >"$out/engine.tsv"
+# Probe.java uses the engine's Java API, which may change between validator versions.
+if ! javac -proc:none -cp "$VALIDATOR" -d "$out/classes" "$here/Probe.java" >"$out/javac.log" 2>&1; then
+  echo "hl7-probes: Probe.java does not compile against $VALIDATOR:" >&2
+  grep -v JAVA_TOOL "$out/javac.log" >&2
+  exit 1
+fi
+if ! java -Xmx2g -cp "$VALIDATOR:$out/classes" Probe "$here/ig" "$here/maps" "$here/rows/full.json" \
+  "$here/rows/empty.json" >"$out/engine.log" 2>&1; then
+  echo "hl7-probes: the HL7 engine run failed (log: $out/engine.log):" >&2
+  tail -20 "$out/engine.log" >&2
+  exit 1
+fi
+grep -P '^(map|P\d\d[A-Za-z]+)\t' "$out/engine.log" >"$out/engine.tsv"
 node "$here/grammar-check.mjs" >"$out/grammar.tsv"
 
 python3 - "$here/cases.json" "$out/engine.tsv" "$out/grammar.tsv" >"$out/results.tsv" <<'PY'
