@@ -103,10 +103,12 @@ class Generation {
   readonly columns: ColumnNames;
   readonly conditions = new Map<Id, RoleCondition | undefined>();
 
-  constructor(
-    readonly project: ProjectFile,
-    readonly plan: TablePlan,
-  ) {
+  readonly project: ProjectFile;
+  readonly plan: TablePlan;
+
+  constructor(project: ProjectFile, plan: TablePlan) {
+    this.project = project;
+    this.plan = plan;
     this.columns = new Map(
       plan.columns.map((c) => [c.column.id, { element: c.element, name: c.column.name }]),
     );

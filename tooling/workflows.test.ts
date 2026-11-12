@@ -69,6 +69,8 @@ describe("GitHub Actions", () => {
     expect(nightly).toContain("schedule:");
     expect(nightly).toContain("NORMALIZER_MEMORY_ROWS: 1000000");
     expect(nightly).toContain("tooling/normalizer-memory.test.ts");
+    expect(nightly).toContain("FML_GENERATIVE_COMPILE");
+    expect(nightly).toContain("tooling/generative-compile.test.ts");
   });
 
   it("validates the FHIR resources of the examples in the golden job", () => {
