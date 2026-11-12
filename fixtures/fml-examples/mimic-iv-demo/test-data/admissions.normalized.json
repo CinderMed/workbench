@@ -1,0 +1,32 @@
+[
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
+    "subject_id": "10031404",
+    "hadm_id": "21606243",
+    "admittime": "2113-08-04T18:46:00",
+    "dischtime": "2113-08-06T20:57:00",
+    "admission_type": "URGENT",
+    "id_Encounter0": "enc-808ff1929871336a2fcd8282",
+    "id_Patient0": "pat-654497824fddf8633975b18a"
+  },
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
+    "subject_id": "10022281",
+    "hadm_id": "29642388",
+    "admittime": "2125-06-17T04:11:00",
+    "dischtime": "2125-06-19T15:25:00",
+    "admission_type": "EW EMER.",
+    "id_Encounter0": "enc-6df82dfa436b49d0fad06016",
+    "id_Patient0": "pat-d36ba945d2c3b023ce8724c6"
+  },
+  {
+    "resourceType": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
+    "subject_id": "10019568",
+    "hadm_id": "28710730",
+    "admittime": "2120-01-30T21:07:00",
+    "dischtime": "2120-02-02T15:40:00",
+    "admission_type": "EW EMER.",
+    "id_Encounter0": "enc-6f6fbb876eaa19f0827206fb",
+    "id_Patient0": "pat-2ebb7b3fb087c91f4379338d"
+  }
+]

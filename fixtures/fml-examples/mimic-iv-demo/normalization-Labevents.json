@@ -1,0 +1,165 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.2.0",
+  "source": "Labevents",
+  "logicalModel": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "labevent_id",
+      "sourceName": "labevent_id",
+      "type": "string"
+    },
+    {
+      "name": "subject_id",
+      "sourceName": "subject_id",
+      "type": "string"
+    },
+    {
+      "name": "hadm_id",
+      "sourceName": "hadm_id",
+      "type": "string"
+    },
+    {
+      "name": "itemid",
+      "sourceName": "itemid",
+      "type": "string",
+      "allowedValues": [
+        "52033",
+        "50879",
+        "50981",
+        "50955",
+        "50999",
+        "50868",
+        "50922",
+        "50861",
+        "50863",
+        "50933",
+        "50931",
+        "50954",
+        "50912",
+        "51006",
+        "51003",
+        "50956",
+        "50880",
+        "50920",
+        "50856",
+        "51035",
+        "51043",
+        "51034",
+        "51254",
+        "51279",
+        "51244",
+        "51214",
+        "51146",
+        "51249",
+        "51237",
+        "51222",
+        "51265",
+        "51221",
+        "51277",
+        "51200",
+        "51256",
+        "51250",
+        "51274",
+        "51275",
+        "51248",
+        "51301",
+        "51427",
+        "51436",
+        "51428",
+        "51438",
+        "52369",
+        "51431"
+      ]
+    },
+    {
+      "name": "charttime",
+      "sourceName": "charttime",
+      "type": "dateTime",
+      "dateFormat": "yyyy-MM-dd HH:mm:ss"
+    },
+    {
+      "name": "value",
+      "sourceName": "value",
+      "type": "string"
+    },
+    {
+      "name": "valuenum",
+      "sourceName": "valuenum",
+      "type": "decimal"
+    },
+    {
+      "name": "valueuom",
+      "sourceName": "valueuom",
+      "type": "string",
+      "allowedValues": [
+        "#/uL",
+        "%",
+        "IU/L",
+        "K/uL",
+        "fL",
+        "g/dL",
+        "m/uL",
+        "mEq/L",
+        "mg/dL",
+        "ng/mL",
+        "pg",
+        "sec",
+        "ug/mL"
+      ]
+    },
+    {
+      "name": "comments",
+      "sourceName": "comments",
+      "type": "string"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "lab"
+      ],
+      "columns": [
+        "labevent_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "subject_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "hadm_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

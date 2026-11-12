@@ -1,0 +1,75 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.2.0",
+  "source": "Admissions",
+  "logicalModel": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "subject_id",
+      "sourceName": "subject_id",
+      "type": "string"
+    },
+    {
+      "name": "hadm_id",
+      "sourceName": "hadm_id",
+      "type": "string"
+    },
+    {
+      "name": "admittime",
+      "sourceName": "admittime",
+      "type": "dateTime",
+      "dateFormat": "yyyy-MM-dd HH:mm:ss"
+    },
+    {
+      "name": "dischtime",
+      "sourceName": "dischtime",
+      "type": "dateTime",
+      "dateFormat": "yyyy-MM-dd HH:mm:ss"
+    },
+    {
+      "name": "admission_type",
+      "sourceName": "admission_type",
+      "type": "string",
+      "allowedValues": [
+        "URGENT",
+        "EW EMER."
+      ]
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "hadm_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "subject_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

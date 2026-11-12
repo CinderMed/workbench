@@ -4,9 +4,9 @@
 # models resolve: logical models, compiled StructureMaps, ConceptMaps and the produced Bundles.
 # Every resource must validate with 0 errors (warnings are reported, not fatal).
 #
-# Bundles whose references point to another table (MOTU HospitalStay and Fall) resolve only
-# together: they are validated through the committed bundle-merged.json (load order MotuPatient →
-# HospitalStay → Fall), not alone.
+# Bundles whose references point to another table (MOTU HospitalStay and Fall, MIMIC-IV demo
+# Admissions and Labevents) resolve only together: they are validated through the committed
+# bundle-merged.json of their folder (in load order), not alone.
 #
 # Usage: VALIDATOR=/abs/path/validator_cli.jar bash tooling/golden/validate-resources.sh
 set -euo pipefail
@@ -17,7 +17,8 @@ fixtures="$root/fixtures/fml-examples"
 out="$root/.tmp/golden-resources"
 patterns=("StructureDefinition-*.json" "StructureMap-*.json" "ConceptMap-*.json" "test-data/*bundle*.json")
 # Validated through bundle-merged.json (references across tables).
-cross_table=("motu/test-data/bundle-HospitalStay.json" "motu/test-data/bundle-Fall.json")
+cross_table=("motu/test-data/bundle-HospitalStay.json" "motu/test-data/bundle-Fall.json"
+  "mimic-iv-demo/test-data/bundle-Admissions.json" "mimic-iv-demo/test-data/bundle-Labevents.json")
 
 rm -rf "$out"
 mkdir -p "$out"

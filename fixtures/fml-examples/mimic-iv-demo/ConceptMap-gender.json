@@ -1,0 +1,32 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "gender",
+  "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/gender",
+  "version": "1.3.0",
+  "name": "Gender",
+  "status": "draft",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "F",
+          "target": [
+            {
+              "code": "female",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "M",
+          "target": [
+            {
+              "code": "male",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

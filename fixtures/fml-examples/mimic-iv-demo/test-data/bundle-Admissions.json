@@ -1,0 +1,76 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Encounter/enc-808ff1929871336a2fcd8282",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-808ff1929871336a2fcd8282",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp",
+        "value" : "21606243"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "AMB",
+        "display" : "ambulatory"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-808ff1929871336a2fcd8282"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Encounter/enc-6df82dfa436b49d0fad06016",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-6df82dfa436b49d0fad06016",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp",
+        "value" : "29642388"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "EMER",
+        "display" : "emergency"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-6df82dfa436b49d0fad06016"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Encounter/enc-6f6fbb876eaa19f0827206fb",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-6f6fbb876eaa19f0827206fb",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp",
+        "value" : "28710730"
+      }],
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "EMER",
+        "display" : "emergency"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-6f6fbb876eaa19f0827206fb"
+    }
+  }]
+}

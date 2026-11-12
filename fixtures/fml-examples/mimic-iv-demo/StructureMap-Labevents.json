@@ -1,0 +1,1968 @@
+{
+  "resourceType" : "StructureMap",
+  "id" : "Labevents",
+  "text" : {
+    "status" : "additional",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/mimic-iv-demo/StructureMap/Labevents&quot; = `Labevents`\n\nuses &quot;http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow&quot; alias LabeventsRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Labevents(source src : LabeventsRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Observation[0] · lab event — always\n  src where ($this.id_Observation0.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/mimic-iv-demo/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n}\n\ngroup Observation0(source src : LabeventsRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.category = cc('http://terminology.hl7.org/CodeSystem/observation-category', 'laboratory', 'Laboratory') &quot;fixed-category&quot;;\n  // identifier: written by 2 rows (R-008, R-009) → one shared instance\n  src where ($this.labevent_id.exists()) -&gt; res.identifier as p then {\n    src -&gt; p.system = 'http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents' &quot;R-008&quot;;\n    src.labevent_id as v -&gt; p.value = v &quot;R-009&quot;;\n  } &quot;Observation0-identifier&quot;;\n  // R-010: value map labItems (one rule per value; ConceptMap exported separately)\n  src.itemid as v where ($this = '52033') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '52033', 'Specimen Type') &quot;R-010-52033&quot;;\n  src.itemid as v where ($this = '50879') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50879', 'Barbiturate Screen') &quot;R-010-50879&quot;;\n  src.itemid as v where ($this = '50981') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50981', 'Salicylate') &quot;R-010-50981&quot;;\n  src.itemid as v where ($this = '50955') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50955', 'Light Green Top Hold') &quot;R-010-50955&quot;;\n  src.itemid as v where ($this = '50999') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50999', 'Tricyclic Antidepressant Screen') &quot;R-010-50999&quot;;\n  src.itemid as v where ($this = '50868') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50868', 'Anion Gap') &quot;R-010-50868&quot;;\n  src.itemid as v where ($this = '50922') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50922', 'Ethanol') &quot;R-010-50922&quot;;\n  src.itemid as v where ($this = '50861') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50861', 'Alanine Aminotransferase (ALT)') &quot;R-010-50861&quot;;\n  src.itemid as v where ($this = '50863') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50863', 'Alkaline Phosphatase') &quot;R-010-50863&quot;;\n  src.itemid as v where ($this = '50933') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50933', 'Green Top Hold (plasma)') &quot;R-010-50933&quot;;\n  src.itemid as v where ($this = '50931') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50931', 'Glucose') &quot;R-010-50931&quot;;\n  src.itemid as v where ($this = '50954') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50954', 'Lactate Dehydrogenase (LD)') &quot;R-010-50954&quot;;\n  src.itemid as v where ($this = '50912') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50912', 'Creatinine') &quot;R-010-50912&quot;;\n  src.itemid as v where ($this = '51006') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51006', 'Urea Nitrogen') &quot;R-010-51006&quot;;\n  src.itemid as v where ($this = '51003') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51003', 'Troponin T') &quot;R-010-51003&quot;;\n  src.itemid as v where ($this = '50956') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50956', 'Lipase') &quot;R-010-50956&quot;;\n  src.itemid as v where ($this = '50880') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50880', 'Benzodiazepine Screen') &quot;R-010-50880&quot;;\n  src.itemid as v where ($this = '50920') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50920', 'Estimated GFR (MDRD equation)') &quot;R-010-50920&quot;;\n  src.itemid as v where ($this = '50856') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '50856', 'Acetaminophen') &quot;R-010-50856&quot;;\n  src.itemid as v where ($this = '51035') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51035', 'LD, Body Fluid') &quot;R-010-51035&quot;;\n  src.itemid as v where ($this = '51043') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51043', 'Total Protein, Body Fluid') &quot;R-010-51043&quot;;\n  src.itemid as v where ($this = '51034') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51034', 'Glucose, Body Fluid') &quot;R-010-51034&quot;;\n  src.itemid as v where ($this = '51254') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51254', 'Monocytes') &quot;R-010-51254&quot;;\n  src.itemid as v where ($this = '51279') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51279', 'Red Blood Cells') &quot;R-010-51279&quot;;\n  src.itemid as v where ($this = '51244') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51244', 'Lymphocytes') &quot;R-010-51244&quot;;\n  src.itemid as v where ($this = '51214') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51214', 'Fibrinogen, Functional') &quot;R-010-51214&quot;;\n  src.itemid as v where ($this = '51146') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51146', 'Basophils') &quot;R-010-51146&quot;;\n  src.itemid as v where ($this = '51249') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51249', 'MCHC') &quot;R-010-51249&quot;;\n  src.itemid as v where ($this = '51237') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51237', 'INR(PT)') &quot;R-010-51237&quot;;\n  src.itemid as v where ($this = '51222') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51222', 'Hemoglobin') &quot;R-010-51222&quot;;\n  src.itemid as v where ($this = '51265') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51265', 'Platelet Count') &quot;R-010-51265&quot;;\n  src.itemid as v where ($this = '51221') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51221', 'Hematocrit') &quot;R-010-51221&quot;;\n  src.itemid as v where ($this = '51277') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51277', 'RDW') &quot;R-010-51277&quot;;\n  src.itemid as v where ($this = '51200') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51200', 'Eosinophils') &quot;R-010-51200&quot;;\n  src.itemid as v where ($this = '51256') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51256', 'Neutrophils') &quot;R-010-51256&quot;;\n  src.itemid as v where ($this = '51250') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51250', 'MCV') &quot;R-010-51250&quot;;\n  src.itemid as v where ($this = '51274') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51274', 'PT') &quot;R-010-51274&quot;;\n  src.itemid as v where ($this = '51275') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51275', 'PTT') &quot;R-010-51275&quot;;\n  src.itemid as v where ($this = '51248') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51248', 'MCH') &quot;R-010-51248&quot;;\n  src.itemid as v where ($this = '51301') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51301', 'White Blood Cells') &quot;R-010-51301&quot;;\n  src.itemid as v where ($this = '51427') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51427', 'Lymphocytes') &quot;R-010-51427&quot;;\n  src.itemid as v where ($this = '51436') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51436', 'Polys') &quot;R-010-51436&quot;;\n  src.itemid as v where ($this = '51428') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51428', 'Macrophage') &quot;R-010-51428&quot;;\n  src.itemid as v where ($this = '51438') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51438', 'RBC, Other Fluid') &quot;R-010-51438&quot;;\n  src.itemid as v where ($this = '52369') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '52369', 'Total Nucleated Cells, Other') &quot;R-010-52369&quot;;\n  src.itemid as v where ($this = '51431') -&gt; res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51431', 'Monos') &quot;R-010-51431&quot;;\n  src.valuenum as v -&gt; res.value = create('Quantity') as q then {\n    v -&gt; q.value = v &quot;R-011-value&quot;;\n    // R-011-unit: unit from column valueuom, value map labUnits\n    src.valueuom as u where ($this = '#/uL') -&gt; q.unit = '#/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '#/uL' &quot;R-011-unit---uL&quot;;\n    src.valueuom as u where ($this = '%') -&gt; q.unit = '%', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '%' &quot;R-011-unit--&quot;;\n    src.valueuom as u where ($this = 'IU/L') -&gt; q.unit = 'IU/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'IU/L' &quot;R-011-unit-IU-L&quot;;\n    src.valueuom as u where ($this = 'K/uL') -&gt; q.unit = 'K/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'K/uL' &quot;R-011-unit-K-uL&quot;;\n    src.valueuom as u where ($this = 'fL') -&gt; q.unit = 'fL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'fL' &quot;R-011-unit-fL&quot;;\n    src.valueuom as u where ($this = 'g/dL') -&gt; q.unit = 'g/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'g/dL' &quot;R-011-unit-g-dL&quot;;\n    src.valueuom as u where ($this = 'm/uL') -&gt; q.unit = 'm/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'm/uL' &quot;R-011-unit-m-uL&quot;;\n    src.valueuom as u where ($this = 'mEq/L') -&gt; q.unit = 'mEq/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mEq/L' &quot;R-011-unit-mEq-L&quot;;\n    src.valueuom as u where ($this = 'mg/dL') -&gt; q.unit = 'mg/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mg/dL' &quot;R-011-unit-mg-dL&quot;;\n    src.valueuom as u where ($this = 'ng/mL') -&gt; q.unit = 'ng/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ng/mL' &quot;R-011-unit-ng-mL&quot;;\n    src.valueuom as u where ($this = 'pg') -&gt; q.unit = 'pg', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'pg' &quot;R-011-unit-pg&quot;;\n    src.valueuom as u where ($this = 'sec') -&gt; q.unit = 'sec', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'sec' &quot;R-011-unit-sec&quot;;\n    src.valueuom as u where ($this = 'ug/mL') -&gt; q.unit = 'ug/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ug/mL' &quot;R-011-unit-ug-mL&quot;;\n  } &quot;R-011&quot;;\n  src where (($this.valuenum.exists()).not()) then {\n    src.value as v -&gt; res.value = v &quot;R-012&quot;;\n  } &quot;R-012-guard&quot;;\n  src.comments as v -&gt; res.note as p, p.text = v &quot;R-013&quot;;\n  // R-014 reference to Patient[0] in another table (via rel_lab_patients): the resource must already be loaded\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-014&quot;;\n  // R-015 reference to Encounter[0] in another table (via rel_lab_admissions): the resource must already be loaded\n  src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-015&quot;;\n  src where (($this.valuenum.exists()).not() and ($this.value.exists()).not()) then {\n    src.comments as v -&gt; res.value = v &quot;R-016&quot;;\n  } &quot;R-016-guard&quot;;\n}\n</pre></div>"
+  },
+  "url" : "http://example.org/fhir/mimic-iv-demo/StructureMap/Labevents",
+  "name" : "Labevents",
+  "status" : "draft",
+  "structure" : [{
+    "url" : "http://example.org/fhir/mimic-iv-demo/StructureDefinition/LabeventsRow",
+    "mode" : "source",
+    "alias" : "LabeventsRow"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Bundle",
+    "mode" : "target",
+    "alias" : "Bundle"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Observation",
+    "mode" : "target",
+    "alias" : "Observation"
+  }],
+  "group" : [{
+    "name" : "Labevents",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "LabeventsRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "bundle",
+      "type" : "Bundle",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "bundle-type",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "type",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "transaction"
+        }]
+      }]
+    },
+    {
+      "name" : "Observation0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Observation0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Observation"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Observation0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Observation0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Observation/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/mimic-iv-demo/Observation/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Observation0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Observation0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Observation0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "LabeventsRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Observation",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "final"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-category",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "category",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/observation-category"
+        },
+        {
+          "valueString" : "laboratory"
+        },
+        {
+          "valueString" : "Laboratory"
+        }]
+      }]
+    },
+    {
+      "name" : "Observation0-identifier",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.labevent_id.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "identifier",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-008",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents"
+          }]
+        }]
+      },
+      {
+        "name" : "R-009",
+        "source" : [{
+          "context" : "src",
+          "element" : "labevent_id",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-52033",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '52033')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "52033"
+        },
+        {
+          "valueString" : "Specimen Type"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50879",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50879')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50879"
+        },
+        {
+          "valueString" : "Barbiturate Screen"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50981",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50981')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50981"
+        },
+        {
+          "valueString" : "Salicylate"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50955",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50955')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50955"
+        },
+        {
+          "valueString" : "Light Green Top Hold"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50999",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50999')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50999"
+        },
+        {
+          "valueString" : "Tricyclic Antidepressant Screen"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50868",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50868')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50868"
+        },
+        {
+          "valueString" : "Anion Gap"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50922",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50922')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50922"
+        },
+        {
+          "valueString" : "Ethanol"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50861",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50861')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50861"
+        },
+        {
+          "valueString" : "Alanine Aminotransferase (ALT)"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50863",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50863')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50863"
+        },
+        {
+          "valueString" : "Alkaline Phosphatase"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50933",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50933')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50933"
+        },
+        {
+          "valueString" : "Green Top Hold (plasma)"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50931",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50931')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50931"
+        },
+        {
+          "valueString" : "Glucose"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50954",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50954')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50954"
+        },
+        {
+          "valueString" : "Lactate Dehydrogenase (LD)"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50912",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50912')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50912"
+        },
+        {
+          "valueString" : "Creatinine"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51006",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51006')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51006"
+        },
+        {
+          "valueString" : "Urea Nitrogen"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51003",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51003')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51003"
+        },
+        {
+          "valueString" : "Troponin T"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50956",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50956')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50956"
+        },
+        {
+          "valueString" : "Lipase"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50880",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50880')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50880"
+        },
+        {
+          "valueString" : "Benzodiazepine Screen"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50920",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50920')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50920"
+        },
+        {
+          "valueString" : "Estimated GFR (MDRD equation)"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-50856",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '50856')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "50856"
+        },
+        {
+          "valueString" : "Acetaminophen"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51035",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51035')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51035"
+        },
+        {
+          "valueString" : "LD, Body Fluid"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51043",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51043')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51043"
+        },
+        {
+          "valueString" : "Total Protein, Body Fluid"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51034",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51034')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51034"
+        },
+        {
+          "valueString" : "Glucose, Body Fluid"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51254",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51254')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51254"
+        },
+        {
+          "valueString" : "Monocytes"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51279",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51279')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51279"
+        },
+        {
+          "valueString" : "Red Blood Cells"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51244",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51244')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51244"
+        },
+        {
+          "valueString" : "Lymphocytes"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51214",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51214')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51214"
+        },
+        {
+          "valueString" : "Fibrinogen, Functional"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51146",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51146')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51146"
+        },
+        {
+          "valueString" : "Basophils"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51249",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51249')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51249"
+        },
+        {
+          "valueString" : "MCHC"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51237",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51237')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51237"
+        },
+        {
+          "valueString" : "INR(PT)"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51222",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51222')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51222"
+        },
+        {
+          "valueString" : "Hemoglobin"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51265",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51265')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51265"
+        },
+        {
+          "valueString" : "Platelet Count"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51221",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51221')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51221"
+        },
+        {
+          "valueString" : "Hematocrit"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51277",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51277')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51277"
+        },
+        {
+          "valueString" : "RDW"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51200",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51200')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51200"
+        },
+        {
+          "valueString" : "Eosinophils"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51256",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51256')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51256"
+        },
+        {
+          "valueString" : "Neutrophils"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51250",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51250')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51250"
+        },
+        {
+          "valueString" : "MCV"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51274",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51274')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51274"
+        },
+        {
+          "valueString" : "PT"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51275",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51275')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51275"
+        },
+        {
+          "valueString" : "PTT"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51248",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51248')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51248"
+        },
+        {
+          "valueString" : "MCH"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51301",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51301')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51301"
+        },
+        {
+          "valueString" : "White Blood Cells"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51427",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51427')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51427"
+        },
+        {
+          "valueString" : "Lymphocytes"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51436",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51436')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51436"
+        },
+        {
+          "valueString" : "Polys"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51428",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51428')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51428"
+        },
+        {
+          "valueString" : "Macrophage"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51438",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51438')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51438"
+        },
+        {
+          "valueString" : "RBC, Other Fluid"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-52369",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '52369')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "52369"
+        },
+        {
+          "valueString" : "Total Nucleated Cells, Other"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010-51431",
+      "source" : [{
+        "context" : "src",
+        "element" : "itemid",
+        "variable" : "v",
+        "condition" : "($this = '51431')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems"
+        },
+        {
+          "valueString" : "51431"
+        },
+        {
+          "valueString" : "Monos"
+        }]
+      }]
+    },
+    {
+      "name" : "R-011",
+      "source" : [{
+        "context" : "src",
+        "element" : "valuenum",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "variable" : "q",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Quantity"
+        }]
+      }],
+      "rule" : [{
+        "name" : "R-011-value",
+        "source" : [{
+          "context" : "v"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit---uL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = '#/uL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "#/uL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "#/uL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit--",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = '%')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "%"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "%"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-IU-L",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'IU/L')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "IU/L"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "IU/L"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-K-uL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'K/uL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "K/uL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "K/uL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-fL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'fL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "fL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "fL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-g-dL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'g/dL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/dL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "g/dL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-m-uL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'm/uL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "m/uL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "m/uL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-mEq-L",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'mEq/L')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mEq/L"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mEq/L"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-mg-dL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'mg/dL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mg/dL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mg/dL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-ng-mL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'ng/mL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "ng/mL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "ng/mL"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-pg",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'pg')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "pg"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "pg"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-sec",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'sec')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "sec"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "sec"
+          }]
+        }]
+      },
+      {
+        "name" : "R-011-unit-ug-mL",
+        "source" : [{
+          "context" : "src",
+          "element" : "valueuom",
+          "variable" : "u",
+          "condition" : "($this = 'ug/mL')"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "ug/mL"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "ug/mL"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-012-guard",
+      "source" : [{
+        "context" : "src",
+        "condition" : "(($this.valuenum.exists()).not())"
+      }],
+      "rule" : [{
+        "name" : "R-012",
+        "source" : [{
+          "context" : "src",
+          "element" : "value",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-013",
+      "source" : [{
+        "context" : "src",
+        "element" : "comments",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "note",
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "text",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-014",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "R-015",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Encounter0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "encounter",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Encounter/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "R-016-guard",
+      "source" : [{
+        "context" : "src",
+        "condition" : "(($this.valuenum.exists()).not() and ($this.value.exists()).not())"
+      }],
+      "rule" : [{
+        "name" : "R-016",
+        "source" : [{
+          "context" : "src",
+          "element" : "comments",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    }]
+  }]
+}

@@ -1,0 +1,293 @@
+{
+  "resourceType" : "StructureMap",
+  "id" : "Admissions",
+  "text" : {
+    "status" : "additional",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/mimic-iv-demo/StructureMap/Admissions&quot; = `Admissions`\n\nuses &quot;http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow&quot; alias AdmissionsRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Encounter&quot; alias Encounter as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Admissions(source src : AdmissionsRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Encounter[0] · hospital admission — always\n  src where ($this.id_Encounter0.exists()) -&gt; bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {\n    src.id_Encounter0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/mimic-iv-demo/Encounter/' + $this) &quot;Encounter0-id&quot;;\n    src then Encounter0(src, res) &quot;Encounter0-body&quot;;\n  } &quot;Encounter0&quot;;\n}\n\ngroup Encounter0(source src : AdmissionsRow, target res : Encounter) {\n  src -&gt; res.status = 'finished' &quot;fixed-status&quot;;\n  // identifier: written by 2 rows (R-004, R-005) → one shared instance\n  src where ($this.hadm_id.exists()) -&gt; res.identifier as p then {\n    src -&gt; p.system = 'http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp' &quot;R-004&quot;;\n    src.hadm_id as v -&gt; p.value = v &quot;R-005&quot;;\n  } &quot;Encounter0-identifier&quot;;\n  // R-006: value map admissionClass (one rule per value; ConceptMap exported separately)\n  src.admission_type as v where ($this = 'URGENT') -&gt; res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') &quot;R-006-URGENT&quot;;\n  src.admission_type as v where ($this = 'EW EMER.') -&gt; res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'EMER', 'emergency') &quot;R-006-EW-EMER.&quot;;\n  // R-007 reference to Patient[0] in another table (via rel_admissions_patients): the resource must already be loaded\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-007&quot;;\n}\n</pre></div>"
+  },
+  "url" : "http://example.org/fhir/mimic-iv-demo/StructureMap/Admissions",
+  "name" : "Admissions",
+  "status" : "draft",
+  "structure" : [{
+    "url" : "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
+    "mode" : "source",
+    "alias" : "AdmissionsRow"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Bundle",
+    "mode" : "target",
+    "alias" : "Bundle"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Encounter",
+    "mode" : "target",
+    "alias" : "Encounter"
+  }],
+  "group" : [{
+    "name" : "Admissions",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "AdmissionsRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "bundle",
+      "type" : "Bundle",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "bundle-type",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "type",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "transaction"
+        }]
+      }]
+    },
+    {
+      "name" : "Encounter0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Encounter0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Encounter"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Encounter0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Encounter0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Encounter/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/mimic-iv-demo/Encounter/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Encounter0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Encounter0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Encounter0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "AdmissionsRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Encounter",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "finished"
+        }]
+      }]
+    },
+    {
+      "name" : "Encounter0-identifier",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.hadm_id.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "identifier",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-004",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://mimic.mit.edu/fhir/mimic/identifier/encounter-hosp"
+          }]
+        }]
+      },
+      {
+        "name" : "R-005",
+        "source" : [{
+          "context" : "src",
+          "element" : "hadm_id",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-URGENT",
+      "source" : [{
+        "context" : "src",
+        "element" : "admission_type",
+        "variable" : "v",
+        "condition" : "($this = 'URGENT')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "class",
+        "transform" : "c",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        },
+        {
+          "valueString" : "AMB"
+        },
+        {
+          "valueString" : "ambulatory"
+        }]
+      }]
+    },
+    {
+      "name" : "R-006-EW-EMER.",
+      "source" : [{
+        "context" : "src",
+        "element" : "admission_type",
+        "variable" : "v",
+        "condition" : "($this = 'EW EMER.')"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "class",
+        "transform" : "c",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        },
+        {
+          "valueString" : "EMER"
+        },
+        {
+          "valueString" : "emergency"
+        }]
+      }]
+    },
+    {
+      "name" : "R-007",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  }]
+}

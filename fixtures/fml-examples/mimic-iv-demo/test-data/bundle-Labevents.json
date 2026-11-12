@@ -1,0 +1,2359 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-494ad8cda7c8565c88fe0919",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-494ad8cda7c8565c88fe0919",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364203"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51427",
+          "display" : "Lymphocytes"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 20,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-494ad8cda7c8565c88fe0919"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-0e0837a139558fc1c7adc21c",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-0e0837a139558fc1c7adc21c",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364204"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51428",
+          "display" : "Macrophage"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 2,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      },
+      "note" : [{
+        "text" : "___"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-0e0837a139558fc1c7adc21c"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-dd88628a415e0c03c802263a",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-dd88628a415e0c03c802263a",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364205"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51431",
+          "display" : "Monos"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 23,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-dd88628a415e0c03c802263a"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-c6bc2b65f295e2650c7bf2f8",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-c6bc2b65f295e2650c7bf2f8",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364206"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51436",
+          "display" : "Polys"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 55,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      },
+      "note" : [{
+        "text" : "___"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-c6bc2b65f295e2650c7bf2f8"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-b325fcb9d14957d6970a7ecf",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-b325fcb9d14957d6970a7ecf",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364207"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51438",
+          "display" : "RBC, Other Fluid"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 34000,
+        "unit" : "#/uL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "#/uL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-b325fcb9d14957d6970a7ecf"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-2290d4e93970e4d823e18103",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-2290d4e93970e4d823e18103",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364208"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "52369",
+          "display" : "Total Nucleated Cells, Other"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 889,
+        "unit" : "#/uL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "#/uL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-2290d4e93970e4d823e18103"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-cd9768cb1910e5939020bf31",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-cd9768cb1910e5939020bf31",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364209"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51034",
+          "display" : "Glucose, Body Fluid"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 95,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-cd9768cb1910e5939020bf31"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-e89ede89e0670895fd858aab",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-e89ede89e0670895fd858aab",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364210"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51035",
+          "display" : "LD, Body Fluid"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 362,
+        "unit" : "IU/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "IU/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-e89ede89e0670895fd858aab"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-46e8c41d2162bdbe6a040150",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-46e8c41d2162bdbe6a040150",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364211"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51043",
+          "display" : "Total Protein, Body Fluid"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "valueQuantity" : {
+        "value" : 4.8,
+        "unit" : "g/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "g/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-46e8c41d2162bdbe6a040150"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-43a00044174572554becac0b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-43a00044174572554becac0b",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364212"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51237",
+          "display" : "INR(PT)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 1
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-43a00044174572554becac0b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-648ef6de6c76ab7219c76c41",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-648ef6de6c76ab7219c76c41",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364213"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51274",
+          "display" : "PT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 11.2,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-648ef6de6c76ab7219c76c41"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-191f739672df7f3f23d1c48a",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-191f739672df7f3f23d1c48a",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364214"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51275",
+          "display" : "PTT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 28.9,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-191f739672df7f3f23d1c48a"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-673394c314cbf43d317ef9e6",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-673394c314cbf43d317ef9e6",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364215"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50861",
+          "display" : "Alanine Aminotransferase (ALT)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 18,
+        "unit" : "IU/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "IU/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-673394c314cbf43d317ef9e6"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-02c16d26807d790f8629526b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-02c16d26807d790f8629526b",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364216"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50863",
+          "display" : "Alkaline Phosphatase"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 98,
+        "unit" : "IU/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "IU/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-02c16d26807d790f8629526b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-b2d50a7b6b23c35a3b38a2cb",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-b2d50a7b6b23c35a3b38a2cb",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364217"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50868",
+          "display" : "Anion Gap"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 18,
+        "unit" : "mEq/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mEq/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-b2d50a7b6b23c35a3b38a2cb"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-55a65a430ffb815a0aab0534",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-55a65a430ffb815a0aab0534",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364225"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50920",
+          "display" : "Estimated GFR (MDRD equation)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueString" : "Using this patient's age, gender, and serum creatinine value of 0.6, .  Estimated GFR = >75 if non African-American (mL/min/1.73 m2) .  Estimated GFR = >75 if African-American (mL/min/1.73 m2) .  For comparison, mean GFR for age group 70+ is 75 (mL/min/1.73 m2) .  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure.",
+      "note" : [{
+        "text" : "Using this patient's age, gender, and serum creatinine value of 0.6, .  Estimated GFR = >75 if non African-American (mL/min/1.73 m2) .  Estimated GFR = >75 if African-American (mL/min/1.73 m2) .  For comparison, mean GFR for age group 70+ is 75 (mL/min/1.73 m2) .  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-55a65a430ffb815a0aab0534"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-ddf9459b5a97d65cc328cc62",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-ddf9459b5a97d65cc328cc62",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364226"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50931",
+          "display" : "Glucose"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 113,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      },
+      "note" : [{
+        "text" : "If fasting, 70-100 normal, >125 provisional diabetes."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-ddf9459b5a97d65cc328cc62"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-737a91577921321585ad59c8",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-737a91577921321585ad59c8",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364229"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50954",
+          "display" : "Lactate Dehydrogenase (LD)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 192,
+        "unit" : "IU/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "IU/L"
+      },
+      "note" : [{
+        "text" : "Slightly Hemolyzed specimen.  Hemolysis falsely elevates this test."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-737a91577921321585ad59c8"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-03993922207c5ea7792709b0",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-03993922207c5ea7792709b0",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364234"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51003",
+          "display" : "Troponin T"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueString" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI.",
+      "note" : [{
+        "text" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-03993922207c5ea7792709b0"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-d3e03e4700ea7021074659e7",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-d3e03e4700ea7021074659e7",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "364251"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50931",
+          "display" : "Glucose"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-654497824fddf8633975b18a"
+      },
+      "encounter" : {
+        "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
+      },
+      "valueQuantity" : {
+        "value" : 99,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      },
+      "note" : [{
+        "text" : "If fasting, 70-100 normal, >125 provisional diabetes."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-d3e03e4700ea7021074659e7"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-056054b61d370b4cc5c815d5",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-056054b61d370b4cc5c815d5",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265190"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50933",
+          "display" : "Green Top Hold (plasma)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueString" : "HOLD.  DISCARD GREATER THAN 4 HOURS OLD.",
+      "note" : [{
+        "text" : "___"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-056054b61d370b4cc5c815d5"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-5f43e6875569faee725035cd",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-5f43e6875569faee725035cd",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265191"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50955",
+          "display" : "Light Green Top Hold"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueString" : "___",
+      "note" : [{
+        "text" : "HOLD."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-5f43e6875569faee725035cd"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-53b618f8d336c7b8296dcae7",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-53b618f8d336c7b8296dcae7",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265192"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51237",
+          "display" : "INR(PT)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 0.9
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-53b618f8d336c7b8296dcae7"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-9e4853560f5c0c52d0fe83be",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-9e4853560f5c0c52d0fe83be",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265193"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51274",
+          "display" : "PT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 9.8,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-9e4853560f5c0c52d0fe83be"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-cd932c3a4d0d7b1de25ee460",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-cd932c3a4d0d7b1de25ee460",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265194"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51275",
+          "display" : "PTT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 32.3,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-cd932c3a4d0d7b1de25ee460"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-84923dc0bba2ec6cd4c883a8",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-84923dc0bba2ec6cd4c883a8",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265195"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51146",
+          "display" : "Basophils"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 0.4,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-84923dc0bba2ec6cd4c883a8"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-424f3bb58fb4f58ff62c0064",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-424f3bb58fb4f58ff62c0064",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265196"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51200",
+          "display" : "Eosinophils"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 0.8,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-424f3bb58fb4f58ff62c0064"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-7c4bbfb16ce0c616da39fd0f",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-7c4bbfb16ce0c616da39fd0f",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265197"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51221",
+          "display" : "Hematocrit"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 36.4,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-7c4bbfb16ce0c616da39fd0f"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-6d1c1a13e0e130b64b7fc1be",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-6d1c1a13e0e130b64b7fc1be",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265198"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51222",
+          "display" : "Hemoglobin"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 12.3,
+        "unit" : "g/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "g/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-6d1c1a13e0e130b64b7fc1be"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-c40b3b9d85c498a8164b46dc",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-c40b3b9d85c498a8164b46dc",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265199"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51244",
+          "display" : "Lymphocytes"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 19.9,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-c40b3b9d85c498a8164b46dc"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-458924450bdd4cc25f744747",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-458924450bdd4cc25f744747",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265200"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51248",
+          "display" : "MCH"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 33.4,
+        "unit" : "pg",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "pg"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-458924450bdd4cc25f744747"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-7becb0c78d4fdb25be3534cb",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-7becb0c78d4fdb25be3534cb",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265201"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51249",
+          "display" : "MCHC"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 33.9,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-7becb0c78d4fdb25be3534cb"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-811127d5830c8774c458eedb",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-811127d5830c8774c458eedb",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265202"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51250",
+          "display" : "MCV"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 99,
+        "unit" : "fL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "fL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-811127d5830c8774c458eedb"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-68498a1784a8a3716a1107e6",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-68498a1784a8a3716a1107e6",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265203"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51254",
+          "display" : "Monocytes"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 16.2,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-68498a1784a8a3716a1107e6"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-68fcb374b6c022f28ad7955d",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-68fcb374b6c022f28ad7955d",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265204"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51256",
+          "display" : "Neutrophils"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 62.6,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-68fcb374b6c022f28ad7955d"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-83eec89edf40b0e8102a4cc1",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-83eec89edf40b0e8102a4cc1",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265205"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51265",
+          "display" : "Platelet Count"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 186,
+        "unit" : "K/uL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "K/uL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-83eec89edf40b0e8102a4cc1"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-74a199c1037b88984e05ad1e",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-74a199c1037b88984e05ad1e",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265206"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51277",
+          "display" : "RDW"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 13.3,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-74a199c1037b88984e05ad1e"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-16d60b5621021ad0ce7c0ead",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-16d60b5621021ad0ce7c0ead",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265207"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51279",
+          "display" : "Red Blood Cells"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 3.7,
+        "unit" : "m/uL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "m/uL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-16d60b5621021ad0ce7c0ead"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-6a2df244a2f6c6015dfe8d0c",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-6a2df244a2f6c6015dfe8d0c",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265208"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51301",
+          "display" : "White Blood Cells"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 10.4,
+        "unit" : "K/uL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "K/uL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-6a2df244a2f6c6015dfe8d0c"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-d0ab8c867f5970735e6fa9a2",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-d0ab8c867f5970735e6fa9a2",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "265209"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50868",
+          "display" : "Anion Gap"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
+      },
+      "valueQuantity" : {
+        "value" : 18,
+        "unit" : "mEq/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mEq/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-d0ab8c867f5970735e6fa9a2"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-ee694ec6ec269537152d52c7",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-ee694ec6ec269537152d52c7",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236698"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51214",
+          "display" : "Fibrinogen, Functional"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 507,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-ee694ec6ec269537152d52c7"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-e6ffa7f3d13028c06a116870",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-e6ffa7f3d13028c06a116870",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236699"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51237",
+          "display" : "INR(PT)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 0.9
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-e6ffa7f3d13028c06a116870"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-e4a378ad3696d7c0b0337191",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-e4a378ad3696d7c0b0337191",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236700"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51274",
+          "display" : "PT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 9.6,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-e4a378ad3696d7c0b0337191"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-d024c118266402d31ef07d38",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-d024c118266402d31ef07d38",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236701"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51275",
+          "display" : "PTT"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 28.2,
+        "unit" : "sec",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "sec"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-d024c118266402d31ef07d38"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-b223488ab6a78d30b3d40d27",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-b223488ab6a78d30b3d40d27",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236702"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50856",
+          "display" : "Acetaminophen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "NEG.",
+      "note" : [{
+        "text" : "NEG."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-b223488ab6a78d30b3d40d27"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-cfbbe95e47626de7b0c019f5",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-cfbbe95e47626de7b0c019f5",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236703"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50879",
+          "display" : "Barbiturate Screen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "NEG"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-cfbbe95e47626de7b0c019f5"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-1d33f255477751ff5bb2a148",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-1d33f255477751ff5bb2a148",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236704"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50880",
+          "display" : "Benzodiazepine Screen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "POS",
+      "note" : [{
+        "text" : "BENZODIAZEPINE IMMUNOASSAY SCREEN DOES NOT RELIABLY DETECT SOME DRUGS,;INCLUDING LORAZEPAM, CLONAZEPAM, AND FLUNITRAZEPAM."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-1d33f255477751ff5bb2a148"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-2b401db28d22db22c7b7832e",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-2b401db28d22db22c7b7832e",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236705"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50912",
+          "display" : "Creatinine"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 0.6,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-2b401db28d22db22c7b7832e"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-6e3ada4e2bab1705ced4647c",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-6e3ada4e2bab1705ced4647c",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236706"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50920",
+          "display" : "Estimated GFR (MDRD equation)"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "Using this patient's age, gender, and serum creatinine value of 0.6,.  Estimated GFR = >75 if non African-American (mL/min/1.73 m2).  Estimated GFR = >75 if African-American (mL/min/1.73 m2).  For comparison, mean GFR for age group 50-59 is 93 (mL/min/1.73 m2).  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure.",
+      "note" : [{
+        "text" : "Using this patient's age, gender, and serum creatinine value of 0.6,.  Estimated GFR = >75 if non African-American (mL/min/1.73 m2).  Estimated GFR = >75 if African-American (mL/min/1.73 m2).  For comparison, mean GFR for age group 50-59 is 93 (mL/min/1.73 m2).  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-6e3ada4e2bab1705ced4647c"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-0378500a0940e0481742595b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-0378500a0940e0481742595b",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236707"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50922",
+          "display" : "Ethanol"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 96,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      },
+      "note" : [{
+        "text" : "80 (THESE UNITS) = 0.08 (% BY WEIGHT)."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-0378500a0940e0481742595b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-65cb49d411fb7a670a629502",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-65cb49d411fb7a670a629502",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236708"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50956",
+          "display" : "Lipase"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 17,
+        "unit" : "IU/L",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "IU/L"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-65cb49d411fb7a670a629502"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-6f8114de58e9d0c69e115bff",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-6f8114de58e9d0c69e115bff",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236709"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50981",
+          "display" : "Salicylate"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "NEG.",
+      "note" : [{
+        "text" : "NEG."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-6f8114de58e9d0c69e115bff"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-77b7dd131d7dd44265d9e74c",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-77b7dd131d7dd44265d9e74c",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236710"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50999",
+          "display" : "Tricyclic Antidepressant Screen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "NEG",
+      "note" : [{
+        "text" : "POSITIVE TRICYCLIC RESULTS REPRESENT POTENTIALLY TOXIC LEVELS;THERAPEUTIC TRICYCLIC LEVELS WILL TYPICALLY HAVE NEGATIVE RESULTS."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-77b7dd131d7dd44265d9e74c"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-8c45cd8af53e5b25023ebabf",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-8c45cd8af53e5b25023ebabf",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236711"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51006",
+          "display" : "Urea Nitrogen"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 10,
+        "unit" : "mg/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "mg/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-8c45cd8af53e5b25023ebabf"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-824f1eb5d41fd13841115ba1",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-824f1eb5d41fd13841115ba1",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236712"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51221",
+          "display" : "Hematocrit"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 41.2,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-824f1eb5d41fd13841115ba1"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-584eb4c4039980cfabe2fae5",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-584eb4c4039980cfabe2fae5",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236713"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51222",
+          "display" : "Hemoglobin"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 13.9,
+        "unit" : "g/dL",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "g/dL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-584eb4c4039980cfabe2fae5"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-72b42070d21ebe54f3afe88f",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-72b42070d21ebe54f3afe88f",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236714"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51248",
+          "display" : "MCH"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 32.7,
+        "unit" : "pg",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "pg"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-72b42070d21ebe54f3afe88f"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-b0c09ffc891546130909b219",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-b0c09ffc891546130909b219",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236715"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "51249",
+          "display" : "MCHC"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueQuantity" : {
+        "value" : 33.6,
+        "unit" : "%",
+        "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+        "code" : "%"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-b0c09ffc891546130909b219"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-f033ef5b5c826484a92adaae",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-f033ef5b5c826484a92adaae",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236721"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "50955",
+          "display" : "Light Green Top Hold"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "___",
+      "note" : [{
+        "text" : "HOLD."
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-f033ef5b5c826484a92adaae"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/mimic-iv-demo/Observation/lab-ede582156d88211e765a2990",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "lab-ede582156d88211e765a2990",
+      "identifier" : [{
+        "system" : "http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents",
+        "value" : "236739"
+      }],
+      "status" : "final",
+      "category" : [{
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code" : "laboratory",
+          "display" : "Laboratory"
+        }]
+      }],
+      "code" : {
+        "coding" : [{
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
+          "code" : "52033",
+          "display" : "Specimen Type"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
+      },
+      "valueString" : "VEN.",
+      "note" : [{
+        "text" : "___"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/lab-ede582156d88211e765a2990"
+    }
+  }]
+}

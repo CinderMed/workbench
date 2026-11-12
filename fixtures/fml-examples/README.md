@@ -149,3 +149,22 @@ single-row `identifier` written inline instead of a block (ADR-0011), and Metast
 rules, now the rows `R-015`/`R-016`. The HL7 validator 7.0.5 recompiled the five StructureMaps from folders without
 the old JSON (line endings normalized, `status: draft` added). The suite passed 13 of 13 in both passes, every
 Bundle is identical, and every FHIR resource validates with 0 errors.
+
+## Golden case mimic-iv-demo: a long table (12 November 2026, #105)
+**`mimic-iv-demo/` holds public, de-identified demo data under the Open Database License (ODbL) v1.0** (its own
+`LICENSE` and `NOTICE.md`): the only non-synthetic rows in the repository. It is a slice of the MIMIC-IV Clinical
+Database Demo 2.2 (3 patients, their admissions, 60 lab events, the 46 lab items they use) in its own long format:
+one row per measurement, `itemid` says what was measured, `valuenum`/`valueuom` or `value` hold it. Shape covered: a
+long table with a code dictionary, three related tables, and an optional relation key (`hadm_id`).
+
+The project maps each lab event row to one Observation (code from a value map on `itemid`, `valueQuantity` from
+`valuenum` with a unit value map on `valueuom`, `valueString` from `value` when there is no number, and from
+`comments` when there is neither, `note` from `comments`) with references through `via` to Patient and Encounter.
+Everything else is generator output. `tools/java/RunMap.java` now also takes an array of normalized rows (long tables)
+and joins the Bundles of the rows. The merged Bundle (Patients → Admissions → Labevents) validates with 0 errors;
+suite: 17 of 17.
+
+`tooling/mimic-on-fhir.test.ts` compares our Bundle with the open MIMIC-IV on FHIR demo (`mimic-on-fhir/`) on the key
+fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
+66 resources match. Not compared, each a gap: times (no time zone at the border, #107), Patient.birthDate (derived
+columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit (#108).
