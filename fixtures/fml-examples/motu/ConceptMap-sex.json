@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "sex",
   "url": "http://example.org/fhir/motu/ConceptMap/sex",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "Sex",
   "status": "draft",
   "group": [

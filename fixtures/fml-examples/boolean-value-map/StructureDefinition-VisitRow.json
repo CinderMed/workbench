@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "VisitRow",
   "url": "http://example.org/fhir/boolean-value-map/StructureDefinition/VisitRow",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "VisitRow",
   "title": "Normalized row of table Visit",
   "status": "draft",

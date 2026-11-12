@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "spineLevel",
   "url": "http://example.org/fhir/metastra/ConceptMap/spineLevel",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "SpineLevel",
   "status": "draft",
   "description": "Spinal levels (SNOMED CT codes from the Metastra sheet, entered by hand).",

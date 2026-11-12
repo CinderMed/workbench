@@ -2,7 +2,7 @@
   "resourceType": "ConceptMap",
   "id": "labItems",
   "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labItems",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "name": "LabItems",
   "status": "draft",
   "description": "itemid to the d_labitems code system of MIMIC-IV on FHIR (one entry per item until a code column can be written as a Coding, #106).",

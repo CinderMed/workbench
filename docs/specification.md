@@ -553,6 +553,8 @@ The conversion module reads only the package: the normalization specification to
 
 **Manifest and load order.** The manifest lists tables, maps, logical models, normalization specifications, ConceptMaps, versions (schema, FHIR, grammar, engine) and the verification result. It also lists every file with its SHA-256 digest, to detect changes. A table depends on another if one of its rows uses a `via` relation towards it. The order is a topological sort by levels (alphabetical on ties), and a cycle between tables blocks the export. For MOTU the result is `MotuPatient → HospitalStay → Fall`.
 
+**Export package (G7, ADR-0012).** `@cindermed/export` writes, for a valid project: the cleaned project copy (`project.json`); for each table, the map (`<Table>.map`), its StructureMap JSON, the logical model and the normalization specification; one ConceptMap per non-boolean value map; the three schemas under `schemas/`, which every `$schema` references by relative path; and `manifest.json`. Every map passes the grammar check first (G10), with errors traced to the mapping row; `verification.compile` is `skipped` until the conversion module (V2). The package version is the one given (`--package-version`), or `0.0.0-dev.<first 12 hex of the SHA-256 of the project file>`, and the logical models and ConceptMaps carry it. The zip is deterministic: the same project, version and `createdAt` give the same bytes on any machine. The project copy leaves out every comment and collaboration field (`review`, `provenance`, Coding `verification`, `extensions`, project timestamps); the full file stays the H3 export. The export runs in the backend only.
+
 **FML syntax tree** (`generator/fml-ast.ts`). The generator can build only these nodes:
 
 | Node | Variants |

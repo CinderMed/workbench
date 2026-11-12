@@ -72,3 +72,9 @@ This addendum replaces the consequence above about `decimalSeparator`, `trueValu
 
 - The HL7 validator reported `sdf-3` ("Each element definition in a snapshot must have a formal definition and cardinalities") on every logical model: the root element had no `definition`. The root now gets the table description, or `Normalized row of table <name>` when there is none, in the snapshot and in the differential. Column and id elements already had one, and an id element without a role label no longer writes empty parentheses.
 - Every logical model of the examples validates with 0 errors. A generator test rejects empty strings in every generated resource (#12).
+
+## Addendum (2026-11-12): logical model version is the package version (#83)
+
+- The logical model's `version` used to be the project format version (as in the prototype), so a format change touched every model even when nothing in the table had changed. It is now the version of the exported package (`logicalModel(project, plan, { version })`, ADR-0012). It is the version given at export, or a dev version derived from the project text. ConceptMaps follow the same rule.
+- Outside an export, callers may omit `version`, and the project format version is used as before.
+- Fixtures: the logical models and ConceptMaps of the four examples carry 0.1.0, the version of their manifests.
