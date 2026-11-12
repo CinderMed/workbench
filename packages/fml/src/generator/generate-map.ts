@@ -15,12 +15,16 @@
  *   expert expressions are not supported in the MVP.
  */
 import type {
+  Coding,
   FhirValue,
   Id,
   Instance,
   MappingRow,
   ProjectFile,
+  SetElement,
   ValidationResult,
+  ValueMap,
+  ValueMapEntry,
 } from "@cindermed/model";
 import {
   groupName,
@@ -43,6 +47,7 @@ import {
   type RoleCondition,
 } from "./conditions.js";
 import { logicalModelName, logicalModelUrl } from "./logical-model.js";
+import { valueRuleNames } from "./rule-names.js";
 import { roleKey, type Planned, type TablePlan } from "./table-plan.js";
 
 const HL7_SD = "http://hl7.org/fhir/StructureDefinition";
@@ -129,6 +134,14 @@ class Generation {
       );
     }
     return this.conditions.get(instance.id);
+  }
+
+  /** The row whose code starts the rule name (`R-010` for `R-010-unit-1`), for diagnostics. */
+  rowIdOf(name: string): string | undefined {
+    const rows = this.project.mappings.filter(
+      (row) => name === row.code || name.startsWith(`${row.code}-`),
+    );
+    return rows.sort((a, b) => b.code.length - a.code.length)[0]?.id;
   }
 
   idField(instance: Instance): Identifier {
@@ -317,7 +330,7 @@ function valueRule(
           ? "expert expressions (D6) are not supported in the MVP"
           : transform.kind === "concat"
             ? "concatenation is not supported yet (#98)"
-            : "value maps and quantities are not supported yet (#11, #12)";
+            : "a Quantity.unit value map is used only by a quantity transform";
       g.error(
         GeneratorCode.TRANSFORM_UNSUPPORTED,
         "mapping",
@@ -330,15 +343,235 @@ function valueRule(
   }
 }
 
-/** A guard: `src where (condition) then { rule } "<name>"`. */
-function guard(name: string, where: Expr, rule: Rule, comment?: string): Rule {
+/** A guard: `src where (condition) then { rules } "<name>"`. */
+function guard(name: string, where: Expr, rules: readonly Rule[], comment?: string): Rule {
   return {
     name: ruleName(name),
     ...(comment === undefined ? {} : { comment }),
     source: { context: src, where },
     targets: [],
-    then: { kind: "rules", rules: [rule] },
+    then: { kind: "rules", rules },
   };
+}
+
+/** The value a value-map entry writes, as an FML transform, for the map's target type. */
+function entryTransform(map: ValueMap, entry: ValueMapEntry): Transform | undefined {
+  const target = entry.target;
+  if (target === undefined) return undefined;
+  if ("value" in target) return { kind: "literal", value: target.value };
+  if (map.target === "Coding" || map.target === "CodeableConcept") {
+    return fixedTransform({ type: map.target, coding: target });
+  }
+  return undefined;
+}
+
+/** `res.path = value` targets of `setElement` and `use.also` (top-level elements only). */
+function setTargets(g: Generation, row: MappingRow, set: readonly SetElement[]): Target[] {
+  const targets: Target[] = [];
+  for (const item of set) {
+    const transform = fixedTransform(item.value);
+    if (transform === undefined || item.path.includes(".") || item.path.includes("[")) {
+      g.error(
+        GeneratorCode.FIXED_VALUE_UNSUPPORTED,
+        "mapping",
+        row.id,
+        "transform.valueMapId",
+        `Row ${row.code}: the value-map action sets "${item.path}", which the FML subset cannot write (top-level elements and simple values only).`,
+      );
+      continue;
+    }
+    targets.push({ context: res, element: fmlElement(item.path), transform });
+  }
+  return targets;
+}
+
+/**
+ * One rule per value of a value map: `src.col as v where ($this = 'value') -> <target>`, named with
+ * `valueRuleNames` over every entry. `skipInstance` values are part of the role's condition and
+ * `absent` values write nothing, so neither gets a rule.
+ */
+function valueMapRules(
+  g: Generation,
+  row: MappingRow,
+  map: ValueMap,
+  columnId: Id | undefined,
+  alias: Identifier,
+  targetsOf: (entry: ValueMapEntry) => Target[] | undefined,
+  prefix = row.code,
+): Rule[] {
+  const names = valueRuleNames(
+    prefix,
+    map.entries.map((entry) => entry.sourceValue),
+  );
+  const rules: Rule[] = [];
+  map.entries.forEach((entry, i) => {
+    const name = names[i];
+    if (
+      name === undefined ||
+      entry.action.kind === "skipInstance" ||
+      entry.action.kind === "absent"
+    )
+      return;
+    let targets: Target[];
+    if (entry.action.kind === "setElement") targets = setTargets(g, row, entry.action.set);
+    else {
+      const own = targetsOf(entry);
+      if (own === undefined) {
+        g.error(
+          GeneratorCode.VALUE_MAP_ENTRY_WITHOUT_TARGET,
+          "mapping",
+          row.id,
+          "transform",
+          `Row ${row.code}: value '${entry.sourceValue}' of value map ${map.name} has no target to write.`,
+        );
+        return;
+      }
+      targets = [...own, ...setTargets(g, row, entry.action.also ?? [])];
+    }
+    rules.push({
+      name,
+      source: {
+        context: src,
+        element: g.columnElement(columnId),
+        alias,
+        where: { kind: "thisEquals", value: entry.sourceValue },
+      },
+      targets,
+    });
+  });
+  return rules;
+}
+
+const withComment = (rules: Rule[], comment: string): Rule[] => {
+  const [first, ...rest] = rules;
+  return first === undefined ? rules : [{ ...first, comment }, ...rest];
+};
+
+/** Unit rules of a quantity: a fixed unit, or one rule per value of the unit column's value map. */
+function unitRules(g: Generation, row: MappingRow, q: Identifier): Rule[] {
+  const transform = row.transform;
+  if (transform.kind !== "quantity") return [];
+  const unitTargets = (unit: Coding): Target[] => [
+    {
+      context: q,
+      element: ident("unit"),
+      transform: { kind: "literal", value: unit.display ?? unit.code },
+    },
+    { context: q, element: ident("system"), transform: { kind: "literal", value: unit.system } },
+    { context: q, element: ident("code"), transform: { kind: "literal", value: unit.code } },
+  ];
+  if (transform.unit !== undefined) {
+    return [
+      {
+        name: ruleName(`${row.code}-unit`),
+        source: { context: src },
+        targets: unitTargets(transform.unit),
+      },
+    ];
+  }
+  const map = g.project.valueMaps.find((m) => m.id === transform.unitValueMapId);
+  if (map === undefined || transform.unitColumnId === undefined) return [];
+  const rules = valueMapRules(
+    g,
+    row,
+    map,
+    transform.unitColumnId,
+    ident("u"),
+    (entry) =>
+      entry.target === undefined || "value" in entry.target ? undefined : unitTargets(entry.target),
+    `${row.code}-unit`,
+  );
+  const column = g.columns.get(transform.unitColumnId)?.name ?? "";
+  return withComment(rules, `${row.code}-unit: unit from column ${column}, value map ${map.name}`);
+}
+
+/**
+ * The rules of one row on `context`: one rule for most transforms, one per value for a value map,
+ * and a `create('Quantity')` block with its unit rules for a quantity.
+ */
+function rowRules(
+  g: Generation,
+  row: MappingRow,
+  context: Identifier,
+  segments: readonly Segment[],
+): Rule[] {
+  const transform = row.transform;
+  const write = (value: Transform): Target[] => {
+    const [first, second] = segments;
+    if (first === undefined) return [];
+    if (second === undefined)
+      return [{ context, element: fmlElement(first.name), transform: value }];
+    const p = ident("p");
+    return [
+      { context, element: fmlElement(first.name), alias: p },
+      { context: p, element: fmlElement(second.name), transform: value },
+    ];
+  };
+  if (transform.kind === "valueMap") {
+    const map = g.project.valueMaps.find((m) => m.id === transform.valueMapId);
+    if (map === undefined)
+      throw new Error(
+        `Unknown value map "${transform.valueMapId}": check the integrity rules first.`,
+      );
+    if (map.target === "Quantity.unit") {
+      g.error(
+        GeneratorCode.TRANSFORM_UNSUPPORTED,
+        "mapping",
+        row.id,
+        "transform.valueMapId",
+        `Row ${row.code}: a Quantity.unit value map is used only by a quantity transform.`,
+      );
+      return [];
+    }
+    const repeat =
+      row.repeat?.kind === "eachValue"
+        ? `${row.code} repeat eachValue: the normalized column is a list; each rule fires for every matching value\n`
+        : "";
+    return withComment(
+      valueMapRules(g, row, map, row.columnId, ident("v"), (entry) => {
+        const value = entryTransform(map, entry);
+        return value === undefined ? undefined : write(value);
+      }),
+      `${repeat}${row.code}: value map ${map.name} (one rule per value; ConceptMap exported separately)`,
+    );
+  }
+  if (transform.kind === "quantity") {
+    const v = ident("v");
+    const q = ident("q");
+    const [target] = write({ kind: "create", type: ident("Quantity") });
+    if (target === undefined || segments.length > 1) {
+      g.error(
+        GeneratorCode.PATH_UNSUPPORTED,
+        "mapping",
+        row.id,
+        "path",
+        `Row ${row.code}: a quantity is written on a top-level element only.`,
+      );
+      return [];
+    }
+    return [
+      {
+        name: ruleName(row.code),
+        source: { context: src, element: g.columnElement(row.columnId), alias: v },
+        targets: [{ ...target, alias: q }],
+        then: {
+          kind: "rules",
+          rules: [
+            {
+              name: ruleName(`${row.code}-value`),
+              source: { context: v },
+              targets: [
+                { context: q, element: ident("value"), transform: { kind: "copy", variable: v } },
+              ],
+            },
+            ...unitRules(g, row, q),
+          ],
+        },
+      },
+    ];
+  }
+  const rule = valueRule(g, row, context, segments);
+  return rule === undefined ? [] : [rule];
 }
 
 /** The condition that guards a row: its own condition and, for a reference, the target's. */
@@ -472,8 +705,7 @@ function roleGroup(g: Generation, instance: Instance): Group {
       for (const member of block) {
         const leaf = parsed.get(member.id)?.[1];
         if (leaf === undefined) continue;
-        const rule = valueRule(g, member, alias, [leaf]);
-        if (rule !== undefined) inner.push(rule);
+        inner.push(...rowRules(g, member, alias, [leaf]));
         if (member.columnId !== undefined) {
           const element = g.columnElement(member.columnId);
           if (!columns.includes(element)) columns.push(element);
@@ -496,11 +728,11 @@ function roleGroup(g: Generation, instance: Instance): Group {
       });
       continue;
     }
-    const rule = valueRule(g, row, res, segments);
-    if (rule === undefined) continue;
+    const own = rowRules(g, row, res, segments);
+    if (own.length === 0) continue;
     const { where, comment } = rowGuard(g, row);
-    if (where !== undefined) rules.push(guard(`${row.code}-guard`, where, rule, comment));
-    else rules.push(comment === undefined ? rule : { ...rule, comment });
+    if (where !== undefined) rules.push(guard(`${row.code}-guard`, where, own, comment));
+    else rules.push(...(comment === undefined ? own : withComment(own, comment)));
   }
   return {
     name: groupName(key),
@@ -510,6 +742,31 @@ function roleGroup(g: Generation, instance: Instance): Group {
     ],
     rules,
   };
+}
+
+/**
+ * Rule names are unique within a group, nested rules included (#90): diagnostics and the printed
+ * line index identify a rule by group and name. Names repeat across groups by design
+ * (`fixed-status` in every role group).
+ */
+function checkRuleNames(g: Generation, group: Group): void {
+  const seen = new Set<string>();
+  const visit = (rules: readonly Rule[]): void => {
+    for (const rule of rules) {
+      if (seen.has(rule.name)) {
+        g.error(
+          GeneratorCode.DUPLICATE_RULE_NAME,
+          "mapping",
+          g.rowIdOf(rule.name) ?? group.name,
+          "code",
+          `Group ${group.name}: two rules are named "${rule.name}". Rename a row code or a value so that every rule of the group has its own name.`,
+        );
+      }
+      seen.add(rule.name);
+      if (rule.then?.kind === "rules") visit(rule.then.rules);
+    }
+  };
+  visit(group.rules);
 }
 
 /** The FML syntax tree of one table, or the generator errors that prevent it. */
@@ -555,6 +812,7 @@ export function generateMap(project: ProjectFile, plan: TablePlan): Planned<Stru
     ],
   };
   const groups = [main, ...roles.map((instance) => roleGroup(g, instance))];
+  for (const group of groups) checkRuleNames(g, group);
   if (g.results.length > 0) return { ok: false, results: g.results };
   return {
     ok: true,
