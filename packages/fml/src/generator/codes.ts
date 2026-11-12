@@ -13,6 +13,16 @@ export const GeneratorCode = {
   ID_RULE_WITHOUT_COLUMNS: "ID_RULE_WITHOUT_COLUMNS",
   /** A literal part follows a column part: the normalization writes the literals first, then the encoded columns. */
   ID_LITERAL_AFTER_COLUMN: "ID_LITERAL_AFTER_COLUMN",
+  /** A row transform the generator does not translate: `expression` (D6, V2) for the whole MVP; `concat` until #98. */
+  TRANSFORM_UNSUPPORTED: "TRANSFORM_UNSUPPORTED",
+  /** A creation condition or row condition uses an expert expression (D6, V2). */
+  CONDITION_EXPRESSION_UNSUPPORTED: "CONDITION_EXPRESSION_UNSUPPORTED",
+  /** A role with `multiplicity: perValue` (one resource per selected value): no golden case yet. */
+  MULTIPLICITY_PER_VALUE_UNSUPPORTED: "MULTIPLICITY_PER_VALUE_UNSUPPORTED",
+  /** An element path the generator cannot write yet (more than two levels, or a nested fixed value). */
+  PATH_UNSUPPORTED: "PATH_UNSUPPORTED",
+  /** A fixed value the FML subset cannot write (a Quantity, or a CodeableConcept with text). */
+  FIXED_VALUE_UNSUPPORTED: "FIXED_VALUE_UNSUPPORTED",
 } as const;
 
 export type GeneratorCode = (typeof GeneratorCode)[keyof typeof GeneratorCode];

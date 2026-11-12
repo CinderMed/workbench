@@ -474,14 +474,31 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 | Id, request, fullUrl | `src.id_Type0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Type/' + $this), e.fullUrl = evaluate(i, '<fullUrlBase>/Type/' + $this)` |
 | Creation condition | FHIRPath with `$this.` in front of every column: `notEmpty` → `$this.col.exists()`; `equals` / `in` → `$this.col.where($this = 'v').exists()`; `notEquals`, `notIn` and `skipInstance` → `.where(…).empty()`; then `and`, `or`, `not` |
 | Fixed value | `src -> res.element = 'value'`, or `c(…)` for Coding and `cc(…)` for CodeableConcept |
-| Copy | `src.col as v -> res.element = v` (a normalized date is also copied into dateTime) |
-| Several rows on the same complex element | One shared block, created if at least one column has a value: `src where ($this.a.exists() or $this.b.exists()) -> res.period as p then { … }` |
+| Copy | `src.col as v -> res.element = v` (a normalized date is also copied into dateTime); a `cast` is written the same way, because the normalization has already converted the value. A path through a choice element is written with the element name: `valueQuantity` → `res.value` |
+| Several rows on the same complex element (two or more rows writing the same parent element) | One shared block, created if at least one column has a value: `src where ($this.a.exists() or $this.b.exists()) -> res.period as p then { … }` |
+| One row on a complex element | Written inline: `src.col as v -> res.period as p, p.start = v` |
 | Named slice | `src where ($this.col.exists()) -> res.component as slc then { discriminator with cc(…); value }` |
 | Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes and booleans. Each rule is named `<row code>-<value>`, with characters outside `[A-Za-z0-9_.-]` replaced by `_` (`R-006-1`, `R-011--1`, `Sì` → `R-002-S_`); when two values of the same map get the same name, the later ones in entry order get a numeric suffix (`Sí` → `R-002-S_2`, `N A` after `N/A` → `R-002-N_A2`). ConceptMaps are exported only as documentation |
 | Quantity with unit from a column | `res.value = create('Quantity') as q then { value; one rule per unit with unit, system and code }` |
 | Multiple choice, `repeat: eachValue` | The normalization produces a list; each per-value rule fires for every item, so one repetition per selected value |
 | Reference in the same table | `src.id_Target as t -> res.subject as r, r.reference = evaluate(t, 'Type/' + $this)`, inside the creation condition of the target role |
 | Reference to another table (`via`) | Same form; the id is computed by the normalization with the columns given by the relation; the target resource must already be loaded |
+
+**Rule names, order and comments.** In a role group, fixed values come first (`fixed-<path>`), then the rows in project order, each named with its code. A shared block (`<Role>-<element>`) or a named slice (`slice-<name>`, discriminator `slice-<name>-<path>`) sits at the position of its first row. A guarded row is `<code>-guard`. Comments come only from these templates:
+
+| Where | Comment |
+| --- | --- |
+| Main group | `Main group: one transaction Bundle per normalized record.` / `Each role becomes an entry with PUT on its deterministic id (computed by the normalization).` |
+| Role entry | `<Type>[<i>] · <label> — always`, or `— created when: <condition>`, with the condition in words: `col is not empty`, `col is empty`, `col = 'v'`, `col is not 'v'`, `col in {'a', 'b'}`, `col not in {…}`, `not (…)`, `and`/`or` with nested groups in parentheses, and ` (skipInstance)` when value-map clauses were added |
+| Shared block | `<element>: written by N rows (R-a, R-b) → one shared instance` |
+| Named slice | `<element>[<slice>]: named slice, created only if the column has a value` |
+| Guarded reference | `<code> the reference honours the creation condition of <Type>[<i>]` |
+| Reference to another table | `<code> reference to <Type>[<i>] in another table (via <relation id>): the resource must already be loaded` |
+| Value map | `<code>: value map <name> (one rule per value; ConceptMap exported separately)` |
+
+Plain copies, constants, fixed values and references to a role that is always created get no comment.
+
+**Generator errors.** Features the schema accepts but the generator does not translate are errors that block the export: `TRANSFORM_UNSUPPORTED` (the expert expression for the whole MVP; concatenation until #98), `CONDITION_EXPRESSION_UNSUPPORTED`, `MULTIPLICITY_PER_VALUE_UNSUPPORTED`, `PATH_UNSUPPORTED` (more than two levels, or a nested fixed value), `FIXED_VALUE_UNSUPPORTED` (a Quantity, or a CodeableConcept with text).
 
 **What the verification revealed.** Six problems were not visible from reading the specification, and each became a generator rule.
 

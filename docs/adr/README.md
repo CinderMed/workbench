@@ -16,3 +16,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0008](0008-fml-grammar-parser-generated-with-antlr-ng.md)   | FML grammar parser generated with antlr-ng       | accepted |
 | [0009](0009-table-plan-element-names-and-id-fields.md)       | Table plan, element names and id fields          | accepted |
 | [0010](0010-reference-normalizer.md)                         | Reference normalizer                             | accepted |
+| [0011](0011-generator-map-structure.md)                      | Generator map structure                          | accepted |
