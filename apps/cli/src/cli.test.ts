@@ -1,9 +1,12 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { exportPackage, mappingTables, toCsv, toXlsx } from "@cindermed/export";
 import { parseProject } from "@cindermed/model";
 import { unzipSync } from "fflate";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { loadDefinitions } from "./fhir-packages.js";
 import { type CliIo, ExitCode, USAGE, packageName, run } from "./index.js";
 
 const examples = fileURLToPath(new URL("../../../fixtures/fml-examples/", import.meta.url));
@@ -32,6 +35,8 @@ function capture(files: Readonly<Record<string, string>> = {}): Captured {
       },
       now: () => new Date("2026-11-12T08:30:15.987Z"),
       version: "9.9.9",
+      // Unit tests never download FHIR packages: tests that need definitions give a cache.
+      loadDefinitions: () => Promise.reject(new Error("no FHIR packages in this test")),
     },
     stdout: () => out,
     stderr: () => err,
@@ -47,8 +52,10 @@ describe("cindermed validate", () => {
   it.each(["metastra", "motu"])("accepts the %s example project", async (name) => {
     const path = `${examples}${name}/project.json`;
     const cli = capture();
-    expect(await run(["validate", path], cli.io)).toBe(ExitCode.OK);
-    expect(cli.stdout()).toBe(`${path}: valid (format 1.3.0)\n`);
+    expect(await run(["validate", path, "--no-fhir"], cli.io)).toBe(ExitCode.OK);
+    expect(cli.stdout()).toBe(
+      `${path}: valid (format 1.3.0)\n  note: FHIR checks skipped (--no-fhir)\n`,
+    );
     expect(cli.stderr()).toBe("");
   });
 
@@ -61,10 +68,10 @@ describe("cindermed validate", () => {
     second.code = first.code;
     const cli = capture({ "broken.json": JSON.stringify(project) });
 
-    expect(await run(["validate", "broken.json"], cli.io)).toBe(ExitCode.INVALID);
+    expect(await run(["validate", "broken.json", "--no-fhir"], cli.io)).toBe(ExitCode.INVALID);
     const lines = cli.stdout().trimEnd().split("\n");
     expect(lines[0]).toBe("broken.json: 1 error");
-    expect(lines[1]).toMatch(/^ {2}error DUPLICATE_ROW_CODE mapping \S+ \(code\): /);
+    expect(lines[2]).toMatch(/^ {2}error DUPLICATE_ROW_CODE mapping \S+ \(code\): /);
   });
 
   it("reports text that is not JSON", async () => {
@@ -76,11 +83,14 @@ describe("cindermed validate", () => {
   it("writes a JSON report with --format json", async () => {
     const path = `${examples}motu/project.json`;
     const cli = capture();
-    expect(await run(["validate", path, "--format", "json"], cli.io)).toBe(ExitCode.OK);
+    expect(await run(["validate", path, "--format", "json", "--no-fhir"], cli.io)).toBe(
+      ExitCode.OK,
+    );
     expect(JSON.parse(cli.stdout())).toEqual({
       file: path,
       valid: true,
       formatVersion: "1.3.0",
+      fhir: { checks: "skipped", packages: [] },
       results: [],
     });
   });
@@ -88,9 +98,10 @@ describe("cindermed validate", () => {
   it("notes a project read from an older minor format", async () => {
     const project = JSON.parse(await exampleText("motu")) as Record<string, unknown>;
     const cli = capture({ "old.json": JSON.stringify({ ...project, formatVersion: "1.1.0" }) });
-    expect(await run(["validate", "old.json"], cli.io)).toBe(ExitCode.OK);
+    expect(await run(["validate", "old.json", "--no-fhir"], cli.io)).toBe(ExitCode.OK);
     expect(cli.stdout()).toBe(
-      "old.json: valid (format 1.3.0)\n  note: read as format 1.3.0 (file has 1.1.0)\n",
+      "old.json: valid (format 1.3.0)\n  note: read as format 1.3.0 (file has 1.1.0)\n" +
+        "  note: FHIR checks skipped (--no-fhir)\n",
     );
   });
 
@@ -105,6 +116,11 @@ describe("cindermed validate", () => {
     expect(report.valid).toBe(false);
     expect(report.migratedFrom).toBe("1.0.0");
     expect(report.results.length).toBeGreaterThan(0);
+    // The schema failed: the FHIR checks did not run, and no definitions were loaded.
+    expect((report as unknown as { fhir: unknown }).fhir).toEqual({
+      checks: "not run",
+      packages: [],
+    });
   });
 
   it("exits with 2 when the file cannot be read", async () => {
@@ -119,6 +135,169 @@ describe("cindermed validate", () => {
     const io: CliIo = { ...cli.io, readFile: () => Promise.reject(new Error("boom")) };
     expect(await run(["validate", "x.json"], io)).toBe(ExitCode.USAGE);
     expect(cli.stderr()).toBe("cindermed: cannot read x.json (read error)\n");
+  });
+});
+
+/** A StructureDefinition with a snapshot of these elements (path → extra fields). */
+function sd(name: string, kind: string, elements: Record<string, Record<string, unknown>>) {
+  return {
+    resourceType: "StructureDefinition",
+    id: name,
+    url: `http://hl7.org/fhir/StructureDefinition/${name}`,
+    name,
+    type: name,
+    kind,
+    abstract: false,
+    derivation: "specialization",
+    snapshot: {
+      element: Object.entries(elements).map(([path, fields]) => ({
+        id: path,
+        path,
+        min: 0,
+        max: "1",
+        ...fields,
+      })),
+    },
+  };
+}
+const typed = (...codes: string[]) => ({ type: codes.map((code) => ({ code })) });
+
+/**
+ * A small hl7.fhir.r4.core in a temporary FHIR package cache: just the elements the
+ * boolean-value-map example writes, so the real loader and checks run without the real package.
+ */
+async function syntheticCache(): Promise<string> {
+  const cache = await mkdtemp(join(tmpdir(), "cindermed-cli-fhir-"));
+  const folder = join(cache, "hl7.fhir.r4.core#4.0.1", "package");
+  await mkdir(folder, { recursive: true });
+  await writeFile(
+    join(folder, "package.json"),
+    JSON.stringify({ name: "hl7.fhir.r4.core", version: "4.0.1", fhirVersions: ["4.0.1"] }),
+  );
+  const definitions = [
+    ...["string", "code", "boolean", "uri"].map((p) => sd(p, "primitive-type", { [p]: {} })),
+    sd("Identifier", "complex-type", { Identifier: {}, "Identifier.value": typed("string") }),
+    sd("Coding", "complex-type", { Coding: {}, "Coding.code": typed("code") }),
+    sd("CodeableConcept", "complex-type", {
+      CodeableConcept: {},
+      "CodeableConcept.coding": { max: "*", ...typed("Coding") },
+    }),
+    sd("Reference", "complex-type", { Reference: {}, "Reference.reference": typed("string") }),
+    sd("Patient", "resource", {
+      Patient: {},
+      "Patient.identifier": { max: "*", ...typed("Identifier") },
+    }),
+    sd("Observation", "resource", {
+      Observation: {},
+      "Observation.status": typed("code"),
+      "Observation.code": typed("CodeableConcept"),
+      "Observation.subject": {
+        type: [
+          { code: "Reference", targetProfile: ["http://hl7.org/fhir/StructureDefinition/Patient"] },
+        ],
+      },
+      "Observation.value[x]": typed("boolean", "string"),
+    }),
+  ];
+  for (const definition of definitions)
+    await writeFile(
+      join(folder, `StructureDefinition-${definition.id}.json`),
+      JSON.stringify(definition),
+    );
+  return cache;
+}
+
+describe("cindermed validate, FHIR checks", () => {
+  let cache: string;
+  beforeAll(async () => {
+    cache = await syntheticCache();
+  });
+  afterAll(async () => {
+    await rm(cache, { recursive: true, force: true });
+  });
+  const visit = `${examples}boolean-value-map/project.json`;
+  const withLoader = (files: Readonly<Record<string, string>> = {}) => {
+    const cli = capture(files);
+    return { ...cli, io: { ...cli.io, loadDefinitions } };
+  };
+
+  it("checks the paths against the FHIR definitions, from the cache given", async () => {
+    const cli = withLoader();
+    expect(await run(["validate", visit, "--fhir-cache", cache, "--offline"], cli.io)).toBe(
+      ExitCode.OK,
+    );
+    expect(cli.stdout()).toBe(`${visit}: valid (format 1.3.0)\n`);
+    const json = withLoader();
+    expect(
+      await run(
+        ["validate", visit, "--fhir-cache", cache, "--offline", "--format", "json"],
+        json.io,
+      ),
+    ).toBe(ExitCode.OK);
+    expect((JSON.parse(json.stdout()) as { fhir: unknown }).fhir).toEqual({
+      checks: "done",
+      packages: ["hl7.fhir.r4.core#4.0.1"],
+    });
+  });
+
+  it("reports a path that is not in the definitions, and exits with 1", async () => {
+    const project = JSON.parse(await exampleText("boolean-value-map")) as {
+      mappings: { path: string }[];
+    };
+    const row = project.mappings[1];
+    if (row === undefined) throw new Error("the example needs a second row");
+    row.path = "valueBooleen";
+    const cli = withLoader({ "typo.json": JSON.stringify(project) });
+    expect(await run(["validate", "typo.json", "--fhir-cache", cache, "--offline"], cli.io)).toBe(
+      ExitCode.INVALID,
+    );
+    expect(cli.stdout()).toBe(
+      "typo.json: 1 error\n" +
+        "  error PATH_NOT_FOUND mapping map_0002 (path): R-002: Observation.valueBooleen: valueBooleen is not an element of Observation\n",
+    );
+  });
+
+  it("passes the project's FHIR version, packages and the options to the loader", async () => {
+    const project = JSON.parse(await exampleText("boolean-value-map")) as {
+      project: Record<string, unknown>;
+    };
+    project.project["packages"] = [{ name: "example.ig", version: "1.0.0" }];
+    const cli = capture({ "ig.json": JSON.stringify(project) });
+    const calls: unknown[] = [];
+    const io: CliIo = {
+      ...cli.io,
+      loadDefinitions: (...args) => {
+        calls.push(args);
+        return Promise.reject(new Error("example.ig#1.0.0 is not in the FHIR package cache"));
+      },
+    };
+    expect(await run(["validate", "ig.json", "--offline", "--fhir-cache", "/cache"], io)).toBe(
+      ExitCode.USAGE,
+    );
+    expect(calls).toEqual([
+      ["4.0.1", [{ id: "example.ig", version: "1.0.0" }], { offline: true, cacheDir: "/cache" }],
+    ]);
+    expect(cli.stderr()).toBe(
+      "cindermed: cannot load the FHIR definitions for ig.json: example.ig#1.0.0 is not in the FHIR package cache\n" +
+        "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n",
+    );
+    expect(cli.stdout()).toBe("");
+  });
+
+  it("downloads by default, and never loads definitions with --no-fhir", async () => {
+    const cli = capture();
+    const calls: unknown[] = [];
+    const io: CliIo = {
+      ...cli.io,
+      loadDefinitions: (...args) => {
+        calls.push(args);
+        return Promise.reject(new Error("offline"));
+      },
+    };
+    expect(await run(["validate", visit], io)).toBe(ExitCode.USAGE);
+    expect(calls).toEqual([["4.0.1", [], { offline: false }]]);
+    expect(await run(["validate", visit, "--no-fhir"], io)).toBe(ExitCode.OK);
+    expect(calls).toHaveLength(1);
   });
 });
 
@@ -233,6 +412,8 @@ describe("cindermed export", () => {
       "--created-at must be an ISO 8601 date-time",
     ],
     [["validate", "p.json", "--out", "x.zip"], "--out does not apply to validate"],
+    [["export", "p.json", "--offline"], "--offline does not apply to export"],
+    [["mapping-table", "p.json", "--no-fhir"], "--no-fhir does not apply to mapping-table"],
   ])("rejects %j", async (args, message) => {
     const cli = capture();
     expect(await run(args, cli.io)).toBe(ExitCode.USAGE);

@@ -4,12 +4,14 @@
  */
 import { parseArgs } from "node:util";
 import { exportPackage, mappingTables, toCsv, toXlsx } from "@cindermed/export";
+import { type PackageRef, validateFhir } from "@cindermed/fhir-defs";
 import {
   PROJECT_FORMAT_VERSION,
   type ValidationResult,
   isValid,
   parseProject,
 } from "@cindermed/model";
+import type { LoadedDefinitions, PackageOptions } from "./fhir-packages.js";
 
 /** Exit codes: 0 valid, 1 the project has errors, 2 the command could not run. */
 export const ExitCode = { OK: 0, INVALID: 1, USAGE: 2 } as const;
@@ -25,6 +27,12 @@ export interface CliIo {
   readonly now: () => Date;
   /** Version of the cindermed CLI, written as the generator of exported packages. */
   readonly version: string;
+  /** Loads the FHIR definitions of a FHIR version and packages (bin.ts: `loadDefinitions`). */
+  readonly loadDefinitions: (
+    fhirVersion: string,
+    packages: readonly PackageRef[],
+    options: PackageOptions,
+  ) => Promise<LoadedDefinitions>;
 }
 
 const FORMATS = ["text", "json"] as const;
@@ -34,7 +42,7 @@ type TableFormat = (typeof TABLE_FORMATS)[number];
 
 /** Options each command accepts (besides --help). */
 const COMMAND_OPTIONS = {
-  validate: ["format"],
+  validate: ["format", "no-fhir", "offline", "fhir-cache"],
   export: ["format", "out", "package-version", "created-at"],
   "mapping-table": ["format", "delimiter", "out", "created-at"],
 } as const;
@@ -47,7 +55,7 @@ function isCommand(value: string): value is Command {
 export const USAGE = `Usage: cindermed <command> [options]
 
 Commands:
-  validate <project.json>   Check a project file (schema, integrity and quality rules)
+  validate <project.json>   Check a project file (schema, integrity, FHIR and quality rules)
   export <project.json>     Write the export package (maps, logical models, normalization
                             specifications, ConceptMaps, schemas, manifest)
   mapping-table <project.json>
@@ -66,6 +74,9 @@ Options:
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
   --created-at <date-time>  export, mapping-table: date of the package or workbook, ISO 8601 with
                             time zone (default: now)
+  --no-fhir                 validate: skip the FHIR checks (paths against the FHIR definitions)
+  --offline                 validate: use only the FHIR package cache, never download a package
+  --fhir-cache <folder>     validate: the FHIR package cache (default: ~/.fhir/packages)
   -h, --help                Show this help
 
 Exit codes: 0 done, 1 the project has errors (nothing is written), 2 the command could not run.
@@ -100,27 +111,68 @@ async function readProject(path: string, io: CliIo): Promise<string | undefined>
   }
 }
 
-async function validate(path: string, format: Format, io: CliIo): Promise<ExitCode> {
+export interface FhirFlags {
+  /** `--no-fhir`: skip the FHIR checks. */
+  readonly skip: boolean;
+  readonly offline: boolean;
+  readonly cacheDir?: string;
+}
+
+type FhirStatus = "done" | "skipped" | "not run";
+
+async function validate(
+  path: string,
+  format: Format,
+  fhir: FhirFlags,
+  io: CliIo,
+): Promise<ExitCode> {
   const text = await readProject(path, io);
   if (text === undefined) return ExitCode.USAGE;
 
   const parsed = parseProject(text);
-  const valid = isValid(parsed.results);
+  const results: ValidationResult[] = [...parsed.results];
+  const project = parsed.project;
+  // The FHIR checks need a project that passed the schema; integrity errors do not stop them.
+  const status: FhirStatus = project === undefined ? "not run" : fhir.skip ? "skipped" : "done";
+  let packages: string[] = [];
+  if (project !== undefined && status === "done") {
+    let loaded: LoadedDefinitions;
+    try {
+      loaded = await io.loadDefinitions(
+        project.project.fhirVersion,
+        (project.project.packages ?? []).map((p) => ({ id: p.name, version: p.version })),
+        {
+          offline: fhir.offline,
+          ...(fhir.cacheDir === undefined ? {} : { cacheDir: fhir.cacheDir }),
+        },
+      );
+    } catch (error) {
+      io.stderr(
+        `cindermed: cannot load the FHIR definitions for ${path}: ${error instanceof Error ? error.message : String(error)}\n` +
+          "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n",
+      );
+      return ExitCode.USAGE;
+    }
+    packages = loaded.index.manifest.packages.map((p) => `${p.id}#${p.version}`);
+    results.push(...validateFhir(project, loaded.definitions));
+  }
+  const valid = isValid(results);
 
   if (format === "json") {
     const report = {
       file: path,
       valid,
-      formatVersion: parsed.project?.formatVersion,
+      formatVersion: project?.formatVersion,
       migratedFrom: parsed.migratedFrom,
-      results: parsed.results,
+      fhir: { checks: status, packages },
+      results,
     };
     io.stdout(`${JSON.stringify(report, null, 2)}\n`);
   } else {
-    const errors = parsed.results.filter((result) => result.severity === "error").length;
-    const warnings = parsed.results.length - errors;
+    const errors = results.filter((result) => result.severity === "error").length;
+    const warnings = results.length - errors;
     const summary = valid
-      ? `valid (format ${parsed.project?.formatVersion ?? PROJECT_FORMAT_VERSION})`
+      ? `valid (format ${project?.formatVersion ?? PROJECT_FORMAT_VERSION})`
       : plural(errors, "error");
     const extra = warnings > 0 ? `, ${plural(warnings, "warning")}` : "";
     const lines = [`${path}: ${summary}${extra}`];
@@ -129,7 +181,8 @@ async function validate(path: string, format: Format, io: CliIo): Promise<ExitCo
         `  note: read as format ${PROJECT_FORMAT_VERSION} (file has ${parsed.migratedFrom})`,
       );
     }
-    lines.push(...parsed.results.map(describeResult));
+    if (status === "skipped") lines.push("  note: FHIR checks skipped (--no-fhir)");
+    lines.push(...results.map(describeResult));
     io.stdout(`${lines.join("\n")}\n`);
   }
   return valid ? ExitCode.OK : ExitCode.INVALID;
@@ -286,6 +339,9 @@ function parseCommandLine(args: readonly string[]) {
       out: { type: "string" },
       "package-version": { type: "string" },
       "created-at": { type: "string" },
+      "no-fhir": { type: "boolean" },
+      offline: { type: "boolean" },
+      "fhir-cache": { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
@@ -364,7 +420,19 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
 
   const format = values.format ?? "text";
   if (!isFormat(format)) return usageError(`unknown format '${format}'`, io);
-  if (command === "validate") return validate(path, format, io);
+  if (command === "validate") {
+    const cacheDir = values["fhir-cache"];
+    return validate(
+      path,
+      format,
+      {
+        skip: values["no-fhir"] === true,
+        offline: values.offline === true,
+        ...(cacheDir === undefined ? {} : { cacheDir }),
+      },
+      io,
+    );
+  }
   if (flags.packageVersion !== undefined && !SEMVER.test(flags.packageVersion)) {
     return usageError(
       `--package-version must be a version such as 1.2.0, not '${flags.packageVersion}'`,
