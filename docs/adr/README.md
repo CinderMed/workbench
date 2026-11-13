@@ -18,4 +18,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0010](0010-reference-normalizer.md)                         | Reference normalizer                             | accepted |
 | [0011](0011-generator-map-structure.md)                      | Generator map structure                          | accepted |
 | [0012](0012-export-package.md)                               | Export package                                   | accepted |
-| [0013](0013-fhir-definition-index.md)                        | FHIR definition index                            | proposed |
+| [0013](0013-fhir-definition-index.md)                        | FHIR definition index                            | accepted |
