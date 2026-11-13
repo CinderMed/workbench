@@ -1,5 +1,14 @@
 # @cindermed/export
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [db6c645]
+- Updated dependencies [568b998]
+  - @cindermed/model@0.4.0
+  - @cindermed/fml@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
