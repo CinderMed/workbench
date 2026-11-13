@@ -35,6 +35,7 @@ export type { ExportManifest } from "./generated/manifest.js";
 export type * as Manifest from "./generated/manifest.js";
 
 export { IntegrityCode, MAX_ID_LENGTH, checkIntegrity, idLength } from "./integrity/index.js";
+export { rowValueMaps } from "./integrity/project-index.js";
 export { QualityCode, checkQuality } from "./quality/index.js";
 export {
   FALSE_VALUES,

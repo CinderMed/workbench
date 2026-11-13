@@ -106,3 +106,28 @@ This addendum revises rule 6 again (#91) and extends rule 9. All results are err
 - A `boolean` column used by a value map needs no allowed values: the normalization already accepts only the canonical forms. When it has a list, the coverage rule applies to it too.
 - **Empty list, `ALLOWED_VALUES_EMPTY`** (rule 9, objectKind `column`, field `allowedValues`). A `categorical` or `multipleChoice` column with `allowedValues: []`, or with only values that are also missing values, has no list left for the normalization, and an empty list would reject every value. The normalization schema 1.2.0 requires at least one allowed value, and the generator refuses to write an empty list.
 - The consequence "Revisit rule 6 if real projects need value maps shared by columns with different allowed values" still holds. A shared map must now cover the allowed values of every column that uses it.
+
+## Addendum (2026-11-13): the FHIR half of rules 4 and 8 (D7, module 3)
+
+The FHIR half of rules 4 and 8 is implemented in `validateFhir(project, defs)` in `@cindermed/fhir-defs`. Path resolution is decided in ADR-0014. The checks run on definitions of the project's FHIR version that have every document they need loaded. In the browser, `loadProjectDefinitions` loads those documents first.
+
+- **Which paths.** The uses rule 4 lists: mapping rows, fixed values, and the elements set by value actions (`setElement`, and `also` on `use`) in the role of each row that uses the map. Also checked: each declared slice (`path[name]`) and each of its discriminator paths.
+- **Rule 4.** A path must resolve in the role's profile, or else in its resource type: `PATH_NOT_FOUND`, `CHOICE_TYPE_REQUIRED`, `SLICE_NOT_REPEATING`, `EXTENSION_NOT_SUPPORTED`, `PATH_PROHIBITED`.
+- **Rule 8.** With `repeat: eachValue`, the element at the **end** of the path must repeat (`REPEAT_TARGET_NOT_REPEATING`, field `repeat`). The generator writes one repetition of that element per value. A repeating ancestor is not enough, because each value would otherwise overwrite the same single-valued element.
+- **Roles.**
+  - `RESOURCE_TYPE_UNKNOWN`: the type is not a resource type of the version. That role's paths are not checked.
+  - `PROFILE_UNKNOWN`: the profile is not in the core package or the listed packages.
+  - `PROFILE_TYPE_MISMATCH`: the profile does not constrain the role's type.
+
+  With an unknown or mismatched profile, the paths are still checked, on the base resource type.
+
+- **Reported once.** A value-map path used by several rows of the same role is reported once, on the value map.
+- **Missing definitions.** A definition that is not loaded gives `DEFINITION_NOT_LOADED`. A check is never skipped silently.
+- **Other version.** Definitions of another FHIR version give one `FHIR_VERSION_MISMATCH` and nothing else.
+- **`cindermed validate`.**
+  - It runs the FHIR level whenever the schema passes, even with integrity errors.
+  - It loads the core package and `project.packages`. The options are `--offline` (never download), `--fhir-cache <folder>` and `--no-fhir` (skip, with a note in the output).
+  - Definitions that cannot be loaded stop the command with exit code 2, because the project's validity is then unknown.
+  - The JSON report records `fhir.checks` (`done`, `skipped`, `not run`) and the packages read.
+- **Not yet.** `cindermed export` does not run the FHIR level yet. It joins with type compatibility (D7, next branch), whose errors block the export as the specification says.
+- **Rule 5** (reference targets, `perValue` sources) is F4, a later branch.

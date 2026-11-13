@@ -37,3 +37,4 @@ export {
   parseManifest,
   parseTypeDocument,
 } from "./index-format.js";
+export { FhirCode, loadProjectDefinitions, validateFhir } from "./validate-fhir.js";

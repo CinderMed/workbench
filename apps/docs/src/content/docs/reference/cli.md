@@ -21,15 +21,26 @@ Relative paths are resolved from the repository root.
 
 ```text
 cindermed validate <project.json> [--format text|json]
+                   [--offline] [--fhir-cache <folder>] [--no-fhir]
 ```
 
-Reads a [project file](/workbench/reference/project-file/) and runs three levels of project validation:
+Reads a [project file](/workbench/reference/project-file/) and runs four levels of project validation:
 
 1. **Schema**: the file matches the project JSON Schema.
 2. **Integrity**: the nine rules the schema cannot express (unique ids, internal references, `via` relations, value map values, resource id length, `repeat`, allowed values that fit the column type). They run only when the schema check passes.
-3. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
+3. **FHIR**: the project against the FHIR definitions of its version (R4 4.0.1 or R5 5.0.0) and of the packages it lists. It runs only when the schema check passes. It checks:
+   - every role's resource type and profile;
+   - every path the project writes (mapping rows, fixed values, elements set by value maps, declared slices and their discriminators), in the role's resource or profile:
+     - `PATH_NOT_FOUND`: no such element;
+     - `CHOICE_TYPE_REQUIRED`: `value` instead of `valueQuantity`;
+     - `SLICE_NOT_REPEATING`: a named slice on an element that does not repeat;
+     - `EXTENSION_NOT_SUPPORTED`;
+     - `PATH_PROHIBITED`: an element the profile forbids;
+   - that `repeat: eachValue` writes to a repeating element (`REPEAT_TARGET_NOT_REPEATING`).
 
-The FHIR checks (paths, types, cardinality) come in a later version.
+   Type compatibility, bindings and references are added later in this version series.
+
+4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 
 A valid project prints one line:
 
@@ -45,7 +56,21 @@ broken.json: 1 error
   error DUPLICATE_ROW_CODE mapping map_02 (code): row code R-001 is already used by map_01
 ```
 
-The codes are stable, so scripts can rely on them.
+The codes are stable, so scripts can rely on them. A path that does not exist in the role's resource:
+
+```text
+typo.json: 1 error
+  error PATH_NOT_FOUND mapping map_0002 (path): R-002: Observation.valueBooleen: valueBooleen is not an element of Observation
+```
+
+### FHIR packages
+
+The FHIR checks read the core package of the project's FHIR version (`hl7.fhir.r4.core` 4.0.1 or `hl7.fhir.r5.core` 5.0.0) and the packages in `project.packages`, with their dependencies.
+
+- **Where they come from.** They are read from the FHIR package cache, `~/.fhir/packages`, the folder the HL7 validator and other FHIR tools share. A package that is not there is downloaded once from packages.fhir.org (about 13 MB for R4, 17 MB for R5) and checked against its checksum.
+- **`--offline`.** Never downloads: a package missing from the cache stops the command with exit code 2.
+- **`--fhir-cache <folder>`.** Uses another cache, for example one prepared for a CI job or a machine without internet access.
+- **`--no-fhir`.** Skips the FHIR checks and says so in the output. The project is then checked by the schema, integrity and quality levels only.
 
 ### JSON output
 
@@ -56,11 +81,12 @@ The codes are stable, so scripts can rely on them.
   "file": "fixtures/fml-examples/motu/project.json",
   "valid": true,
   "formatVersion": "1.3.0",
+  "fhir": { "checks": "done", "packages": ["hl7.fhir.r4.core#4.0.1"] },
   "results": []
 }
 ```
 
-Each item of `results` has the fields `severity`, `code`, `objectKind`, `id`, `field` and `message`. The report also has `migratedFrom` when the file was written in an older format.
+Each item of `results` has the fields `severity`, `code`, `objectKind`, `id`, `field` and `message`. `fhir.checks` is `done`, `skipped` (`--no-fhir`) or `not run` (the schema check failed), and `fhir.packages` lists the packages the checks read. The report also has `migratedFrom` when the file was written in an older format.
 
 ## `cindermed export`
 
@@ -134,8 +160,8 @@ The project must match the schema. A project with integrity errors or quality wa
 
 ## Exit codes
 
-| Code | Meaning                                                                                            |
-| ---- | -------------------------------------------------------------------------------------------------- |
-| 0    | The project is valid (`validate`), or the package or table was written (`export`, `mapping-table`) |
-| 1    | The project has errors, including a file that is not JSON; `export` writes nothing                 |
-| 2    | The command could not run: wrong arguments, or a file it cannot read or write                      |
+| Code | Meaning                                                                                                                  |
+| ---- | ------------------------------------------------------------------------------------------------------------------------ |
+| 0    | The project is valid (`validate`), or the package or table was written (`export`, `mapping-table`)                       |
+| 1    | The project has errors, including a file that is not JSON; `export` writes nothing                                       |
+| 2    | The command could not run: wrong arguments, a file it cannot read or write, or (`validate`) FHIR packages it cannot load |
