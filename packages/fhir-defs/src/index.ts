@@ -3,6 +3,19 @@ export const packageName = "@cindermed/fhir-defs";
 
 export { buildIndex, type BuiltIndex, type PackageContents } from "./build-index.js";
 export { CORE_PACKAGES, type CorePackage, corePackage, findCorePackage } from "./core-packages.js";
+export {
+  type PathIssue,
+  type PathIssueCode,
+  type PathResult,
+  type ReferenceTargets,
+  type ResolvedElement,
+  type ResolvedSegment,
+  type TreeNode,
+  elementTree,
+  referenceTargets,
+  resolvePath,
+  withDefinitions,
+} from "./element-tree.js";
 export { FhirDefinitions, type IndexFetch, indexId } from "./definitions.js";
 export {
   INDEX_FORMAT_VERSION,
