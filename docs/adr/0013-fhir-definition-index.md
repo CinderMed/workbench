@@ -1,6 +1,6 @@
 # ADR-0013: FHIR definitions: package cache and compact definition index
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-11-12
 - Module: 3 (FHIR definitions and validation)
 
@@ -99,3 +99,19 @@ No document may exceed 64 KiB (tested on the core packages). Opening the path pi
 - Profiles without a snapshot cannot be used. If projects need IGs published without snapshots, snapshot generation is a new decision.
 - A new FHIR version needs a new `CORE_PACKAGES` entry with its tarball digest.
 - Revisit the element fields if the path picker needs more than `short` (for example `definition` on demand). That would be a minor format version, or a separate document type.
+
+## Addendum (2026-11-13): limits on downloads and tarballs (#145)
+
+A package comes from the network and is written to disk, so the loader trusts neither its size nor its content.
+
+- **Entry types.** Before anything is written, one streaming pass checks every entry of the tarball, inside `package/` or not:
+  - Only regular files and directories are allowed. A symbolic link, hard link, device, FIFO or any other entry type is refused, and the error names the entry and its type.
+  - So is an absolute path or a path with a `..` segment.
+  - The extraction filter repeats the type check as a second guard.
+- **Sizes.**
+  - **Download:** at most 100 MB per request, checked on `Content-Length` and again while the body streams in.
+  - **Extracted:** the entries of a tarball may add up to at most 500 MB. The check stops at the first entry past the limit, so an oversized archive (a gzip bomb) is never decompressed in full.
+  - The largest package the workbench uses, `hl7.fhir.r5.core`, is 17.1 MB compressed and about 93 MB extracted.
+- **Time.** Every registry request (metadata and tarball, body included) has a timeout, 120 s by default, through `AbortSignal.timeout`. The error says which URL did not answer in time.
+- The limits are options (`PackageOptions.limits`), so the API can set its own. A refused package leaves nothing in the cache.
+- Cost: the check reads the tarball once more before extraction, so installing a core package takes about 10 s instead of 6 s, once per machine.

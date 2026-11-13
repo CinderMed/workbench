@@ -1,10 +1,12 @@
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { link, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { gzipSync } from "node:zlib";
 import { c as create } from "tar";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  type PackageOptions,
   PackageError,
   loadDefinitions,
   packageFolder,
@@ -95,7 +97,10 @@ function registry(packages: Record<string, Uint8Array>, overrides: Record<string
     asked.push(url);
     const path = url.replace("https://packages.fhir.org/", "");
     const tgz = packages[decodeURIComponent(path)];
-    if (tgz !== undefined) return Promise.resolve(new Response(tgz));
+    if (tgz !== undefined)
+      return Promise.resolve(
+        new Response(tgz, { headers: { "content-length": String(tgz.length) } }),
+      );
     const [id] = path.split("/");
     const versions: Record<string, { dist: { shasum: string } }> = {};
     for (const [key, bytes] of Object.entries(packages)) {
@@ -323,5 +328,192 @@ describe("loadDefinitions", () => {
         offline: true,
       }),
     ).rejects.toThrow("package r5.ig#1.0.0 is for FHIR 5.0.0, not 4.0.1");
+  });
+});
+
+/**
+ * A gzipped tarball written header by header (ustar), for entries `tar.c` will not create:
+ * devices, FIFOs, `..` and absolute paths. `type` is the ustar type flag.
+ */
+function rawTarball(entries: { path: string; type: string; data?: string }[]): Uint8Array {
+  const blocks: Buffer[] = [];
+  const field = (header: Buffer, offset: number, length: number, value: string) => {
+    header.write(value.slice(0, length), offset, "latin1");
+  };
+  for (const entry of entries) {
+    const data = Buffer.from(entry.data ?? "", "utf8");
+    const header = Buffer.alloc(512);
+    field(header, 0, 100, entry.path);
+    field(header, 100, 8, "0000644\0");
+    field(header, 108, 8, "0000000\0");
+    field(header, 116, 8, "0000000\0");
+    field(header, 124, 12, `${data.length.toString(8).padStart(11, "0")}\0`);
+    field(header, 136, 12, "00000000000\0");
+    field(header, 148, 8, "        ");
+    field(header, 156, 1, entry.type);
+    field(header, 257, 6, "ustar\0");
+    field(header, 263, 2, "00");
+    let sum = 0;
+    for (const byte of header) sum += byte;
+    field(header, 148, 8, `${sum.toString(8).padStart(6, "0")}\0 `);
+    blocks.push(header, data, Buffer.alloc((512 - (data.length % 512)) % 512));
+  }
+  blocks.push(Buffer.alloc(1024));
+  return new Uint8Array(gzipSync(Buffer.concat(blocks)));
+}
+
+const ig = { id: "example.ig", version: "1.0.0" };
+const PACKAGE_JSON = JSON.stringify({
+  name: "example.ig",
+  version: "1.0.0",
+  fhirVersions: ["4.0.1"],
+});
+
+describe("package tarballs are checked before extraction", () => {
+  async function refused(
+    tgz: Uint8Array,
+    message: string | RegExp,
+    options: Partial<PackageOptions> = {},
+  ) {
+    const { fetch } = registry({ "example.ig/1.0.0": tgz });
+    await expect(packageFolder(ig, { cacheDir: cache, fetch, ...options })).rejects.toThrow(
+      message,
+    );
+    // Nothing is extracted: no package, no temporary folder.
+    expect(await readdir(cache)).toEqual([]);
+  }
+
+  it("refuses symbolic links", async () => {
+    const source = join(work, "with-symlink");
+    await writeFiles(join(source, "package"), { "package.json": PACKAGE_JSON });
+    await symlink("/etc/passwd", join(source, "package", "passwd.json"));
+    const file = join(work, "symlink.tgz");
+    await create({ gzip: true, cwd: source, file, portable: true }, ["package"]);
+    await refused(
+      new Uint8Array(await readFile(file)),
+      "example.ig#1.0.0: the tarball contains package/passwd.json, a SymbolicLink entry; only files and folders are allowed",
+    );
+  });
+
+  it("refuses hard links", async () => {
+    const source = join(work, "with-link");
+    await writeFiles(join(source, "package"), { "package.json": PACKAGE_JSON, "a.json": "{}" });
+    await link(join(source, "package", "a.json"), join(source, "package", "b.json"));
+    const file = join(work, "link.tgz");
+    await create({ gzip: true, cwd: source, file, portable: true }, ["package"]);
+    await refused(
+      new Uint8Array(await readFile(file)),
+      /a Link entry; only files and folders are allowed/,
+    );
+  });
+
+  it.each([
+    ["a character device", "3", "CharacterDevice"],
+    ["a block device", "4", "BlockDevice"],
+    ["a FIFO", "6", "FIFO"],
+  ])("refuses %s, even outside package/", async (_name, type, typeName) => {
+    await refused(
+      rawTarball([
+        { path: "package/package.json", type: "0", data: PACKAGE_JSON },
+        { path: "other/dev", type },
+      ]),
+      `example.ig#1.0.0: the tarball contains other/dev, a ${typeName} entry; only files and folders are allowed`,
+    );
+  });
+
+  it.each(["package/../../escape.json", "/tmp/escape.json"])(
+    "refuses the path %s",
+    async (path) => {
+      await refused(
+        rawTarball([
+          { path: "package/package.json", type: "0", data: PACKAGE_JSON },
+          { path, type: "0", data: "{}" },
+        ]),
+        `example.ig#1.0.0: the tarball contains a path outside its folder (${path})`,
+      );
+    },
+  );
+
+  it("refuses a tarball larger than the extraction limit once extracted", async () => {
+    await refused(
+      rawTarball([
+        { path: "package/package.json", type: "0", data: PACKAGE_JSON },
+        { path: "package/big.json", type: "0", data: "x".repeat(4000) },
+      ]),
+      "example.ig#1.0.0: the tarball is larger than the extraction limit (0 MB) once extracted",
+      { limits: { maxExtractedBytes: 2000 } },
+    );
+  });
+
+  it("refuses a truncated tarball", async () => {
+    const whole = rawTarball([
+      { path: "package/package.json", type: "0", data: PACKAGE_JSON },
+      { path: "package/a.json", type: "0", data: "y".repeat(3000) },
+    ]);
+    await refused(
+      whole.slice(0, Math.floor(whole.length / 2)),
+      /example\.ig#1\.0\.0: the tarball could not be read/,
+    );
+  });
+
+  it("extracts a valid raw tarball", async () => {
+    const { fetch } = registry({
+      "example.ig/1.0.0": rawTarball([
+        { path: "package/", type: "5" },
+        { path: "package/package.json", type: "0", data: PACKAGE_JSON },
+      ]),
+    });
+    const folder = await packageFolder(ig, { cacheDir: cache, fetch });
+    expect(await readdir(folder)).toEqual(["package.json"]);
+  });
+});
+
+describe("registry requests have size and time limits", () => {
+  it("refuses a download larger than the limit, by Content-Length or while streaming", async () => {
+    const tgz = await tarball(packageFiles("example.ig", "1.0.0", {}));
+    const declared = registry({ "example.ig/1.0.0": tgz });
+    const limits = { maxDownloadBytes: tgz.length - 1 };
+    await expect(
+      packageFolder(ig, { cacheDir: cache, fetch: declared.fetch, limits }),
+    ).rejects.toThrow(
+      "example.ig#1.0.0: https://packages.fhir.org/example.ig/1.0.0 is larger than the download limit (0 MB)",
+    );
+    // A server that sends no Content-Length: the body is counted as it streams.
+    const streaming: typeof globalThis.fetch = async (input, init) => {
+      const response = await declared.fetch(input, init);
+      const body = new Uint8Array(await response.arrayBuffer());
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (let i = 0; i < body.length; i += 100) controller.enqueue(body.slice(i, i + 100));
+          controller.close();
+        },
+      });
+      return new Response(stream, { status: response.status });
+    };
+    await expect(packageFolder(ig, { cacheDir: cache, fetch: streaming, limits })).rejects.toThrow(
+      "is larger than the download limit (0 MB)",
+    );
+    expect(await readdir(cache)).toEqual([]);
+  });
+
+  it("gives up on a registry that does not answer in time", async () => {
+    const silent: typeof globalThis.fetch = (_input, init) =>
+      new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(init.signal?.reason instanceof Error ? init.signal.reason : new Error("aborted"));
+        });
+      });
+    await expect(
+      packageFolder(ig, { cacheDir: cache, fetch: silent, limits: { requestTimeoutMs: 50 } }),
+    ).rejects.toThrow(
+      "example.ig#1.0.0: https://packages.fhir.org/example.ig did not answer within 0.05 s",
+    );
+  });
+
+  it("refuses registry metadata that is not JSON", async () => {
+    const html: typeof globalThis.fetch = () => Promise.resolve(new Response("<html>"));
+    await expect(packageFolder(ig, { cacheDir: cache, fetch: html })).rejects.toThrow(
+      "example.ig#1.0.0: https://packages.fhir.org/example.ig did not answer with JSON",
+    );
   });
 });

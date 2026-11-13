@@ -24,7 +24,7 @@ import {
   corePackage,
   findCorePackage,
 } from "@cindermed/fhir-defs";
-import { x as extract } from "tar";
+import { Parser, type ReadEntry, x as extract } from "tar";
 
 export const DEFAULT_REGISTRY = "https://packages.fhir.org";
 
@@ -37,7 +37,38 @@ export interface PackageOptions {
   readonly registry?: string;
   /** The fetch function (tests pass their own). Default: the global fetch. */
   readonly fetch?: typeof globalThis.fetch;
+  /** Limits on downloads and extraction. Default: {@link DEFAULT_LIMITS}. */
+  readonly limits?: Partial<PackageLimits>;
 }
+
+export interface PackageLimits {
+  /** Largest package tarball (or registry answer) downloaded, in bytes. */
+  readonly maxDownloadBytes: number;
+  /** Largest total size of the entries of a tarball, in bytes: the extracted size at most. */
+  readonly maxExtractedBytes: number;
+  /** Time allowed for each registry request, headers and body, in milliseconds. */
+  readonly requestTimeoutMs: number;
+}
+
+/**
+ * Generous for the largest package the workbench uses: hl7.fhir.r5.core 5.0.0 is 17.1 MB
+ * compressed and about 93 MB extracted (ADR-0013).
+ */
+export const DEFAULT_LIMITS: PackageLimits = {
+  maxDownloadBytes: 100 * 1024 * 1024,
+  maxExtractedBytes: 500 * 1024 * 1024,
+  requestTimeoutMs: 120_000,
+};
+
+/** Entry types that may appear in a package tarball: regular files and directories only. */
+const ALLOWED_ENTRY_TYPES: ReadonlySet<string> = new Set([
+  "File",
+  "OldFile",
+  "ContiguousFile",
+  "Directory",
+]);
+
+const megabytes = (bytes: number) => `${String(Math.round((bytes / 1024 / 1024) * 10) / 10)} MB`;
 
 /** A package could not be found, downloaded, checked or read. */
 export class PackageError extends Error {
@@ -71,23 +102,27 @@ export async function packageFolder(
     throw new PackageError(
       `${label(ref)} is not in the FHIR package cache (${cacheDir}) and downloads are off`,
     );
-  const tarball = await download(ref, options);
-  await install(tarball, folder, cacheDir);
+  const limits = { ...DEFAULT_LIMITS, ...options.limits };
+  const tarball = await download(ref, options, limits);
+  await install(tarball, folder, cacheDir, limits, label(ref));
   return join(folder, "package");
 }
 
-async function download(ref: PackageRef, options: PackageOptions): Promise<Uint8Array> {
+async function download(
+  ref: PackageRef,
+  options: PackageOptions,
+  limits: PackageLimits,
+): Promise<Uint8Array> {
   const fetch = options.fetch ?? globalThis.fetch;
   const registry = (options.registry ?? DEFAULT_REGISTRY).replace(/\/+$/, "");
   const core = findCorePackage(ref.id, ref.version);
   // The expected digest: pinned for the core packages, from the registry for the others.
   const expected =
     core === undefined
-      ? { algorithm: "sha1", digest: await registryShasum(ref, registry, fetch) }
+      ? { algorithm: "sha1", digest: await registryShasum(ref, registry, fetch, limits) }
       : { algorithm: "sha256", digest: core.tarballSha256 };
   const url = `${registry}/${encodeURIComponent(ref.id)}/${encodeURIComponent(ref.version)}`;
-  const response = await fetchOrFail(fetch, url, label(ref));
-  const bytes = new Uint8Array(await response.arrayBuffer());
+  const bytes = await fetchBytes(fetch, url, label(ref), limits);
   const actual = createHash(expected.algorithm).update(bytes).digest("hex");
   if (actual !== expected.digest)
     throw new PackageError(
@@ -100,13 +135,16 @@ async function registryShasum(
   ref: PackageRef,
   registry: string,
   fetch: typeof globalThis.fetch,
+  limits: PackageLimits,
 ): Promise<string> {
-  const response = await fetchOrFail(
-    fetch,
-    `${registry}/${encodeURIComponent(ref.id)}`,
-    label(ref),
-  );
-  const metadata: unknown = await response.json();
+  const url = `${registry}/${encodeURIComponent(ref.id)}`;
+  const bytes = await fetchBytes(fetch, url, label(ref), limits);
+  let metadata: unknown;
+  try {
+    metadata = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    throw new PackageError(`${label(ref)}: ${url} did not answer with JSON`);
+  }
   const shasum = (metadata as { versions?: Record<string, { dist?: { shasum?: unknown } }> })
     .versions?.[ref.version]?.dist?.shasum;
   if (typeof shasum !== "string" || !/^[0-9a-f]{40}$/.test(shasum))
@@ -114,31 +152,145 @@ async function registryShasum(
   return shasum;
 }
 
-async function fetchOrFail(
+/**
+ * Downloads a URL within the time and size limits. The timeout covers the whole request, body
+ * included; the size is checked on `Content-Length` and again while the body streams in.
+ */
+async function fetchBytes(
   fetch: typeof globalThis.fetch,
   url: string,
   what: string,
-): Promise<Response> {
+  limits: PackageLimits,
+): Promise<Uint8Array> {
+  const signal = AbortSignal.timeout(limits.requestTimeoutMs);
+  const failed = (error: unknown): PackageError =>
+    error instanceof PackageError
+      ? error
+      : signal.aborted
+        ? new PackageError(
+            `${what}: ${url} did not answer within ${String(limits.requestTimeoutMs / 1000)} s`,
+          )
+        : new PackageError(
+            `${what}: ${url} could not be reached (${error instanceof Error ? error.message : String(error)})`,
+          );
+  const tooLarge = () =>
+    new PackageError(
+      `${what}: ${url} is larger than the download limit (${megabytes(limits.maxDownloadBytes)})`,
+    );
   let response: Response;
   try {
-    response = await fetch(url);
+    response = await fetch(url, { signal });
   } catch (error) {
-    throw new PackageError(
-      `${what}: ${url} could not be reached (${error instanceof Error ? error.message : String(error)})`,
-    );
+    throw failed(error);
   }
   if (!response.ok) throw new PackageError(`${what}: ${url} answered ${String(response.status)}`);
-  return response;
+  const declared = Number(response.headers.get("content-length") ?? "0");
+  if (declared > limits.maxDownloadBytes) {
+    await response.body?.cancel();
+    throw tooLarge();
+  }
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    const reader = response.body?.getReader();
+    for (;;) {
+      if (reader === undefined) break;
+      const read = await reader.read();
+      if (read.done) break;
+      const chunk: unknown = read.value;
+      if (!(chunk instanceof Uint8Array)) throw new PackageError(`${what}: ${url} sent no bytes`);
+      total += chunk.byteLength;
+      if (total > limits.maxDownloadBytes) {
+        await reader.cancel();
+        throw tooLarge();
+      }
+      chunks.push(chunk);
+    }
+  } catch (error) {
+    throw failed(error);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+/**
+ * Checks every entry of a tarball before anything is written: only regular files and
+ * directories, relative paths without `..`, and a total size within the limit. The check stops
+ * at the first problem, so an oversized archive is never decompressed in full.
+ */
+async function inspect(tarball: Uint8Array, what: string, limits: PackageLimits): Promise<void> {
+  let total = 0;
+  let problem: PackageError | undefined;
+  const parser = new Parser({
+    onReadEntry: (entry: ReadEntry) => {
+      if (problem === undefined) {
+        const path = entry.path;
+        if (!ALLOWED_ENTRY_TYPES.has(entry.type))
+          problem = new PackageError(
+            `${what}: the tarball contains ${path}, a ${entry.type} entry; only files and folders are allowed`,
+          );
+        else if (
+          path.startsWith("/") ||
+          /^[A-Za-z]:/.test(path) ||
+          path.split(/[\\/]/).includes("..")
+        )
+          problem = new PackageError(
+            `${what}: the tarball contains a path outside its folder (${path})`,
+          );
+        else {
+          total += entry.size;
+          if (total > limits.maxExtractedBytes)
+            problem = new PackageError(
+              `${what}: the tarball is larger than the extraction limit (${megabytes(limits.maxExtractedBytes)}) once extracted`,
+            );
+        }
+        if (problem !== undefined) parser.abort(problem);
+      }
+      entry.resume();
+    },
+  });
+  await new Promise<void>((resolve, reject) => {
+    parser.on("abort", () => {
+      reject(problem ?? new PackageError(`${what}: the tarball could not be read`));
+    });
+    parser.on("error", (error: unknown) => {
+      reject(
+        problem ?? new PackageError(`${what}: the tarball could not be read (${String(error)})`),
+      );
+    });
+    parser.on("end", () => {
+      if (problem === undefined) resolve();
+      else reject(problem);
+    });
+    parser.end(Buffer.from(tarball));
+  });
 }
 
 /** Extracts the `package/` folder of a tarball into a temporary folder, then renames it into place. */
-async function install(tarball: Uint8Array, folder: string, cacheDir: string): Promise<void> {
+async function install(
+  tarball: Uint8Array,
+  folder: string,
+  cacheDir: string,
+  limits: PackageLimits,
+  what: string,
+): Promise<void> {
+  await inspect(tarball, what, limits);
   const temporary = join(cacheDir, `.cindermed-${randomUUID()}`);
   await mkdir(temporary, { recursive: true });
   try {
+    // inspect() has checked every entry; the filter repeats the type check as a second guard.
     await pipeline(
       Readable.from([tarball]),
-      extract({ cwd: temporary, filter: (path) => path.startsWith("package/") }),
+      extract({
+        cwd: temporary,
+        filter: (path, entry) =>
+          path.startsWith("package/") && "type" in entry && ALLOWED_ENTRY_TYPES.has(entry.type),
+      }),
     );
     if (!(await exists(join(temporary, "package", "package.json"))))
       throw new PackageError(`${folder}: the tarball has no package/package.json`);
