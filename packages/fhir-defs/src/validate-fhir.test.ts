@@ -3,7 +3,17 @@ import { describe, expect, it } from "vitest";
 import { buildIndex } from "./build-index.js";
 import { FhirDefinitions } from "./definitions.js";
 import { FHIR, r4Paths } from "./test-support/synthetic-packages.js";
+import { TypeCode } from "./type-compat.js";
 import { FhirCode, loadProjectDefinitions, validateFhir } from "./validate-fhir.js";
+
+/**
+ * The path findings only. These tests copy one string column everywhere, which the type checks
+ * (type-compat.test.ts) rightly flag; here only the paths matter.
+ */
+function paths(results: ReturnType<typeof validateFhir>) {
+  const types: readonly string[] = Object.values(TypeCode);
+  return results.filter((r) => !types.includes(r.code));
+}
 
 function definitions(loaded = true) {
   const index = buildIndex("4.0.1", [r4Paths()]);
@@ -102,7 +112,7 @@ describe("validateFhir", () => {
       ],
       valueMaps: [valueMap],
     });
-    expect(validateFhir(ok, defs)).toEqual([]);
+    expect(paths(validateFhir(ok, defs))).toEqual([]);
   });
 
   it.each([
@@ -127,15 +137,17 @@ describe("validateFhir", () => {
       "R-001: Observation.valueQuantity.extension: extension: extensions cannot be mapped",
     ],
   ])("reports the row path %s as %s", (path, code, message) => {
-    expect(validateFhir(project({ mappings: [row(1, path)] }), defs)).toEqual([
+    expect(paths(validateFhir(project({ mappings: [row(1, path)] }), defs))).toEqual([
       { severity: "error", code, objectKind: "mapping", id: "map_1", field: "path", message },
     ]);
   });
 
   it("reports repeat eachValue towards an element that does not repeat (rule 8)", () => {
-    const results = validateFhir(
-      project({ mappings: [row(1, "status", { repeat: { kind: "eachValue" } })] }),
-      defs,
+    const results = paths(
+      validateFhir(
+        project({ mappings: [row(1, "status", { repeat: { kind: "eachValue" } })] }),
+        defs,
+      ),
     );
     expect(results).toEqual([
       {
@@ -151,29 +163,31 @@ describe("validateFhir", () => {
   });
 
   it("checks fixed values, slice declarations and their discriminators on the role (rule 4)", () => {
-    const results = validateFhir(
-      project({
-        instances: [
-          observation({
-            fixedValues: [{ path: "stat", value: status }],
-            slices: [
-              {
-                id: "s1",
-                path: "code",
-                name: "one",
-                discriminator: [{ path: "text", value: { type: "string", value: "x" } }],
-              },
-              {
-                id: "s2",
-                path: "component",
-                name: "two",
-                discriminator: [{ path: "kode", value: { type: "string", value: "x" } }],
-              },
-            ],
-          }),
-        ],
-      }),
-      defs,
+    const results = paths(
+      validateFhir(
+        project({
+          instances: [
+            observation({
+              fixedValues: [{ path: "stat", value: status }],
+              slices: [
+                {
+                  id: "s1",
+                  path: "code",
+                  name: "one",
+                  discriminator: [{ path: "text", value: { type: "string", value: "x" } }],
+                },
+                {
+                  id: "s2",
+                  path: "component",
+                  name: "two",
+                  discriminator: [{ path: "kode", value: { type: "string", value: "x" } }],
+                },
+              ],
+            }),
+          ],
+        }),
+        defs,
+      ),
     );
     expect(results.map((r) => [r.code, r.objectKind, r.id, r.field])).toEqual([
       [FhirCode.SLICE_NOT_REPEATING, "instance", "ins_obs", "slices.0.path"],
@@ -202,12 +216,14 @@ describe("validateFhir", () => {
       ],
     };
     const used = { transform: { kind: "valueMap", valueMapId: "vm" } } as const;
-    const results = validateFhir(
-      project({
-        mappings: [row(1, "code.coding", used), row(2, "code.coding", used)],
-        valueMaps: [valueMap],
-      }),
-      defs,
+    const results = paths(
+      validateFhir(
+        project({
+          mappings: [row(1, "code.coding", used), row(2, "code.coding", used)],
+          valueMaps: [valueMap],
+        }),
+        defs,
+      ),
     );
     expect(results).toEqual([
       {
@@ -223,12 +239,14 @@ describe("validateFhir", () => {
   });
 
   it("resolves paths in the role's profile", () => {
-    const results = validateFhir(
-      project({
-        instances: [observation({ profile: `${FHIR}vitalsigns` })],
-        mappings: [row(1, "method"), row(2, "category[VSCat].coding")],
-      }),
-      defs,
+    const results = paths(
+      validateFhir(
+        project({
+          instances: [observation({ profile: `${FHIR}vitalsigns` })],
+          mappings: [row(1, "method"), row(2, "category[VSCat].coding")],
+        }),
+        defs,
+      ),
     );
     expect(results.map((r) => [r.code, r.id])).toEqual([[FhirCode.PATH_PROHIBITED, "map_1"]]);
     expect(results[0]?.message).toBe(
@@ -237,25 +255,32 @@ describe("validateFhir", () => {
   });
 
   it("checks the role's resource type and profile", () => {
-    const results = validateFhir(
-      project({
-        instances: [
-          observation({ id: "a", resourceType: "Observasion" }),
-          observation({
-            id: "b",
-            index: 1,
-            profile: "http://example.org/StructureDefinition/unknown",
-          }),
-          observation({ id: "c", index: 2, profile: `${FHIR}SimpleQuantity` }),
-          observation({ id: "d", index: 3, resourceType: "Patient", profile: `${FHIR}vitalsigns` }),
-        ],
-        mappings: [
-          row(1, "nothing", { instanceId: "a" }),
-          row(2, "method", { instanceId: "b" }),
-          row(3, "x", { instanceId: "missing" }),
-        ],
-      }),
-      defs,
+    const results = paths(
+      validateFhir(
+        project({
+          instances: [
+            observation({ id: "a", resourceType: "Observasion" }),
+            observation({
+              id: "b",
+              index: 1,
+              profile: "http://example.org/StructureDefinition/unknown",
+            }),
+            observation({ id: "c", index: 2, profile: `${FHIR}SimpleQuantity` }),
+            observation({
+              id: "d",
+              index: 3,
+              resourceType: "Patient",
+              profile: `${FHIR}vitalsigns`,
+            }),
+          ],
+          mappings: [
+            row(1, "nothing", { instanceId: "a" }),
+            row(2, "method", { instanceId: "b" }),
+            row(3, "x", { instanceId: "missing" }),
+          ],
+        }),
+        defs,
+      ),
     );
     expect(results.map((r) => [r.code, r.id, r.field, r.message])).toEqual([
       [
@@ -293,7 +318,7 @@ describe("validateFhir", () => {
   });
 
   it("refuses definitions of another FHIR version", () => {
-    expect(validateFhir(project({}, "5.0.0"), defs)).toEqual([
+    expect(paths(validateFhir(project({}, "5.0.0"), defs))).toEqual([
       {
         severity: "error",
         code: FhirCode.FHIR_VERSION_MISMATCH,
@@ -306,7 +331,9 @@ describe("validateFhir", () => {
   });
 
   it("reports definitions that are not loaded instead of guessing", () => {
-    const results = validateFhir(project({ mappings: [row(1, "code")] }), definitions(false).defs);
+    const results = paths(
+      validateFhir(project({ mappings: [row(1, "code")] }), definitions(false).defs),
+    );
     expect(results.map((r) => r.code)).toEqual([FhirCode.DEFINITION_NOT_LOADED]);
   });
 });
@@ -338,7 +365,7 @@ describe("loadProjectDefinitions", () => {
       "types/Observation.json",
       "types/Questionnaire.json",
     ]);
-    expect(validateFhir(p, empty)).toEqual(validateFhir(p, defs));
-    expect(validateFhir(p, empty).map((r) => r.code)).toEqual([FhirCode.PATH_PROHIBITED]);
+    expect(paths(validateFhir(p, empty))).toEqual(paths(validateFhir(p, defs)));
+    expect(paths(validateFhir(p, empty)).map((r) => r.code)).toEqual([FhirCode.PATH_PROHIBITED]);
   });
 });

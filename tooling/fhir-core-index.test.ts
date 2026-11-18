@@ -133,10 +133,13 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("element paths in FHIR %s", (fh
         max: "1",
       },
     ]);
-    expect(resolve("Observation", "valueQuantity").choice).toEqual({
+    expect(resolve("Observation", "valueQuantity").choice).toMatchObject({
       element: "value[x]",
       type: "Quantity",
     });
+    expect(resolve("Observation", "valueQuantity").choice?.options).toEqual(
+      expect.arrayContaining(["Quantity", "CodeableConcept", "string", "boolean", "integer"]),
+    );
     expect(resolve("Observation", "component[nrs].valueInteger").segments[0]).toMatchObject({
       name: "component",
       slice: "nrs",

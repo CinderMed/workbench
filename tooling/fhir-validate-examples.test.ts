@@ -49,4 +49,47 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
     },
     300_000,
   );
+
+  // Done-when of module 3: "cindermed validate flags the boolean on Patient.name".
+  it.each([
+    ["name", ExitCode.INVALID],
+    ["active", ExitCode.OK],
+  ])(
+    "a boolean column copied to Patient.%s",
+    async (path, expected) => {
+      const project = JSON.parse(
+        readFileSync(join(fixtures, "boolean-value-map", "project.json"), "utf8"),
+      ) as {
+        sources: { columns: Record<string, unknown>[] }[];
+        mappings: Record<string, unknown>[];
+      };
+      project.sources[0]?.columns.push({ id: "col_flag", name: "flag", dataType: "boolean" });
+      project.mappings.push({
+        id: "map_flag",
+        code: "R-099",
+        columnId: "col_flag",
+        instanceId: "ins_patient0",
+        path,
+        transform: { kind: "copy" },
+      });
+      let out = "";
+      const code = await run(["validate", "flag.json", "--offline"], {
+        readFile: () => Promise.resolve(JSON.stringify(project)),
+        stdout: (text) => (out += text),
+        stderr: (text) => (out += text),
+        writeFile: () => Promise.reject(new Error("validate writes nothing")),
+        now: () => new Date(),
+        version: "0.0.0",
+        loadDefinitions,
+      });
+      expect(code).toBe(expected);
+      expect(out).toBe(
+        expected === ExitCode.OK
+          ? "flag.json: valid (format 1.3.0)\n"
+          : "flag.json: 1 error\n" +
+              "  error COMPLEX_TARGET mapping map_flag (path): R-099: column flag (boolean) cannot be copied to Patient.name (HumanName), a complex type: no element of HumanName takes a boolean value\n",
+      );
+    },
+    300_000,
+  );
 });

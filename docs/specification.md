@@ -711,6 +711,7 @@ The check acts at three moments:
 | `BINDING_VIOLATION` | Error or warning | Code outside the ValueSet (required, or extensible/preferred) |
 | `CARDINALITY_MISMATCH` | Error | Multiple values towards a single element |
 | `DUPLICATE_TARGET` | Error | Two rows on the same non-repeating element without exclusive conditions |
+| `EXPRESSION_NOT_TYPE_CHECKED` | Warning | Expert expression (D6): not type-checked, only by the grammar |
 
 The verified examples already cover the copies string → string, integer → integer, decimal → decimal, date → date and date → dateTime, and the value map from a categorical column to `boolean` (`valueBoolean`). Every other combination the table allows must have a golden case before it is enabled (modules 2 and 3).
 

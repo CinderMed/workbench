@@ -72,7 +72,7 @@ describe("resolvePath", () => {
       elementId: "Observation.value[x]",
     });
     expect(resolved("Observation", "valueQuantity")).toMatchObject({
-      choice: { element: "value[x]", type: "Quantity" },
+      choice: { element: "value[x]", type: "Quantity", options: ["Quantity", "string", "boolean"] },
       types: [{ code: "Quantity" }],
       short: "Actual result",
     });

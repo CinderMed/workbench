@@ -7,6 +7,7 @@ import { exportPackage, mappingTables, toCsv, toXlsx } from "@cindermed/export";
 import { type PackageRef, validateFhir } from "@cindermed/fhir-defs";
 import {
   PROJECT_FORMAT_VERSION,
+  type ProjectFile,
   type ValidationResult,
   isValid,
   parseProject,
@@ -43,7 +44,7 @@ type TableFormat = (typeof TABLE_FORMATS)[number];
 /** Options each command accepts (besides --help). */
 const COMMAND_OPTIONS = {
   validate: ["format", "no-fhir", "offline", "fhir-cache"],
-  export: ["format", "out", "package-version", "created-at"],
+  export: ["format", "out", "package-version", "created-at", "no-fhir", "offline", "fhir-cache"],
   "mapping-table": ["format", "delimiter", "out", "created-at"],
 } as const;
 type Command = keyof typeof COMMAND_OPTIONS;
@@ -74,9 +75,10 @@ Options:
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
   --created-at <date-time>  export, mapping-table: date of the package or workbook, ISO 8601 with
                             time zone (default: now)
-  --no-fhir                 validate: skip the FHIR checks (paths against the FHIR definitions)
-  --offline                 validate: use only the FHIR package cache, never download a package
-  --fhir-cache <folder>     validate: the FHIR package cache (default: ~/.fhir/packages)
+  --no-fhir                 validate, export: skip the FHIR checks (paths and types against the
+                            FHIR definitions)
+  --offline                 validate, export: use only the FHIR package cache, never download
+  --fhir-cache <folder>     validate, export: the FHIR package cache (default: ~/.fhir/packages)
   -h, --help                Show this help
 
 Exit codes: 0 done, 1 the project has errors (nothing is written), 2 the command could not run.
@@ -120,6 +122,48 @@ export interface FhirFlags {
 
 type FhirStatus = "done" | "skipped" | "not run";
 
+interface FhirLoad {
+  readonly status: FhirStatus;
+  readonly packages: readonly string[];
+  readonly loaded?: LoadedDefinitions;
+}
+
+/**
+ * The FHIR definitions for a project: loaded (core package and `project.packages`), skipped
+ * (`--no-fhir`) or not needed (the project did not pass the schema). `undefined` when they could
+ * not be loaded: the message is written and the command stops with exit code 2.
+ */
+async function definitionsFor(
+  path: string,
+  project: ProjectFile | undefined,
+  fhir: FhirFlags,
+  io: CliIo,
+): Promise<FhirLoad | undefined> {
+  if (project === undefined) return { status: "not run", packages: [] };
+  if (fhir.skip) return { status: "skipped", packages: [] };
+  try {
+    const loaded = await io.loadDefinitions(
+      project.project.fhirVersion,
+      (project.project.packages ?? []).map((p) => ({ id: p.name, version: p.version })),
+      {
+        offline: fhir.offline,
+        ...(fhir.cacheDir === undefined ? {} : { cacheDir: fhir.cacheDir }),
+      },
+    );
+    return {
+      status: "done",
+      packages: loaded.index.manifest.packages.map((p) => `${p.id}#${p.version}`),
+      loaded,
+    };
+  } catch (error) {
+    io.stderr(
+      `cindermed: cannot load the FHIR definitions for ${path}: ${error instanceof Error ? error.message : String(error)}\n` +
+        "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n",
+    );
+    return undefined;
+  }
+}
+
 async function validate(
   path: string,
   format: Format,
@@ -132,30 +176,11 @@ async function validate(
   const parsed = parseProject(text);
   const results: ValidationResult[] = [...parsed.results];
   const project = parsed.project;
-  // The FHIR checks need a project that passed the schema; integrity errors do not stop them.
-  const status: FhirStatus = project === undefined ? "not run" : fhir.skip ? "skipped" : "done";
-  let packages: string[] = [];
-  if (project !== undefined && status === "done") {
-    let loaded: LoadedDefinitions;
-    try {
-      loaded = await io.loadDefinitions(
-        project.project.fhirVersion,
-        (project.project.packages ?? []).map((p) => ({ id: p.name, version: p.version })),
-        {
-          offline: fhir.offline,
-          ...(fhir.cacheDir === undefined ? {} : { cacheDir: fhir.cacheDir }),
-        },
-      );
-    } catch (error) {
-      io.stderr(
-        `cindermed: cannot load the FHIR definitions for ${path}: ${error instanceof Error ? error.message : String(error)}\n` +
-          "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n",
-      );
-      return ExitCode.USAGE;
-    }
-    packages = loaded.index.manifest.packages.map((p) => `${p.id}#${p.version}`);
-    results.push(...validateFhir(project, loaded.definitions));
-  }
+  const fhirLoad = await definitionsFor(path, project, fhir, io);
+  if (fhirLoad === undefined) return ExitCode.USAGE;
+  if (project !== undefined && fhirLoad.loaded !== undefined)
+    results.push(...validateFhir(project, fhirLoad.loaded.definitions));
+  const { status, packages } = fhirLoad;
   const valid = isValid(results);
 
   if (format === "json") {
@@ -189,6 +214,7 @@ async function validate(
 }
 
 export interface ExportFlags {
+  readonly fhir: FhirFlags;
   readonly out?: string;
   readonly packageVersion?: string;
   readonly createdAt?: string;
@@ -208,17 +234,24 @@ async function exportProject(
 ): Promise<ExitCode> {
   const text = await readProject(path, io);
   if (text === undefined) return ExitCode.USAGE;
+  const fhirLoad = await definitionsFor(path, parseProject(text).project, flags.fhir, io);
+  if (fhirLoad === undefined) return ExitCode.USAGE;
+  const fhir = { checks: fhirLoad.status, packages: fhirLoad.packages };
+  const skipped = fhirLoad.status === "skipped" ? ["  note: FHIR checks skipped (--no-fhir)"] : [];
   const result = exportPackage(text, {
     createdAt: flags.createdAt ?? isoSecond(io.now()),
     ...(flags.packageVersion === undefined ? {} : { packageVersion: flags.packageVersion }),
     generator: { name: "cindermed", version: io.version },
+    ...(fhirLoad.loaded === undefined ? {} : { definitions: fhirLoad.loaded.definitions }),
   });
   if (!result.ok) {
     if (format === "json") {
-      io.stdout(`${JSON.stringify({ file: path, ok: false, results: result.results }, null, 2)}\n`);
+      io.stdout(
+        `${JSON.stringify({ file: path, ok: false, fhir, results: result.results }, null, 2)}\n`,
+      );
     } else {
       const errors = result.results.filter((r) => r.severity === "error").length;
-      const lines = [`${path}: export blocked, ${plural(errors, "error")}`];
+      const lines = [`${path}: export blocked, ${plural(errors, "error")}`, ...skipped];
       lines.push(...result.results.map(describeResult));
       io.stdout(`${lines.join("\n")}\n`);
     }
@@ -248,6 +281,7 @@ async function exportProject(
       out,
       package: result.manifest.package,
       files,
+      fhir,
       warnings: result.warnings,
     };
     io.stdout(`${JSON.stringify(report, null, 2)}\n`);
@@ -256,6 +290,7 @@ async function exportProject(
       result.warnings.length > 0 ? `, ${plural(result.warnings.length, "warning")}` : "";
     const lines = [
       `${path}: exported ${name} ${version} to ${out} (${plural(files.length, "file")}${extra})`,
+      ...skipped,
       ...result.warnings.map(describeResult),
     ];
     io.stdout(`${lines.join("\n")}\n`);
@@ -420,19 +455,13 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
 
   const format = values.format ?? "text";
   if (!isFormat(format)) return usageError(`unknown format '${format}'`, io);
-  if (command === "validate") {
-    const cacheDir = values["fhir-cache"];
-    return validate(
-      path,
-      format,
-      {
-        skip: values["no-fhir"] === true,
-        offline: values.offline === true,
-        ...(cacheDir === undefined ? {} : { cacheDir }),
-      },
-      io,
-    );
-  }
+  const cacheDir = values["fhir-cache"];
+  const fhirFlags: FhirFlags = {
+    skip: values["no-fhir"] === true,
+    offline: values.offline === true,
+    ...(cacheDir === undefined ? {} : { cacheDir }),
+  };
+  if (command === "validate") return validate(path, format, fhirFlags, io);
   if (flags.packageVersion !== undefined && !SEMVER.test(flags.packageVersion)) {
     return usageError(
       `--package-version must be a version such as 1.2.0, not '${flags.packageVersion}'`,
@@ -443,6 +472,7 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
     path,
     format,
     {
+      fhir: fhirFlags,
       ...(flags.out === undefined ? {} : { out: flags.out }),
       ...(flags.packageVersion === undefined ? {} : { packageVersion: flags.packageVersion }),
       ...(flags.createdAt === undefined ? {} : { createdAt: flags.createdAt }),
