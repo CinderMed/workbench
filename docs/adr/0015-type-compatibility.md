@@ -1,6 +1,6 @@
 # ADR-0015: Type compatibility checks
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-11-13
 - Module: 3 (FHIR definitions and validation)
 

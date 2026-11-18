@@ -20,4 +20,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0012](0012-export-package.md)                               | Export package                                   | accepted |
 | [0013](0013-fhir-definition-index.md)                        | FHIR definition index                            | accepted |
 | [0014](0014-element-paths-and-trees.md)                      | Element paths and trees                          | accepted |
-| [0015](0015-type-compatibility.md)                           | Type compatibility checks                        | proposed |
+| [0015](0015-type-compatibility.md)                           | Type compatibility checks                        | accepted |
