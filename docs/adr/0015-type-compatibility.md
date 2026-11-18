@@ -71,3 +71,18 @@ Some points are left open: which code a cell "allowed with a warning" gets, whic
   The other allowed combinations are type-checked here, but not yet proved end to end by the HL7 engine.
 
 - Revisit `TYPE_PRECISION` for the format cases if users need to tell a range risk from a format risk.
+
+## Addendum (2026-11-18): cells turned off until the generator writes choice elements with a type (#156)
+
+The type-combinations golden case (#157) ran every combination the table allows through the generator and the HL7 engine. Some give an invalid resource, a valid one of the wrong type, or a StructureMap that does not validate. As decided, they are turned off rather than worked around in the generator, until #156 is fixed with golden cases:
+
+- **On a choice element, a value of another type than the chosen one** (`TYPE_MISMATCH`). The generator writes the base name (`res.value = v`), and the engine takes the type of the value written: the column's type in the logical model (categorical and multipleChoice are strings), or the literal's (quoted for string, code, uri, date and dateTime). So these are off on a choice element, while they still work on an element that is not a choice:
+  - a cast to string from integer, decimal, boolean, date or dateTime;
+  - a copy of a date to `…DateTime`, or of an integer to `…Decimal`;
+  - a dateTime constant.
+- **A quantity into a type derived from Quantity** (Age, Duration, Distance, Count; `TYPE_MISMATCH`). The generator writes `create('Quantity')`. Quantity itself and its profiles (SimpleQuantity) are fine.
+- **A Quantity constant** (`TYPE_MISMATCH`): the FML subset cannot write it, and the generator already refused it at export.
+- **A reference into a choice element** (`TYPE_MISMATCH`).
+- **Choice names the generator gets wrong** (`PATH_UNSUPPORTED`, in the export). The generator still names choice elements from a fixed list of R4 names (ADR-0011): `Immunization.doseQuantity` is not a choice but is written `dose`, and `protocolApplied.doseNumber[x]` or `prediction.probability[x]` are missing from the list. It also writes a path through a choice (`valueQuantity.value`) without a type. `@cindermed/export` compares the name the generator writes with the definitions and blocks the paths that differ, with the generator's own code.
+
+`tooling/fhir-type-compat.test.ts` encodes these limits in its expectations, written separately from the code, and the verified examples are not affected.

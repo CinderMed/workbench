@@ -51,6 +51,19 @@ export function fhirType(code: string): string {
 }
 
 /** Quantity and the types and profiles derived from it (Age, Duration, Distance, Count, SimpleQuantity). */
+/**
+ * A type derived from Quantity by specialization (Age, Duration, Distance, Count), not Quantity
+ * itself and not a profile of it (SimpleQuantity).
+ */
+export function isDerivedQuantity(defs: FhirDefinitions, type: string): boolean {
+  const entry = defs.entry(type);
+  return (
+    type !== "Quantity" &&
+    entry?.derivation === "specialization" &&
+    entry.baseDefinition === `${SD}Quantity`
+  );
+}
+
 export function isQuantity(defs: FhirDefinitions, type: string): boolean {
   if (type === "Quantity") return true;
   const entry = defs.entry(type);
@@ -272,7 +285,7 @@ function best(
 }
 
 /** The type findings of a mapping row whose path resolved to `element`. */
-export function checkRowTypes(
+function tableRowTypes(
   defs: FhirDefinitions,
   context: RowContext,
   row: MappingRow,
@@ -466,7 +479,7 @@ export function checkRowTypes(
 }
 
 /** The type finding of a typed value (fixed value, value action) written to `element`, if any. */
-export function checkValueType(
+function tableValueType(
   defs: FhirDefinitions,
   value: FhirValue,
   resourceType: string,
@@ -481,4 +494,180 @@ export function checkValueType(
     field: "value",
     message: `${label}: the value is ${article(value.type)}, but the element is ${target(resourceType, element)}${alternatives(element, (t) => valueVerdict(defs, value, t))}`,
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// What the generator and the HL7 engine can write today (#156). The table above says what FHIR
+// allows; these cells are allowed by it but give an invalid or wrong resource, so they are turned
+// off until the generator writes them with an explicit type.
+
+const ISSUE = "#156";
+
+/** The FHIR type of a column in the logical model of the normalized row (the generator's table). */
+const COLUMN_TYPES: Readonly<Record<ColumnType, string>> = {
+  string: "string",
+  integer: "integer",
+  decimal: "decimal",
+  boolean: "boolean",
+  date: "date",
+  dateTime: "dateTime",
+  categorical: "string",
+  multipleChoice: "string",
+};
+
+/** The type of the FML literal the generator writes for a typed value. */
+function literalType(value: FhirValue): string {
+  switch (value.type) {
+    case "boolean":
+    case "integer":
+    case "decimal":
+    case "Coding":
+    case "CodeableConcept":
+    case "Quantity":
+      return value.type;
+    default:
+      return "string"; // string, code, uri, date, dateTime: a quoted literal.
+  }
+}
+
+const VALUE_MAP_TYPES: Readonly<Record<string, string>> = {
+  code: "string",
+  Coding: "Coding",
+  CodeableConcept: "CodeableConcept",
+  boolean: "boolean",
+};
+
+/**
+ * On a choice element the generator writes the base name (`res.value = v`) and the HL7 engine
+ * takes the type of the value written: the column's type, or the literal's. Another type than the
+ * one the path chooses gives an invalid resource, or a valid one of the wrong type.
+ */
+function choiceFinding(
+  element: ResolvedElement,
+  written: string,
+  what: string,
+  where: string,
+): string | undefined {
+  const choice = element.choice;
+  if (choice === undefined || written === choice.type) return undefined;
+  const name = (type: string) =>
+    `${choice.element.slice(0, -3)}${type.charAt(0).toUpperCase()}${type.slice(1)}`;
+  return `${what} is written to ${where}, a choice element, as ${article(written)}: the HL7 engine would make it ${article(name(written))}, not ${article(name(choice.type))}; write it to an element that is not a choice (${ISSUE})`;
+}
+
+function engineRowTypes(
+  defs: FhirDefinitions,
+  context: RowContext,
+  row: MappingRow,
+  resourceType: string,
+  element: ResolvedElement,
+): TypeFinding[] {
+  const where = target(resourceType, element);
+  const off = (field: string, message: string): TypeFinding => ({
+    code: TypeCode.TYPE_MISMATCH,
+    severity: "error",
+    field,
+    message: `${row.code}: ${message}`,
+  });
+  const transform = row.transform;
+  const column = row.columnId === undefined ? undefined : context.columns.get(row.columnId);
+  let why: string | undefined;
+  switch (transform.kind) {
+    case "copy":
+    case "cast":
+      if (column !== undefined)
+        why = choiceFinding(
+          element,
+          COLUMN_TYPES[column.dataType],
+          `column ${column.name} (${column.dataType})`,
+          where,
+        );
+      break;
+    case "constant":
+      if (transform.value.type === "Quantity")
+        return [
+          off(
+            "transform.value",
+            `a Quantity constant cannot be written in the FML subset yet (${ISSUE})`,
+          ),
+        ];
+      why = choiceFinding(element, literalType(transform.value), "the constant", where);
+      break;
+    case "valueMap": {
+      const valueMap = context.valueMaps.get(transform.valueMapId);
+      const written = valueMap === undefined ? undefined : VALUE_MAP_TYPES[valueMap.target];
+      if (valueMap !== undefined && written !== undefined)
+        why = choiceFinding(element, written, `value map ${valueMap.name}`, where);
+      break;
+    }
+    case "quantity": {
+      const derived = element.types
+        .map((t) => fhirType(t.code))
+        .find((t) => isDerivedQuantity(defs, t));
+      if (derived !== undefined)
+        return [
+          off(
+            "path",
+            `the quantity transform writes a Quantity, but ${where} needs ${article(derived)}, which the generator cannot create yet (${ISSUE})`,
+          ),
+        ];
+      why = choiceFinding(element, "Quantity", "the quantity transform", where);
+      break;
+    }
+    case "reference":
+      if (element.choice !== undefined)
+        return [
+          off(
+            "path",
+            `a reference cannot be written to ${where}, a choice element, yet (${ISSUE})`,
+          ),
+        ];
+      break;
+    case "concat":
+    case "expression":
+      break;
+  }
+  return why === undefined ? [] : [off("path", why)];
+}
+
+/** The type findings of a mapping row whose path resolved to `element`. */
+export function checkRowTypes(
+  defs: FhirDefinitions,
+  context: RowContext,
+  row: MappingRow,
+  resourceType: string,
+  element: ResolvedElement,
+): TypeFinding[] {
+  const findings = tableRowTypes(defs, context, row, resourceType, element);
+  if (findings.some((f) => f.severity === "error")) return findings;
+  const engine = engineRowTypes(defs, context, row, resourceType, element);
+  // An engine limit replaces a warning on the same field: the cell is off, not merely risky.
+  return engine.length === 0
+    ? findings
+    : [...findings.filter((f) => !engine.some((e) => e.field === f.field)), ...engine];
+}
+
+/** The type finding of a typed value (fixed value, value action) written to `element`, if any. */
+export function checkValueType(
+  defs: FhirDefinitions,
+  value: FhirValue,
+  resourceType: string,
+  element: ResolvedElement,
+  label: string,
+): TypeFinding | undefined {
+  const table = tableValueType(defs, value, resourceType, element, label);
+  if (table !== undefined) return table;
+  const where = target(resourceType, element);
+  const message =
+    value.type === "Quantity"
+      ? `a Quantity value cannot be written in the FML subset yet (${ISSUE})`
+      : choiceFinding(element, literalType(value), "the value", where);
+  return message === undefined
+    ? undefined
+    : {
+        code: TypeCode.TYPE_MISMATCH,
+        severity: "error",
+        field: "value",
+        message: `${label}: ${message}`,
+      };
 }

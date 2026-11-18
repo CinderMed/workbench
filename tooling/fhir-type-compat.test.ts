@@ -84,12 +84,41 @@ const COPY: Record<Column["dataType"], { ok: string[]; warn: string[]; transform
   multipleChoice: { ok: [], warn: [], transform: Object.keys(ELEMENTS) },
 };
 
+/**
+ * What the generator and the HL7 engine can write today (#156): on a choice element the engine
+ * takes the type of the value written (the column's type in the logical model, or the literal's),
+ * so a cell the table allows is off when that type is not the chosen one; quantities into types
+ * derived from Quantity, and Quantity constants, are off too.
+ */
+const CHOICE_ELEMENTS = new Set(["integer", "dateTime", "time", "Quantity", "Age", "Period"]);
+const DERIVED_QUANTITIES = new Set(["Age", "Duration"]);
+const WRITTEN: Record<Column["dataType"], string> = {
+  string: "string",
+  integer: "integer",
+  decimal: "decimal",
+  boolean: "boolean",
+  date: "date",
+  dateTime: "dateTime",
+  categorical: "string",
+  multipleChoice: "string",
+};
+function engine(allowed: Outcome, type: string, written: string): Outcome {
+  if (allowed !== "ok" && allowed !== "TYPE_PRECISION") return allowed;
+  return CHOICE_ELEMENTS.has(type) && written !== type ? "TYPE_MISMATCH" : allowed;
+}
+
 function expectedCopy(column: Column["dataType"], type: string): Outcome {
   const rule = COPY[column];
-  if (rule.ok.includes(type)) return "ok";
-  if (rule.warn.includes(type)) return "TYPE_PRECISION";
-  if (rule.transform.includes(type)) return "TYPE_NEEDS_TRANSFORM";
-  return COMPLEX.includes(type) ? "COMPLEX_TARGET" : "TYPE_MISMATCH";
+  const allowed: Outcome = rule.ok.includes(type)
+    ? "ok"
+    : rule.warn.includes(type)
+      ? "TYPE_PRECISION"
+      : rule.transform.includes(type)
+        ? "TYPE_NEEDS_TRANSFORM"
+        : COMPLEX.includes(type)
+          ? "COMPLEX_TARGET"
+          : "TYPE_MISMATCH";
+  return engine(allowed, type, WRITTEN[column]);
 }
 
 const column = (dataType: Column["dataType"]): Column => ({ id: "col", name: "c", dataType });
@@ -158,7 +187,7 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
   it.each([
     // Conversions allowed: to string, to the same type, integer → decimal, date → dateTime.
     ["integer", "decimal", "decimal", "ok"],
-    ["date", "dateTime", "dateTime", "ok"],
+    ["date", "dateTime", "dateTime", "TYPE_MISMATCH"], // on effectiveDateTime, a choice (#156)
     ["date", "date", "date", "ok"],
     ["integer", "string", "string", "ok"],
     ["decimal", "string", "string", "ok"],
@@ -195,7 +224,8 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
       [...QUANTITIES, "decimal", "CodeableConcept"].map((type) => [dataType, type] as const),
     ),
   )("quantity: %s column on %s", (dataType, type) => {
-    const fits = QUANTITIES.includes(type) && dataType !== "string";
+    const fits =
+      QUANTITIES.includes(type) && dataType !== "string" && !DERIVED_QUANTITIES.has(type);
     expect(outcome(type, { kind: "quantity" }, dataType)).toBe(fits ? "ok" : "TYPE_MISMATCH");
   });
 
@@ -235,7 +265,12 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
       ].map((type) => [value.type, type, value] as const),
     ),
   )("constant %s on %s", (valueType, type, value) => {
-    const fits = valueType === type || (valueType === "Quantity" && QUANTITIES.includes(type));
+    const allowed = valueType === type || (valueType === "Quantity" && QUANTITIES.includes(type));
+    // The literal's type: quoted for string, code, uri, date and dateTime; Quantity cannot be written.
+    const literal = ["string", "code", "uri", "date", "dateTime"].includes(valueType)
+      ? "string"
+      : valueType;
+    const fits = allowed && valueType !== "Quantity" && engine("ok", type, literal) === "ok";
     expect(outcome(type, { kind: "constant", value })).toBe(fits ? "ok" : "TYPE_MISMATCH");
   });
 
