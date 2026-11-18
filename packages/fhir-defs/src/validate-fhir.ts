@@ -6,17 +6,23 @@
  * - every path resolves in the role's type or profile: mapping rows, fixed values, the elements
  *   set by value-map actions, and declared slices with their discriminators;
  * - a slice sits on a repeating element;
- * - `repeat: eachValue` writes to a repeating element.
- * Results have the shape of every other level and are errors: they block the export.
+ * - `repeat: eachValue` writes to a repeating element;
+ * - every row's transform, every fixed value and every value-action value fits the element's type
+ *   (type compatibility, `type-compat.ts`).
+ * Results have the shape of every other level. Errors block the export.
  */
 import {
+  type Column,
+  type FhirValue,
   type Instance,
+  type MappingRow,
   type ObjectKind,
   type ProjectFile,
   type ValidationResult,
   rowValueMaps,
 } from "@cindermed/model";
 import type { FhirDefinitions, IndexFetch } from "./definitions.js";
+import { type TypeFinding, checkRowTypes, checkValueType } from "./type-compat.js";
 import {
   type PathIssueCode,
   type ResolvedElement,
@@ -77,6 +83,10 @@ interface PathUse {
   readonly label: string;
   /** For `repeat: eachValue`: the element at the end of the path must repeat. */
   readonly mustRepeat?: boolean;
+  /** The mapping row writing to the path: its transform is type-checked (D7). */
+  readonly row?: MappingRow;
+  /** A typed value written to the path (fixed value, discriminator, value action), and its field. */
+  readonly value?: { readonly value: FhirValue; readonly field: string };
 }
 
 const roleKey = (instance: Instance) => `${instance.resourceType}[${String(instance.index)}]`;
@@ -116,6 +126,7 @@ function pathUses(project: ProjectFile): PathUse[] {
           instance,
           path: `${slice.path}[${slice.name}].${d.path}`,
           label: `discriminator of ${label}`,
+          value: { value: d.value, field: `slices.${String(i)}.discriminator.${String(j)}.value` },
         });
       });
     });
@@ -126,6 +137,7 @@ function pathUses(project: ProjectFile): PathUse[] {
         instance,
         path: fixed.path,
         label: "fixed value",
+        value: { value: fixed.value, field: `fixedValues.${String(i)}.value` },
       });
     });
   }
@@ -140,6 +152,7 @@ function pathUses(project: ProjectFile): PathUse[] {
       path: row.path,
       label: row.code,
       mustRepeat: row.repeat?.kind === "eachValue",
+      row,
     });
     // Elements set by value actions belong to the role of the row that uses the value map.
     for (const { valueMapId } of rowValueMaps(row)) {
@@ -160,6 +173,10 @@ function pathUses(project: ProjectFile): PathUse[] {
             instance,
             path: set.path,
             label: `value map ${valueMap.name} (used by ${row.code})`,
+            value: {
+              value: set.value,
+              field: `entries.${String(i)}.action.${key}.${String(j)}.value`,
+            },
           });
         });
       });
@@ -168,9 +185,15 @@ function pathUses(project: ProjectFile): PathUse[] {
   return uses;
 }
 
-function result(owner: Owner, field: string, code: FhirCode, message: string): ValidationResult {
+function result(
+  owner: Owner,
+  field: string,
+  code: string,
+  message: string,
+  severity: "error" | "warning" = "error",
+): ValidationResult {
   return {
-    severity: "error",
+    severity,
     code,
     objectKind: owner.objectKind,
     ...(owner.id === undefined ? {} : { id: owner.id }),
@@ -230,6 +253,12 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
       );
   }
 
+  const context = {
+    columns: new Map<string, Column>(
+      project.sources.flatMap((source) => source.columns.map((c) => [c.id, c] as const)),
+    ),
+    valueMaps: new Map(project.valueMaps.map((m) => [m.id, m])),
+  };
   // The same value-map path may be checked once per row that uses the map: report it once.
   const seen = new Set<string>();
   for (const use of pathUses(project)) {
@@ -237,21 +266,43 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
     if (ref === undefined) continue; // Reported above as RESOURCE_TYPE_UNKNOWN.
     const where = `${use.label}: ${use.instance.resourceType}.${use.path}`;
     const resolved = resolvePath(defs, ref, use.path);
-    let found: ValidationResult | undefined;
+    const found: ValidationResult[] = [];
     if (!resolved.ok)
-      found = result(
-        use.owner,
-        use.field,
-        PATH_CODES[resolved.issue.code],
-        `${where}: ${resolved.issue.message}`,
+      found.push(
+        result(
+          use.owner,
+          use.field,
+          PATH_CODES[resolved.issue.code],
+          `${where}: ${resolved.issue.message}`,
+        ),
       );
-    else if (use.mustRepeat === true && !repeats(resolved.value.max))
-      found = repeatResult(use, where, resolved.value);
-    if (found === undefined) continue;
-    const key = `${found.objectKind}|${found.id ?? ""}|${found.field ?? ""}|${found.code}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    results.push(found);
+    else {
+      if (use.mustRepeat === true && !repeats(resolved.value.max))
+        found.push(repeatResult(use, where, resolved.value));
+      const findings: TypeFinding[] = [];
+      if (use.row !== undefined)
+        findings.push(
+          ...checkRowTypes(defs, context, use.row, use.instance.resourceType, resolved.value),
+        );
+      if (use.value !== undefined) {
+        const finding = checkValueType(
+          defs,
+          use.value.value,
+          use.instance.resourceType,
+          resolved.value,
+          use.label,
+        );
+        if (finding !== undefined) findings.push({ ...finding, field: use.value.field });
+      }
+      for (const f of findings)
+        found.push(result(use.owner, f.field, f.code, f.message, f.severity));
+    }
+    for (const item of found) {
+      const key = `${item.objectKind}|${item.id ?? ""}|${item.field ?? ""}|${item.code}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      results.push(item);
+    }
   }
   return results;
 }

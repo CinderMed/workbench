@@ -328,6 +328,9 @@ importers:
 
   packages/export:
     dependencies:
+      '@cindermed/fhir-defs':
+        specifier: workspace:*
+        version: link:../fhir-defs
       '@cindermed/fml':
         specifier: workspace:*
         version: link:../fml

@@ -20,6 +20,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cindermed/fhir-defs": "workspace:*",
     "@cindermed/fml": "workspace:*",
     "@cindermed/model": "workspace:*",
     "@noble/hashes": "2.4.0",

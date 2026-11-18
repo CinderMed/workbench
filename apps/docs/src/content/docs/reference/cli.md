@@ -36,9 +36,14 @@ Reads a [project file](/workbench/reference/project-file/) and runs four levels 
      - `SLICE_NOT_REPEATING`: a named slice on an element that does not repeat;
      - `EXTENSION_NOT_SUPPORTED`;
      - `PATH_PROHIBITED`: an element the profile forbids;
-   - that `repeat: eachValue` writes to a repeating element (`REPEAT_TARGET_NOT_REPEATING`).
+   - that `repeat: eachValue` writes to a repeating element (`REPEAT_TARGET_NOT_REPEATING`);
+   - that each row's transform produces a value of the element's type (type compatibility). For example, a `boolean` column copied to `Patient.name`, a HumanName, is a `COMPLEX_TARGET` error; on `Patient.active`, a boolean, it is valid. The codes are:
+     - `TYPE_MISMATCH`;
+     - `TYPE_NEEDS_TRANSFORM`: the message names the transform, such as a value map or the quantity transform;
+     - `COMPLEX_TARGET`: the message lists the elements that fit;
+     - `TYPE_PRECISION`: a warning, for a value that may be out of range or badly formatted.
 
-   Type compatibility, bindings and references are added later in this version series.
+   Bindings, cardinality and references are added later in this version series.
 
 4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 
@@ -93,7 +98,10 @@ Each item of `results` has the fields `severity`, `code`, `objectKind`, `id`, `f
 ```text
 cindermed export <project.json> [--out <file.zip|folder>] [--package-version <x.y.z>]
                  [--created-at <date-time>] [--format text|json]
+                 [--offline] [--fhir-cache <folder>] [--no-fhir]
 ```
+
+The project is validated first, the FHIR level included: any error blocks the export and nothing is written. The FHIR packages are loaded as for [`validate`](#fhir-packages), with the same options.
 
 Writes the export package of a project: everything a conversion tool needs to turn the data files into FHIR, without the workbench.
 

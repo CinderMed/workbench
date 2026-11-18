@@ -284,6 +284,55 @@ describe("cindermed validate, FHIR checks", () => {
     expect(cli.stdout()).toBe("");
   });
 
+  it("blocks an export with FHIR errors, and exports a project without them", async () => {
+    const out = [
+      "--package-version",
+      "0.1.0",
+      "--created-at",
+      "2026-11-12T00:00:00Z",
+      "--out",
+      "pkg.zip",
+    ];
+    const good = withLoader();
+    expect(await run(["export", visit, ...out, "--fhir-cache", cache, "--offline"], good.io)).toBe(
+      ExitCode.OK,
+    );
+    expect([...good.written.keys()]).toEqual(["pkg.zip"]);
+
+    const project = JSON.parse(await exampleText("boolean-value-map")) as {
+      sources: { columns: Record<string, unknown>[] }[];
+      mappings: Record<string, unknown>[];
+    };
+    project.sources[0]?.columns.push({ id: "col_flag", name: "flag", dataType: "boolean" });
+    project.mappings.push({
+      id: "map_flag",
+      code: "R-099",
+      columnId: "col_flag",
+      instanceId: "ins_patient0",
+      path: "identifier",
+      transform: { kind: "copy" },
+    });
+    const bad = withLoader({ "flag.json": JSON.stringify(project) });
+    expect(
+      await run(["export", "flag.json", ...out, "--fhir-cache", cache, "--offline"], bad.io),
+    ).toBe(ExitCode.INVALID);
+    expect(bad.written.size).toBe(0);
+    expect(bad.stdout()).toBe(
+      "flag.json: export blocked, 1 error\n" +
+        "  error COMPLEX_TARGET mapping map_flag (path): R-099: column flag (boolean) cannot be copied to Patient.identifier (Identifier), a complex type: no element of Identifier takes a boolean value\n",
+    );
+    const json = withLoader({ "flag.json": JSON.stringify(project) });
+    await run(
+      ["export", "flag.json", ...out, "--fhir-cache", cache, "--offline", "--format", "json"],
+      json.io,
+    );
+    expect(JSON.parse(json.stdout())).toMatchObject({
+      ok: false,
+      fhir: { checks: "done", packages: ["hl7.fhir.r4.core#4.0.1"] },
+      results: [{ code: "COMPLEX_TARGET" }],
+    });
+  });
+
   it("downloads by default, and never loads definitions with --no-fhir", async () => {
     const cli = capture();
     const calls: unknown[] = [];
@@ -330,7 +379,7 @@ describe("cindermed usage", () => {
 
 describe("cindermed export", () => {
   const motu = `${examples}motu/project.json`;
-  const fixed = ["--package-version", "0.1.0", "--created-at", "2026-11-12T00:00:00Z"];
+  const fixed = ["--package-version", "0.1.0", "--created-at", "2026-11-12T00:00:00Z", "--no-fhir"];
 
   it("writes the deterministic zip of the export package", async () => {
     const cli = capture();
@@ -345,7 +394,10 @@ describe("cindermed export", () => {
     if (!expected.ok) throw new Error("fixture export failed");
     expect([...cli.written.keys()]).toEqual(["out/motu.zip"]);
     expect(cli.written.get("out/motu.zip")).toEqual(expected.zip);
-    expect(cli.stdout()).toBe(`${motu}: exported motu-mapping 0.1.0 to out/motu.zip (18 files)\n`);
+    expect(cli.stdout()).toBe(
+      `${motu}: exported motu-mapping 0.1.0 to out/motu.zip (18 files)\n` +
+        "  note: FHIR checks skipped (--no-fhir)\n",
+    );
   });
 
   it("writes the files into a folder when --out does not end in .zip", async () => {
@@ -363,7 +415,7 @@ describe("cindermed export", () => {
 
   it("uses a dev version from the project, the clock and the package name by default", async () => {
     const cli = capture();
-    expect(await run(["export", motu], cli.io)).toBe(ExitCode.OK);
+    expect(await run(["export", motu, "--no-fhir"], cli.io)).toBe(ExitCode.OK);
     const [out] = [...cli.written.keys()];
     expect(out).toMatch(/^motu-mapping-0\.0\.0-dev\.[0-9a-f]{12}\.zip$/);
     const entries = unzipSync(cli.written.get(out ?? "") ?? new Uint8Array());
@@ -394,12 +446,13 @@ describe("cindermed export", () => {
     expect(await run(["export", "broken.json", ...fixed], cli.io)).toBe(ExitCode.INVALID);
     expect(cli.written.size).toBe(0);
     expect(cli.stdout()).toMatch(
-      /^broken\.json: export blocked, 1 error\n {2}error DUPLICATE_ROW_CODE/,
+      /^broken\.json: export blocked, 1 error\n {2}note: FHIR checks skipped \(--no-fhir\)\n {2}error DUPLICATE_ROW_CODE/,
     );
     const json = capture({ "broken.json": JSON.stringify(broken) });
-    await run(["export", "broken.json", "--format", "json"], json.io);
+    await run(["export", "broken.json", "--format", "json", "--no-fhir"], json.io);
     expect(JSON.parse(json.stdout())).toMatchObject({
       ok: false,
+      fhir: { checks: "skipped", packages: [] },
       results: [{ code: "DUPLICATE_ROW_CODE" }],
     });
   });
@@ -412,7 +465,7 @@ describe("cindermed export", () => {
       "--created-at must be an ISO 8601 date-time",
     ],
     [["validate", "p.json", "--out", "x.zip"], "--out does not apply to validate"],
-    [["export", "p.json", "--offline"], "--offline does not apply to export"],
+    [["mapping-table", "p.json", "--offline"], "--offline does not apply to mapping-table"],
     [["mapping-table", "p.json", "--no-fhir"], "--no-fhir does not apply to mapping-table"],
   ])("rejects %j", async (args, message) => {
     const cli = capture();

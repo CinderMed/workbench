@@ -3,7 +3,8 @@
  * checked against the official FML grammar (G10). No I/O (ADR-0001): project text in, files and a
  * deterministic zip out. Backend only, because it carries the grammar parser (ADR-0008).
  *
- * Pipeline: read and validate the project (errors block, warnings are returned) → for each table,
+ * Pipeline: read and validate the project, FHIR level included when definitions are given (errors
+ * block, warnings are returned) → for each table,
  * plan, logical model, normalization specification and map (generator errors block) → grammar
  * check of every printed map (errors, traced to the mapping row, block) → ConceptMaps → the
  * cleaned project copy → the three schemas → manifest with SHA-256 digests → zip.
@@ -18,6 +19,7 @@ import {
   type ProjectFile,
   type ValidationResult,
 } from "@cindermed/model";
+import { type FhirDefinitions, validateFhir } from "@cindermed/fhir-defs";
 import {
   conceptMaps,
   generateMap,
@@ -42,6 +44,12 @@ export const ExportCode = {
 } as const;
 
 export interface ExportOptions {
+  /**
+   * The FHIR definitions of the project's FHIR version, with every document the project needs
+   * loaded (ADR-0013). When given, the FHIR level of validation runs (D7: paths and types) and
+   * its errors block the export. The CLI always gives them, unless `--no-fhir` says otherwise.
+   */
+  readonly definitions?: FhirDefinitions;
   /** ISO 8601 date-time of the package, also the timestamp of every zip entry. */
   readonly createdAt: string;
   /** Package version; absent = `0.0.0-dev.<first 12 hex of the SHA-256 of the project text>`. */
@@ -100,8 +108,12 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
   const errors = parsed.results.filter((r) => r.severity === "error");
   if (parsed.project === undefined || errors.length > 0)
     return { ok: false, results: parsed.results };
-  const warnings = parsed.results.filter((r) => r.severity !== "error");
   const project = parsed.project;
+  // FHIR level (D7): its errors block the export like the other levels' errors.
+  const fhir = options.definitions === undefined ? [] : validateFhir(project, options.definitions);
+  if (fhir.some((r) => r.severity === "error"))
+    return { ok: false, results: [...parsed.results, ...fhir] };
+  const warnings = [...parsed.results, ...fhir].filter((r) => r.severity !== "error");
   const version = packageVersion(projectText, options.packageVersion);
   const refs = {
     project: options.schemaRefs?.project ?? "schemas/mapping-project.schema.json",
