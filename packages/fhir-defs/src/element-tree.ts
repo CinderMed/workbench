@@ -72,7 +72,12 @@ export interface ResolvedElement {
   /** The element's types; for a choice, only the type chosen. */
   readonly types: readonly ElementType[];
   /** For a choice: the choice element (`value[x]`) and the type chosen (`Quantity`). */
-  readonly choice?: { readonly element: string; readonly type: string };
+  readonly choice?: {
+    readonly element: string;
+    readonly type: string;
+    /** Every type the choice element allows, in its order (`Quantity`, `CodeableConcept`, …). */
+    readonly options: readonly string[];
+  };
   /** The profile slice used, when the path names one the profile defines. */
   readonly sliceName?: string;
   readonly short?: string;
@@ -249,6 +254,8 @@ export function resolvePath(
   if (!start.ok) return fail(start.issue);
   let at: Position = start.value;
   let sliceName: string | undefined;
+  /** The types of the last choice element on the path (not of a type slice that replaced it). */
+  let options: string[] = [];
   const segments: ResolvedSegment[] = [];
   const parts = path === "" ? [] : path.split(".");
   for (const [index, part] of parts.entries()) {
@@ -289,6 +296,7 @@ export function resolvePath(
     }
     let { element } = found;
     const chosen = found.type;
+    options = chosen === undefined ? [] : (found.element.type ?? []).map((t) => t.code);
     // A profile may constrain one type of a choice with a type slice named after it (valueQuantity).
     if (chosen !== undefined) {
       const typeSlice = docIndex(doc)
@@ -340,7 +348,13 @@ export function resolvePath(
       types: chosen === undefined ? (element.type ?? []) : [chosen],
       ...(chosen === undefined
         ? {}
-        : { choice: { element: elementName(element), type: chosen.code } }),
+        : {
+            choice: {
+              element: elementName(element),
+              type: chosen.code,
+              options,
+            },
+          }),
       ...(sliceName === undefined ? {} : { sliceName }),
       ...(element.short === undefined ? {} : { short: element.short }),
       ...(element.binding === undefined ? {} : { binding: element.binding }),

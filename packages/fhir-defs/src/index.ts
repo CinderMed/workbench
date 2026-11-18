@@ -38,3 +38,17 @@ export {
   parseTypeDocument,
 } from "./index-format.js";
 export { FhirCode, loadProjectDefinitions, validateFhir } from "./validate-fhir.js";
+export {
+  type ColumnType,
+  TypeCode,
+  type TypeFinding,
+  type Verdict,
+  castAllowed,
+  checkRowTypes,
+  checkValueType,
+  copyVerdict,
+  fhirType,
+  isQuantity,
+  valueMapVerdict,
+  valueVerdict,
+} from "./type-compat.js";
