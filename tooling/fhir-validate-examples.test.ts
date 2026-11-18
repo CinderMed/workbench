@@ -11,6 +11,12 @@ import { validateFhir } from "../packages/fhir-defs/dist/index.js";
 
 const enabled = process.env["FHIR_CORE_PACKAGES"] === "1";
 const fixtures = resolve(import.meta.dirname, "../fixtures/fml-examples");
+/**
+ * Warnings an example gives on purpose: type-combinations covers the cells of the compatibility
+ * table that are allowed with a warning (TYPE_PRECISION), one each. Every other example gives none.
+ */
+const EXPECTED_WARNINGS: Readonly<Record<string, number>> = { "type-combinations": 10 };
+
 const examples = readdirSync(fixtures, { withFileTypes: true })
   .filter((e) => e.isDirectory() && existsSync(join(fixtures, e.name, "project.json")))
   .map((e) => e.name);
@@ -25,7 +31,12 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       const { definitions } = await loadDefinitions(project.project.fhirVersion, [], {
         offline: true,
       });
-      expect(validateFhir(project, definitions)).toEqual([]);
+      const results = validateFhir(project, definitions);
+      expect(results.filter((r) => r.severity === "error")).toEqual([]);
+      const warnings = results.filter((r) => r.severity === "warning");
+      expect(warnings.map((r) => r.code)).toEqual(
+        Array.from({ length: EXPECTED_WARNINGS[name] ?? 0 }, () => "TYPE_PRECISION"),
+      );
     },
     300_000,
   );
@@ -45,7 +56,13 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
         version: "0.0.0",
         loadDefinitions,
       });
-      expect([code, out, err]).toEqual([ExitCode.OK, `${path}: valid (format 1.3.0)\n`, ""]);
+      const warnings = EXPECTED_WARNINGS[name] ?? 0;
+      const summary = warnings === 0 ? "" : `, ${String(warnings)} warnings`;
+      expect([code, out.split("\n")[0], err]).toEqual([
+        ExitCode.OK,
+        `${path}: valid (format 1.3.0)${summary}`,
+        "",
+      ]);
     },
     300_000,
   );

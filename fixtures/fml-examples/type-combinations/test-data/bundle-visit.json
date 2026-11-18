@@ -1,0 +1,268 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/type-combinations/Patient/pat-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-ac1aebf0638b7020804eed3b",
+      "meta" : {
+        "versionId" : "1",
+        "profile" : ["http://hl7.org/fhir/StructureDefinition/Patient"]
+      },
+      "language" : "it",
+      "identifier" : [{
+        "system" : "urn:example:patients",
+        "value" : "P-100"
+      }],
+      "active" : true,
+      "name" : [{
+        "text" : "Test Patient"
+      }],
+      "birthDate" : "1980-01-01",
+      "multipleBirthInteger" : 1,
+      "photo" : [{
+        "url" : "https://cindermed.org/photo.png",
+        "size" : 1024
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Observation/obs-weight-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-weight-ac1aebf0638b7020804eed3b",
+      "status" : "final",
+      "code" : {
+        "text" : "weight"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-weight-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Location/loc-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Location",
+      "id" : "loc-ac1aebf0638b7020804eed3b",
+      "name" : "42",
+      "alias" : ["true"],
+      "description" : "0.75",
+      "position" : {
+        "longitude" : 72,
+        "latitude" : 90,
+        "altitude" : 0.25
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Location/loc-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/RiskAssessment/risk-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "RiskAssessment",
+      "id" : "risk-ac1aebf0638b7020804eed3b",
+      "status" : "final",
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "prediction" : [{
+        "relativeRisk" : 0.75
+      }],
+      "mitigation" : "2023-05-04"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "RiskAssessment/risk-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Observation/obs-panel-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-panel-ac1aebf0638b7020804eed3b",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "8301-4",
+          "display" : "type combinations panel"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "valueQuantity" : {
+        "value" : 180,
+        "unit" : "centimeter",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "cm"
+      },
+      "component" : [{
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "8307-1",
+            "display" : "categorical as text"
+          }]
+        },
+        "valueString" : "weight"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "8308-9",
+            "display" : "string as text"
+          }]
+        },
+        "valueString" : "free text"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "8309-7",
+            "display" : "integer"
+          }]
+        },
+        "valueInteger" : 42
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "8310-5",
+            "display" : "boolean"
+          }]
+        },
+        "valueBoolean" : true
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "http://loinc.org",
+            "code" : "8311-3",
+            "display" : "dateTime"
+          }]
+        },
+        "valueDateTime" : "2023-05-04"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-panel-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Condition/cond-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Condition",
+      "id" : "cond-ac1aebf0638b7020804eed3b",
+      "code" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "38341003",
+          "display" : "Hypertension"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Condition/cond-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Encounter/enc-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Encounter",
+      "id" : "enc-ac1aebf0638b7020804eed3b",
+      "status" : "finished",
+      "class" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code" : "AMB",
+        "display" : "ambulatory"
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "diagnosis" : [{
+        "condition" : {
+          "reference" : "Condition/cond-ac1aebf0638b7020804eed3b"
+        },
+        "rank" : 2
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Encounter/enc-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/MedicationDispense/disp-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "MedicationDispense",
+      "id" : "disp-ac1aebf0638b7020804eed3b",
+      "status" : "completed",
+      "medicationCodeableConcept" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "387517004",
+          "display" : "Paracetamol"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "quantity" : {
+        "value" : 50.5,
+        "unit" : "milliliter",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "mL"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "MedicationDispense/disp-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Immunization/imm-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Immunization",
+      "id" : "imm-ac1aebf0638b7020804eed3b",
+      "status" : "completed",
+      "vaccineCode" : {
+        "coding" : [{
+          "system" : "http://snomed.info/sct",
+          "code" : "836398006",
+          "display" : "Vaccine"
+        }]
+      },
+      "patient" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "occurrenceDateTime" : "2023-04-01",
+      "recorded" : "2023-05-04T10:00:00+02:00",
+      "lotNumber" : "2023-05-04"
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Immunization/imm-ac1aebf0638b7020804eed3b"
+    }
+  }]
+}

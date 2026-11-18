@@ -19,7 +19,7 @@ root=$(cd "$(dirname "$0")/../.." && pwd)
 source_dir="$root/fixtures/fml-examples"
 out="$root/.tmp/golden"
 work="$out/fml-examples"
-expected_checks=19
+expected_checks=21
 
 rm -rf "$out"
 mkdir -p "$out"

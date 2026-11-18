@@ -1,0 +1,1199 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "VisitRow",
+  "url": "http://example.org/fhir/type-combinations/StructureDefinition/VisitRow",
+  "version": "0.1.0",
+  "name": "VisitRow",
+  "title": "Normalized row of table Visit",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/type-combinations/StructureDefinition/VisitRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "definition": "One synthetic visit row.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "patient_id",
+        "definition": "patient_id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_system",
+        "path": "VisitRow.id_system",
+        "short": "id_system",
+        "definition": "id_system",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_system",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.language",
+        "path": "VisitRow.language",
+        "short": "language",
+        "definition": "language",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.language",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.record_version",
+        "path": "VisitRow.record_version",
+        "short": "record_version",
+        "definition": "record_version",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.record_version",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.photo_url",
+        "path": "VisitRow.photo_url",
+        "short": "photo_url",
+        "definition": "photo_url",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.photo_url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.profile_url",
+        "path": "VisitRow.profile_url",
+        "short": "profile_url",
+        "definition": "profile_url",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.profile_url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.photo_size",
+        "path": "VisitRow.photo_size",
+        "short": "photo_size",
+        "definition": "photo_size",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.photo_size",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.weight_kg",
+        "path": "VisitRow.weight_kg",
+        "short": "weight_kg",
+        "definition": "weight_kg",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.weight_kg",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.height_cm",
+        "path": "VisitRow.height_cm",
+        "short": "height_cm",
+        "definition": "height_cm",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.height_cm",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ref_low",
+        "path": "VisitRow.ref_low",
+        "short": "ref_low",
+        "definition": "ref_low",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ref_low",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ref_high",
+        "path": "VisitRow.ref_high",
+        "short": "ref_high",
+        "definition": "ref_high",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ref_high",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ratio",
+        "path": "VisitRow.ratio",
+        "short": "ratio",
+        "definition": "ratio",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ratio",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.count",
+        "path": "VisitRow.count",
+        "short": "count",
+        "definition": "count",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.count",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.smoker",
+        "path": "VisitRow.smoker",
+        "short": "smoker",
+        "definition": "smoker",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.smoker",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_date",
+        "path": "VisitRow.visit_date",
+        "short": "visit_date",
+        "definition": "visit_date",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_date",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_at",
+        "path": "VisitRow.visit_at",
+        "short": "visit_at",
+        "definition": "visit_at",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_at",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.obs_status",
+        "path": "VisitRow.obs_status",
+        "short": "obs_status",
+        "definition": "obs_status",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.obs_status",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.obs_label",
+        "path": "VisitRow.obs_label",
+        "short": "obs_label",
+        "definition": "obs_label",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.obs_label",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.onset_age",
+        "path": "VisitRow.onset_age",
+        "short": "onset_age",
+        "definition": "onset_age",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.onset_age",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.supply_days",
+        "path": "VisitRow.supply_days",
+        "short": "supply_days",
+        "definition": "supply_days",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.supply_days",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.dose_number",
+        "path": "VisitRow.dose_number",
+        "short": "dose_number",
+        "definition": "dose_number",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.dose_number",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.vaccinated_on",
+        "path": "VisitRow.vaccinated_on",
+        "short": "vaccinated_on",
+        "definition": "vaccinated_on",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.vaccinated_on",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.note",
+        "path": "VisitRow.note",
+        "short": "note",
+        "definition": "note",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.note",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (weight), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Location0",
+        "path": "VisitRow.id_Location0",
+        "short": "Computed id of Location[0]",
+        "definition": "Deterministic id of the resource of role Location[0] (site), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Location0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_RiskAssessment0",
+        "path": "VisitRow.id_RiskAssessment0",
+        "short": "Computed id of RiskAssessment[0]",
+        "definition": "Deterministic id of the resource of role RiskAssessment[0] (risk), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_RiskAssessment0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation1",
+        "path": "VisitRow.id_Observation1",
+        "short": "Computed id of Observation[1]",
+        "definition": "Deterministic id of the resource of role Observation[1] (panel), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Condition0",
+        "path": "VisitRow.id_Condition0",
+        "short": "Computed id of Condition[0]",
+        "definition": "Deterministic id of the resource of role Condition[0] (condition), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Condition0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Encounter0",
+        "path": "VisitRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_MedicationDispense0",
+        "path": "VisitRow.id_MedicationDispense0",
+        "short": "Computed id of MedicationDispense[0]",
+        "definition": "Deterministic id of the resource of role MedicationDispense[0] (dispense), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_MedicationDispense0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Immunization0",
+        "path": "VisitRow.id_Immunization0",
+        "short": "Computed id of Immunization[0]",
+        "definition": "Deterministic id of the resource of role Immunization[0] (vaccination), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Immunization0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "definition": "One synthetic visit row.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "patient_id",
+        "definition": "patient_id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_system",
+        "path": "VisitRow.id_system",
+        "short": "id_system",
+        "definition": "id_system",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_system",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.language",
+        "path": "VisitRow.language",
+        "short": "language",
+        "definition": "language",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.language",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.record_version",
+        "path": "VisitRow.record_version",
+        "short": "record_version",
+        "definition": "record_version",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.record_version",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.photo_url",
+        "path": "VisitRow.photo_url",
+        "short": "photo_url",
+        "definition": "photo_url",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.photo_url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.profile_url",
+        "path": "VisitRow.profile_url",
+        "short": "profile_url",
+        "definition": "profile_url",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.profile_url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.photo_size",
+        "path": "VisitRow.photo_size",
+        "short": "photo_size",
+        "definition": "photo_size",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.photo_size",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.weight_kg",
+        "path": "VisitRow.weight_kg",
+        "short": "weight_kg",
+        "definition": "weight_kg",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.weight_kg",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.height_cm",
+        "path": "VisitRow.height_cm",
+        "short": "height_cm",
+        "definition": "height_cm",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.height_cm",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ref_low",
+        "path": "VisitRow.ref_low",
+        "short": "ref_low",
+        "definition": "ref_low",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ref_low",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ref_high",
+        "path": "VisitRow.ref_high",
+        "short": "ref_high",
+        "definition": "ref_high",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ref_high",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.ratio",
+        "path": "VisitRow.ratio",
+        "short": "ratio",
+        "definition": "ratio",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.ratio",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.count",
+        "path": "VisitRow.count",
+        "short": "count",
+        "definition": "count",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.count",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.smoker",
+        "path": "VisitRow.smoker",
+        "short": "smoker",
+        "definition": "smoker",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.smoker",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_date",
+        "path": "VisitRow.visit_date",
+        "short": "visit_date",
+        "definition": "visit_date",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_date",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_at",
+        "path": "VisitRow.visit_at",
+        "short": "visit_at",
+        "definition": "visit_at",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_at",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.obs_status",
+        "path": "VisitRow.obs_status",
+        "short": "obs_status",
+        "definition": "obs_status",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.obs_status",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.obs_label",
+        "path": "VisitRow.obs_label",
+        "short": "obs_label",
+        "definition": "obs_label",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.obs_label",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.onset_age",
+        "path": "VisitRow.onset_age",
+        "short": "onset_age",
+        "definition": "onset_age",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.onset_age",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.supply_days",
+        "path": "VisitRow.supply_days",
+        "short": "supply_days",
+        "definition": "supply_days",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.supply_days",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.dose_number",
+        "path": "VisitRow.dose_number",
+        "short": "dose_number",
+        "definition": "dose_number",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.dose_number",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.vaccinated_on",
+        "path": "VisitRow.vaccinated_on",
+        "short": "vaccinated_on",
+        "definition": "vaccinated_on",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.vaccinated_on",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.note",
+        "path": "VisitRow.note",
+        "short": "note",
+        "definition": "note",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.note",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (weight), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Location0",
+        "path": "VisitRow.id_Location0",
+        "short": "Computed id of Location[0]",
+        "definition": "Deterministic id of the resource of role Location[0] (site), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Location0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_RiskAssessment0",
+        "path": "VisitRow.id_RiskAssessment0",
+        "short": "Computed id of RiskAssessment[0]",
+        "definition": "Deterministic id of the resource of role RiskAssessment[0] (risk), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_RiskAssessment0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation1",
+        "path": "VisitRow.id_Observation1",
+        "short": "Computed id of Observation[1]",
+        "definition": "Deterministic id of the resource of role Observation[1] (panel), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation1",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Condition0",
+        "path": "VisitRow.id_Condition0",
+        "short": "Computed id of Condition[0]",
+        "definition": "Deterministic id of the resource of role Condition[0] (condition), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Condition0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Encounter0",
+        "path": "VisitRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_MedicationDispense0",
+        "path": "VisitRow.id_MedicationDispense0",
+        "short": "Computed id of MedicationDispense[0]",
+        "definition": "Deterministic id of the resource of role MedicationDispense[0] (dispense), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_MedicationDispense0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Immunization0",
+        "path": "VisitRow.id_Immunization0",
+        "short": "Computed id of Immunization[0]",
+        "definition": "Deterministic id of the resource of role Immunization[0] (vaccination), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Immunization0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

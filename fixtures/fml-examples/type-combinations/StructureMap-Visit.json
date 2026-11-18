@@ -1,0 +1,2297 @@
+{
+  "resourceType" : "StructureMap",
+  "id" : "Visit",
+  "text" : {
+    "status" : "additional",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/type-combinations/StructureMap/Visit&quot; = `Visit`\n\nuses &quot;http://example.org/fhir/type-combinations/StructureDefinition/VisitRow&quot; alias VisitRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Location&quot; alias Location as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/RiskAssessment&quot; alias RiskAssessment as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Condition&quot; alias Condition as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Encounter&quot; alias Encounter as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/MedicationDispense&quot; alias MedicationDispense as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Immunization&quot; alias Immunization as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Visit(source src : VisitRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n  // Observation[0] · weight — always\n  src where ($this.id_Observation0.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n  // Location[0] · site — always\n  src where ($this.id_Location0.exists()) -&gt; bundle.entry as e, e.resource = create('Location') as res, e.request as req then {\n    src.id_Location0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Location/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Location/' + $this) &quot;Location0-id&quot;;\n    src then Location0(src, res) &quot;Location0-body&quot;;\n  } &quot;Location0&quot;;\n  // RiskAssessment[0] · risk — always\n  src where ($this.id_RiskAssessment0.exists()) -&gt; bundle.entry as e, e.resource = create('RiskAssessment') as res, e.request as req then {\n    src.id_RiskAssessment0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'RiskAssessment/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/RiskAssessment/' + $this) &quot;RiskAssessment0-id&quot;;\n    src then RiskAssessment0(src, res) &quot;RiskAssessment0-body&quot;;\n  } &quot;RiskAssessment0&quot;;\n  // Observation[1] · panel — always\n  src where ($this.id_Observation1.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation1 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Observation/' + $this) &quot;Observation1-id&quot;;\n    src then Observation1(src, res) &quot;Observation1-body&quot;;\n  } &quot;Observation1&quot;;\n  // Condition[0] · condition — always\n  src where ($this.id_Condition0.exists()) -&gt; bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {\n    src.id_Condition0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Condition/' + $this) &quot;Condition0-id&quot;;\n    src then Condition0(src, res) &quot;Condition0-body&quot;;\n  } &quot;Condition0&quot;;\n  // Encounter[0] · visit — always\n  src where ($this.id_Encounter0.exists()) -&gt; bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {\n    src.id_Encounter0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Encounter/' + $this) &quot;Encounter0-id&quot;;\n    src then Encounter0(src, res) &quot;Encounter0-body&quot;;\n  } &quot;Encounter0&quot;;\n  // MedicationDispense[0] · dispense — always\n  src where ($this.id_MedicationDispense0.exists()) -&gt; bundle.entry as e, e.resource = create('MedicationDispense') as res, e.request as req then {\n    src.id_MedicationDispense0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'MedicationDispense/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/MedicationDispense/' + $this) &quot;MedicationDispense0-id&quot;;\n    src then MedicationDispense0(src, res) &quot;MedicationDispense0-body&quot;;\n  } &quot;MedicationDispense0&quot;;\n  // Immunization[0] · vaccination — always\n  src where ($this.id_Immunization0.exists()) -&gt; bundle.entry as e, e.resource = create('Immunization') as res, e.request as req then {\n    src.id_Immunization0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Immunization/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Immunization/' + $this) &quot;Immunization0-id&quot;;\n    src then Immunization0(src, res) &quot;Immunization0-body&quot;;\n  } &quot;Immunization0&quot;;\n}\n\ngroup Patient0(source src : VisitRow, target res : Patient) {\n  src -&gt; res.active = true &quot;fixed-active&quot;;\n  src -&gt; res.multipleBirth = 1 &quot;fixed-multipleBirthInteger&quot;;\n  src -&gt; res.birthDate = '1980-01-01' &quot;fixed-birthDate&quot;;\n  // identifier: written by 2 rows (R-001, R-002) → one shared instance\n  src where ($this.patient_id.exists() or $this.id_system.exists()) -&gt; res.identifier as p then {\n    src.patient_id as v -&gt; p.value = v &quot;R-001&quot;;\n    src.id_system as v -&gt; p.system = v &quot;R-002&quot;;\n  } &quot;Patient0-identifier&quot;;\n  src.language as v -&gt; res.language = v &quot;R-003&quot;;\n  // meta: written by 2 rows (R-004, R-005) → one shared instance\n  src where ($this.record_version.exists() or $this.profile_url.exists()) -&gt; res.meta as p then {\n    src.record_version as v -&gt; p.versionId = v &quot;R-004&quot;;\n    src.profile_url as v -&gt; p.profile = v &quot;R-005&quot;;\n  } &quot;Patient0-meta&quot;;\n  // photo: written by 2 rows (R-006, R-007) → one shared instance\n  src where ($this.photo_url.exists() or $this.photo_size.exists()) -&gt; res.photo as p then {\n    src.photo_url as v -&gt; p.url = v &quot;R-006&quot;;\n    src.photo_size as v -&gt; p.size = v &quot;R-007&quot;;\n  } &quot;Patient0-photo&quot;;\n  src -&gt; res.name as p, p.text = 'Test Patient' &quot;R-008&quot;;\n}\n\ngroup Observation0(source src : VisitRow, target res : Observation) {\n  src.obs_status as v -&gt; res.status = v &quot;R-009&quot;;\n  src.obs_label as v -&gt; res.code as p, p.text = v &quot;R-010&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-011&quot;;\n}\n\ngroup Location0(source src : VisitRow, target res : Location) {\n  // position: written by 3 rows (R-012, R-013, R-014) → one shared instance\n  src where ($this.weight_kg.exists() or $this.ref_high.exists()) -&gt; res.position as p then {\n    src.weight_kg as v -&gt; p.longitude = v &quot;R-012&quot;;\n    src.ref_high as v -&gt; p.latitude = v &quot;R-013&quot;;\n    src -&gt; p.altitude = 0.25 &quot;R-014&quot;;\n  } &quot;Location0-position&quot;;\n  src.count as v -&gt; res.name = v &quot;R-015&quot;;\n  src.ratio as v -&gt; res.description = v &quot;R-016&quot;;\n  src.smoker as v -&gt; res.alias = v &quot;R-017&quot;;\n}\n\ngroup RiskAssessment0(source src : VisitRow, target res : RiskAssessment) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src.ratio as v -&gt; res.prediction as p, p.relativeRisk = v &quot;R-018&quot;;\n  src.visit_date as v -&gt; res.mitigation = v &quot;R-019&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-020&quot;;\n}\n\ngroup Observation1(source src : VisitRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('http://loinc.org', '8301-4', 'type combinations panel') &quot;fixed-code&quot;;\n  src.height_cm as v -&gt; res.value = create('Quantity') as q then {\n    v -&gt; q.value = v &quot;R-021-value&quot;;\n    src -&gt; q.unit = 'centimeter', q.system = 'http://unitsofmeasure.org', q.code = 'cm' &quot;R-021-unit&quot;;\n  } &quot;R-021&quot;;\n  // component[c2s]: named slice, created only if the column has a value\n  src where ($this.obs_label.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://loinc.org', '8307-1', 'categorical as text') &quot;slice-c2s-code&quot;;\n    src.obs_label as v -&gt; slc.value = v &quot;R-022&quot;;\n  } &quot;slice-c2s&quot;;\n  // component[s2s]: named slice, created only if the column has a value\n  src where ($this.note.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://loinc.org', '8308-9', 'string as text') &quot;slice-s2s-code&quot;;\n    src.note as v -&gt; slc.value = v &quot;R-023&quot;;\n  } &quot;slice-s2s&quot;;\n  // component[i2i]: named slice, created only if the column has a value\n  src where ($this.count.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://loinc.org', '8309-7', 'integer') &quot;slice-i2i-code&quot;;\n    src.count as v -&gt; slc.value = v &quot;R-024&quot;;\n  } &quot;slice-i2i&quot;;\n  // component[b2b]: named slice, created only if the column has a value\n  src where ($this.smoker.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://loinc.org', '8310-5', 'boolean') &quot;slice-b2b-code&quot;;\n    src.smoker as v -&gt; slc.value = v &quot;R-025&quot;;\n  } &quot;slice-b2b&quot;;\n  // component[dt2dt]: named slice, created only if the column has a value\n  src where ($this.visit_at.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('http://loinc.org', '8311-3', 'dateTime') &quot;slice-dt2dt-code&quot;;\n    src.visit_at as v -&gt; slc.value = v &quot;R-026&quot;;\n  } &quot;slice-dt2dt&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-027&quot;;\n}\n\ngroup Condition0(source src : VisitRow, target res : Condition) {\n  src -&gt; res.code = cc('http://snomed.info/sct', '38341003', 'Hypertension') &quot;fixed-code&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-028&quot;;\n}\n\ngroup Encounter0(source src : VisitRow, target res : Encounter) {\n  src -&gt; res.status = 'finished' &quot;fixed-status&quot;;\n  src -&gt; res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') &quot;fixed-class&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-029&quot;;\n  // diagnosis: written by 2 rows (R-030, R-031) → one shared instance\n  src where ($this.dose_number.exists()) -&gt; res.diagnosis as p then {\n    src.id_Condition0 as t -&gt; p.condition as r, r.reference = evaluate(t, 'Condition/' + $this) &quot;R-030&quot;;\n    src.dose_number as v -&gt; p.rank = v &quot;R-031&quot;;\n  } &quot;Encounter0-diagnosis&quot;;\n}\n\ngroup MedicationDispense0(source src : VisitRow, target res : MedicationDispense) {\n  src -&gt; res.status = 'completed' &quot;fixed-status&quot;;\n  src -&gt; res.medication = cc('http://snomed.info/sct', '387517004', 'Paracetamol') &quot;fixed-medicationCodeableConcept&quot;;\n  src.ref_low as v -&gt; res.quantity = create('Quantity') as q then {\n    v -&gt; q.value = v &quot;R-035-value&quot;;\n    src -&gt; q.unit = 'milliliter', q.system = 'http://unitsofmeasure.org', q.code = 'mL' &quot;R-035-unit&quot;;\n  } &quot;R-035&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-036&quot;;\n}\n\ngroup Immunization0(source src : VisitRow, target res : Immunization) {\n  src -&gt; res.status = 'completed' &quot;fixed-status&quot;;\n  src -&gt; res.vaccineCode = cc('http://snomed.info/sct', '836398006', 'Vaccine') &quot;fixed-vaccineCode&quot;;\n  src -&gt; res.recorded = '2023-05-04T10:00:00+02:00' &quot;fixed-recorded&quot;;\n  src.vaccinated_on as v -&gt; res.occurrence = v &quot;R-032&quot;;\n  src.visit_at as v -&gt; res.lotNumber = v &quot;R-033&quot;;\n  src.id_Patient0 as t -&gt; res.patient as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-034&quot;;\n}\n</pre></div>"
+  },
+  "url" : "http://example.org/fhir/type-combinations/StructureMap/Visit",
+  "name" : "Visit",
+  "status" : "draft",
+  "structure" : [{
+    "url" : "http://example.org/fhir/type-combinations/StructureDefinition/VisitRow",
+    "mode" : "source",
+    "alias" : "VisitRow"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Bundle",
+    "mode" : "target",
+    "alias" : "Bundle"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Patient",
+    "mode" : "target",
+    "alias" : "Patient"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Observation",
+    "mode" : "target",
+    "alias" : "Observation"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Location",
+    "mode" : "target",
+    "alias" : "Location"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/RiskAssessment",
+    "mode" : "target",
+    "alias" : "RiskAssessment"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Condition",
+    "mode" : "target",
+    "alias" : "Condition"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Encounter",
+    "mode" : "target",
+    "alias" : "Encounter"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/MedicationDispense",
+    "mode" : "target",
+    "alias" : "MedicationDispense"
+  },
+  {
+    "url" : "http://hl7.org/fhir/StructureDefinition/Immunization",
+    "mode" : "target",
+    "alias" : "Immunization"
+  }],
+  "group" : [{
+    "name" : "Visit",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "bundle",
+      "type" : "Bundle",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "bundle-type",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "type",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "transaction"
+        }]
+      }]
+    },
+    {
+      "name" : "Patient0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Patient0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Patient"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Patient0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Patient0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Patient/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Patient/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Patient0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Patient0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Observation0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Observation0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Observation"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Observation0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Observation0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Observation/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Observation/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Observation0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Observation0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Location0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Location0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Location"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Location0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Location0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Location/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Location/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Location0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Location0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "RiskAssessment0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_RiskAssessment0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "RiskAssessment"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "RiskAssessment0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_RiskAssessment0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'RiskAssessment/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/RiskAssessment/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "RiskAssessment0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "RiskAssessment0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Observation1",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Observation1.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Observation"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Observation1-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Observation1",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Observation/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Observation/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Observation1-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Observation1",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Condition0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Condition0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Condition"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Condition0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Condition0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Condition/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Condition/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Condition0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Condition0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Encounter0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Encounter0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Encounter"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Encounter0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Encounter0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Encounter/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Encounter/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Encounter0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Encounter0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "MedicationDispense0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_MedicationDispense0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "MedicationDispense"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "MedicationDispense0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_MedicationDispense0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'MedicationDispense/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/MedicationDispense/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "MedicationDispense0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "MedicationDispense0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    },
+    {
+      "name" : "Immunization0",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.id_Immunization0.exists())"
+      }],
+      "target" : [{
+        "context" : "bundle",
+        "contextType" : "variable",
+        "element" : "entry",
+        "variable" : "e"
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "resource",
+        "variable" : "res",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Immunization"
+        }]
+      },
+      {
+        "context" : "e",
+        "contextType" : "variable",
+        "element" : "request",
+        "variable" : "req"
+      }],
+      "rule" : [{
+        "name" : "Immunization0-id",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Immunization0",
+          "variable" : "i"
+        }],
+        "target" : [{
+          "context" : "res",
+          "contextType" : "variable",
+          "element" : "id",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "i"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "method",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "PUT"
+          }]
+        },
+        {
+          "context" : "req",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'Immunization/' + $this"
+          }]
+        },
+        {
+          "context" : "e",
+          "contextType" : "variable",
+          "element" : "fullUrl",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "i"
+          },
+          {
+            "valueString" : "'http://example.org/fhir/type-combinations/Immunization/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "Immunization0-body",
+        "source" : [{
+          "context" : "src"
+        }],
+        "dependent" : [{
+          "name" : "Immunization0",
+          "variable" : ["src",
+          "res"]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Patient0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Patient",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-active",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "active",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueBoolean" : true
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-multipleBirthInteger",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "multipleBirth",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueInteger" : 1
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-birthDate",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "birthDate",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "1980-01-01"
+        }]
+      }]
+    },
+    {
+      "name" : "Patient0-identifier",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.patient_id.exists() or $this.id_system.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "identifier",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-001",
+        "source" : [{
+          "context" : "src",
+          "element" : "patient_id",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-002",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_system",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-003",
+      "source" : [{
+        "context" : "src",
+        "element" : "language",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "language",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "Patient0-meta",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.record_version.exists() or $this.profile_url.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "meta",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-004",
+        "source" : [{
+          "context" : "src",
+          "element" : "record_version",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "versionId",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-005",
+        "source" : [{
+          "context" : "src",
+          "element" : "profile_url",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "profile",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "Patient0-photo",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.photo_url.exists() or $this.photo_size.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "photo",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-006",
+        "source" : [{
+          "context" : "src",
+          "element" : "photo_url",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "url",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-007",
+        "source" : [{
+          "context" : "src",
+          "element" : "photo_size",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "size",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-008",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "name",
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "text",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "Test Patient"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Observation0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Observation",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "R-009",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_status",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-010",
+      "source" : [{
+        "context" : "src",
+        "element" : "obs_label",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "text",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-011",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Location0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Location",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "Location0-position",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.weight_kg.exists() or $this.ref_high.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "position",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-012",
+        "source" : [{
+          "context" : "src",
+          "element" : "weight_kg",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "longitude",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-013",
+        "source" : [{
+          "context" : "src",
+          "element" : "ref_high",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "latitude",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-014",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "altitude",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueDecimal" : 0.25
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-015",
+      "source" : [{
+        "context" : "src",
+        "element" : "count",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "name",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-016",
+      "source" : [{
+        "context" : "src",
+        "element" : "ratio",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "description",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-017",
+      "source" : [{
+        "context" : "src",
+        "element" : "smoker",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "alias",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "RiskAssessment0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "RiskAssessment",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "final"
+        }]
+      }]
+    },
+    {
+      "name" : "R-018",
+      "source" : [{
+        "context" : "src",
+        "element" : "ratio",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "prediction",
+        "variable" : "p"
+      },
+      {
+        "context" : "p",
+        "contextType" : "variable",
+        "element" : "relativeRisk",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-019",
+      "source" : [{
+        "context" : "src",
+        "element" : "visit_date",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "mitigation",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-020",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Observation1",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Observation",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "final"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-code",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://loinc.org"
+        },
+        {
+          "valueString" : "8301-4"
+        },
+        {
+          "valueString" : "type combinations panel"
+        }]
+      }]
+    },
+    {
+      "name" : "R-021",
+      "source" : [{
+        "context" : "src",
+        "element" : "height_cm",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "value",
+        "variable" : "q",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Quantity"
+        }]
+      }],
+      "rule" : [{
+        "name" : "R-021-value",
+        "source" : [{
+          "context" : "v"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-021-unit",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "centimeter"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://unitsofmeasure.org"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "cm"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "slice-c2s",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.obs_label.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-c2s-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://loinc.org"
+          },
+          {
+            "valueString" : "8307-1"
+          },
+          {
+            "valueString" : "categorical as text"
+          }]
+        }]
+      },
+      {
+        "name" : "R-022",
+        "source" : [{
+          "context" : "src",
+          "element" : "obs_label",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "slice-s2s",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.note.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-s2s-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://loinc.org"
+          },
+          {
+            "valueString" : "8308-9"
+          },
+          {
+            "valueString" : "string as text"
+          }]
+        }]
+      },
+      {
+        "name" : "R-023",
+        "source" : [{
+          "context" : "src",
+          "element" : "note",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "slice-i2i",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.count.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-i2i-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://loinc.org"
+          },
+          {
+            "valueString" : "8309-7"
+          },
+          {
+            "valueString" : "integer"
+          }]
+        }]
+      },
+      {
+        "name" : "R-024",
+        "source" : [{
+          "context" : "src",
+          "element" : "count",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "slice-b2b",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.smoker.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-b2b-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://loinc.org"
+          },
+          {
+            "valueString" : "8310-5"
+          },
+          {
+            "valueString" : "boolean"
+          }]
+        }]
+      },
+      {
+        "name" : "R-025",
+        "source" : [{
+          "context" : "src",
+          "element" : "smoker",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "slice-dt2dt",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.visit_at.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "component",
+        "variable" : "slc"
+      }],
+      "rule" : [{
+        "name" : "slice-dt2dt-code",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "cc",
+          "parameter" : [{
+            "valueString" : "http://loinc.org"
+          },
+          {
+            "valueString" : "8311-3"
+          },
+          {
+            "valueString" : "dateTime"
+          }]
+        }]
+      },
+      {
+        "name" : "R-026",
+        "source" : [{
+          "context" : "src",
+          "element" : "visit_at",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "slc",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-027",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Condition0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Condition",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-code",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "code",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "38341003"
+        },
+        {
+          "valueString" : "Hypertension"
+        }]
+      }]
+    },
+    {
+      "name" : "R-028",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Encounter0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Encounter",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "finished"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-class",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "class",
+        "transform" : "c",
+        "parameter" : [{
+          "valueString" : "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        },
+        {
+          "valueString" : "AMB"
+        },
+        {
+          "valueString" : "ambulatory"
+        }]
+      }]
+    },
+    {
+      "name" : "R-029",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    },
+    {
+      "name" : "Encounter0-diagnosis",
+      "source" : [{
+        "context" : "src",
+        "condition" : "($this.dose_number.exists())"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "diagnosis",
+        "variable" : "p"
+      }],
+      "rule" : [{
+        "name" : "R-030",
+        "source" : [{
+          "context" : "src",
+          "element" : "id_Condition0",
+          "variable" : "t"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "condition",
+          "variable" : "r"
+        },
+        {
+          "context" : "r",
+          "contextType" : "variable",
+          "element" : "reference",
+          "transform" : "evaluate",
+          "parameter" : [{
+            "valueId" : "t"
+          },
+          {
+            "valueString" : "'Condition/' + $this"
+          }]
+        }]
+      },
+      {
+        "name" : "R-031",
+        "source" : [{
+          "context" : "src",
+          "element" : "dose_number",
+          "variable" : "v"
+        }],
+        "target" : [{
+          "context" : "p",
+          "contextType" : "variable",
+          "element" : "rank",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "MedicationDispense0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "MedicationDispense",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "completed"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-medicationCodeableConcept",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "medication",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "387517004"
+        },
+        {
+          "valueString" : "Paracetamol"
+        }]
+      }]
+    },
+    {
+      "name" : "R-035",
+      "source" : [{
+        "context" : "src",
+        "element" : "ref_low",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "quantity",
+        "variable" : "q",
+        "transform" : "create",
+        "parameter" : [{
+          "valueString" : "Quantity"
+        }]
+      }],
+      "rule" : [{
+        "name" : "R-035-value",
+        "source" : [{
+          "context" : "v"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "value",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueId" : "v"
+          }]
+        }]
+      },
+      {
+        "name" : "R-035-unit",
+        "source" : [{
+          "context" : "src"
+        }],
+        "target" : [{
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "unit",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "milliliter"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "system",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "http://unitsofmeasure.org"
+          }]
+        },
+        {
+          "context" : "q",
+          "contextType" : "variable",
+          "element" : "code",
+          "transform" : "copy",
+          "parameter" : [{
+            "valueString" : "mL"
+          }]
+        }]
+      }]
+    },
+    {
+      "name" : "R-036",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "subject",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  },
+  {
+    "name" : "Immunization0",
+    "typeMode" : "none",
+    "input" : [{
+      "name" : "src",
+      "type" : "VisitRow",
+      "mode" : "source"
+    },
+    {
+      "name" : "res",
+      "type" : "Immunization",
+      "mode" : "target"
+    }],
+    "rule" : [{
+      "name" : "fixed-status",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "status",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "completed"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-vaccineCode",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "vaccineCode",
+        "transform" : "cc",
+        "parameter" : [{
+          "valueString" : "http://snomed.info/sct"
+        },
+        {
+          "valueString" : "836398006"
+        },
+        {
+          "valueString" : "Vaccine"
+        }]
+      }]
+    },
+    {
+      "name" : "fixed-recorded",
+      "source" : [{
+        "context" : "src"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "recorded",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueString" : "2023-05-04T10:00:00+02:00"
+        }]
+      }]
+    },
+    {
+      "name" : "R-032",
+      "source" : [{
+        "context" : "src",
+        "element" : "vaccinated_on",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "occurrence",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-033",
+      "source" : [{
+        "context" : "src",
+        "element" : "visit_at",
+        "variable" : "v"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "lotNumber",
+        "transform" : "copy",
+        "parameter" : [{
+          "valueId" : "v"
+        }]
+      }]
+    },
+    {
+      "name" : "R-034",
+      "source" : [{
+        "context" : "src",
+        "element" : "id_Patient0",
+        "variable" : "t"
+      }],
+      "target" : [{
+        "context" : "res",
+        "contextType" : "variable",
+        "element" : "patient",
+        "variable" : "r"
+      },
+      {
+        "context" : "r",
+        "contextType" : "variable",
+        "element" : "reference",
+        "transform" : "evaluate",
+        "parameter" : [{
+          "valueId" : "t"
+        },
+        {
+          "valueString" : "'Patient/' + $this"
+        }]
+      }]
+    }]
+  }]
+}

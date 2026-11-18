@@ -1,0 +1,181 @@
+map "http://example.org/fhir/type-combinations/StructureMap/Visit" = `Visit`
+
+uses "http://example.org/fhir/type-combinations/StructureDefinition/VisitRow" alias VisitRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
+uses "http://hl7.org/fhir/StructureDefinition/Location" alias Location as target
+uses "http://hl7.org/fhir/StructureDefinition/RiskAssessment" alias RiskAssessment as target
+uses "http://hl7.org/fhir/StructureDefinition/Condition" alias Condition as target
+uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as target
+uses "http://hl7.org/fhir/StructureDefinition/MedicationDispense" alias MedicationDispense as target
+uses "http://hl7.org/fhir/StructureDefinition/Immunization" alias Immunization as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Visit(source src : VisitRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+  // Observation[0] · weight — always
+  src where ($this.id_Observation0.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Observation/' + $this) "Observation0-id";
+    src then Observation0(src, res) "Observation0-body";
+  } "Observation0";
+  // Location[0] · site — always
+  src where ($this.id_Location0.exists()) -> bundle.entry as e, e.resource = create('Location') as res, e.request as req then {
+    src.id_Location0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Location/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Location/' + $this) "Location0-id";
+    src then Location0(src, res) "Location0-body";
+  } "Location0";
+  // RiskAssessment[0] · risk — always
+  src where ($this.id_RiskAssessment0.exists()) -> bundle.entry as e, e.resource = create('RiskAssessment') as res, e.request as req then {
+    src.id_RiskAssessment0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'RiskAssessment/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/RiskAssessment/' + $this) "RiskAssessment0-id";
+    src then RiskAssessment0(src, res) "RiskAssessment0-body";
+  } "RiskAssessment0";
+  // Observation[1] · panel — always
+  src where ($this.id_Observation1.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation1 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Observation/' + $this) "Observation1-id";
+    src then Observation1(src, res) "Observation1-body";
+  } "Observation1";
+  // Condition[0] · condition — always
+  src where ($this.id_Condition0.exists()) -> bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {
+    src.id_Condition0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Condition/' + $this) "Condition0-id";
+    src then Condition0(src, res) "Condition0-body";
+  } "Condition0";
+  // Encounter[0] · visit — always
+  src where ($this.id_Encounter0.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
+    src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Encounter/' + $this) "Encounter0-id";
+    src then Encounter0(src, res) "Encounter0-body";
+  } "Encounter0";
+  // MedicationDispense[0] · dispense — always
+  src where ($this.id_MedicationDispense0.exists()) -> bundle.entry as e, e.resource = create('MedicationDispense') as res, e.request as req then {
+    src.id_MedicationDispense0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'MedicationDispense/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/MedicationDispense/' + $this) "MedicationDispense0-id";
+    src then MedicationDispense0(src, res) "MedicationDispense0-body";
+  } "MedicationDispense0";
+  // Immunization[0] · vaccination — always
+  src where ($this.id_Immunization0.exists()) -> bundle.entry as e, e.resource = create('Immunization') as res, e.request as req then {
+    src.id_Immunization0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Immunization/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Immunization/' + $this) "Immunization0-id";
+    src then Immunization0(src, res) "Immunization0-body";
+  } "Immunization0";
+}
+
+group Patient0(source src : VisitRow, target res : Patient) {
+  src -> res.active = true "fixed-active";
+  src -> res.multipleBirth = 1 "fixed-multipleBirthInteger";
+  src -> res.birthDate = '1980-01-01' "fixed-birthDate";
+  // identifier: written by 2 rows (R-001, R-002) → one shared instance
+  src where ($this.patient_id.exists() or $this.id_system.exists()) -> res.identifier as p then {
+    src.patient_id as v -> p.value = v "R-001";
+    src.id_system as v -> p.system = v "R-002";
+  } "Patient0-identifier";
+  src.language as v -> res.language = v "R-003";
+  // meta: written by 2 rows (R-004, R-005) → one shared instance
+  src where ($this.record_version.exists() or $this.profile_url.exists()) -> res.meta as p then {
+    src.record_version as v -> p.versionId = v "R-004";
+    src.profile_url as v -> p.profile = v "R-005";
+  } "Patient0-meta";
+  // photo: written by 2 rows (R-006, R-007) → one shared instance
+  src where ($this.photo_url.exists() or $this.photo_size.exists()) -> res.photo as p then {
+    src.photo_url as v -> p.url = v "R-006";
+    src.photo_size as v -> p.size = v "R-007";
+  } "Patient0-photo";
+  src -> res.name as p, p.text = 'Test Patient' "R-008";
+}
+
+group Observation0(source src : VisitRow, target res : Observation) {
+  src.obs_status as v -> res.status = v "R-009";
+  src.obs_label as v -> res.code as p, p.text = v "R-010";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-011";
+}
+
+group Location0(source src : VisitRow, target res : Location) {
+  // position: written by 3 rows (R-012, R-013, R-014) → one shared instance
+  src where ($this.weight_kg.exists() or $this.ref_high.exists()) -> res.position as p then {
+    src.weight_kg as v -> p.longitude = v "R-012";
+    src.ref_high as v -> p.latitude = v "R-013";
+    src -> p.altitude = 0.25 "R-014";
+  } "Location0-position";
+  src.count as v -> res.name = v "R-015";
+  src.ratio as v -> res.description = v "R-016";
+  src.smoker as v -> res.alias = v "R-017";
+}
+
+group RiskAssessment0(source src : VisitRow, target res : RiskAssessment) {
+  src -> res.status = 'final' "fixed-status";
+  src.ratio as v -> res.prediction as p, p.relativeRisk = v "R-018";
+  src.visit_date as v -> res.mitigation = v "R-019";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-020";
+}
+
+group Observation1(source src : VisitRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.code = cc('http://loinc.org', '8301-4', 'type combinations panel') "fixed-code";
+  src.height_cm as v -> res.value = create('Quantity') as q then {
+    v -> q.value = v "R-021-value";
+    src -> q.unit = 'centimeter', q.system = 'http://unitsofmeasure.org', q.code = 'cm' "R-021-unit";
+  } "R-021";
+  // component[c2s]: named slice, created only if the column has a value
+  src where ($this.obs_label.exists()) -> res.component as slc then {
+    src -> slc.code = cc('http://loinc.org', '8307-1', 'categorical as text') "slice-c2s-code";
+    src.obs_label as v -> slc.value = v "R-022";
+  } "slice-c2s";
+  // component[s2s]: named slice, created only if the column has a value
+  src where ($this.note.exists()) -> res.component as slc then {
+    src -> slc.code = cc('http://loinc.org', '8308-9', 'string as text') "slice-s2s-code";
+    src.note as v -> slc.value = v "R-023";
+  } "slice-s2s";
+  // component[i2i]: named slice, created only if the column has a value
+  src where ($this.count.exists()) -> res.component as slc then {
+    src -> slc.code = cc('http://loinc.org', '8309-7', 'integer') "slice-i2i-code";
+    src.count as v -> slc.value = v "R-024";
+  } "slice-i2i";
+  // component[b2b]: named slice, created only if the column has a value
+  src where ($this.smoker.exists()) -> res.component as slc then {
+    src -> slc.code = cc('http://loinc.org', '8310-5', 'boolean') "slice-b2b-code";
+    src.smoker as v -> slc.value = v "R-025";
+  } "slice-b2b";
+  // component[dt2dt]: named slice, created only if the column has a value
+  src where ($this.visit_at.exists()) -> res.component as slc then {
+    src -> slc.code = cc('http://loinc.org', '8311-3', 'dateTime') "slice-dt2dt-code";
+    src.visit_at as v -> slc.value = v "R-026";
+  } "slice-dt2dt";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-027";
+}
+
+group Condition0(source src : VisitRow, target res : Condition) {
+  src -> res.code = cc('http://snomed.info/sct', '38341003', 'Hypertension') "fixed-code";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-028";
+}
+
+group Encounter0(source src : VisitRow, target res : Encounter) {
+  src -> res.status = 'finished' "fixed-status";
+  src -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') "fixed-class";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-029";
+  // diagnosis: written by 2 rows (R-030, R-031) → one shared instance
+  src where ($this.dose_number.exists()) -> res.diagnosis as p then {
+    src.id_Condition0 as t -> p.condition as r, r.reference = evaluate(t, 'Condition/' + $this) "R-030";
+    src.dose_number as v -> p.rank = v "R-031";
+  } "Encounter0-diagnosis";
+}
+
+group MedicationDispense0(source src : VisitRow, target res : MedicationDispense) {
+  src -> res.status = 'completed' "fixed-status";
+  src -> res.medication = cc('http://snomed.info/sct', '387517004', 'Paracetamol') "fixed-medicationCodeableConcept";
+  src.ref_low as v -> res.quantity = create('Quantity') as q then {
+    v -> q.value = v "R-035-value";
+    src -> q.unit = 'milliliter', q.system = 'http://unitsofmeasure.org', q.code = 'mL' "R-035-unit";
+  } "R-035";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-036";
+}
+
+group Immunization0(source src : VisitRow, target res : Immunization) {
+  src -> res.status = 'completed' "fixed-status";
+  src -> res.vaccineCode = cc('http://snomed.info/sct', '836398006', 'Vaccine') "fixed-vaccineCode";
+  src -> res.recorded = '2023-05-04T10:00:00+02:00' "fixed-recorded";
+  src.vaccinated_on as v -> res.occurrence = v "R-032";
+  src.visit_at as v -> res.lotNumber = v "R-033";
+  src.id_Patient0 as t -> res.patient as r, r.reference = evaluate(t, 'Patient/' + $this) "R-034";
+}
