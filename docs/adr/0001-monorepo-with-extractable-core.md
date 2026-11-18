@@ -16,7 +16,7 @@ During the MVP almost every feature changes schema, generator and UI together. W
 Keep the core in the `workbench` monorepo, isolated as if it were separate:
 
 - the domain packages (`model`, `fhir-defs`, `fml`, `normalizer`, `export`) do no network or database I/O and do not import `apps/*`. CI fails if they do: dependency-cruiser checks imports, ESLint bans I/O globals, and the packages compile without Node types (ADR-0003);
-- the core packages have their own versions and are published to npm, together with the `cindermed` CLI (from `v0.3.0`);
+- the core packages have their own versions and are published to npm, together with the `cindermed` CLI (from `v0.5.0`, module 3b; first planned for `v0.3.0`, moved when the mapping grid was brought forward, 2026-11-18);
 - the project file format has its own version (`formatVersion`), independent of the app's.
 
 **Extraction criteria.** Move the core to its own repository (for example `core`) when one of these happens:

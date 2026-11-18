@@ -891,7 +891,7 @@ Scopes are the packages and apps: `model`, `fhir-defs`, `fml`, `normalizer`, `ex
 | Item | Rule |
 | --- | --- |
 | Tool | Changesets for the pnpm monorepo: every PR that changes a package's behaviour adds a `.changeset/*.md` file with the level (patch, minor, major) and one sentence for the changelog |
-| Domain packages and CLI | Independent semver (`@cindermed/model`, `@cindermed/fml`, …). Published to npm with provenance from `v0.3.0`, when the core works on its own; before that they stay private |
+| Domain packages and CLI | Independent semver (`@cindermed/model`, `@cindermed/fml`, …). Published to npm with provenance from `v0.5.0` (module 3b), when the core works on its own; before that they stay private |
 | Product | `apps/api` and `apps/web` in one group with a single version: the workbench version (`v0.1.0`, `v0.2.0`, …) |
 | Release | On `main` a workflow opens or updates the "Version Packages" PR; merging it updates versions and `CHANGELOG.md`, creates the `vX.Y.Z` tag and the GitHub Release with notes, and publishes the npm packages |
 | Images | For each tag, Docker images of `api` and `web` pushed to GitHub Container Registry with tags `X.Y.Z` and `sha-<commit>`; `latest` only for stable releases |
@@ -940,21 +940,24 @@ Scopes are the packages and apps: `model`, `fhir-defs`, `fml`, `normalizer`, `ex
 
 ## Incremental module plan
 
-The 43 MVP features are split into 9 modules, plus a module 0 for the foundations. Work starts from the domain: modules 1–3 have no UI and are used from the command line. By version `v0.3.0` a hand-written project file already produces FML that is verified and validated against FHIR, and the contracts are fixed before the API and UI are built. Each module is a minor release made of several pull requests, one per branch. Claude Code receives this document exported as Markdown (`docs/specification.md`), the `fml-examples.zip` package (in `fixtures/fml-examples`) and the two MOTU and Metastra spreadsheets (in `fixtures/excel`).
+The 43 MVP features are split into 9 modules, plus a module 0 for the foundations; module 3 has a second part, 3b. Work starts from the domain: modules 1–3 have no UI and are used from the command line. By version `v0.3.0` a hand-written project file already produces FML that is verified and validated against FHIR (paths, types, bindings, references). The mapping grid (module 7) comes next, in local mode: it works on a project file in the browser, with the same validation as the CLI, before the API, the database and the other screens (modules 4–6) are built. Each module is a minor release made of several pull requests, one per branch, and releases are numbered in build order. Claude Code receives this document exported as Markdown (`docs/specification.md`), the `fml-examples.zip` package (in `fixtures/fml-examples`) and the two MOTU and Metastra spreadsheets (in `fixtures/excel`).
 
 ![MVP modules in build order](images/diagram-modules.png)
+
+The diagram shows the original order; the table below is the current one (module 3 split into 3 and 3b, module 7 before modules 4–6).
 
 | Module | Concepts and features | Packages | Example branches | Release: done when |
 | --- | --- | --- | --- | --- |
 | 0. Foundations | No features: organization, monorepo, CI, releases, environment, docs skeleton | all (empty), `docker/`, `apps/docs` | `chore/monorepo-setup`, `chore/org-community-files`, `ci/github-actions`, `chore/changesets-release`, `chore/docker-compose`, `docs/site-skeleton`, `docs/specs-and-adr` | `v0.0.1`: CI green; `docker compose up` shows the Keycloak login; the "Version Packages" PR creates tag and images; the empty docs site is deployed |
 | 1. Domain core | Project objects (table, column, role, row, value map, reference, status), integrity rules, project file (H3) | `model`, `cli` | `feature/model-json-schemas`, `feature/model-types-codegen`, `feature/model-integrity-rules`, `feature/h3-project-file-cli` | `v0.1.0`: `cindermed validate` accepts the two example projects; every integrity rule has a positive and a negative test |
 | 2. Generator and package | G1, G2, G3, G7, G10 (grammar), H1 | `fml`, `normalizer`, `export`, `cli` | `feature/g2-fml-ast-printer`, `feature/g10-grammar-check`, `feature/g1-logical-model-normalization`, `feature/normalizer-reference`, `feature/normalizer-streaming`, `feature/g2-generator-roles`, `feature/g2-generator-references`, `feature/g2-generator-value-maps`, `feature/golden-long-format`, `chore/fixtures-generated-maps`, `feature/g7-export-manifest`, `feature/h1-csv-xlsx-export`, `ci/golden-tests` | `v0.2.0`: `cindermed export` on the two examples produces maps that pass the grammar and the golden tests in CI |
-| 3. FHIR definitions and validation | D7 (paths, type compatibility, binding, cardinality), F4; contract extensions for long tables (Coding from a code column, time zone at the border, Quantity unit from a text column) | `fhir-defs`, `model` | `feature/fhir-defs-package-loader`, `feature/fhir-defs-element-tree`, `feature/d7-path-validation`, `feature/d7-type-compatibility`, `feature/d7-binding-checks`, `feature/f4-reference-checks`, `feature/contract-coding-from-column`, `feature/contract-time-zone`, `feature/contract-quantity-unit-text`, `ci/npm-publish` | `v0.3.0`: `cindermed validate` flags the boolean on `Patient.name`; every cell of the compatibility table is tested in R4 and R5; the long-format golden case (MIMIC-IV demo slice) matches the MIMIC-IV on FHIR demo on its key fields, and the daylight-saving case passes; core packages and `cindermed` published to npm |
-| 4. Platform | A1, A2, A3; history as infrastructure | `api`, `web` | `feature/api-persistence-entities`, `feature/a2-auth-and-roles`, `feature/a3-optimistic-concurrency`, `feature/api-history`, `feature/a1-projects-ui` | `v0.4.0`: login, project creation, members with roles, 409 conflict handled in the UI, JSON import and export from the UI |
-| 5. Source | B1–B6, B11 (several tables) | `api`, `web` | `feature/b1-b2-import-wizard`, `feature/b3-dictionary-import`, `feature/b3-code-table-dictionary`, `feature/b4-b5-column-dictionary`, `feature/b6-source-editor`, `feature/b11-several-tables` | `v0.5.0`: import of the Metastra FirstOverview: 100 variables, 11 sections, fixable warnings; MOTU's three tables imported into one project; `d_labitems` imported as the allowed values of `itemid` |
-| 6. Roles and references | C1–C6, F1–F3, B11 (relations between tables) | `api`, `web` | `feature/c1-roles`, `feature/c2-c4-multiplicity-conditions`, `feature/c5-c6-fixed-values-ids`, `feature/f1-f3-references`, `feature/b11-table-relations` | `v0.6.0`: the 6 roles of the Metastra example created from the UI, with automatic references from the context; the MOTU relations declared from the UI and a reference across tables created through them |
-| 7. Mapping grid | D1–D5, D8, A5, A6 | `web`, `api` | `feature/d1-mapping-grid` (with a table switcher for B11), `feature/d2-grouping`, `feature/d3-path-picker`, `feature/d4-named-slices`, `feature/d5-transforms`, `feature/d8-bulk-actions`, `feature/a5-a6-status-comments` | `v0.7.0`: the 11 example variables mapped by hand give the same project file, ids and dates aside; the boolean on `Patient.name` is red; rows of several tables mapped in the same grid |
-| 8. Value maps and terminology | E1, E1b, E2, E4, E5, E6 | `terminology`, `api`, `web` | `feature/e1-value-map-editor`, `feature/e1b-bulk-value-map-import`, `feature/e2-terminology-providers`, `feature/e4-coding-verification`, `feature/e5-shared-maps`, `feature/e6-value-actions` | `v0.8.0`: a LOINC code searched and assigned from the map; display verified; a map with more than 1,000 entries imported from a code table or a CSV file, and the values it does not cover marked absent in one action |
+| 3. FHIR definitions and validation | D7 (paths, type compatibility, binding, cardinality in a first version), F4; golden cases for every type combination the compatibility table allows; contract extensions in project format 1.4.0: Coding from a code column, profile slice names in paths | `fhir-defs`, `model`, `fml`, `export`, `cli` | `feature/fhir-defs-package-loader`, `feature/fhir-defs-element-tree`, `feature/d7-path-validation`, `feature/d7-type-compatibility`, `chore/fixtures-type-combinations`, `feature/d7-binding-checks`, `feature/f4-reference-checks`, `feature/d7-cardinality`, `feature/contract-coding-from-column`, `feature/contract-profile-slice-names` | `v0.3.0`: `cindermed validate` flags the boolean on `Patient.name`; every cell of the compatibility table is tested in R4 and R5, and every combination it allows has a golden case built by the generator and run by the HL7 engine; required bindings and reference targets are checked; `cindermed export` blocks on FHIR errors |
+| 7. Mapping grid (local mode) | D1–D5, D8; local data layer: a project file loaded from and saved to a file in the browser, through a storage interface the API implements later (module 4); the same validation as the CLI in the browser, with the compact definition index; `cindermed init` (an empty project from a dataset's columns) | `web`, `fhir-defs`, `cli` | `docs/adr-grid-data-layer`, `feature/cli-init`, `feature/d1-mapping-grid` (with a table switcher for B11), `feature/d2-grouping`, `feature/d3-path-picker`, `feature/d4-named-slices`, `feature/d5-transforms`, `feature/d8-bulk-actions` | `v0.4.0`: the 11 example variables mapped by hand give the same project file, ids and dates aside; the boolean on `Patient.name` is red; rows of several tables mapped in the same grid; all without a server |
+| 3b. Long tables and publishing | R5 golden case; MIMIC-IV comparison; contract extensions for long tables: time zone at the border (normalization 1.3.0), Quantity unit from a text column and quantities on a nested element (project format 1.5.0); npm publishing | `normalizer`, `model`, `fml`, `export`, `cli` | `feature/golden-r5`, `test/mimic-key-fields`, `feature/contract-time-zone`, `feature/contract-quantity-unit-text`, `feature/quantity-nested-element`, `ci/npm-publish` | `v0.5.0`: the R5 golden case passes; the long-format golden case (MIMIC-IV demo slice) matches the MIMIC-IV on FHIR demo on its key fields, and the daylight-saving case passes; core packages and `cindermed` published to npm |
+| 4. Platform | A1, A2, A3; history as infrastructure; A5, A6 (status and comments, on top of the platform); the grid moves from local mode to the API | `api`, `web` | `feature/api-persistence-entities`, `feature/a2-auth-and-roles`, `feature/a3-optimistic-concurrency`, `feature/api-history`, `feature/a1-projects-ui`, `feature/grid-api-storage`, `feature/a5-a6-status-comments` | `v0.6.0`: login, project creation, members with roles, 409 conflict handled in the UI, JSON import and export from the UI |
+| 5. Source | B1–B6, B11 (several tables) | `api`, `web` | `feature/b1-b2-import-wizard`, `feature/b3-dictionary-import`, `feature/b3-code-table-dictionary`, `feature/b4-b5-column-dictionary`, `feature/b6-source-editor`, `feature/b11-several-tables` | `v0.7.0`: import of the Metastra FirstOverview: 100 variables, 11 sections, fixable warnings; MOTU's three tables imported into one project; `d_labitems` imported as the allowed values of `itemid` |
+| 6. Roles and references | C1–C6, F1–F3, B11 (relations between tables) | `api`, `web` | `feature/c1-roles`, `feature/c2-c4-multiplicity-conditions`, `feature/c5-c6-fixed-values-ids`, `feature/f1-f3-references`, `feature/b11-table-relations` | `v0.8.0`: the 6 roles of the Metastra example created from the UI, with automatic references from the context; the MOTU relations declared from the UI and a reference across tables created through them |
+| 8. Value maps and terminology | E1, E1b, E2, E4, E5, E6 | `terminology`, `api`, `web` | `feature/e1-value-map-editor`, `feature/e1b-bulk-value-map-import`, `feature/e2-terminology-providers`, `feature/e4-coding-verification`, `feature/e5-shared-maps`, `feature/e6-value-actions` | `v0.9.0`: a LOINC code searched and assigned from the map; display verified; a map with more than 1,000 entries imported from a code table or a CSV file, and the values it does not cover marked absent in one action |
 | 9. Export and acceptance | G6 and the Export page (G7, G10, H1, H3 from the UI); user documentation | `web`, `api`, `apps/docs` | `feature/g6-fml-view`, `feature/export-page`, `test/e2e-acceptance`, `docs/metastra-walkthrough`, `docs/motu-walkthrough` | `v1.0.0`: complete FirstOverview (100 variables mapped, excluded or not mappable) exported without errors; golden and end-to-end tests green; docs site with the two walkthroughs published |
 
 **After the MVP.** V2 and Future features are grouped into modules with the same rules.
@@ -989,8 +992,41 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 - Commits and PR titles in Conventional Commits: <type>(<scope>): <description>.
   Scopes: model, fhir-defs, fml, normalizer, export, terminology, api, web, cli, docs, infra, deps.
 - Every PR: tests, a changeset (pnpm changeset) if a package changes, description from the template,
-  "Closes #n" for the issue. Open the PR with gh pr create; do not merge it: I review it.
+  "Closes #n" for the issue. Open the PR with gh pr create. Merging follows the 'Decisions and merging' section.
 - Never push directly to main. Squash merge.
+
+## Decisions and merging
+
+### Ask me first (stop and wait) only for
+- Contract changes: project, normalization, manifest schemas; translation rules; result codes and their severity.
+- A new third-party dependency (workspace packages are fine).
+- An ADR that changes or contradicts the specification.
+- Scope changes: moving work between modules, dropping a done-when item.
+- Anything hard to undo: releases, tags, npm publishing, repository or org settings, deleting branches with unmerged work.
+
+### Decide yourself, and record it
+Everything else: implementation choices inside an approved plan, refactors, tests, fixes, docs, CI.
+Record non-obvious choices in the PR description or in an ADR (status `accepted` unless it is on the "ask me" list).
+Put any assumption you made in a "Decisions taken" list in the PR description.
+
+### Merge yourself
+Merge a PR yourself (`gh pr merge --squash --auto`) when all of these hold:
+- CI is fully green, the Golden job included;
+- it changes no contract and adds no third-party dependency;
+- it does not touch fixtures/ expected files, CLAUDE.md or the release workflow;
+- it has no open question for me.
+Otherwise, leave the PR open and tell me in one short message what I need to decide.
+After merging, add the PR to a short daily log in your next message to me (number, title, one line).
+
+### Default principles for recurring choices
+- Strict by default: an invalid or unknown value is blocked or reported, never dropped or guessed.
+- Canonical forms inside the platform; locale and formats are declared only at the borders (import, display).
+- A new translation rule or type combination needs a golden case first, built by the generator and run by the HL7 engine.
+- Expected files in fixtures/ change only in a dedicated PR.
+- New third-party dependencies: released at least 14 days ago, pinned to an exact version, licence compatible.
+- No data values in logs or messages (values only in a separate `value` field); no patient data anywhere.
+- When two options are equally good, pick the simpler one that is easier to change later, and record it.
+- When the specification is silent, follow the closest existing ADR; when it is ambiguous, ask.
 
 ## Language
 - English everywhere: code, comments, messages, schemas, commits, PRs, issues, ADRs, docs.
@@ -1015,6 +1051,8 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 
 ## Commands
 - pnpm install / pnpm -r build / pnpm -r test / pnpm lint / pnpm typecheck / pnpm changeset
+- pnpm codegen (regenerate the packages/model types after a schema change, ADR-0004,
+  and the FML grammar parser in packages/fml, ADR-0008)
 - docker compose up (full development stack)
 - pnpm cindermed validate <project.json> / pnpm cindermed export <project.json>
 - pnpm --filter docs dev (documentation site)
