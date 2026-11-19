@@ -66,3 +66,4 @@ export {
 } from "./binding.js";
 export { MAX_VALUE_SET_CODES } from "./build-index.js";
 export { ReferenceCode, checkReferences } from "./references.js";
+export { CardinalityCode, checkCardinality, exclusive, requirements } from "./cardinality.js";

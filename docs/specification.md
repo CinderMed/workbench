@@ -715,7 +715,7 @@ The check acts at three moments:
 | `TYPE_PRECISION` | Warning | Possible loss or out-of-range value |
 | `BINDING_VIOLATION` | Error or warning | Code outside the ValueSet (required, or extensible/preferred) |
 | `CARDINALITY_MISMATCH` | Error | Multiple values towards a single element |
-| `DUPLICATE_TARGET` | Error | Two rows on the same non-repeating element without exclusive conditions |
+| `DUPLICATE_TARGET` | Warning in the first version (ADR-0018), error later | Two rows on the same non-repeating element without exclusive conditions; only conditions on the same column with different values, a value or no value, are recognised as exclusive |
 | `EXPRESSION_NOT_TYPE_CHECKED` | Warning | Expert expression (D6): not type-checked, only by the grammar |
 
 **Cells turned off for now (#156, ADR-0015 addendum).** The generator writes choice elements by their base name, and the HL7 engine takes the type of the value written. So these are reported as `TYPE_MISMATCH` until the generator writes choice elements with an explicit type:
