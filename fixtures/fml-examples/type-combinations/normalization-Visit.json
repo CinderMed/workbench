@@ -1,0 +1,253 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.2.0",
+  "source": "Visit",
+  "logicalModel": "http://example.org/fhir/type-combinations/StructureDefinition/VisitRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "patient_id",
+      "sourceName": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "id_system",
+      "sourceName": "id_system",
+      "type": "string"
+    },
+    {
+      "name": "language",
+      "sourceName": "language",
+      "type": "string"
+    },
+    {
+      "name": "record_version",
+      "sourceName": "record_version",
+      "type": "string"
+    },
+    {
+      "name": "photo_url",
+      "sourceName": "photo_url",
+      "type": "string"
+    },
+    {
+      "name": "profile_url",
+      "sourceName": "profile_url",
+      "type": "string"
+    },
+    {
+      "name": "photo_size",
+      "sourceName": "photo_size",
+      "type": "integer"
+    },
+    {
+      "name": "weight_kg",
+      "sourceName": "weight_kg",
+      "type": "integer"
+    },
+    {
+      "name": "height_cm",
+      "sourceName": "height_cm",
+      "type": "integer"
+    },
+    {
+      "name": "ref_low",
+      "sourceName": "ref_low",
+      "type": "decimal"
+    },
+    {
+      "name": "ref_high",
+      "sourceName": "ref_high",
+      "type": "integer"
+    },
+    {
+      "name": "ratio",
+      "sourceName": "ratio",
+      "type": "decimal"
+    },
+    {
+      "name": "count",
+      "sourceName": "count",
+      "type": "integer"
+    },
+    {
+      "name": "smoker",
+      "sourceName": "smoker",
+      "type": "boolean"
+    },
+    {
+      "name": "visit_date",
+      "sourceName": "visit_date",
+      "type": "date"
+    },
+    {
+      "name": "visit_at",
+      "sourceName": "visit_at",
+      "type": "dateTime",
+      "dateFormat": "yyyy-MM-dd"
+    },
+    {
+      "name": "obs_status",
+      "sourceName": "obs_status",
+      "type": "string",
+      "allowedValues": [
+        "final",
+        "preliminary"
+      ]
+    },
+    {
+      "name": "obs_label",
+      "sourceName": "obs_label",
+      "type": "string",
+      "allowedValues": [
+        "weight",
+        "height"
+      ]
+    },
+    {
+      "name": "onset_age",
+      "sourceName": "onset_age",
+      "type": "integer"
+    },
+    {
+      "name": "supply_days",
+      "sourceName": "supply_days",
+      "type": "decimal"
+    },
+    {
+      "name": "dose_number",
+      "sourceName": "dose_number",
+      "type": "integer"
+    },
+    {
+      "name": "vaccinated_on",
+      "sourceName": "vaccinated_on",
+      "type": "dateTime",
+      "dateFormat": "yyyy-MM-dd"
+    },
+    {
+      "name": "note",
+      "sourceName": "note",
+      "type": "string"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "obs-weight"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Location0",
+      "literals": [
+        "loc"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_RiskAssessment0",
+      "literals": [
+        "risk"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation1",
+      "literals": [
+        "obs-panel"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Condition0",
+      "literals": [
+        "cond"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_MedicationDispense0",
+      "literals": [
+        "disp"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Immunization0",
+      "literals": [
+        "imm"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}
