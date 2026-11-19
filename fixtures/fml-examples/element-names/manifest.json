@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_element_names",
     "name": "Element names",
-    "formatVersion": "1.3.0",
+    "formatVersion": "1.4.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -68,7 +68,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "f711da19406bceb527d8d694fcde726dd5f689bd2e35b5dbb2714934b8f3c7fb",
+      "sha256": "12d091703de8dc06750c54db290a8ef1c04cfc772674f3d1150bac2c57f9b009",
       "mediaType": "application/json"
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "sha256": "425d88d9ab4c7f3ffa891195f89b7349f3e6b8d1413c849af32bc8af2021882c",
       "mediaType": "application/json"
     },
     {

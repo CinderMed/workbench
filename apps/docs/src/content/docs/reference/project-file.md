@@ -5,7 +5,7 @@ description: The JSON file that holds a whole mapping project.
 
 A project file is one JSON document with the whole mapping project: tables and columns, roles, mapping rows, value maps, templates and review comments. It is the native format of CinderMed. You can export it, keep it in git and import it again.
 
-The format is described by the JSON Schema `mapping-project.schema.json`, format version 1.3.0. The two example projects in the repository are good starting points:
+The format is described by the JSON Schema `mapping-project.schema.json`, format version 1.4.0. The two example projects in the repository are good starting points:
 
 - `fixtures/fml-examples/metastra/project.json`: one table, 11 variables
 - `fixtures/fml-examples/motu/project.json`: three tables linked by a relation
@@ -19,7 +19,7 @@ Check a file with [`cindermed validate`](/workbench/reference/cli/).
 | File version                         | What happens                                                       |
 | ------------------------------------ | ------------------------------------------------------------------ |
 | Same major and minor (any patch)     | Read as it is                                                      |
-| Same major, older minor (e.g. 1.2.0) | Read as it is; saved again as 1.3.0                                |
+| Same major, older minor (e.g. 1.2.0) | Read as it is; saved again as 1.4.0                                |
 | Older major                          | Migrated automatically, one major at a time                        |
 | Newer minor or major (e.g. 1.4.0)    | Rejected with `UNSUPPORTED_FORMAT_VERSION`: update CinderMed first |
 

@@ -62,7 +62,7 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       const summary = warnings === 0 ? "" : `, ${String(warnings)} warnings`;
       expect([code, out.split("\n")[0], err]).toEqual([
         ExitCode.OK,
-        `${path}: valid (format 1.3.0)${summary}`,
+        `${path}: valid (format 1.4.0)${summary}`,
         "",
       ]);
     },
@@ -104,7 +104,7 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       expect(code).toBe(expected);
       expect(out).toBe(
         expected === ExitCode.OK
-          ? "flag.json: valid (format 1.3.0)\n"
+          ? "flag.json: valid (format 1.4.0)\n"
           : "flag.json: 1 error\n" +
               "  error COMPLEX_TARGET mapping map_flag (path): R-099: column flag (boolean) cannot be copied to Patient.name (HumanName), a complex type: no element of HumanName takes a boolean value\n",
       );

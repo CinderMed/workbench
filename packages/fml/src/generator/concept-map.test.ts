@@ -53,7 +53,7 @@ describe("conceptMaps (R4)", () => {
       resourceType: "ConceptMap",
       id: "sex",
       url: "http://example.org/fhir/motu/ConceptMap/sex",
-      version: "1.3.0",
+      version: file.formatVersion,
       name: "Sex",
       status: "draft",
       group: [

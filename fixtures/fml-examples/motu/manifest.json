@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_motu",
     "name": "MOTU",
-    "formatVersion": "1.3.0",
+    "formatVersion": "1.4.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -117,7 +117,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "a74fc7ae03d76d4e980ad40b121ddd5396cd7a71a7084a125b2c6ab12e76fcda",
+      "sha256": "56f1047ae142d65bd6e6e42520a0689dec3448ee90668556df58f40586ff2c9a",
       "mediaType": "application/json"
     },
     {
@@ -187,7 +187,7 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "sha256": "425d88d9ab4c7f3ffa891195f89b7349f3e6b8d1413c849af32bc8af2021882c",
       "mediaType": "application/json"
     },
     {

@@ -54,7 +54,7 @@ describe("cindermed validate", () => {
     const cli = capture();
     expect(await run(["validate", path, "--no-fhir"], cli.io)).toBe(ExitCode.OK);
     expect(cli.stdout()).toBe(
-      `${path}: valid (format 1.3.0)\n  note: FHIR checks skipped (--no-fhir)\n`,
+      `${path}: valid (format 1.4.0)\n  note: FHIR checks skipped (--no-fhir)\n`,
     );
     expect(cli.stderr()).toBe("");
   });
@@ -89,7 +89,7 @@ describe("cindermed validate", () => {
     expect(JSON.parse(cli.stdout())).toEqual({
       file: path,
       valid: true,
-      formatVersion: "1.3.0",
+      formatVersion: "1.4.0",
       fhir: { checks: "skipped", packages: [] },
       results: [],
     });
@@ -100,7 +100,7 @@ describe("cindermed validate", () => {
     const cli = capture({ "old.json": JSON.stringify({ ...project, formatVersion: "1.1.0" }) });
     expect(await run(["validate", "old.json", "--no-fhir"], cli.io)).toBe(ExitCode.OK);
     expect(cli.stdout()).toBe(
-      "old.json: valid (format 1.3.0)\n  note: read as format 1.3.0 (file has 1.1.0)\n" +
+      "old.json: valid (format 1.4.0)\n  note: read as format 1.4.0 (file has 1.1.0)\n" +
         "  note: FHIR checks skipped (--no-fhir)\n",
     );
   });
@@ -226,7 +226,7 @@ describe("cindermed validate, FHIR checks", () => {
     expect(await run(["validate", visit, "--fhir-cache", cache, "--offline"], cli.io)).toBe(
       ExitCode.OK,
     );
-    expect(cli.stdout()).toBe(`${visit}: valid (format 1.3.0)\n`);
+    expect(cli.stdout()).toBe(`${visit}: valid (format 1.4.0)\n`);
     const json = withLoader();
     expect(
       await run(

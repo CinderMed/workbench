@@ -5,7 +5,7 @@ datasets, how a project file is translated into FML and how the result is checke
 verification prototypes, not the final generator, which will be written in TypeScript.
 
 ## Contents
-- `mapping-project.schema.json` — project file schema, format 1.3.0
+- `mapping-project.schema.json` — project file schema, format 1.4.0
 - `normalization.schema.json` — normalization specification schema (1.2.0): deterministic per-row algorithms
 - `manifest.schema.json` — schema of the exported package manifest (1.0.0)
 - `generator/` — the generator contract in TypeScript
@@ -187,3 +187,10 @@ package version, 0.1.0, instead of the project format version. The Bundles do no
 `tests/run-all.sh` reads the normalizer command from `NORMALIZE` (default `node tools/normalize.mjs`). The golden
 suite also runs it with the TypeScript normalizer (`tooling/golden/normalize-ts.mjs`, same command line, output and
 messages) on the maps of the exported packages; maps, normalized rows and Bundles are identical.
+
+## Format update (19 November 2026)
+Project schema 1.4.0 (compatible minor version, not released yet): the version only, so that the contract extensions
+of module 3 (Coding from a code column, profile slice names in paths) can extend it branch by branch. The example
+projects are stamped 1.4.0; their packages were regenerated with `tooling/golden/write-fixture.mjs`: only the
+manifests changed (the project's format version and the digest of the cleaned `project.json`). Maps, logical models,
+normalization specifications and Bundles are unchanged.

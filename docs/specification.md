@@ -347,7 +347,7 @@ The most important constraints concern clinical data: the real dataset must neve
 
 ## Project JSON Schema
 
-The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.3.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
+The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.4.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
 
 | Key | Content | Features |
 | --- | --- | --- |
@@ -528,7 +528,7 @@ For each table the generator produces artifacts described by their own schemas, 
 
 | Artifact | Format | Produced by | Used by |
 | --- | --- | --- | --- |
-| Project file | `mapping-project.schema.json` 1.3.0 | Workbench | Generator, export |
+| Project file | `mapping-project.schema.json` 1.4.0 | Workbench | Generator, export |
 | Normalization specification | `normalization.schema.json` 1.2.0 | Generator | Conversion module |
 | Logical model of the normalized row | `logical` StructureDefinition | Generator | FML engine |
 | StructureMap | FML, plus JSON compiled by the HL7 engine | Generator (syntax tree → printer) | FML engine |
@@ -619,7 +619,7 @@ workbench/
     cli/                 `cindermed` command (validate, export); published to npm with the domain packages
     docs/                user documentation site (Astro Starlight): guides, worked examples, reference
   packages/
-    model/               JSON Schemas (project 1.3.0, normalization 1.2.0, manifest), generated types, integrity rules
+    model/               JSON Schemas (project 1.4.0, normalization 1.2.0, manifest), generated types, integrity rules
     fhir-defs/           loading R4/R5 packages, element tree, path resolution
     fml/                 syntax tree, printer, project → FML generator, grammar check
     normalizer/          reference normalizer (port of tools/normalize.mjs)

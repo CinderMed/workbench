@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_boolean_value_map",
     "name": "Boolean value map",
-    "formatVersion": "1.3.0",
+    "formatVersion": "1.4.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -68,7 +68,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "66901373098e759cfba069d8d97dd3f76025f073f2568de36fa6a9ddbf5028ff",
+      "sha256": "7b36c419a85cbaa0301ddf5c8d895e237d8aa5010887e1136de5430424508b02",
       "mediaType": "application/json"
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "sha256": "425d88d9ab4c7f3ffa891195f89b7349f3e6b8d1413c849af32bc8af2021882c",
       "mediaType": "application/json"
     },
     {
