@@ -4,6 +4,8 @@
 import { parseProject, serializeProject, type ExportManifest } from "@cindermed/model";
 import { strFromU8 } from "fflate";
 import { describe, expect, it } from "vitest";
+import combosManifest from "../../../fixtures/fml-examples/type-combinations/manifest.json?raw";
+import combosProject from "../../../fixtures/fml-examples/type-combinations/project.json?raw";
 import namesManifest from "../../../fixtures/fml-examples/element-names/manifest.json?raw";
 import namesProject from "../../../fixtures/fml-examples/element-names/project.json?raw";
 import visitManifest from "../../../fixtures/fml-examples/boolean-value-map/manifest.json?raw";
@@ -48,6 +50,7 @@ describe.each([
   ["boolean-value-map", visitProject, visitManifest],
   ["mimic-iv-demo", mimicProject, mimicManifest],
   ["element-names", namesProject, namesManifest],
+  ["type-combinations", combosProject, combosManifest],
 ])("export of %s", (folder, projectText, manifestText) => {
   const expected = JSON.parse(manifestText) as ExportManifest;
   const result = exportPackage(projectText, {

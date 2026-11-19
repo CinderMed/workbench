@@ -19,6 +19,10 @@ verification prototypes, not the final generator, which will be written in TypeS
   `packages/fml/src/test-support/boolean-value-map.ts` (not written by hand) and compiled with the HL7 engine
 - `element-names/` — 1 table (Visit): a column named `a b` is used in a creation condition. Its element name must
   be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
+- `type-combinations/` — 1 table (Visit), 9 roles, one synthetic row: every combination of the type-compatibility table
+  that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
+  casts; Quantity, Duration and SimpleQuantity; constants of each type), checked value by value by
+  `tests/type-combinations.py` (#153). Written with `tooling/golden/write-fixture.mjs` from `project.json`
   - `project.json` — project file
   - `*.map` — StructureMaps in FML (written by applying the generator rules)
   - `StructureDefinition-*Row.json` — logical model of the normalized row

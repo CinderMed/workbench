@@ -1,0 +1,1050 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.3.0",
+  "project": {
+    "id": "prj_type_combinations",
+    "name": "Type combinations",
+    "description": "Golden case: every type combination the compatibility table allows that the other examples do not cover, on one synthetic row (#153).",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/type-combinations",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/type-combinations",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One synthetic visit row.",
+      "rowKey": [
+        "col_pid"
+      ],
+      "columns": [
+        {
+          "id": "col_pid",
+          "name": "patient_id",
+          "label": "patient_id",
+          "dataType": "string"
+        },
+        {
+          "id": "col_id_system",
+          "name": "id_system",
+          "label": "id_system",
+          "dataType": "string"
+        },
+        {
+          "id": "col_lang",
+          "name": "language",
+          "label": "language",
+          "dataType": "string"
+        },
+        {
+          "id": "col_version",
+          "name": "record_version",
+          "label": "record_version",
+          "dataType": "string"
+        },
+        {
+          "id": "col_photo_url",
+          "name": "photo_url",
+          "label": "photo_url",
+          "dataType": "string"
+        },
+        {
+          "id": "col_profile",
+          "name": "profile_url",
+          "label": "profile_url",
+          "dataType": "string"
+        },
+        {
+          "id": "col_photo_size",
+          "name": "photo_size",
+          "label": "photo_size",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_weight",
+          "name": "weight_kg",
+          "label": "weight_kg",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_height",
+          "name": "height_cm",
+          "label": "height_cm",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_ref_low",
+          "name": "ref_low",
+          "label": "ref_low",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_ref_high",
+          "name": "ref_high",
+          "label": "ref_high",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_ratio",
+          "name": "ratio",
+          "label": "ratio",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_count",
+          "name": "count",
+          "label": "count",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_smoker",
+          "name": "smoker",
+          "label": "smoker",
+          "dataType": "boolean"
+        },
+        {
+          "id": "col_visit_date",
+          "name": "visit_date",
+          "label": "visit_date",
+          "dataType": "date"
+        },
+        {
+          "id": "col_visit_at",
+          "name": "visit_at",
+          "label": "visit_at",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd"
+        },
+        {
+          "id": "col_status",
+          "name": "obs_status",
+          "label": "obs_status",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "final"
+            },
+            {
+              "code": "preliminary"
+            }
+          ]
+        },
+        {
+          "id": "col_label",
+          "name": "obs_label",
+          "label": "obs_label",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "weight"
+            },
+            {
+              "code": "height"
+            }
+          ]
+        },
+        {
+          "id": "col_age",
+          "name": "onset_age",
+          "label": "onset_age",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_supply",
+          "name": "supply_days",
+          "label": "supply_days",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_dose",
+          "name": "dose_number",
+          "label": "dose_number",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_vaccinated",
+          "name": "vaccinated_on",
+          "label": "vaccinated_on",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd"
+        },
+        {
+          "id": "col_note",
+          "name": "note",
+          "label": "note",
+          "dataType": "string"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_pat",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "active",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "path": "multipleBirthInteger",
+          "value": {
+            "type": "integer",
+            "value": 1
+          }
+        },
+        {
+          "path": "birthDate",
+          "value": {
+            "type": "date",
+            "value": "1980-01-01"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs-weight",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "weight",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-weight"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      }
+    },
+    {
+      "id": "ins_loc",
+      "resourceType": "Location",
+      "index": 0,
+      "label": "site",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "loc"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_risk",
+      "resourceType": "RiskAssessment",
+      "index": 0,
+      "label": "risk",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "risk"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs-panel",
+      "resourceType": "Observation",
+      "index": 1,
+      "label": "panel",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-panel"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://loinc.org",
+              "code": "8301-4",
+              "display": "type combinations panel",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ],
+      "slices": [
+        {
+          "id": "slc_c2s",
+          "path": "component",
+          "name": "c2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://loinc.org",
+                  "code": "8307-1",
+                  "display": "categorical as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_s2s",
+          "path": "component",
+          "name": "s2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://loinc.org",
+                  "code": "8308-9",
+                  "display": "string as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_i2i",
+          "path": "component",
+          "name": "i2i",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://loinc.org",
+                  "code": "8309-7",
+                  "display": "integer",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_b2b",
+          "path": "component",
+          "name": "b2b",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://loinc.org",
+                  "code": "8310-5",
+                  "display": "boolean",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_dt2dt",
+          "path": "component",
+          "name": "dt2dt",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "http://loinc.org",
+                  "code": "8311-3",
+                  "display": "dateTime",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ins_cond",
+      "resourceType": "Condition",
+      "index": 0,
+      "label": "condition",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "cond"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "38341003",
+              "display": "Hypertension",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_enc",
+      "resourceType": "Encounter",
+      "index": 0,
+      "label": "visit",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "enc"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "finished"
+          }
+        },
+        {
+          "path": "class",
+          "value": {
+            "type": "Coding",
+            "coding": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "AMB",
+              "display": "ambulatory",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_disp",
+      "resourceType": "MedicationDispense",
+      "index": 0,
+      "label": "dispense",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "disp"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "completed"
+          }
+        },
+        {
+          "path": "medicationCodeableConcept",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "387517004",
+              "display": "Paracetamol",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_imm",
+      "resourceType": "Immunization",
+      "index": 0,
+      "label": "vaccination",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "imm"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "completed"
+          }
+        },
+        {
+          "path": "vaccineCode",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "836398006",
+              "display": "Vaccine",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        },
+        {
+          "path": "recorded",
+          "value": {
+            "type": "dateTime",
+            "value": "2023-05-04T10:00:00+02:00"
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "instanceId": "ins_pat",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_pid"
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "instanceId": "ins_pat",
+      "path": "identifier.system",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_id_system"
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "instanceId": "ins_pat",
+      "path": "language",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_lang"
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "instanceId": "ins_pat",
+      "path": "meta.versionId",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_version"
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "instanceId": "ins_pat",
+      "path": "meta.profile",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_profile"
+    },
+    {
+      "id": "map_0006",
+      "code": "R-006",
+      "instanceId": "ins_pat",
+      "path": "photo.url",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_photo_url"
+    },
+    {
+      "id": "map_0007",
+      "code": "R-007",
+      "instanceId": "ins_pat",
+      "path": "photo.size",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_photo_size"
+    },
+    {
+      "id": "map_0008",
+      "code": "R-008",
+      "instanceId": "ins_pat",
+      "path": "name.text",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "string",
+          "value": "Test Patient"
+        }
+      }
+    },
+    {
+      "id": "map_0009",
+      "code": "R-009",
+      "instanceId": "ins_obs-weight",
+      "path": "status",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_status"
+    },
+    {
+      "id": "map_0010",
+      "code": "R-010",
+      "instanceId": "ins_obs-weight",
+      "path": "code.text",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_label"
+    },
+    {
+      "id": "map_0011",
+      "code": "R-011",
+      "instanceId": "ins_obs-weight",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0012",
+      "code": "R-012",
+      "instanceId": "ins_loc",
+      "path": "position.longitude",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_weight"
+    },
+    {
+      "id": "map_0013",
+      "code": "R-013",
+      "instanceId": "ins_loc",
+      "path": "position.latitude",
+      "transform": {
+        "kind": "cast",
+        "to": "decimal"
+      },
+      "columnId": "col_ref_high"
+    },
+    {
+      "id": "map_0014",
+      "code": "R-014",
+      "instanceId": "ins_loc",
+      "path": "position.altitude",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "decimal",
+          "value": 0.25
+        }
+      }
+    },
+    {
+      "id": "map_0015",
+      "code": "R-015",
+      "instanceId": "ins_loc",
+      "path": "name",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_count"
+    },
+    {
+      "id": "map_0016",
+      "code": "R-016",
+      "instanceId": "ins_loc",
+      "path": "description",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_ratio"
+    },
+    {
+      "id": "map_0017",
+      "code": "R-017",
+      "instanceId": "ins_loc",
+      "path": "alias",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_smoker"
+    },
+    {
+      "id": "map_0018",
+      "code": "R-018",
+      "instanceId": "ins_risk",
+      "path": "prediction.relativeRisk",
+      "transform": {
+        "kind": "cast",
+        "to": "decimal"
+      },
+      "columnId": "col_ratio"
+    },
+    {
+      "id": "map_0019",
+      "code": "R-019",
+      "instanceId": "ins_risk",
+      "path": "mitigation",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_visit_date"
+    },
+    {
+      "id": "map_0020",
+      "code": "R-020",
+      "instanceId": "ins_risk",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0021",
+      "code": "R-021",
+      "instanceId": "ins_obs-panel",
+      "path": "valueQuantity",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "cm",
+          "display": "centimeter"
+        }
+      },
+      "columnId": "col_height"
+    },
+    {
+      "id": "map_0022",
+      "code": "R-022",
+      "instanceId": "ins_obs-panel",
+      "path": "component[c2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_label"
+    },
+    {
+      "id": "map_0023",
+      "code": "R-023",
+      "instanceId": "ins_obs-panel",
+      "path": "component[s2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_note"
+    },
+    {
+      "id": "map_0024",
+      "code": "R-024",
+      "instanceId": "ins_obs-panel",
+      "path": "component[i2i].valueInteger",
+      "transform": {
+        "kind": "cast",
+        "to": "integer"
+      },
+      "columnId": "col_count"
+    },
+    {
+      "id": "map_0025",
+      "code": "R-025",
+      "instanceId": "ins_obs-panel",
+      "path": "component[b2b].valueBoolean",
+      "transform": {
+        "kind": "cast",
+        "to": "boolean"
+      },
+      "columnId": "col_smoker"
+    },
+    {
+      "id": "map_0026",
+      "code": "R-026",
+      "instanceId": "ins_obs-panel",
+      "path": "component[dt2dt].valueDateTime",
+      "transform": {
+        "kind": "cast",
+        "to": "dateTime"
+      },
+      "columnId": "col_visit_at"
+    },
+    {
+      "id": "map_0027",
+      "code": "R-027",
+      "instanceId": "ins_obs-panel",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0028",
+      "code": "R-028",
+      "instanceId": "ins_cond",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0029",
+      "code": "R-029",
+      "instanceId": "ins_enc",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0030",
+      "code": "R-030",
+      "instanceId": "ins_enc",
+      "path": "diagnosis.condition",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_cond"
+      }
+    },
+    {
+      "id": "map_0031",
+      "code": "R-031",
+      "instanceId": "ins_enc",
+      "path": "diagnosis.rank",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_dose"
+    },
+    {
+      "id": "map_0032",
+      "code": "R-032",
+      "instanceId": "ins_imm",
+      "path": "occurrenceDateTime",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_vaccinated"
+    },
+    {
+      "id": "map_0033",
+      "code": "R-033",
+      "instanceId": "ins_imm",
+      "path": "lotNumber",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_visit_at"
+    },
+    {
+      "id": "map_0034",
+      "code": "R-034",
+      "instanceId": "ins_imm",
+      "path": "patient",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0035",
+      "code": "R-035",
+      "instanceId": "ins_disp",
+      "path": "quantity",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "mL",
+          "display": "milliliter"
+        }
+      },
+      "columnId": "col_ref_low"
+    },
+    {
+      "id": "map_0036",
+      "code": "R-036",
+      "instanceId": "ins_disp",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": []
+}

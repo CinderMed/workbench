@@ -46,6 +46,7 @@ for folder in "$fixtures"/*/; do
     echo "validate: $name: errors in FHIR resources:" >&2
     grep -E "^-- |^\*FAILURE\*|^  Error" "$log" >&2
     status=1
+    continue
   fi
   echo "validate: $name: ${#files[@]} resources, 0 errors"
 done
