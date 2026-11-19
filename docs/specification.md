@@ -91,7 +91,7 @@ A mapping is made of seven objects. The grid shows them as rows and cells, but e
 
 ## Features
 
-There are 67 features, split into 9 groups; 41 are MVP. The MVP covers creating projects, importing and correcting the source, filling in the mapping tables and exporting as FML, CSV and JSON. Data conversion is V2, as a separate module. The priority can be changed from the column menu.
+There are 69 features, split into 9 groups; 43 are MVP. The MVP covers creating projects, importing and correcting the source, filling in the mapping tables and exporting as FML, CSV and JSON. Data conversion is V2, as a separate module. The priority can be changed from the column menu.
 
 ### A. Projects and collaboration
 
@@ -1001,13 +1001,16 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
   table, a long table and several related tables; Metastra, MOTU and MIMIC-IV are only examples.
 
 ## Workflow
-- Work one module at a time, in the order of the "Incremental module plan".
-- One feature per branch: feature/<id>-<name> (fix/, chore/, docs/, refactor/, ci/ for the rest).
+- Work one module at a time, in the build order of the "Incremental module plan" table:
+  0, 1, 2, 3, 7, 3b, 4, 5, 6, 8, 9. Releases are numbered in build order (module 7 is v0.4.0).
+- Before the first code branch of a module, propose the plan (branches, issues, open decisions) and wait.
+- One feature per branch: feature/<id>-<name> (fix/, chore/, docs/, refactor/, ci/, test/ for the rest).
 - Commits and PR titles in Conventional Commits: <type>(<scope>): <description>.
   Scopes: model, fhir-defs, fml, normalizer, export, terminology, api, web, cli, docs, infra, deps.
 - Every PR: tests, a changeset (pnpm changeset) if a package changes, description from the template,
-  "Closes #n" for the issue. Open the PR with gh pr create. Merging follows the 'Decisions and merging' section.
-- Never push directly to main. Squash merge.
+  "Closes #n" or "Part of #n" for the issue. Open the PR with gh pr create. Merging follows the
+  'Decisions and merging' section.
+- Never push directly to main. Squash merge. Never use an admin bypass of branch protection.
 
 ## Decisions and merging
 
@@ -1017,6 +1020,9 @@ Full specification: docs/specification.md. Verified examples: fixtures/fml-examp
 - An ADR that changes or contradicts the specification.
 - Scope changes: moving work between modules, dropping a done-when item.
 - Anything hard to undo: releases, tags, npm publishing, repository or org settings, deleting branches with unmerged work.
+- Anything posted outside this repository (issues or PRs on other repositories, HL7 Zulip, forums):
+  draft it in the repository or in your message; I post it myself.
+- Installing tools on my machine outside the repository (JDKs, global packages): say what and where first.
 
 ### Decide yourself, and record it
 Everything else: implementation choices inside an approved plan, refactors, tests, fixes, docs, CI.
@@ -1050,25 +1056,43 @@ After merging, add the PR to a short daily log in your next message to me (numbe
 ## Technical rules
 - TypeScript strict everywhere, no `any`; model types are generated from the JSON Schemas in packages/model.
 - Domain packages (model, fhir-defs, fml, normalizer, export) do no I/O and do not import apps/* (ADR-0001).
-- The project (1.3.0), normalization (1.2.0) and manifest (1.0.0) schemas are contracts:
-  an incompatible change needs a new major version, a migration and my approval.
+  dependency-cruiser enforces the boundaries; apps/web never imports @cindermed/export or the FML grammar
+  (ADR-0008, ADR-0012).
+- The project, normalization and manifest schemas (packages/model/src/schemas; current version in each `$id`)
+  are contracts: any change needs my approval; an incompatible change needs a new major version and a migration.
+  A version not yet in a release may be extended branch by branch; once released, changes go in the next version.
+  Every version change has a migration test from the previous version.
 - FML translation follows the "Translation rules" and "Generator contract" sections.
   The generator builds only FML tree nodes and never concatenates FML strings.
   Add a golden case that covers a rule before changing it.
-- Type compatibility follows the table in the Architecture section; every new combination needs a golden case.
-- Golden tests (fixtures/fml-examples) must stay green on every commit.
+- Type compatibility follows the table in the Architecture section (ADR-0015); every new combination needs a golden case.
+- FHIR checks (paths, types, bindings, references, cardinality) live in `validateFhir` in fhir-defs and read the
+  compact definition index (ADR-0013, ADR-0014); the CLI and, from module 7, the browser load the index.
+  Core FHIR packages are pinned by SHA-256; only apps download them.
+- Golden tests (fixtures/fml-examples) must stay green on every commit. The HL7 engine is validator_cli 7.0.5
+  on Java 21, pinned by SHA-256 in .github/workflows/ci.yml, kept in the git-ignored .fhir/validator/.
 - Tests never write into fixtures/: outputs go to .tmp/ (git-ignored); expected files change only in a dedicated PR.
 - Fixture maps (fixtures/fml-examples/*/*.map) are produced only by the generator, never edited by hand.
 - Docs examples live in fixtures/ and run in CI; update the docs when user-visible behaviour changes.
-- No patient data in the database or logs; no credentials in code, packages or logs.
+- No patient data in the database or logs; no credentials in code, packages or logs; never commit .env files.
+  HMAC keys for ids stay outside packages, reports and logs.
+- The only real (non-synthetic) rows are the small MIMIC-IV demo slice in fixtures/fml-examples/mimic-iv-demo,
+  under ODbL with its LICENSE and NOTICE.md; keep it small and keep those files. All other test rows are synthetic.
+- The grid's local mode (module 7) has no login: it runs only on the developer's machine, bound to localhost.
+  Never deploy it or expose it on a reachable address; the API storage (module 4) replaces it for shared use.
 - Every technical decision not covered by the specification goes in docs/adr/NNNN-title.md.
 
 ## Commands
-- pnpm install / pnpm -r build / pnpm -r test / pnpm lint / pnpm typecheck / pnpm changeset
+- pnpm install / pnpm -r build / pnpm test / pnpm lint / pnpm typecheck / pnpm format:check / pnpm changeset
+- FHIR_CORE_PACKAGES=1 pnpm test (also the tests that need the R4 and R5 core packages)
 - pnpm codegen (regenerate the packages/model types after a schema change, ADR-0004,
   and the FML grammar parser in packages/fml, ADR-0008)
+- pnpm boundaries (dependency rules) / pnpm check:fixtures (fixture checksums)
+- VALIDATOR=/abs/path/validator_cli.jar pnpm golden (golden suite; build packages and CLI first)
 - docker compose up (full development stack)
-- pnpm cindermed validate <project.json> / pnpm cindermed export <project.json>
+- pnpm cindermed validate <project.json> / pnpm cindermed export <project.json> /
+  pnpm cindermed mapping-table <project.json>
+  (FHIR options: --offline, --fhir-cache <folder>, --no-fhir)
 - pnpm --filter docs dev (documentation site)
 
 ## Done
@@ -1077,13 +1101,13 @@ A module is finished only when its "done when" criterion is proven by tests and 
 
 ## MVP, decisions and open items
 
-The MVP includes 41 features. It is complete when the Metastra dictionary can be imported, corrected by hand, the FirstOverview form remapped from scratch and the project exported as FML, CSV and JSON, with StructureMaps that pass the official grammar.
+The MVP includes 43 features. It is complete when the Metastra dictionary can be imported, corrected by hand, the FirstOverview form remapped from scratch and the project exported as FML, CSV and JSON, with StructureMaps that pass the official grammar.
 
 **Components.** Stack, repository layout, services and Docker Compose are described in the Architecture section.
 
 The grid uses TanStack Table instead of AG Grid, because AG Grid Community lacks row grouping.
 
-**MVP scope by feature group:** A1, A2, A3, A5, A6 · B1–B6 · C1–C6 · D1–D5, D7, D8 · E1, E2, E4–E6 · F1–F4 · G1–G3, G6, G7, G10 · H1, H3.
+**MVP scope by feature group:** A1, A2, A3, A5, A6 · B1–B6, B11 · C1–C6 · D1–D5, D7, D8 · E1, E1b, E2, E4–E6 · F1–F4 · G1–G3, G6, G7, G10 · H1, H3.
 
 **Decisions taken (9 November 2026)**
 
