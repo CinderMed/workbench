@@ -54,6 +54,8 @@ Reads a [project file](/workbench/reference/project-file/) and runs four levels 
      - `CARDINALITY_MISMATCH`: an error when a multiple-choice column is written without `repeat: eachValue`;
      - `DUPLICATE_TARGET`: a warning when two rows write the same single-valued element and their conditions are not recognised as exclusive. Only conditions on the same column are recognised: different values, or a value against none. Check the others by hand.
 
+   - profile slices: `SLICE_NAME_UNUSABLE`, a warning when a role's profile requires a slice whose name cannot be written in a project path (letters, digits and `-`, starting with a letter).
+
 4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 
 A valid project prints one line:

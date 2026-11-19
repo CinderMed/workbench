@@ -228,6 +228,14 @@ describe("parseProject", () => {
     expect(parsed.project).toEqual({ ...legacy, formatVersion: "1.4.0" });
   });
 
+  it("reads a 1.3.0 project with named slices as 1.4.0 (slice names only widen, #150)", () => {
+    const legacy = { ...copy(metastra), formatVersion: "1.3.0" };
+    const parsed = parseProject(JSON.stringify(legacy));
+    expect(parsed.results).toEqual([]);
+    expect(parsed.migratedFrom).toBe("1.3.0");
+    expect(parsed.project).toEqual({ ...legacy, formatVersion: "1.4.0" });
+  });
+
   it("rejects an older major with no migration", () => {
     const parsed = parseProject(JSON.stringify(withVersion("0.9.0")));
     expect(parsed.results).toEqual([

@@ -646,7 +646,7 @@ Given a project (FHIR version and packages), the engine loads the StructureDefin
 | `resolvePath(typeOrProfile, path)` | The element found, with type and the cardinality of every segment, or the error with a stable code (ADR-0014) | Inline validation (D7) |
 | `referenceTargets(typeOrProfile, path)` | Resource types allowed for a Reference | Reference choice (F1, F4) |
 
-Rules: choice types `value[x]` are exposed with their concrete name (`valueQuantity`, `valueCodeableConcept`); a named slice (`component[nrs]`) is allowed only on elements whose maximum cardinality is greater than 1; FHIR extensions cannot be mapped in the MVP. Trees are kept in memory per version-type pair; packages sit on a volume and are downloaded only the first time. The engine reads the packages through a **compact definition index** (ADR-0013): a manifest of the version's types and profiles, and one small document per type (only the element fields the workbench uses), built from the packages in the CLI or the API and served by the API. The browser loads the manifest and the documents of the types it shows, never a whole core package. Core packages are checked against a pinned SHA-256 when downloaded, and the cache is the shared FHIR package cache (`~/.fhir/packages`).
+Rules: choice types `value[x]` are exposed with their concrete name (`valueQuantity`, `valueCodeableConcept`); a named slice (`component[nrs]`, `category[VSCat]`) is allowed only on elements whose maximum cardinality is greater than 1, and its name matches `[A-Za-z][A-Za-z0-9-]*` (project format 1.4.0, ADR-0020); FHIR extensions cannot be mapped in the MVP. Trees are kept in memory per version-type pair; packages sit on a volume and are downloaded only the first time. The engine reads the packages through a **compact definition index** (ADR-0013): a manifest of the version's types and profiles, and one small document per type (only the element fields the workbench uses), built from the packages in the CLI or the API and served by the API. The browser loads the manifest and the documents of the types it shows, never a whole core package. Core packages are checked against a pinned SHA-256 when downloaded, and the cache is the shared FHIR package cache (`~/.fhir/packages`).
 
 ### Project validation
 
@@ -719,6 +719,7 @@ The check acts at three moments:
 | `CARDINALITY_MISMATCH` | Error | Multiple values towards a single element |
 | `DUPLICATE_TARGET` | Warning in the first version (ADR-0018), error later | Two rows on the same non-repeating element without exclusive conditions; only conditions on the same column with different values, a value or no value, are recognised as exclusive |
 | `EXPRESSION_NOT_TYPE_CHECKED` | Warning | Expert expression (D6): not type-checked, only by the grammar |
+| `SLICE_NAME_UNUSABLE` | Warning | The role's profile requires a slice of a top-level element whose name a project path cannot hold (ADR-0020) |
 
 **Cells turned off for now (#156, ADR-0015 addendum).** The generator writes choice elements by their base name, and the HL7 engine takes the type of the value written. So these are reported as `TYPE_MISMATCH` until the generator writes choice elements with an explicit type:
 - on a choice element, a value whose type is not the chosen one, for example a cast to string into `valueString` or a dateTime constant into `effectiveDateTime`;

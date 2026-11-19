@@ -4,6 +4,7 @@ import firstOverviewMap from "../../../../fixtures/fml-examples/metastra/FirstOv
 import metastraProject from "../../../../fixtures/fml-examples/metastra/project.json" with { type: "json" };
 import motuProject from "../../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
 import { printMap } from "../fml-print.js";
+import { parseFml } from "../grammar-check.js";
 import { GeneratorCode } from "./codes.js";
 import { roleCondition, type ColumnNames } from "./conditions.js";
 import { fmlElement, generateMap } from "./generate-map.js";
@@ -387,5 +388,20 @@ describe("value maps", () => {
         'Group Observation1: two rules are named "R-010-unit-1". Rename a row code or a value so that every rule of the group has its own name.',
       ],
     ]);
+  });
+});
+
+describe("generateMap with a profile slice name (#150, format 1.4.0)", () => {
+  it("writes a slice that starts with an upper-case letter, with valid rule names", () => {
+    const file = copy(metastraProject);
+    for (const role of file.instances)
+      for (const slice of role.slices ?? []) if (slice.name === "nrs") slice.name = "VSCat";
+    for (const r of file.mappings) r.path = r.path.replace("component[nrs]", "component[VSCat]");
+    const text = printed(file, "src_firstoverview");
+    expect(text).toContain(
+      "src -> slc.code = cc('http://snomed.info/sct', '1284852002') \"slice-VSCat-code\";",
+    );
+    expect(text).toContain('} "slice-VSCat";');
+    expect(parseFml(text)).toEqual([]);
   });
 });
