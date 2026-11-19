@@ -89,6 +89,12 @@ group Observation0(source src : VisitRow, target res : Observation) {
   src.obs_status as v -> res.status = v "R-009";
   src.obs_label as v -> res.code as p, p.text = v "R-010";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-011";
+  src.finding_code as v -> res.value = create('CodeableConcept') as cn then {
+    v -> cn.coding = create('Coding') as cd then {
+      v -> cd.system = 'https://cindermed.org/fhir/CodeSystem/type-combinations-findings', cd.code = v "R-037-code";
+      src.finding_label as d -> cd.display = d "R-037-display";
+    } "R-037-coding";
+  } "R-037";
 }
 
 group Location0(source src : VisitRow, target res : Location) {
@@ -152,13 +158,15 @@ group Condition0(source src : VisitRow, target res : Condition) {
 
 group Encounter0(source src : VisitRow, target res : Encounter) {
   src -> res.status = 'finished' "fixed-status";
-  src -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'AMB', 'ambulatory') "fixed-class";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-029";
   // diagnosis: written by 2 rows (R-030, R-031) → one shared instance
   src where ($this.dose_number.exists()) -> res.diagnosis as p then {
     src.id_Condition0 as t -> p.condition as r, r.reference = evaluate(t, 'Condition/' + $this) "R-030";
     src.dose_number as v -> p.rank = v "R-031";
   } "Encounter0-diagnosis";
+  src.encounter_class as v -> res.class = create('Coding') as cd then {
+    v -> cd.system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode', cd.code = v "R-038-code";
+  } "R-038";
 }
 
 group MedicationDispense0(source src : VisitRow, target res : MedicationDispense) {

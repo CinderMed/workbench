@@ -75,27 +75,27 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "9905036213be3013ba7b7a9043878961d882e04bedaea1c7b72c5a0b3d2874c9",
+      "sha256": "5c8e6bfa04728d9d2693db7536fea622b019caddd330d79355382f753a98f317",
       "mediaType": "application/json"
     },
     {
       "path": "Visit.map",
-      "sha256": "cd644bb760bddbd0243cd9183bced732fc675624970bbaf54d182a3942e85dd4",
+      "sha256": "137b8ad80b11efd215f3bf3f6d5e8f6a049da2632647ef7dc1129654342ee1d6",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Visit.json",
-      "sha256": "6c285d46fcc0158d72d2b23e37825635a223e597f0810e71eb5ce46cf1d950af",
+      "sha256": "89960076c615f3edd0346b4ba8baba16d3b1ce2c218b58ea32e107b8b948c714",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-VisitRow.json",
-      "sha256": "6cf2f9d54dd8d50ea2784efa2a5e0c37f5aa138e1e86f1326962f2f793043d1d",
+      "sha256": "01824e1c40f6472f47360f579bfc42b40976a517c4de72e2587ca7ba84803ce6",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "normalization-Visit.json",
-      "sha256": "eff40774c8913a3819d62cd55582f374835af0b6ccf5ce00033090919458948d",
+      "sha256": "a293e1bc7a1474e32596ad79c962ebe6c4b76d6ab28ba3051ce1ed152b459d4b",
       "mediaType": "application/json"
     },
     {

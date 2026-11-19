@@ -42,6 +42,13 @@
       },
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "valueCodeableConcept" : {
+        "coding" : [{
+          "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-findings",
+          "code" : "123",
+          "display" : "Elevated weight"
+        }]
       }
     },
     "request" : {
@@ -194,8 +201,7 @@
       "status" : "finished",
       "class" : {
         "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-        "code" : "AMB",
-        "display" : "ambulatory"
+        "code" : "AMB"
       },
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
