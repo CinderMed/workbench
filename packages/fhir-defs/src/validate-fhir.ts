@@ -9,7 +9,9 @@
  * - `repeat: eachValue` writes to a repeating element;
  * - every row's transform, every fixed value and every value-action value fits the element's type
  *   (type compatibility, `type-compat.ts`);
- * - every code written to a bound element is in its ValueSet (bindings, `binding.ts`).
+ * - every code written to a bound element is in its ValueSet (bindings, `binding.ts`);
+ * - references point to allowed types, required references are written, no role is orphan
+ *   (F4, `references.ts`).
  * Results have the shape of every other level. Errors block the export.
  */
 import {
@@ -25,6 +27,7 @@ import {
 } from "@cindermed/model";
 import type { FhirDefinitions, IndexFetch } from "./definitions.js";
 import { BindingCode, checkBinding, rowCodes, valueCodes } from "./binding.js";
+import { checkReferences } from "./references.js";
 import { type TypeFinding, checkRowTypes, checkValueType } from "./type-compat.js";
 import {
   type PathIssueCode,
@@ -310,6 +313,8 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
       results.push(item);
     }
   }
+  // References (F4, ADR-0017).
+  results.push(...checkReferences(project, defs, (instance) => roleDefinition(defs, instance)));
   return results;
 }
 

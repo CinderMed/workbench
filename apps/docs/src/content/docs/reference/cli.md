@@ -45,7 +45,12 @@ Reads a [project file](/workbench/reference/project-file/) and runs four levels 
 
    - that every code written to a code, Coding or CodeableConcept element with a binding is in its ValueSet (`BINDING_VIOLATION`). A required binding gives an error, an extensible or preferred one a warning. A required ValueSet that cannot be expanded from the FHIR packages gives a "binding not checked" warning. The codes checked are value-map targets, constants, fixed values and the allowed values of a categorical column that is copied.
 
-   Cardinality and references are added later in this version series.
+   - references (F4):
+     - `REF_TARGET_NOT_ALLOWED`: an error when the element does not allow the target role's type, for example a Condition about a Practitioner;
+     - `REFERENCE_REQUIRED_MISSING`: a warning when a required reference, such as `Condition.subject`, is not written;
+     - `ROLE_ORPHAN`: a warning when a role is linked to no other role.
+
+   Cardinality is added later in this version series.
 
 4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 

@@ -12,10 +12,14 @@ import { validateFhir } from "../packages/fhir-defs/dist/index.js";
 const enabled = process.env["FHIR_CORE_PACKAGES"] === "1";
 const fixtures = resolve(import.meta.dirname, "../fixtures/fml-examples");
 /**
- * Warnings an example gives on purpose: type-combinations covers the cells of the compatibility
- * table that are allowed with a warning (TYPE_PRECISION), one each. Every other example gives none.
+ * Warnings an example gives on purpose. type-combinations covers the cells of the compatibility
+ * table that are allowed with a warning (TYPE_PRECISION, one each), and its Location role exists
+ * only to host decimal elements, so nothing references it (ROLE_ORPHAN). Every other example
+ * gives none.
  */
-const EXPECTED_WARNINGS: Readonly<Record<string, number>> = { "type-combinations": 10 };
+const EXPECTED_WARNINGS: Readonly<Record<string, readonly string[]>> = {
+  "type-combinations": [...Array.from({ length: 10 }, () => "TYPE_PRECISION"), "ROLE_ORPHAN"],
+};
 
 const examples = readdirSync(fixtures, { withFileTypes: true })
   .filter((e) => e.isDirectory() && existsSync(join(fixtures, e.name, "project.json")))
@@ -34,9 +38,7 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       const results = validateFhir(project, definitions);
       expect(results.filter((r) => r.severity === "error")).toEqual([]);
       const warnings = results.filter((r) => r.severity === "warning");
-      expect(warnings.map((r) => r.code)).toEqual(
-        Array.from({ length: EXPECTED_WARNINGS[name] ?? 0 }, () => "TYPE_PRECISION"),
-      );
+      expect(warnings.map((r) => r.code)).toEqual(EXPECTED_WARNINGS[name] ?? []);
     },
     300_000,
   );
@@ -56,7 +58,7 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
         version: "0.0.0",
         loadDefinitions,
       });
-      const warnings = EXPECTED_WARNINGS[name] ?? 0;
+      const warnings = (EXPECTED_WARNINGS[name] ?? []).length;
       const summary = warnings === 0 ? "" : `, ${String(warnings)} warnings`;
       expect([code, out.split("\n")[0], err]).toEqual([
         ExitCode.OK,
