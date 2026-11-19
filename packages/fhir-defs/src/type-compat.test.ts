@@ -8,6 +8,7 @@ import {
   TypeCode,
   castAllowed,
   checkRowTypes,
+  checkValueType,
   copyVerdict,
   fhirType,
   isQuantity,
@@ -168,7 +169,18 @@ describe("checkRowTypes", () => {
           "R-001: column note (string) cannot be converted to integer: a conversion goes to string, to the same type, from integer to decimal or from date to dateTime",
       },
     ]);
-    expect(check("valueString", { kind: "cast", to: "string" }, "t")).toEqual([]);
+    // A cast to string works on an element that is not a choice; on a choice the engine keeps
+    // the column's type (#156), so that cell is off.
+    expect(check("code.text", { kind: "cast", to: "string" }, "t")).toEqual([]);
+    expect(check("valueString", { kind: "cast", to: "string" }, "t")).toEqual([
+      {
+        code: TypeCode.TYPE_MISMATCH,
+        severity: "error",
+        field: "path",
+        message:
+          "R-001: column seen (dateTime) is written to Observation.valueString (string), a choice element, as a dateTime: the HL7 engine would make it a valueDateTime, not a valueString; write it to an element that is not a choice (#156)",
+      },
+    ]);
     expect(check("valueBoolean", { kind: "cast", to: "string" }, "t")[0]?.message).toBe(
       "R-001: column seen converted to string cannot be written to Observation.valueBoolean (boolean); use valueString",
     );
@@ -311,5 +323,194 @@ describe("validateFhir, types", () => {
         "value map codes (used by R-002): the value is a boolean, but the element is Observation.status (code)",
       ],
     ]);
+  });
+});
+
+describe("cells the generator and the HL7 engine cannot write yet (#156)", () => {
+  const SD = "http://hl7.org/fhir/StructureDefinition/";
+  const sd = (
+    name: string,
+    kind: string,
+    elements: Record<string, Record<string, unknown>>,
+    extra = {},
+  ) => ({
+    resourceType: "StructureDefinition",
+    id: name,
+    url: `${SD}${name}`,
+    name,
+    type: name,
+    kind,
+    abstract: false,
+    derivation: "specialization",
+    snapshot: {
+      element: Object.entries(elements).map(([path, f]) => ({
+        id: path,
+        path,
+        min: 0,
+        max: "1",
+        ...f,
+      })),
+    },
+    ...extra,
+  });
+  const typed = (...codes: string[]) => ({ type: codes.map((code) => ({ code })) });
+  const engine = (() => {
+    const index = buildIndex("4.0.1", [
+      {
+        id: "hl7.fhir.r4.core",
+        version: "4.0.1",
+        fhirVersions: ["4.0.1"],
+        resources: [
+          ...["string", "decimal", "dateTime", "date"].map((p) =>
+            sd(p, "primitive-type", { [p]: {} }),
+          ),
+          sd("Quantity", "complex-type", { Quantity: {}, "Quantity.value": typed("decimal") }),
+          sd(
+            "Age",
+            "complex-type",
+            { Age: {}, "Age.value": typed("decimal") },
+            { baseDefinition: `${SD}Quantity` },
+          ),
+          sd("Reference", "complex-type", {
+            Reference: {},
+            "Reference.reference": typed("string"),
+          }),
+          sd("Condition", "resource", {
+            Condition: {},
+            "Condition.onset[x]": typed("Age", "dateTime", "string"),
+            "Condition.focus[x]": typed("Reference", "string"),
+          }),
+          sd("Thing", "resource", {
+            Thing: {},
+            "Thing.age": typed("Age"),
+            "Thing.when": typed("dateTime"),
+            "Thing.size": typed("Quantity"),
+          }),
+        ],
+      },
+    ]);
+    if (!index.ok) throw new Error(JSON.stringify(index.issues));
+    const opened = FhirDefinitions.open(index.value.manifest);
+    if (!opened.ok) throw new Error("not opened");
+    for (const [file, text] of index.value.files) opened.value.add(file, text);
+    return opened.value;
+  })();
+  const cols = new Map<string, Column>([
+    ["d", { id: "d", name: "seen", dataType: "date" }],
+    ["n", { id: "n", name: "years", dataType: "decimal" }],
+  ]);
+  const ctx = { columns: cols, valueMaps: new Map<string, ValueMap>() };
+  function on(type: string, path: string, transform: MappingRow["transform"], columnId?: string) {
+    const resolved = resolvePath(engine, type, path);
+    if (!resolved.ok) throw new Error(resolved.issue.message);
+    const row: MappingRow = {
+      id: "m",
+      code: "R-001",
+      instanceId: "i",
+      path,
+      transform,
+      ...(columnId === undefined ? {} : { columnId }),
+    };
+    return checkRowTypes(engine, ctx, row, type, resolved.value).map((f) => [
+      f.code,
+      f.field,
+      f.message,
+    ]);
+  }
+
+  it("turns off a value whose type is not the choice's", () => {
+    // date → dateTime is allowed by the table, but on a choice the engine would write onsetDate.
+    expect(on("Condition", "onsetDateTime", { kind: "copy" }, "d")).toEqual([
+      [
+        "TYPE_MISMATCH",
+        "path",
+        "R-001: column seen (date) is written to Condition.onsetDateTime (dateTime), a choice element, as a date: the HL7 engine would make it an onsetDate, not an onsetDateTime; write it to an element that is not a choice (#156)",
+      ],
+    ]);
+    expect(on("Thing", "when", { kind: "copy" }, "d")).toEqual([]);
+    expect(
+      on("Condition", "onsetDateTime", {
+        kind: "constant",
+        value: { type: "dateTime", value: "2023-05-04T10:00:00+02:00" },
+      })[0]?.[0],
+    ).toBe("TYPE_MISMATCH");
+    expect(
+      on("Thing", "when", {
+        kind: "constant",
+        value: { type: "dateTime", value: "2023-05-04T10:00:00+02:00" },
+      }),
+    ).toEqual([]);
+    expect(
+      on("Condition", "onsetString", { kind: "constant", value: { type: "string", value: "x" } }),
+    ).toEqual([]);
+  });
+
+  it("turns off quantities into types derived from Quantity, and Quantity constants", () => {
+    const age =
+      "R-001: the quantity transform writes a Quantity, but Condition.onsetAge (Age) needs an Age, which the generator cannot create yet (#156)";
+    expect(on("Condition", "onsetAge", { kind: "quantity" }, "n")).toEqual([
+      ["TYPE_MISMATCH", "path", age],
+    ]);
+    expect(on("Thing", "age", { kind: "quantity" }, "n")[0]?.[0]).toBe("TYPE_MISMATCH");
+    expect(on("Thing", "size", { kind: "quantity" }, "n")).toEqual([]);
+    expect(
+      on("Thing", "size", {
+        kind: "constant",
+        value: {
+          type: "Quantity",
+          value: 1,
+          unit: { system: "http://unitsofmeasure.org", code: "mg" },
+        },
+      }),
+    ).toEqual([
+      [
+        "TYPE_MISMATCH",
+        "transform.value",
+        "R-001: a Quantity constant cannot be written in the FML subset yet (#156)",
+      ],
+    ]);
+  });
+
+  it("turns off references into a choice element", () => {
+    expect(on("Condition", "focusReference", { kind: "reference", targetInstanceId: "x" })).toEqual(
+      [
+        [
+          "TYPE_MISMATCH",
+          "path",
+          "R-001: a reference cannot be written to Condition.focusReference (Reference), a choice element, yet (#156)",
+        ],
+      ],
+    );
+  });
+
+  it("checks typed values the same way", () => {
+    const resolved = (type: string, path: string) => {
+      const r = resolvePath(engine, type, path);
+      if (!r.ok) throw new Error(r.issue.message);
+      return r.value;
+    };
+    const dateTime = { type: "dateTime", value: "2023-05-04T10:00:00+02:00" } as const;
+    expect(
+      checkValueType(
+        engine,
+        dateTime,
+        "Condition",
+        resolved("Condition", "onsetDateTime"),
+        "fixed value",
+      )?.message,
+    ).toBe(
+      "fixed value: the value is written to Condition.onsetDateTime (dateTime), a choice element, as a string: the HL7 engine would make it an onsetString, not an onsetDateTime; write it to an element that is not a choice (#156)",
+    );
+    expect(
+      checkValueType(engine, dateTime, "Thing", resolved("Thing", "when"), "fixed value"),
+    ).toBeUndefined();
+    const quantity = {
+      type: "Quantity",
+      value: 1,
+      unit: { system: "http://unitsofmeasure.org", code: "mg" },
+    } as const;
+    expect(
+      checkValueType(engine, quantity, "Thing", resolved("Thing", "size"), "fixed value")?.message,
+    ).toBe("fixed value: a Quantity value cannot be written in the FML subset yet (#156)");
   });
 });

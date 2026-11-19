@@ -20,6 +20,7 @@ import {
   type ValidationResult,
 } from "@cindermed/model";
 import { type FhirDefinitions, validateFhir } from "@cindermed/fhir-defs";
+import { choicePathResults } from "./choice-paths.js";
 import {
   conceptMaps,
   generateMap,
@@ -110,7 +111,14 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
     return { ok: false, results: parsed.results };
   const project = parsed.project;
   // FHIR level (D7): its errors block the export like the other levels' errors.
-  const fhir = options.definitions === undefined ? [] : validateFhir(project, options.definitions);
+  const fhir =
+    options.definitions === undefined
+      ? []
+      : [
+          ...validateFhir(project, options.definitions),
+          // Paths through choice elements the generator cannot write yet (#156).
+          ...choicePathResults(project, options.definitions),
+        ];
   if (fhir.some((r) => r.severity === "error"))
     return { ok: false, results: [...parsed.results, ...fhir] };
   const warnings = [...parsed.results, ...fhir].filter((r) => r.severity !== "error");

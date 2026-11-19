@@ -713,6 +713,14 @@ The check acts at three moments:
 | `DUPLICATE_TARGET` | Error | Two rows on the same non-repeating element without exclusive conditions |
 | `EXPRESSION_NOT_TYPE_CHECKED` | Warning | Expert expression (D6): not type-checked, only by the grammar |
 
+**Cells turned off for now (#156, ADR-0015 addendum).** The generator writes choice elements by their base name, and the HL7 engine takes the type of the value written. So these are reported as `TYPE_MISMATCH` until the generator writes choice elements with an explicit type:
+- on a choice element, a value whose type is not the chosen one, for example a cast to string into `valueString` or a dateTime constant into `effectiveDateTime`;
+- a quantity into Age, Duration, Distance or Count;
+- a Quantity constant;
+- a reference into a choice element.
+
+The export also blocks paths whose choice names the generator would write wrongly (`PATH_UNSUPPORTED`).
+
 The verified examples already cover the copies string → string, integer → integer, decimal → decimal, date → date and date → dateTime, and the value map from a categorical column to `boolean` (`valueBoolean`). Every other combination the table allows must have a golden case before it is enabled (modules 2 and 3).
 
 ### Data and persistence

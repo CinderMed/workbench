@@ -48,6 +48,7 @@ export {
   checkValueType,
   copyVerdict,
   fhirType,
+  isDerivedQuantity,
   isQuantity,
   valueMapVerdict,
   valueVerdict,
