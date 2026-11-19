@@ -20,7 +20,13 @@ export const CardinalityCode = {
 
 const repeats = (max: string) => max === "*" || Number(max) > 1;
 /** Transforms that read the row's column: the row writes only when the column has a value. */
-const READS_COLUMN: ReadonlySet<string> = new Set(["copy", "cast", "valueMap", "quantity"]);
+const READS_COLUMN: ReadonlySet<string> = new Set([
+  "copy",
+  "cast",
+  "valueMap",
+  "quantity",
+  "coding",
+]);
 
 /** One write to an element of a role: a mapping row or a fixed value (always written). */
 interface Write {

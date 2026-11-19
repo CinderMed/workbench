@@ -136,6 +136,19 @@ describe("rule 1: unique ids and existing references of the right kind", () => {
       "transform.unitValueMapId",
     ],
     [
+      "the display column of a coding (#106)",
+      (p) => {
+        row(p, "map_hb").transform = {
+          kind: "coding",
+          system: "http://example.org/hb",
+          as: "CodeableConcept",
+          displayColumnId: "col_gone",
+        };
+      },
+      "map_hb",
+      "transform.displayColumnId",
+    ],
+    [
       "a reference target",
       (p) => {
         row(p, "map_obs_subj").transform = { kind: "reference", targetInstanceId: "ins_gone" };
@@ -301,6 +314,19 @@ describe("rule 3: rows and roles use the columns of their own table", () => {
       },
       "map_hb",
       "transform.unitColumnId",
+    ],
+    [
+      "the display column of a coding (#106)",
+      (p) => {
+        row(p, "map_hb").transform = {
+          kind: "coding",
+          system: "http://example.org/hb",
+          as: "CodeableConcept",
+          displayColumnId: "col_adm",
+        };
+      },
+      "map_hb",
+      "transform.displayColumnId",
     ],
     [
       "a role id rule column",

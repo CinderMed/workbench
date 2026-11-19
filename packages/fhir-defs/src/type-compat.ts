@@ -76,6 +76,8 @@ function isComplex(defs: FhirDefinitions, type: string): boolean {
 }
 
 const VALUE_MAP = "a value map";
+/** Column types a coding reads its code from (#106). */
+const CODING_COLUMNS: readonly ColumnType[] = ["string", "categorical", "integer"];
 const CAST_TO_STRING = "a conversion (cast) to string";
 const QUANTITY = "the quantity transform (with a unit)";
 
@@ -414,6 +416,29 @@ function tableRowTypes(
       }
       return findings;
     }
+    case "coding": {
+      const findings: TypeFinding[] = [];
+      if (column !== undefined && !CODING_COLUMNS.includes(column.dataType))
+        findings.push(
+          error(
+            TypeCode.TYPE_MISMATCH,
+            "columnId",
+            `a coding takes a string, categorical or integer column, not ${column.name} (${column.dataType})`,
+          ),
+        );
+      const fits = (t: string): Verdict =>
+        fhirType(t) === transform.as ? OK : { kind: "mismatch" };
+      const { verdict } = best(element, fits);
+      if (verdict.kind !== "ok")
+        findings.push(
+          error(
+            TypeCode.TYPE_MISMATCH,
+            "transform.as",
+            `the coding writes a ${transform.as}, but the element is ${where}${alternatives(element, fits)}`,
+          ),
+        );
+      return findings;
+    }
     case "concat": {
       const findings: TypeFinding[] = [];
       transform.columnIds.forEach((id, i) => {
@@ -623,6 +648,7 @@ function engineRowTypes(
           ),
         ];
       break;
+    case "coding": // Written with create('<as>'): typed, so a choice gets the right type.
     case "concat":
     case "expression":
       break;

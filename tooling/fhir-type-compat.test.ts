@@ -229,6 +229,23 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
     expect(outcome(type, { kind: "quantity" }, dataType)).toBe(fits ? "ok" : "TYPE_MISMATCH");
   });
 
+  // Coding from a code column (#106): the type written must be the element's; the column holds
+  // the code (string, categorical or integer).
+  it.each([
+    ["CodeableConcept", "CodeableConcept", "categorical", "ok"],
+    ["CodeableConcept", "CodeableConcept", "integer", "ok"],
+    ["Coding", "Coding", "string", "ok"],
+    ["Coding", "CodeableConcept", "string", "TYPE_MISMATCH"],
+    ["CodeableConcept", "Coding", "string", "TYPE_MISMATCH"],
+    ["CodeableConcept", "string", "string", "TYPE_MISMATCH"],
+    ["CodeableConcept", "CodeableConcept", "decimal", "TYPE_MISMATCH"],
+    ["CodeableConcept", "CodeableConcept", "date", "TYPE_MISMATCH"],
+  ] as const)("coding as %s on %s from a %s column is %s", (as, type, dataType, expected) => {
+    expect(outcome(type, { kind: "coding", system: "http://example.org/cs", as }, dataType)).toBe(
+      expected,
+    );
+  });
+
   it.each(["string", "markdown", "code", "integer", "CodeableConcept"])("concat on %s", (type) => {
     expect(outcome(type, { kind: "concat", columnIds: ["col", "col"] })).toBe(
       type === "string" || type === "markdown" ? "ok" : "TYPE_MISMATCH",

@@ -119,11 +119,12 @@ function roleColumns(instance: Instance): Id[] {
   ];
 }
 
-/** Columns a row reads: its column, the unit column of a quantity, concatenated columns, its condition. */
+/** Columns a row reads: its column, the unit column of a quantity, the display column of a coding, concatenated columns, its condition. */
 function rowColumns(row: MappingRow): Id[] {
   const ids = row.columnId === undefined ? [] : [row.columnId];
   const t = row.transform;
   if (t.kind === "quantity" && t.unitColumnId !== undefined) ids.push(t.unitColumnId);
+  if (t.kind === "coding" && t.displayColumnId !== undefined) ids.push(t.displayColumnId);
   if (t.kind === "concat") ids.push(...t.columnIds);
   return [...ids, ...conditionColumns(row.condition)];
 }
@@ -148,6 +149,8 @@ function transformText(
     case "quantity":
       if (t.unit !== undefined) return `quantity, unit ${coding(t.unit)}`;
       return `quantity, unit from ${t.unitColumnId === undefined ? "?" : columnName(t.unitColumnId)}${t.unitValueMapId === undefined ? "" : ` (value map ${mapName(t.unitValueMapId)})`}`;
+    case "coding":
+      return `${t.as} from the code, system ${t.system}${t.displayColumnId === undefined ? "" : `, display from ${columnName(t.displayColumnId)}`}`;
     case "concat":
       return `concatenation of ${t.columnIds.map(columnName).join(", ")}${t.separator === undefined ? "" : ` with '${t.separator}'`}`;
     case "reference": {

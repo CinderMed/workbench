@@ -293,6 +293,60 @@ describe("value maps", () => {
     );
   });
 
+  it("writes a coding from a code column, typed, with its display when present (#106)", () => {
+    const file = copy(metastraProject);
+    row(file, "R-006").transform = {
+      kind: "coding",
+      system: "http://example.org/pain",
+      as: "CodeableConcept",
+      displayColumnId: "col_hb_unit",
+    };
+    row(file, "R-011").transform = {
+      kind: "coding",
+      system: "http://example.org/osteo",
+      as: "Coding",
+    };
+    const text = printed(file, "src_firstoverview");
+    expect(text).toContain(
+      [
+        "  src.obs_pain_axial_intervals as v -> res.value = create('CodeableConcept') as cn then {",
+        "    v -> cn.coding = create('Coding') as cd then {",
+        "      v -> cd.system = 'http://example.org/pain', cd.code = v \"R-006-code\";",
+        '      src.obs_bloodt_hb_spec as d -> cd.display = d "R-006-display";',
+        '    } "R-006-coding";',
+        '  } "R-006";',
+      ].join("\n"),
+    );
+    expect(text).toContain(
+      [
+        "  src.cond_osteoporosis_yn as v -> res.verificationStatus = create('Coding') as cd then {",
+        "    v -> cd.system = 'http://example.org/osteo', cd.code = v \"R-011-code\";",
+        '  } "R-011";',
+      ].join("\n"),
+    );
+  });
+
+  it("writes a coding on a top-level element only (or at the top of a named slice)", () => {
+    const file = copy(metastraProject);
+    const r = row(file, "R-011");
+    r.transform = { kind: "coding", system: "http://example.org/osteo", as: "Coding" };
+    r.path = "verificationStatus.coding";
+    const map = generate(file, "src_firstoverview");
+    expect(map.ok ? [] : map.results.map((x) => [x.code, x.message])).toEqual([
+      [
+        GeneratorCode.PATH_UNSUPPORTED,
+        "Row R-011: a coding is written on a top-level element only.",
+      ],
+    ]);
+    const sliced = copy(metastraProject);
+    const nrs = row(sliced, "R-007");
+    nrs.transform = { kind: "coding", system: "http://example.org/nrs", as: "CodeableConcept" };
+    nrs.path = "component[nrs].code";
+    expect(printed(sliced, "src_firstoverview")).toContain(
+      "    src.obs_pain_axial_nrs as v -> slc.code = create('CodeableConcept') as cn then {",
+    );
+  });
+
   it("reports an entry without a target and a Quantity.unit map on a value-map row", () => {
     const file = copy(motuProject);
     delete sex(file).entries[0].target;

@@ -143,7 +143,7 @@ There are 69 features, split into 9 groups; 43 are MVP. The MVP covers creating 
 | D2 | Two groupings | By source section or by target role, with a toggle | MVP |
 | D3 | Path picker | Element tree of the resource or profile, with type and cardinality; search by name | MVP |
 | D4 | Repeated elements with a discriminator | `component` and `coding` identified by a name (e.g. `component[nrs]`) instead of an index | MVP |
-| D5 | Guided transforms | Copy, type conversion, constant, value map, quantity (value + unit from an auxiliary column, UCUM units), concatenation | MVP |
+| D5 | Guided transforms | Copy, type conversion, constant, value map, quantity (value + unit from an auxiliary column, UCUM units), Coding from a code column (system fixed, display from another column), concatenation | MVP |
 | D6 | Free expression for experts | FHIRPath or FML field visible only to the technical role, for cases D5 does not cover | V2 |
 | D7 | Inline validation | Cells highlighted for a missing path, incompatible type, exceeded cardinality, missing role or code | MVP |
 | D8 | Filters and bulk actions | Filters by status, role, section; assign a role or a status to several rows at once | MVP |
@@ -480,6 +480,7 @@ The rules were applied by hand, the way the generator will apply them, to two ex
 | Named slice | `src where ($this.col.exists()) -> res.component as slc then { discriminator with cc(…); value }` |
 | Value map | One rule per value: `src.col as v where ($this = '1') -> res.value = cc(system, code, display)`; a constant for codes and booleans. Each rule is named `<row code>-<value>`; a rule name is a FHIR `id` (`[A-Za-z0-9.-]{1,64}`), so characters outside `[A-Za-z0-9.-]` become `-` (`R-006-1`, `R-011--1`, `Sì` → `R-002-S-`) and the name is cut to 64 characters; when two values of the same map get the same name, the later ones in entry order get a numeric suffix, added after cutting so the name still fits (`Sí` → `R-002-S-2`; `N/A`, `N A`, `N-A` → `R-002-N-A`, `R-002-N-A2`, `R-002-N-A3`). ConceptMaps are exported only as documentation |
 | Quantity with unit from a column | `res.value = create('Quantity') as q then { value; one rule per unit with unit, system and code }` |
+| Coding from a code column (format 1.4.0, #106) | `src.col as v -> res.code = create('CodeableConcept') as cn then { v -> cn.coding = create('Coding') as cd then { v -> cd.system = '<system>', cd.code = v; src.label as d -> cd.display = d } }` (for a Coding: `create('Coding') as cd` directly). The type is created explicitly, so a choice element gets it; the display only when its column has a value. One rule for any number of codes, instead of one value-map entry per code |
 | Multiple choice, `repeat: eachValue` | The normalization produces a list; each per-value rule fires for every item, so one repetition per selected value |
 | Reference in the same table | `src.id_Target as t -> res.subject as r, r.reference = evaluate(t, 'Type/' + $this)`, inside the creation condition of the target role |
 | Reference to another table (`via`) | Same form; the id is computed by the normalization with the columns given by the relation; the target resource must already be loaded |
@@ -694,6 +695,7 @@ The check acts at three moments:
 | --- | --- | --- |
 | Value map | categorical, multipleChoice, boolean (other types are a rule 6 error: declare the column categorical) | The map's target type (`code`, `Coding`, `CodeableConcept`, `boolean`) must match the element's type. A map to `boolean` turns local yes/no words into `true`/`false` (golden case `boolean-value-map`: `Sì`/`No` → `Observation.valueBoolean`) |
 | Quantity | integer, decimal | Quantity and its profiles (SimpleQuantity, Age, Duration) |
+| Coding from a column (format 1.4.0) | string, categorical, integer | The type written (`as`: Coding or CodeableConcept) must be the element's type. The column's allowed values are checked against the element's binding, with the transform's system |
 | Conversion (`cast`) | integer → decimal, date → dateTime, any type → string | The conversion's result type |
 | Concatenation | string, code, integer, decimal | string, markdown |
 | Constant | none | The type of the fixed value (`FhirValue.type`) must match the element's type |

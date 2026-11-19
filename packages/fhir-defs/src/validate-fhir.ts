@@ -342,8 +342,8 @@ function bindingResults(
   if (use.row === undefined) return [];
   const { codes, valueMap } = rowCodes(use.row, context.columns, context.valueMaps);
   return checkBinding(defs, element, codes, where).map((f) => {
-    // A value-map code belongs to its entry; a constant to the row's transform; a copied
-    // categorical column to the row (its column needs a value map).
+    // A value-map code belongs to its entry; a constant to the row's transform; the allowed
+    // values of a copied categorical column, or of a coding's column, to the row's column.
     if (valueMap !== undefined && f.field !== undefined)
       return result(
         { objectKind: "valueMap", id: valueMap.id },
@@ -354,7 +354,10 @@ function bindingResults(
       );
     return result(
       use.owner,
-      f.field ?? (use.row?.transform.kind === "copy" ? "columnId" : "path"),
+      f.field ??
+        (use.row?.transform.kind === "copy" || use.row?.transform.kind === "coding"
+          ? "columnId"
+          : "path"),
       BindingCode.BINDING_VIOLATION,
       f.message,
       f.severity,

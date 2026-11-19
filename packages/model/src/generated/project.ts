@@ -180,6 +180,18 @@ export type Transform =
       unitValueMapId?: Id;
     }
   | {
+      kind: "coding";
+      system: Canonical;
+      /**
+       * The type written: it must be the element's type.
+       */
+      as: "Coding" | "CodeableConcept";
+      /**
+       * Column holding the display, in the same table.
+       */
+      displayColumnId?: Id;
+    }
+  | {
       kind: "concat";
       /**
        * @minItems 2

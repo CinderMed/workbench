@@ -88,6 +88,19 @@ export function rowCodes(
     });
     return { codes, valueMap };
   }
+  if (transform.kind === "coding" && row.columnId !== undefined) {
+    const column = columns.get(row.columnId);
+    const missing = new Set(column?.missingValues ?? []);
+    return {
+      codes: (column?.allowedValues ?? [])
+        .filter((v) => !missing.has(v.code))
+        .map((v) => ({
+          system: transform.system,
+          code: v.code,
+          from: `allowed value ${v.code} of column ${column?.name ?? ""}`,
+        })),
+    };
+  }
   if (transform.kind === "copy" && row.columnId !== undefined) {
     const column = columns.get(row.columnId);
     if (column?.dataType !== "categorical") return { codes: [] };

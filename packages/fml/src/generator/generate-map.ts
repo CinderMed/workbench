@@ -489,7 +489,8 @@ function unitRules(g: Generation, row: MappingRow, q: Identifier): Rule[] {
 
 /**
  * The rules of one row on `context`: one rule for most transforms, one per value for a value map,
- * and a `create('Quantity')` block with its unit rules for a quantity.
+ * a `create('Quantity')` block with its unit rules for a quantity, and a `create('Coding')` or
+ * `create('CodeableConcept')` block for a coding.
  */
 function rowRules(
   g: Generation,
@@ -572,8 +573,104 @@ function rowRules(
       },
     ];
   }
+  if (transform.kind === "coding") return codingRules(g, row, segments, write);
   const rule = valueRule(g, row, context, segments);
   return rule === undefined ? [] : [rule];
+}
+
+/**
+ * Coding from a code column (#106): the column's value is the code of a fixed system. A Coding, or
+ * a CodeableConcept with one coding, is created with its type (so a choice element gets the right
+ * one), and the display is written only when its column has a value:
+ *
+ *   src.col as v -> res.code = create('CodeableConcept') as cn then {
+ *     v -> cn.coding = create('Coding') as cd then {
+ *       v -> cd.system = '<system>', cd.code = v "R-x-code";
+ *       src.label as d -> cd.display = d "R-x-display";
+ *     } "R-x-coding";
+ *   } "R-x";
+ */
+function codingRules(
+  g: Generation,
+  row: MappingRow,
+  segments: readonly Segment[],
+  write: (value: Transform) => Target[],
+): Rule[] {
+  const transform = row.transform;
+  if (transform.kind !== "coding") return [];
+  const v = ident("v");
+  const cd = ident("cd");
+  const [target] = write({ kind: "create", type: ident(transform.as) });
+  if (target === undefined || segments.length > 1) {
+    g.error(
+      GeneratorCode.PATH_UNSUPPORTED,
+      "mapping",
+      row.id,
+      "path",
+      `Row ${row.code}: a coding is written on a top-level element only.`,
+    );
+    return [];
+  }
+  const inner: Rule[] = [
+    {
+      name: ruleName(`${row.code}-code`),
+      source: { context: v },
+      targets: [
+        {
+          context: cd,
+          element: ident("system"),
+          transform: { kind: "literal", value: transform.system },
+        },
+        { context: cd, element: ident("code"), transform: { kind: "copy", variable: v } },
+      ],
+    },
+  ];
+  if (transform.displayColumnId !== undefined) {
+    const d = ident("d");
+    inner.push({
+      name: ruleName(`${row.code}-display`),
+      source: { context: src, element: g.columnElement(transform.displayColumnId), alias: d },
+      targets: [
+        { context: cd, element: ident("display"), transform: { kind: "copy", variable: d } },
+      ],
+    });
+  }
+  const source = { context: src, element: g.columnElement(row.columnId), alias: v };
+  if (transform.as === "Coding")
+    return [
+      {
+        name: ruleName(row.code),
+        source,
+        targets: [{ ...target, alias: cd }],
+        then: { kind: "rules", rules: inner },
+      },
+    ];
+  const cn = ident("cn");
+  return [
+    {
+      name: ruleName(row.code),
+      source,
+      targets: [{ ...target, alias: cn }],
+      then: {
+        kind: "rules",
+        rules: [
+          {
+            name: ruleName(`${row.code}-coding`),
+            source: { context: v },
+            targets: [
+              {
+                context: cn,
+                element: ident("coding"),
+                transform: { kind: "create", type: ident("Coding") },
+                alias: cd,
+              },
+            ],
+            then: { kind: "rules", rules: inner },
+          },
+        ],
+      },
+    },
+  ];
 }
 
 /** The condition that guards a row: its own condition and, for a reference, the target's. */
