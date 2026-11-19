@@ -50,7 +50,9 @@ Reads a [project file](/workbench/reference/project-file/) and runs four levels 
      - `REFERENCE_REQUIRED_MISSING`: a warning when a required reference, such as `Condition.subject`, is not written;
      - `ROLE_ORPHAN`: a warning when a role is linked to no other role.
 
-   Cardinality is added later in this version series.
+   - cardinality:
+     - `CARDINALITY_MISMATCH`: an error when a multiple-choice column is written without `repeat: eachValue`;
+     - `DUPLICATE_TARGET`: a warning when two rows write the same single-valued element and their conditions are not recognised as exclusive. Only conditions on the same column are recognised: different values, or a value against none. Check the others by hand.
 
 4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 
