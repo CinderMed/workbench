@@ -65,3 +65,4 @@ export {
   valueCodes,
 } from "./binding.js";
 export { MAX_VALUE_SET_CODES } from "./build-index.js";
+export { ReferenceCode, checkReferences } from "./references.js";

@@ -658,6 +658,11 @@ Validation runs in the API on every save (on the changed object and on those tha
 | FHIR | Existing path, type compatible with the transform, cardinality, type allowed for References, declared slices | Error |
 | Quality | Columns without a description, columns neither mapped nor excluded, roles without rows, `perGroup` roles fed by several rows, `manual` codes or codes with a different display, `categorical` or `multipleChoice` columns without allowed values and not used by a value map (`ALLOWED_VALUES_MISSING`: values will not be checked during conversion) | Warning |
 
+**References (F4).** At the FHIR level (ADR-0017):
+- `REF_TARGET_NOT_ALLOWED` (error): a reference whose target role's type the element's `targetProfile` does not allow. It is a warning, "target not checked", when the element's target profiles are not in the definitions.
+- `REFERENCE_REQUIRED_MISSING` (warning): a required top-level Reference of a role's resource that no row writes.
+- `ROLE_ORPHAN` (warning): in a project with two or more roles, a role that references no other role and that no role references.
+
 Every result has the shape `{severity, code, objectKind, id, field, message}`. Codes are stable (e.g. `PATH_NOT_FOUND`, `TYPE_MISMATCH`, `REF_TARGET_NOT_ALLOWED`), so the grid highlights the right cell. Errors block the export, warnings do not.
 
 ### Type compatibility in the grid
