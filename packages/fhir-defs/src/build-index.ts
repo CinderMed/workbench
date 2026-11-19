@@ -19,6 +19,8 @@ import {
   type PackageRef,
   type Result,
   type TypeDocument,
+  type ValueSetDocument,
+  type ValueSetEntry,
   failure,
 } from "./index-format.js";
 
@@ -92,7 +94,8 @@ export function buildIndex(
         ? 1
         : a.id.localeCompare(b.id, "en") || a.version.localeCompare(b.version, "en"),
   );
-  const candidates = collect(ordered, issues);
+  const terminology: Terminology = { valueSets: new Map(), codeSystems: new Map() };
+  const candidates = collect(ordered, issues, terminology);
   const primitives = new Set(
     candidates.filter((c) => c.kind === "primitive-type").map((c) => String(c.sd["type"])),
   );
@@ -136,23 +139,48 @@ export function buildIndex(
   }
   if (issues.some((i) => i.severity === "error")) return { ok: false, issues };
 
+  const valueSets = boundValueSets(candidates, terminology, files);
+
   entries.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
   const manifest: IndexManifest = {
     indexFormat: INDEX_FORMAT_VERSION,
     fhirVersion,
     packages: ordered.map((p) => ({ id: p.id, version: p.version })),
     entries,
+    valueSets,
   };
   return { ok: true, value: { manifest, manifestText: JSON.stringify(manifest), files }, issues };
 }
 
+/** Terminology resources by canonical URL (the first package wins), with their package. */
+interface Terminology {
+  readonly valueSets: Map<string, { readonly resource: Json; readonly pkg: PackageRef }>;
+  readonly codeSystems: Map<string, Json>;
+}
+
 /** The StructureDefinitions the index keeps, in package order then resource order. */
-function collect(packages: readonly PackageContents[], issues: IndexIssue[]): Candidate[] {
+function collect(
+  packages: readonly PackageContents[],
+  issues: IndexIssue[],
+  terminology: Terminology,
+): Candidate[] {
   const kept: Candidate[] = [];
   for (const p of packages) {
     const pkg = { id: p.id, version: p.version };
     for (const resource of p.resources) {
-      if (!isObject(resource) || resource["resourceType"] !== "StructureDefinition") continue;
+      if (!isObject(resource)) continue;
+      const canonical = str(resource["url"]);
+      if (resource["resourceType"] === "ValueSet" && canonical !== undefined) {
+        if (!terminology.valueSets.has(canonical))
+          terminology.valueSets.set(canonical, { resource, pkg });
+        continue;
+      }
+      if (resource["resourceType"] === "CodeSystem" && canonical !== undefined) {
+        if (!terminology.codeSystems.has(canonical))
+          terminology.codeSystems.set(canonical, resource);
+        continue;
+      }
+      if (resource["resourceType"] !== "StructureDefinition") continue;
       const kind = str(resource["kind"]);
       if (kind === "logical") continue;
       if (resource["derivation"] === "constraint" && resource["type"] === "Extension") continue;
@@ -294,4 +322,163 @@ function elementValue(
   const suffix = key.slice(prefix.length);
   const lower = suffix.charAt(0).toLowerCase() + suffix.slice(1);
   return { type: primitives.has(lower) ? lower : suffix, value: e[key] };
+}
+
+// ---------------------------------------------------------------------------------------------
+// ValueSet expansions for the binding checks (ADR-0016), offline, from the packages only.
+
+/** Larger expansions are not kept: the documents must stay small (ADR-0013). */
+export const MAX_VALUE_SET_CODES = 2000;
+const CHECKED_STRENGTHS: readonly string[] = ["required", "extensible", "preferred"];
+
+type Expansion =
+  | { readonly ok: true; readonly codes: Map<string, Set<string>> }
+  | { readonly ok: false; readonly reason: string };
+
+/** The URLs of the ValueSets that kept elements bind with a checked strength, without version. */
+function boundUrls(candidates: readonly Candidate[]): string[] {
+  const urls = new Set<string>();
+  for (const { snapshot } of candidates)
+    for (const element of snapshot) {
+      const binding = element["binding"];
+      if (!isObject(binding)) continue;
+      const valueSet = str(binding["valueSet"]);
+      if (valueSet !== undefined && CHECKED_STRENGTHS.includes(str(binding["strength"]) ?? ""))
+        urls.add(valueSet.split("|")[0] ?? valueSet);
+    }
+  return [...urls].sort();
+}
+
+function concepts(list: unknown, into: Set<string>): void {
+  if (!Array.isArray(list)) return;
+  for (const concept of list) {
+    if (!isObject(concept)) continue;
+    const code = str(concept["code"]);
+    if (code !== undefined) into.add(code);
+    concepts(concept["concept"], into);
+  }
+}
+
+/** The expansion of a ValueSet from its compose (or its stored expansion), or why there is none. */
+function expand(
+  url: string,
+  terminology: Terminology,
+  seen: ReadonlySet<string> = new Set(),
+): Expansion {
+  const found = terminology.valueSets.get(url);
+  if (found === undefined) return { ok: false, reason: "the ValueSet is not in the packages" };
+  if (seen.has(url)) return { ok: false, reason: "the ValueSet includes itself" };
+  const vs = found.resource;
+  const codes = new Map<string, Set<string>>();
+  const add = (system: string, values: Iterable<string>) => {
+    const set = codes.get(system) ?? new Set<string>();
+    for (const v of values) set.add(v);
+    codes.set(system, set);
+  };
+  const compose = vs["compose"];
+  if (!isObject(compose)) {
+    // No compose: a stored expansion, if there is one.
+    const expansion = vs["expansion"];
+    const contains = isObject(expansion) ? expansion["contains"] : undefined;
+    if (!Array.isArray(contains))
+      return { ok: false, reason: "the ValueSet has no compose and no expansion" };
+    const flat = (list: unknown[]): void => {
+      for (const c of list) {
+        if (!isObject(c)) continue;
+        const system = str(c["system"]);
+        const code = str(c["code"]);
+        if (system !== undefined && code !== undefined) add(system, [code]);
+        if (Array.isArray(c["contains"])) flat(c["contains"]);
+      }
+    };
+    flat(contains);
+    return { ok: true, codes };
+  }
+  const part = (item: Json, remove: boolean): string | undefined => {
+    if (Array.isArray(item["filter"]) && item["filter"].length > 0) return "it uses a filter";
+    for (const sub of Array.isArray(item["valueSet"]) ? item["valueSet"] : []) {
+      const subUrl = str(sub)?.split("|")[0];
+      if (subUrl === undefined) continue;
+      const inner = expand(subUrl, terminology, new Set([...seen, url]));
+      if (!inner.ok) return `it includes ${subUrl}, which cannot be expanded: ${inner.reason}`;
+      if (remove) return "it excludes a ValueSet";
+      for (const [system, values] of inner.codes) add(system, values);
+    }
+    const system = str(item["system"]);
+    if (system === undefined) return undefined;
+    const listed = new Set<string>();
+    if (Array.isArray(item["concept"])) concepts(item["concept"], listed);
+    else {
+      if (remove) return "it excludes a whole code system";
+      const cs = terminology.codeSystems.get(system);
+      if (cs === undefined) return `the code system ${system} is not in the packages`;
+      if (cs["content"] !== "complete")
+        return `the code system ${system} is not complete in the packages (${str(cs["content"]) ?? "no content"})`;
+      concepts(cs["concept"], listed);
+    }
+    if (remove)
+      codes.get(system)?.forEach((c) => (listed.has(c) ? codes.get(system)?.delete(c) : undefined));
+    else add(system, listed);
+    return undefined;
+  };
+  for (const include of Array.isArray(compose["include"]) ? compose["include"] : []) {
+    if (!isObject(include)) continue;
+    const reason = part(include, false);
+    if (reason !== undefined) return { ok: false, reason };
+  }
+  for (const exclude of Array.isArray(compose["exclude"]) ? compose["exclude"] : []) {
+    if (!isObject(exclude)) continue;
+    const reason = part(exclude, true);
+    if (reason !== undefined) return { ok: false, reason };
+  }
+  return { ok: true, codes };
+}
+
+/** The manifest entries of the bound ValueSets, adding a document for each expandable one. */
+function boundValueSets(
+  candidates: readonly Candidate[],
+  terminology: Terminology,
+  files: Map<string, string>,
+): ValueSetEntry[] {
+  const entries: ValueSetEntry[] = [];
+  for (const url of boundUrls(candidates)) {
+    const expansion = expand(url, terminology);
+    if (!expansion.ok) {
+      entries.push({ url, expandable: false, reason: expansion.reason });
+      continue;
+    }
+    const count = [...expansion.codes.values()].reduce((n, set) => n + set.size, 0);
+    if (count > MAX_VALUE_SET_CODES) {
+      entries.push({
+        url,
+        expandable: false,
+        reason: `it has ${String(count)} codes, more than the ${String(MAX_VALUE_SET_CODES)} kept offline`,
+      });
+      continue;
+    }
+    const found = terminology.valueSets.get(url);
+    const id = str(found?.resource["id"]) ?? url.split("/").at(-1) ?? "valueset";
+    const file = `valueSets/${found?.pkg.id ?? "unknown"}/${id}.json`;
+    const document: ValueSetDocument = {
+      indexFormat: INDEX_FORMAT_VERSION,
+      url,
+      codes: Object.fromEntries(
+        [...expansion.codes.entries()]
+          .filter(([, set]) => set.size > 0)
+          .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          .map(([system, set]) => [system, [...set].sort()]),
+      ),
+    };
+    const text = JSON.stringify(document);
+    files.set(file, text);
+    entries.push({
+      url,
+      expandable: true,
+      file,
+      sha256: sha256Hex(text),
+      size: utf8Length(text),
+      count,
+    });
+  }
+  return entries;
 }

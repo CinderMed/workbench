@@ -8,7 +8,8 @@
  * - a slice sits on a repeating element;
  * - `repeat: eachValue` writes to a repeating element;
  * - every row's transform, every fixed value and every value-action value fits the element's type
- *   (type compatibility, `type-compat.ts`).
+ *   (type compatibility, `type-compat.ts`);
+ * - every code written to a bound element is in its ValueSet (bindings, `binding.ts`).
  * Results have the shape of every other level. Errors block the export.
  */
 import {
@@ -16,12 +17,14 @@ import {
   type FhirValue,
   type Instance,
   type MappingRow,
+  type ValueMap,
   type ObjectKind,
   type ProjectFile,
   type ValidationResult,
   rowValueMaps,
 } from "@cindermed/model";
 import type { FhirDefinitions, IndexFetch } from "./definitions.js";
+import { BindingCode, checkBinding, rowCodes, valueCodes } from "./binding.js";
 import { type TypeFinding, checkRowTypes, checkValueType } from "./type-compat.js";
 import {
   type PathIssueCode,
@@ -296,6 +299,9 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
       }
       for (const f of findings)
         found.push(result(use.owner, f.field, f.code, f.message, f.severity));
+      // Bindings (ADR-0016): only for values that can be written at all.
+      if (!findings.some((f) => f.severity === "error"))
+        found.push(...bindingResults(defs, context, use, resolved.value));
     }
     for (const item of found) {
       const key = `${item.objectKind}|${item.id ?? ""}|${item.field ?? ""}|${item.code}`;
@@ -305,6 +311,46 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
     }
   }
   return results;
+}
+
+/** The binding findings of a path use whose element resolved, on the object that holds each code. */
+function bindingResults(
+  defs: FhirDefinitions,
+  context: {
+    readonly columns: ReadonlyMap<string, Column>;
+    readonly valueMaps: ReadonlyMap<string, ValueMap>;
+  },
+  use: PathUse,
+  element: ResolvedElement,
+): ValidationResult[] {
+  const where = `${use.label}: ${use.instance.resourceType}.${use.path}`;
+  if (use.value !== undefined) {
+    const value = use.value;
+    return checkBinding(defs, element, valueCodes(value.value), where).map((f) =>
+      result(use.owner, value.field, BindingCode.BINDING_VIOLATION, f.message, f.severity),
+    );
+  }
+  if (use.row === undefined) return [];
+  const { codes, valueMap } = rowCodes(use.row, context.columns, context.valueMaps);
+  return checkBinding(defs, element, codes, where).map((f) => {
+    // A value-map code belongs to its entry; a constant to the row's transform; a copied
+    // categorical column to the row (its column needs a value map).
+    if (valueMap !== undefined && f.field !== undefined)
+      return result(
+        { objectKind: "valueMap", id: valueMap.id },
+        f.field,
+        BindingCode.BINDING_VIOLATION,
+        f.message,
+        f.severity,
+      );
+    return result(
+      use.owner,
+      f.field ?? (use.row?.transform.kind === "copy" ? "columnId" : "path"),
+      BindingCode.BINDING_VIOLATION,
+      f.message,
+      f.severity,
+    );
+  });
 }
 
 function repeatResult(use: PathUse, where: string, element: ResolvedElement): ValidationResult {
@@ -335,7 +381,10 @@ export async function loadProjectDefinitions(
   }
   for (const use of pathUses(project)) {
     const ref = roleDefinition(defs, use.instance);
-    if (ref !== undefined)
-      await withDefinitions(defs, fetch, () => resolvePath(defs, ref, use.path));
+    if (ref === undefined) continue;
+    const resolved = await withDefinitions(defs, fetch, () => resolvePath(defs, ref, use.path));
+    const valueSet = resolved.ok ? resolved.value.binding?.valueSet : undefined;
+    if (valueSet !== undefined && defs.valueSet(valueSet) === undefined)
+      await defs.load([valueSet], fetch);
   }
 }

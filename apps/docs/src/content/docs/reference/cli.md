@@ -43,7 +43,9 @@ Reads a [project file](/workbench/reference/project-file/) and runs four levels 
      - `COMPLEX_TARGET`: the message lists the elements that fit;
      - `TYPE_PRECISION`: a warning, for a value that may be out of range or badly formatted.
 
-   Bindings, cardinality and references are added later in this version series.
+   - that every code written to a code, Coding or CodeableConcept element with a binding is in its ValueSet (`BINDING_VIOLATION`). A required binding gives an error, an extensible or preferred one a warning. A required ValueSet that cannot be expanded from the FHIR packages gives a "binding not checked" warning. The codes checked are value-map targets, constants, fixed values and the allowed values of a categorical column that is copied.
+
+   Cardinality and references are added later in this version series.
 
 4. **Quality**: warnings that do not make the project invalid. The first one is `ALLOWED_VALUES_MISSING`: a `categorical` or `multipleChoice` column without allowed values, whose values will not be checked during conversion. It also runs only when the schema check passes.
 

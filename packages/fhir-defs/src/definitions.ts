@@ -11,9 +11,12 @@ import {
   type IndexManifest,
   type Result,
   type TypeDocument,
+  type ValueSetDocument,
+  type ValueSetEntry,
   failure,
   parseManifest,
   parseTypeDocument,
+  parseValueSetDocument,
 } from "./index-format.js";
 
 /** Gets the text of a file of the index (a path from the manifest, such as `types/Patient.json`). */
@@ -24,6 +27,8 @@ export class FhirDefinitions {
   private readonly byUrl = new Map<string, IndexEntry>();
   private readonly byType = new Map<string, IndexEntry>();
   private readonly documents = new Map<string, TypeDocument>();
+  private readonly valueSetsByUrl = new Map<string, ValueSetEntry>();
+  private readonly valueSetDocuments = new Map<string, ValueSetDocument>();
 
   private constructor(manifest: IndexManifest) {
     this.manifest = manifest;
@@ -32,6 +37,7 @@ export class FhirDefinitions {
       // Types are found by name too; profiles only by URL.
       if (entry.derivation !== "constraint") this.byType.set(entry.type, entry);
     }
+    for (const entry of manifest.valueSets ?? []) this.valueSetsByUrl.set(entry.url, entry);
   }
 
   /** Opens an index from its manifest (the parsed `index.json`). */
@@ -68,8 +74,33 @@ export class FhirDefinitions {
     return this.document(ref) !== undefined;
   }
 
+  /** The manifest entry of a ValueSet bound by an element (its URL, with or without `|version`). */
+  valueSetEntry(url: string): ValueSetEntry | undefined {
+    return this.valueSetsByUrl.get(url.split("|")[0] ?? url);
+  }
+
+  /** The expansion of a ValueSet, if its document has been loaded. */
+  valueSet(url: string): ValueSetDocument | undefined {
+    const entry = this.valueSetEntry(url);
+    return entry?.expandable === true ? this.valueSetDocuments.get(entry.file) : undefined;
+  }
+
   /** Adds the text of a document of the manifest, after checking its digest and format. */
-  add(file: string, text: string): Result<TypeDocument> {
+  add(file: string, text: string): Result<TypeDocument | ValueSetDocument> {
+    const valueSet = (this.manifest.valueSets ?? []).find((e) => e.expandable && e.file === file);
+    if (valueSet?.expandable === true) {
+      if (sha256Hex(text) !== valueSet.sha256)
+        return failure({
+          severity: "error",
+          code: "INDEX_DOCUMENT_DIGEST_MISMATCH",
+          message: `${file} does not match the SHA-256 of the index`,
+          subject: file,
+        });
+      const parsed = parseValueSetDocument(parseJson(text), file);
+      if (!parsed.ok) return parsed;
+      this.valueSetDocuments.set(file, parsed.value);
+      return parsed;
+    }
     const entry = this.manifest.entries.find((e) => e.file === file);
     if (entry === undefined)
       return failure({
@@ -85,13 +116,7 @@ export class FhirDefinitions {
         message: `${file} does not match the SHA-256 of the index`,
         subject: file,
       });
-    let json: unknown;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      json = undefined;
-    }
-    const parsed = parseTypeDocument(json, file);
+    const parsed = parseTypeDocument(parseJson(text), file);
     if (!parsed.ok) return parsed;
     if (parsed.value.url !== entry.url)
       return failure({
@@ -105,13 +130,20 @@ export class FhirDefinitions {
   }
 
   /**
-   * Loads the documents of these types or profiles that are not loaded yet, in parallel. Unknown
+   * Loads the documents of these types, profiles or bound ValueSets (by URL) that are not loaded
+   * yet, in parallel. A ValueSet that cannot be expanded has no document and is skipped. Unknown
    * references and failed fetches are reported; the documents that did load stay loaded.
    */
   async load(refs: readonly string[], fetch: IndexFetch): Promise<Result<void>> {
     const issues: IndexIssue[] = [];
     const files = new Set<string>();
     for (const ref of refs) {
+      const valueSet = this.valueSetEntry(ref);
+      if (valueSet !== undefined) {
+        if (valueSet.expandable && !this.valueSetDocuments.has(valueSet.file))
+          files.add(valueSet.file);
+        continue;
+      }
       const entry = this.entry(ref);
       if (entry === undefined)
         issues.push({
@@ -141,6 +173,14 @@ export class FhirDefinitions {
       }),
     );
     return issues.length === 0 ? { ok: true, value: undefined, issues } : { ok: false, issues };
+  }
+}
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
   }
 }
 

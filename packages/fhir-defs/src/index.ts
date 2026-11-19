@@ -32,10 +32,13 @@ export {
   type PackageRef,
   type Result,
   type TypeDocument,
+  type ValueSetDocument,
+  type ValueSetEntry,
   elementPath,
   isSupportedFormat,
   parseManifest,
   parseTypeDocument,
+  parseValueSetDocument,
 } from "./index-format.js";
 export { FhirCode, loadProjectDefinitions, validateFhir } from "./validate-fhir.js";
 export {
@@ -53,3 +56,12 @@ export {
   valueMapVerdict,
   valueVerdict,
 } from "./type-compat.js";
+export {
+  BindingCode,
+  type BindingFinding,
+  type WrittenCode,
+  checkBinding,
+  rowCodes,
+  valueCodes,
+} from "./binding.js";
+export { MAX_VALUE_SET_CODES } from "./build-index.js";

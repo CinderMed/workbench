@@ -302,6 +302,13 @@ async function install(
   }
 }
 
+/** The resources the definition index uses: definitions, and the terminology of bindings. */
+const INDEXED_TYPES: ReadonlySet<string> = new Set([
+  "StructureDefinition",
+  "ValueSet",
+  "CodeSystem",
+]);
+
 /** A package read from the cache: its StructureDefinitions and its dependencies. */
 export interface ReadPackage extends PackageContents {
   readonly resources: readonly unknown[];
@@ -309,8 +316,8 @@ export interface ReadPackage extends PackageContents {
 }
 
 /**
- * Reads a package's manifest and StructureDefinitions. With `.index.json` (FHIR package index),
- * only the StructureDefinition files are parsed; without it, every JSON file is.
+ * Reads a package's manifest, StructureDefinitions, ValueSets and CodeSystems. With `.index.json`
+ * (FHIR package index), only those files are parsed; without it, every JSON file is.
  */
 export async function readPackage(
   ref: PackageRef,
@@ -345,7 +352,12 @@ export async function readPackage(
       files?: { filename?: unknown; resourceType?: unknown }[];
     };
     files = (index.files ?? [])
-      .filter((f) => f.resourceType === "StructureDefinition" && typeof f.filename === "string")
+      .filter(
+        (f) =>
+          typeof f.resourceType === "string" &&
+          INDEXED_TYPES.has(f.resourceType) &&
+          typeof f.filename === "string",
+      )
       .map((f) => String(f.filename));
   } else {
     files = (await readdir(folder)).filter((f) => f.endsWith(".json") && f !== "package.json");

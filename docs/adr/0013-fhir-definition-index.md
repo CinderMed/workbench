@@ -115,3 +115,7 @@ A package comes from the network and is written to disk, so the loader trusts ne
 - **Time.** Every registry request (metadata and tarball, body included) has a timeout, 120 s by default, through `AbortSignal.timeout`. The error says which URL did not answer in time.
 - The limits are options (`PackageOptions.limits`), so the API can set its own. A refused package leaves nothing in the cache.
 - Cost: the check reads the tarball once more before extraction, so installing a core package takes about 10 s instead of 6 s, once per machine.
+
+## Addendum (2026-11-19): index format 1.1.0
+
+Format 1.1.0 adds the ValueSet expansions of bindings: `manifest.valueSets` and one document per expandable ValueSet, `valueSets/<package>/<id>.json` (ADR-0016). It is a compatible minor version: a 1.0.0 index has no `valueSets`, and a reader of 1.x accepts both.
