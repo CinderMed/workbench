@@ -33,7 +33,7 @@ describe("buildIndex", () => {
     ]);
     expect([...value.files.keys()].sort()).toEqual(value.manifest.entries.map((e) => e.file));
     expect(value.manifest).toMatchObject({
-      indexFormat: "1.0.0",
+      indexFormat: "1.1.0",
       fhirVersion: "4.0.1",
       packages: [{ id: "hl7.fhir.r4.core", version: "4.0.1" }],
     });

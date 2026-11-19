@@ -212,8 +212,14 @@ describe("FHIR package cache", () => {
 });
 
 describe("readPackage", () => {
-  it("reads only the StructureDefinitions listed in .index.json", async () => {
-    const files = core();
+  it("reads only the definitions and terminology listed in .index.json", async () => {
+    const files = packageFiles("hl7.fhir.r4.core", "4.0.1", {
+      "StructureDefinition-Patient.json": sd("Patient", "resource"),
+      "StructureDefinition-string.json": sd("string", "primitive-type"),
+      "ValueSet-x.json": { resourceType: "ValueSet", id: "x" },
+      "CodeSystem-y.json": { resourceType: "CodeSystem", id: "y" },
+      "SearchParameter-z.json": { resourceType: "SearchParameter", id: "z" },
+    });
     files["broken.json"] = "not json, and not listed";
     await cached("hl7.fhir.r4.core", "4.0.1", files);
     const read = await readPackage(
@@ -222,7 +228,12 @@ describe("readPackage", () => {
     );
     expect(read.fhirVersions).toEqual(["4.0.1"]);
     expect(read.dependencies).toEqual([]);
-    expect(read.resources.map((r) => (r as { id: string }).id)).toEqual(["Patient", "string"]);
+    expect(read.resources.map((r) => (r as { id: string }).id)).toEqual([
+      "y",
+      "Patient",
+      "string",
+      "x",
+    ]);
   });
 
   it("reads every JSON file without .index.json, and the old fhir-version-list", async () => {

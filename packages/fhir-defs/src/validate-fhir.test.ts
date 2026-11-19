@@ -3,15 +3,17 @@ import { describe, expect, it } from "vitest";
 import { buildIndex } from "./build-index.js";
 import { FhirDefinitions } from "./definitions.js";
 import { FHIR, r4Paths } from "./test-support/synthetic-packages.js";
+import { BindingCode } from "./binding.js";
 import { TypeCode } from "./type-compat.js";
 import { FhirCode, loadProjectDefinitions, validateFhir } from "./validate-fhir.js";
 
 /**
  * The path findings only. These tests copy one string column everywhere, which the type checks
- * (type-compat.test.ts) rightly flag; here only the paths matter.
+ * (type-compat.test.ts) rightly flag, and bind to ValueSets the synthetic package does not have
+ * (binding.test.ts); here only the paths matter.
  */
 function paths(results: ReturnType<typeof validateFhir>) {
-  const types: readonly string[] = Object.values(TypeCode);
+  const types: readonly string[] = [...Object.values(TypeCode), ...Object.values(BindingCode)];
   return results.filter((r) => !types.includes(r.code));
 }
 

@@ -4,11 +4,11 @@
  * holds it; each file holds one type or profile, loaded only when needed. The API serves these
  * files as they are, so the browser never loads a whole core package.
  *
- * Format version 1.0.0. A reader accepts every 1.x.y index; a new optional field is a minor
- * version, anything else a major one.
+ * Format version 1.1.0 (1.0.0 plus the ValueSet expansions of bindings, ADR-0016). A reader
+ * accepts every 1.x.y index; a new optional field is a minor version, anything else a major one.
  */
 
-export const INDEX_FORMAT_VERSION = "1.0.0";
+export const INDEX_FORMAT_VERSION = "1.1.0";
 const SUPPORTED_MAJOR = "1.";
 
 /** A FHIR package, as `<id>#<version>` in the manifest. */
@@ -42,6 +42,22 @@ export interface IndexEntry {
   readonly size: number;
 }
 
+/**
+ * A ValueSet used by a binding of a kept element (format 1.1.0). Expandable ones have a document
+ * (`valueSets/<package>/<id>.json`) with every code; the others say why they cannot be checked.
+ */
+export type ValueSetEntry =
+  | {
+      readonly url: string;
+      readonly expandable: true;
+      readonly file: string;
+      readonly sha256: string;
+      readonly size: number;
+      /** Number of codes in the expansion. */
+      readonly count: number;
+    }
+  | { readonly url: string; readonly expandable: false; readonly reason: string };
+
 /** `index.json`. */
 export interface IndexManifest {
   readonly indexFormat: string;
@@ -50,6 +66,15 @@ export interface IndexManifest {
   readonly packages: readonly PackageRef[];
   /** Sorted by `file`. */
   readonly entries: readonly IndexEntry[];
+  /** Format 1.1.0: the ValueSets of required, extensible and preferred bindings, sorted by URL. */
+  readonly valueSets?: readonly ValueSetEntry[];
+}
+
+/** The expansion of a ValueSet: its codes, grouped by code system, both sorted. */
+export interface ValueSetDocument {
+  readonly indexFormat: string;
+  readonly url: string;
+  readonly codes: Readonly<Record<string, readonly string[]>>;
 }
 
 export interface ElementType {
@@ -221,6 +246,37 @@ function isElement(value: unknown): value is IndexElement {
   );
 }
 
+function isValueSetEntry(value: unknown): value is ValueSetEntry {
+  if (!isObject(value) || !isString(value["url"])) return false;
+  if (value["expandable"] === false) return isString(value["reason"]);
+  return (
+    value["expandable"] === true &&
+    isString(value["file"]) &&
+    isString(value["sha256"]) &&
+    /^[0-9a-f]{64}$/.test(value["sha256"]) &&
+    typeof value["size"] === "number" &&
+    typeof value["count"] === "number"
+  );
+}
+
+/** Reads one ValueSet document (already parsed). */
+export function parseValueSetDocument(value: unknown, subject?: string): Result<ValueSetDocument> {
+  const codes = isObject(value) ? value["codes"] : undefined;
+  const valid =
+    isObject(value) &&
+    isSupportedFormat(value["indexFormat"]) &&
+    isString(value["url"]) &&
+    isObject(codes) &&
+    Object.values(codes).every(isStringArray);
+  if (!valid)
+    return malformed(
+      "INDEX_DOCUMENT_MALFORMED",
+      "the document does not have the index format",
+      subject,
+    );
+  return { ok: true, value: value as unknown as ValueSetDocument, issues: [] };
+}
+
 /** Reads `index.json` (already parsed). */
 export function parseManifest(value: unknown): Result<IndexManifest> {
   if (!isObject(value)) return malformed("INDEX_MALFORMED", "the manifest is not an object");
@@ -237,7 +293,8 @@ export function parseManifest(value: unknown): Result<IndexManifest> {
     !Array.isArray(packages) ||
     !packages.every(isPackageRef) ||
     !Array.isArray(entries) ||
-    !entries.every(isEntry)
+    !entries.every(isEntry) ||
+    !optional(value["valueSets"], (v) => Array.isArray(v) && v.every(isValueSetEntry))
   )
     return malformed("INDEX_MALFORMED", "the manifest does not have the index format");
   return { ok: true, value: value as unknown as IndexManifest, issues: [] };
