@@ -25,7 +25,9 @@
     "savedToFile": "Every change is saved to {{file}}.",
     "unsaved": "Unsaved changes: download the project to keep them.",
     "downloadToSave": "This browser cannot write the file: save by downloading it.",
-    "download": "Download project"
+    "download": "Download project",
+    "tabGrid": "Grid",
+    "tabRoles": "Roles · {{count}}"
   },
   "grid": {
     "label": "Mapping grid of table {{table}}",
@@ -84,5 +86,39 @@
       "notMappable": "Not mappable",
       "excluded": "Excluded"
     }
+  },
+  "roles": {
+    "title": "Roles",
+    "explanation": "A role is a FHIR resource made from each record, such as Patient[0] or Observation[1]. Here you set its type, index, label and table; the rest of a role comes later.",
+    "add": "Add role",
+    "none": "No roles yet: add one to start mapping.",
+    "column": {
+      "role": "Role",
+      "table": "Table",
+      "idRule": "Id rule",
+      "rows": "Rows"
+    },
+    "tableMissing": "table missing",
+    "noIdRule": "no id rule",
+    "edit": "Edit",
+    "editRole": "Edit {{role}}",
+    "editTitle": "Edit {{role}}",
+    "delete": "Delete",
+    "deleteRole": "Delete {{role}}",
+    "deleteTitle": "Delete {{role}}?",
+    "deleteWarning_one": "{{count}} row uses this role: it will show an error until you choose another role.",
+    "deleteWarning_other": "{{count}} rows use this role: they will show an error until you choose another role.",
+    "deleteWarning_zero": "No row uses this role.",
+    "field": {
+      "resourceType": "Resource type",
+      "resourceTypeHint": "As in FHIR, for example Patient, Observation, Condition",
+      "index": "Index",
+      "label": "Label",
+      "table": "Table"
+    },
+    "noRowKey": "The table has no row key yet, so the role gets no id rule: it is added with the row key.",
+    "idRuleKept": "The id rule follows the type, index and table while it is the default one.",
+    "cancel": "Cancel",
+    "save": "Save"
   }
 }

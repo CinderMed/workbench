@@ -7,6 +7,7 @@ import {
   List,
   Paper,
   Stack,
+  Tabs,
   Text,
   Title,
 } from "@mantine/core";
@@ -15,6 +16,7 @@ import { type DragEvent, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { type FileAccess, blobAccess } from "../storage/file-access";
 import { MappingGrid } from "../grid/MappingGrid";
+import { RolesPanel } from "../roles/RolesPanel";
 import { LocalFileStore, NotAProjectError } from "../storage/local-file-store";
 import type { Loaded } from "../storage/project-store";
 
@@ -227,12 +229,30 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
         )}
 
         {state.kind === "open" && (
-          <MappingGrid
-            project={state.project}
-            versions={state.versions}
-            store={state.store}
-            onLoaded={onLoaded}
-          />
+          <Tabs defaultValue="grid" keepMounted={false}>
+            <Tabs.List>
+              <Tabs.Tab value="grid">{t("local.tabGrid")}</Tabs.Tab>
+              <Tabs.Tab value="roles">
+                {t("local.tabRoles", { count: state.project.instances.length })}
+              </Tabs.Tab>
+            </Tabs.List>
+            <Tabs.Panel value="grid" pt="sm">
+              <MappingGrid
+                project={state.project}
+                versions={state.versions}
+                store={state.store}
+                onLoaded={onLoaded}
+              />
+            </Tabs.Panel>
+            <Tabs.Panel value="roles" pt="sm">
+              <RolesPanel
+                project={state.project}
+                versions={state.versions}
+                store={state.store}
+                onLoaded={onLoaded}
+              />
+            </Tabs.Panel>
+          </Tabs>
         )}
       </Stack>
     </Container>

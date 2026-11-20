@@ -52,3 +52,13 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 | Status                   | The review status                                                                         |
 
 The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the path picker and the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
+
+## Roles
+
+The **Roles** tab lists the project's roles: the FHIR resources made from each record, such as `Patient[0]` or `Observation[1]`. A new project from `cindermed init` has none, so this is where mapping starts.
+
+- **Add role** asks for the resource type (as in FHIR: `Patient`, `Observation`), the index (the next free one for that type), a label and the table. A new role makes one resource per record.
+- **Id rule.** A role gets a default id rule: its name (`observation1`) and the table's row key columns, so two roles of the same table get different ids. A table without a row key (as `cindermed init` writes it) gives no id rule yet. While the id rule is the default one, it follows the role's type, index and table when they change.
+- **Delete** asks first, and says how many rows use the role. Those rows stay, with an error, until you give them another role.
+
+How many resources a role makes, its conditions, slices and fixed values are set in a later version.
