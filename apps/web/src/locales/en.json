@@ -34,7 +34,7 @@
     "tables": "Tables",
     "rowCount_one": "{{count}} row",
     "rowCount_other": "{{count}} rows",
-    "keys": "Arrows or Tab to move, Enter to edit (on a group: open or close it), Esc to cancel. Role and Element are edited here; a new row is saved once it has both.",
+    "keys": "Arrows or Tab to move, Enter to edit (on Element: the path picker; F2 to type the path), Esc to cancel. On a group: Enter opens or closes it. A new row is saved once it has a role and an element.",
     "noColumn": "(no column)",
     "roleMissing": "role missing",
     "conflict": "This object was changed elsewhere: the grid now shows the current project. Make your change again.",
@@ -170,5 +170,20 @@
       "template": "template",
       "normalization": "normalization"
     }
+  },
+  "picker": {
+    "title": "Element",
+    "titleFor": "Element for {{column}}",
+    "search": "Search by name",
+    "tree": "Elements of {{role}}",
+    "noMatch": "No element matches the search.",
+    "unknownType": "{{type}} is not a resource type of the project's FHIR version.",
+    "fixed": "fixed",
+    "pattern": "pattern",
+    "selected": "Selected path:",
+    "use": "Use this element",
+    "keys": "Up and Down to move, Right to open, Left to close, Enter to choose. Complex types open when you need them; the search finds the opened ones.",
+    "noRole": "Choose the row's role first: the element tree depends on it.",
+    "unavailable": "No FHIR definitions in the browser: type the path, or write them with cindermed fhir-index."
   }
 }

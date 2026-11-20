@@ -51,9 +51,11 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 | Transform, Values / code | The transform, and a summary: the value map, the unit, the code system or the target role |
 | Status                   | The review status                                                                         |
 
+**Path picker.** Enter (or a double-click) on an Element cell opens the element tree of the row's role, from the FHIR definitions written by `cindermed fhir-index`: each element with its cardinality and types, choice elements under their concrete names (`valueQuantity`, `valueCodeableConcept`). Up and Down move, Right opens an element, Left closes it, Enter chooses; the search box finds elements by name among those opened (backbone elements such as `component` are always opened, datatypes such as `HumanName` when you open them). F2 types the path by hand instead, and so does the cell when there are no definitions. A row needs its role before the picker can open.
+
 **Groups.** The switch above the grid groups the rows **by section** of the source table (the columns' sections, in their order) or **by role** (the role each row writes to). Rows with no section or no role come last, under "No section" or "No role"; a table without sections is one list when grouped by section. A group's header shows how many rows it holds; Enter or a click on it closes and opens it.
 
-The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the path picker and the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
+The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
 
 ## Checks while you map
 
@@ -82,5 +84,5 @@ A Playwright test checks the local mode end to end in Chromium: it writes the re
 ```bash
 pnpm -r build
 pnpm --filter @cindermed/web exec playwright install --only-shell chromium   # once: about 130 MB in ~/.cache/ms-playwright
-pnpm --filter @cindermed/web e2e
+pnpm --filter @cindermed/web e2e   # E2E_PORT=5191 to run next to an open pnpm dev
 ```

@@ -22,6 +22,8 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
+import { PathPicker } from "../picker/PathPicker";
+import type { BrowserDefinitions } from "../validation/index-fetch";
 import { type CellAddress, type CellFinding, cellFindings } from "./findings";
 import { type Grouping, type Line, gridLines } from "./groups";
 import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
@@ -72,6 +74,8 @@ export interface MappingGridProps {
   readonly findings?: readonly ValidationResult[];
   /** A cell to select (from the list of findings); a new `nonce` selects it again. */
   readonly target?: { readonly address: CellAddress; readonly nonce: number };
+  /** The FHIR definitions for the path picker (D3); without them Element is typed by hand. */
+  readonly definitions?: () => Promise<BrowserDefinitions>;
 }
 
 /**
@@ -86,6 +90,7 @@ export function MappingGrid({
   onLoaded,
   findings,
   target,
+  definitions,
 }: MappingGridProps) {
   const detailsId = useId();
   const { t } = useTranslation();
@@ -292,6 +297,27 @@ export function MappingGrid({
     [commit, move, setEditing],
   );
 
+  /** The path picker, open on a row (D3). */
+  const [picking, setPicking] = useState<{ row: number; role: Instance } | undefined>();
+  const ELEMENT = COLUMNS.findIndex((c) => c.id === "element");
+  /** Enter or a double-click: the path picker on Element when it can open, else the editor. */
+  const edit = (rowIndex: number, col: number) => {
+    const row = rowAt(rowIndex);
+    if (col !== ELEMENT || definitions === undefined || row === undefined) {
+      startEditing(rowIndex, col);
+      return;
+    }
+    const roleId =
+      row.mapping?.instanceId ??
+      (row.column === undefined ? undefined : drafts.get(row.column.id)?.instanceId);
+    const role = roles.find((r) => r.id === roleId);
+    if (role === undefined) {
+      setNotice(t("picker.noRole"));
+      return;
+    }
+    setPicking({ row: rowIndex, role });
+  };
+
   const onGridKey = (event: KeyboardEvent) => {
     if (editing !== undefined) return;
     const { row, col } = active;
@@ -322,7 +348,7 @@ export function MappingGrid({
       Enter: () => {
         const line = model[row]?.original;
         if (line?.kind === "group") toggleGroup(line.key);
-        else startEditing(row, col);
+        else edit(row, col);
       },
       F2: () => {
         startEditing(row, col);
@@ -607,7 +633,7 @@ export function MappingGrid({
                         }}
                         onDoubleClick={() => {
                           setActive({ row: item.index, col });
-                          startEditing(item.index, col);
+                          edit(item.index, col);
                         }}
                         style={cellStyle(isActive, kept === undefined ? found?.severity : "error")}
                       >
@@ -637,6 +663,28 @@ export function MappingGrid({
           </div>
         </div>
       </div>
+      {picking !== undefined && definitions !== undefined && (
+        <PathPicker
+          role={picking.role}
+          {...(rowAt(picking.row)?.column === undefined
+            ? {}
+            : { columnName: rowAt(picking.row)?.column?.name ?? "" })}
+          {...(rowAt(picking.row)?.mapping === undefined
+            ? {}
+            : { current: rowAt(picking.row)?.mapping?.path ?? "" })}
+          definitions={definitions}
+          onClose={() => {
+            setPicking(undefined);
+            gridRef.current?.focus();
+          }}
+          onPick={(path) => {
+            const row = picking.row;
+            setPicking(undefined);
+            void commit(row, ELEMENT, path);
+            gridRef.current?.focus();
+          }}
+        />
+      )}
       <CellDetails
         id={detailsId}
         refusedMessage={activeKey === undefined ? undefined : refused.get(activeKey)?.message}

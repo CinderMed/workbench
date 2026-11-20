@@ -26,7 +26,9 @@ test("a broken path turns its cell red, with the reason in the details bar", asy
   const code = (await row.getByRole("gridcell").nth(0).textContent()) ?? "";
   expect(code).toMatch(/^R-\d{3}$/);
 
-  await element.dblclick();
+  // Enter and double-click open the path picker; F2 types the path.
+  await element.click();
+  await page.keyboard.press("F2");
   const input = grid.getByRole("textbox", { name: "Element" });
   await input.fill("notAnElement");
   await input.press("Enter");
@@ -37,5 +39,14 @@ test("a broken path turns its cell red, with the reason in the details bar", asy
   const details = page.getByTestId("cell-details");
   await expect(details).toContainText(`${code} · Element`);
   await expect(details).toContainText("PATH_NOT_FOUND");
+
+  // The path picker reads the same real definitions on the page: Enter opens the role's tree.
+  await page.keyboard.press("Enter");
+  const picker = page.getByRole("dialog");
+  await expect(picker.getByRole("tree")).toBeVisible({ timeout: 30_000 });
+  expect(await picker.getByRole("treeitem").count()).toBeGreaterThan(5);
+  await page.keyboard.press("Escape");
+  await expect(picker).toBeHidden();
+
   expect(consoleErrors).toEqual([]);
 });

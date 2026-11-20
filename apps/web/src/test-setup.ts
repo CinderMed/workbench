@@ -25,3 +25,11 @@ if (typeof window !== "undefined" && !("ResizeObserver" in window))
       disconnect = () => undefined;
     },
   });
+
+// jsdom does not scroll: scrollIntoView does nothing (the path picker keeps the active node in view).
+if (typeof window !== "undefined")
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    writable: true,
+    value: () => undefined,
+  });
