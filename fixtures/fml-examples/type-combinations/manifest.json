@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_type_combinations",
     "name": "Type combinations",
-    "formatVersion": "1.3.0",
+    "formatVersion": "1.4.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -75,7 +75,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "953eeb00f2f422bce1c9453596782095240d676351f002ea6c967e2934ab8a83",
+      "sha256": "9905036213be3013ba7b7a9043878961d882e04bedaea1c7b72c5a0b3d2874c9",
       "mediaType": "application/json"
     },
     {
@@ -100,7 +100,7 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "90535d2c2ad7e497a42039c26680b181ba2204d8d30934d1c2c7ec5cb150ee30",
+      "sha256": "425d88d9ab4c7f3ffa891195f89b7349f3e6b8d1413c849af32bc8af2021882c",
       "mediaType": "application/json"
     },
     {
