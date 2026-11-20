@@ -186,6 +186,31 @@ describe("checkRowTypes", () => {
     );
   });
 
+  it("checks a coding from a code column (#106): its type and its column", () => {
+    const coding = (as: "Coding" | "CodeableConcept") => ({
+      kind: "coding" as const,
+      system: "http://example.org/cs",
+      as,
+    });
+    expect(check("code", coding("CodeableConcept"), "c")).toEqual([]);
+    expect(check("code.coding", coding("Coding"), "i")).toEqual([]);
+    expect(check("code", coding("Coding"), "s")).toEqual([
+      {
+        code: TypeCode.TYPE_MISMATCH,
+        severity: "error",
+        field: "transform.as",
+        message:
+          "R-001: the coding writes a Coding, but the element is Observation.code (CodeableConcept)",
+      },
+    ]);
+    expect(check("code", coding("CodeableConcept"), "b").map((f) => [f.field, f.message])).toEqual([
+      [
+        "columnId",
+        "R-001: a coding takes a string, categorical or integer column, not smoker (boolean)",
+      ],
+    ]);
+  });
+
   it("checks value maps, quantities, concatenations, constants, references and expressions", () => {
     expect(check("valueString", { kind: "valueMap", valueMapId: "vm" }, "c")[0]?.message).toBe(
       "R-001: value map answers gives CodeableConcept, but the element is Observation.valueString (string)",

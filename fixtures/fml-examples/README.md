@@ -194,3 +194,5 @@ of module 3 (Coding from a code column, profile slice names in paths) can extend
 projects are stamped 1.4.0; their packages were regenerated with `tooling/golden/write-fixture.mjs`: only the
 manifests changed (the project's format version and the digest of the cleaned `project.json`). Maps, logical models,
 normalization specifications and Bundles are unchanged.
+Each extension of 1.4.0 that changes the project schema changes one line of every manifest: the digest of the included
+`schemas/mapping-project.schema.json`. With the coding transform (#106) nothing else changed.

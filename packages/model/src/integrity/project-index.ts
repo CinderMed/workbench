@@ -102,6 +102,9 @@ export function rowColumns(row: MappingRow): { columnId: string; field: string }
   if (transform.kind === "quantity" && transform.unitColumnId !== undefined) {
     columns.push({ columnId: transform.unitColumnId, field: "transform.unitColumnId" });
   }
+  if (transform.kind === "coding" && transform.displayColumnId !== undefined) {
+    columns.push({ columnId: transform.displayColumnId, field: "transform.displayColumnId" });
+  }
   if (transform.kind === "concat") {
     transform.columnIds.forEach((columnId, i) => {
       columns.push({ columnId, field: `transform.columnIds.${String(i)}` });

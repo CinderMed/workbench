@@ -316,6 +316,13 @@ describe("validateFhir, bindings", () => {
             dataType: "categorical",
             allowedValues: [{ code: "1" }, { code: "2" }, { code: "3" }],
           },
+          {
+            id: "tree",
+            name: "tree",
+            dataType: "categorical",
+            allowedValues: [{ code: "root" }, { code: "leaf" }, { code: "NA" }],
+            missingValues: ["NA"],
+          },
         ],
       },
     ],
@@ -325,6 +332,7 @@ describe("validateFhir, bindings", () => {
       row("2", "listed", { kind: "constant", value: { type: "code", value: "y" } }),
       row("3", "listed", { kind: "copy" }, "cat"),
       row("4", "listed", { kind: "constant", value: { type: "code", value: "z" } }),
+      row("5", "whole", { kind: "coding", system: `${CS}tree`, as: "Coding" }, "tree"),
     ],
     valueMaps: [map],
   };
@@ -340,6 +348,8 @@ describe("validateFhir, bindings", () => {
       ["valueMap", "vm", "entries.2.action.set.0.value"],
       ["mapping", "3", "columnId"],
       ["mapping", "4", "transform.value"],
+      // A coding from a column: its allowed values, with the transform's system (#106).
+      ["mapping", "5", "columnId"],
     ]);
   });
 

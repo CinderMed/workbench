@@ -24,3 +24,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0016](0016-binding-checks.md)                               | Binding checks                                   | accepted |
 | [0017](0017-reference-checks.md)                             | Reference checks                                 | accepted |
 | [0018](0018-cardinality-first-version.md)                    | Cardinality, first version                       | accepted |
+| [0019](0019-coding-from-a-code-column.md)                    | Coding from a code column                        | accepted |

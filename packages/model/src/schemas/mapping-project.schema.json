@@ -1358,6 +1358,35 @@
           "type": "object",
           "required": [
             "kind",
+            "system",
+            "as"
+          ],
+          "additionalProperties": false,
+          "description": "Coding from a code column (format 1.4.0, #106): the column's value is the code of a fixed code system, written as a Coding or a CodeableConcept with one coding; the display comes from another column of the same row, when it has a value. No value map is needed, so a long code list (e.g. MIMIC-IV itemid) costs one rule.",
+          "properties": {
+            "kind": {
+              "const": "coding"
+            },
+            "system": {
+              "$ref": "#/$defs/Canonical"
+            },
+            "as": {
+              "description": "The type written: it must be the element's type.",
+              "enum": [
+                "Coding",
+                "CodeableConcept"
+              ]
+            },
+            "displayColumnId": {
+              "description": "Column holding the display, in the same table.",
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
             "columnIds"
           ],
           "additionalProperties": false,
