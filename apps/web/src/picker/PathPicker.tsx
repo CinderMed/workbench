@@ -1,12 +1,13 @@
 import { Alert, Badge, Button, Group, Loader, Modal, Stack, Text, TextInput } from "@mantine/core";
 import type { TreeNode } from "@cindermed/fhir-defs";
-import type { Instance } from "@cindermed/model";
+import type { Instance, MappingRow, ProjectFile } from "@cindermed/model";
 import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { roleName } from "../grid/rows";
 import { SliceForm } from "../slices/SliceForm";
 import { repeats, slicePath } from "../slices/slices";
 import type { BrowserDefinitions } from "../validation/index-fetch";
+import { type Fit, fitter } from "./fit";
 import {
   type Levels,
   type PickerNode,
@@ -32,6 +33,11 @@ export interface PathPickerProps {
   readonly onCreateSlice?: (slice: Slice) => Promise<string | undefined>;
   /** A new slice id. */
   readonly newSliceId?: () => string;
+  /**
+   * The row being placed, to grey the elements it cannot be written to (type compatibility).
+   * Without it, every element can be chosen.
+   */
+  readonly fit?: { readonly project: ProjectFile; readonly row: MappingRow };
 }
 
 type Slice = NonNullable<Instance["slices"]>[number];
@@ -60,6 +66,7 @@ export function PathPicker({
   onClose,
   onCreateSlice,
   newSliceId,
+  fit,
 }: PathPickerProps) {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -145,6 +152,21 @@ export function PathPicker({
     [levels, expanded, query, slices],
   );
   const selected = lines[Math.min(active, Math.max(lines.length - 1, 0))];
+  /** How each element fits the row; recomputed when more definitions are loaded. */
+  const fitOf = useMemo(
+    () =>
+      fit === undefined || state.kind !== "ready"
+        ? undefined
+        : fitter(state.found.defs, state.ref, resourceType, fit.project, fit.row),
+    // `levels` changes when documents load, which can change what resolves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fit, state, resourceType, levels],
+  );
+  const fitAt = (node: TreeNode): Fit => fitOf?.(node.path) ?? { kind: "ok" };
+  /** Chooses an element, unless the row cannot be written to it. */
+  const choose = (node: TreeNode) => {
+    if (fitAt(node).kind !== "blocked") onPick(node.path);
+  };
 
   const open = async (node: TreeNode) => {
     if (state.kind !== "ready" || !node.expandable) return;
@@ -253,7 +275,7 @@ export function PathPicker({
         if (line?.expanded) close(line.node);
       },
       Enter: () => {
-        if (line !== undefined) onPick(line.node.path);
+        if (line !== undefined) choose(line.node);
       },
     };
     const action = keys[event.key];
@@ -347,19 +369,21 @@ export function PathPicker({
             )}
             {lines.map((line, i) => {
               const isActive = line === selected;
+              const blocked = fitAt(line.node).kind === "blocked";
               return (
                 <div
                   key={line.node.path}
                   role="treeitem"
                   aria-level={line.depth + 1}
                   aria-selected={isActive}
+                  aria-disabled={blocked || undefined}
                   aria-expanded={line.node.expandable ? line.expanded : undefined}
                   onClick={() => {
                     setActive(i);
                     treeRef.current?.focus();
                   }}
                   onDoubleClick={() => {
-                    onPick(line.node.path);
+                    choose(line.node);
                   }}
                   style={{
                     display: "grid",
@@ -368,6 +392,7 @@ export function PathPicker({
                     padding: "4px 8px",
                     paddingLeft: 8 + line.depth * 18,
                     cursor: "pointer",
+                    opacity: blocked ? 0.45 : undefined,
                     background: isActive ? "var(--mantine-color-blue-light)" : undefined,
                     fontFamily: "var(--mantine-font-family-monospace)",
                     fontSize: 13,
@@ -397,6 +422,7 @@ export function PathPicker({
             })}
           </div>
         )}
+        {selected !== undefined && creating === undefined && <FitNote fit={fitAt(selected.node)} />}
         <Group justify="space-between">
           <Text size="sm">
             {t("picker.selected")}{" "}
@@ -417,9 +443,13 @@ export function PathPicker({
               {t("roles.cancel")}
             </Button>
             <Button
-              disabled={selected === undefined || creating !== undefined}
+              disabled={
+                selected === undefined ||
+                creating !== undefined ||
+                fitAt(selected.node).kind === "blocked"
+              }
               onClick={() => {
-                if (selected !== undefined) onPick(selected.node.path);
+                if (selected !== undefined) choose(selected.node);
               }}
             >
               {t("picker.use")}
@@ -431,5 +461,24 @@ export function PathPicker({
         </Text>
       </Stack>
     </Modal>
+  );
+}
+
+/** Why the selected element can or cannot take the row. */
+function FitNote({ fit }: { readonly fit: Fit }) {
+  const { t } = useTranslation();
+  if (fit.kind === "ok") return null;
+  const text =
+    fit.kind === "blocked"
+      ? t("picker.blocked", { message: fit.message })
+      : fit.kind === "needs"
+        ? t("picker.needs", {
+            transforms: fit.transforms.map((k) => t(`grid.transform.${k}`)).join(", "),
+          })
+        : fit.message;
+  return (
+    <Text size="sm" c={fit.kind === "blocked" ? "red" : "orange"} data-testid="picker-fit">
+      {text}
+    </Text>
   );
 }

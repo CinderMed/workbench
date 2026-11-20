@@ -86,4 +86,43 @@ describe("the path picker (D3)", () => {
     const dialog = await screen.findByRole("dialog");
     expect(await within(dialog).findByText("/fhir-index/index.json: 404")).toBeTruthy();
   });
+
+  it("greys the elements the row cannot be written to, and says what the others need", async () => {
+    const user = userEvent.setup();
+    const grid = await openPatients(() => Promise.resolve(syntheticDefinitions()));
+    grid.focus();
+    // R-002 copies the boolean column flag: the picker opens on name, a HumanName.
+    await user.keyboard("{ArrowDown}{ArrowRight}{ArrowRight}{ArrowRight}{Enter}");
+    const dialog = await screen.findByRole("dialog");
+    const tree = await within(dialog).findByRole("tree");
+    const item = (name: string) =>
+      within(tree)
+        .getAllByRole("treeitem")
+        .find((i) => i.textContent.replace(/[▸▾]/g, "").startsWith(name));
+    expect(item("name")?.getAttribute("aria-disabled")).toBe("true");
+    expect(item("active")?.getAttribute("aria-disabled")).toBeNull();
+    expect(within(dialog).getByTestId("picker-fit").textContent).toMatch(
+      /^The row cannot be written here: R-002: column flag \(boolean\) cannot be copied to Patient\.name/,
+    );
+    expect(within(dialog).getByRole("button", { name: "Use this element" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    tree.focus();
+    await user.keyboard("{Enter}"); // Not chosen: the dialog stays.
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    // name.family takes the flag once converted: it can be chosen, with the reason.
+    await user.keyboard("{ArrowRight}");
+    await waitFor(() => {
+      expect(item("family")).toBeDefined();
+    });
+    await user.keyboard("{ArrowDown}");
+    expect(within(dialog).getByTestId("picker-selected").textContent).toBe("name.family");
+    expect(within(dialog).getByTestId("picker-fit").textContent).toBe(
+      "The row can be written here with another transform: Conversion. Set it in the Transform cell after choosing.",
+    );
+    await user.keyboard("{ArrowUp}{ArrowUp}"); // active: fits, no note.
+    expect(within(dialog).getByTestId("picker-selected").textContent).toBe("active");
+    expect(within(dialog).queryByTestId("picker-fit")).toBeNull();
+  });
 });
