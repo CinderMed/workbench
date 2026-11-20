@@ -183,4 +183,42 @@ describe("the transform editor (D5)", () => {
     });
     expect(added).not.toHaveProperty("columnId");
   });
+
+  it("does not offer concatenation until the export can write it, and shows a row that has one", async () => {
+    const user = userEvent.setup();
+    const project = load(metastraProject);
+    const withConcat: ProjectFile = {
+      ...project,
+      mappings: project.mappings.map((m) =>
+        m.code === "R-001"
+          ? {
+              ...m,
+              transform: { kind: "concat", columnIds: ["col_patient_id", "col_encounter_fo"] },
+            }
+          : m,
+      ),
+    };
+    const { grid } = await open(withConcat);
+
+    await user.dblClick(cell(grid, "R-002", 5));
+    let dialog = await screen.findByRole("dialog");
+    const kinds = () =>
+      within(within(dialog).getByLabelText<HTMLSelectElement>("Transform"))
+        .getAllByRole("option")
+        .map((o) => o.getAttribute("value"));
+    expect(kinds()).not.toContain("concat");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    await user.dblClick(cell(grid, "R-001", 5));
+    dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByLabelText<HTMLSelectElement>("Transform").value).toBe("concat");
+    expect(
+      within(dialog).getByText(
+        /The FML export cannot write a concatenation yet: it refuses this row \(TRANSFORM_UNSUPPORTED\)/,
+      ),
+    ).toBeTruthy();
+  });
 });
