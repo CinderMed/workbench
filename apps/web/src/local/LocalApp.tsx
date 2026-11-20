@@ -256,14 +256,19 @@ interface ProjectViewProps {
 /** The open project: its validation summary, the grid and the roles. */
 function ProjectView({ project, versions, store, onLoaded, validator }: ProjectViewProps) {
   const { t } = useTranslation();
-  const validation = useValidation(project, validator);
+  const state = useValidation(project, validator);
+  const validation = state === undefined || "failed" in state ? undefined : state;
   const errors = validation?.results.filter((r) => r.severity === "error").length ?? 0;
   const warnings = (validation?.results.length ?? 0) - errors;
   const fhir = validation?.fhir;
   return (
     <Stack gap="sm">
       <Group gap="xs" data-testid="validation-summary">
-        {validation === undefined ? (
+        {state !== undefined && "failed" in state ? (
+          <Alert color="red" py={4}>
+            {t("validation.failed", { message: state.failed })}
+          </Alert>
+        ) : validation === undefined ? (
           <Text size="sm" c="dimmed">
             {t("validation.running")}
           </Text>

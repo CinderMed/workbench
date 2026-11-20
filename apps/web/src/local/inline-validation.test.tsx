@@ -102,4 +102,15 @@ describe("inline validation in the local mode (D7)", () => {
       ),
     ).toBeTruthy();
   });
+
+  it("says that the check failed, and why, instead of checking forever", async () => {
+    renderLocal(() => Promise.reject(new Error("index.json is not a definition index")));
+    await open("patients.json", JSON.stringify(patientProject()));
+    expect(
+      await screen.findByText(
+        "The check failed: index.json is not a definition index. It runs again after your next change.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("Checking the project…")).toBeNull();
+  });
 });
