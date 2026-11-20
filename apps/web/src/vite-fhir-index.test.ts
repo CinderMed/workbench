@@ -64,6 +64,15 @@ describe("serveFhirIndex (local mode, dev server only)", () => {
     expect(response.body).toBe("");
   });
 
+  it.each(["/fhir-index/%E0%A4%A", "/fhir-index/%", "/fhir-index/types/%zz.json"])(
+    "answers 400 to the malformed escape in %s, without throwing",
+    async (url) => {
+      const response = await get(url);
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toBe("");
+    },
+  );
+
   it("answers only GET, and leaves other paths to the dev server", async () => {
     expect((await get("/fhir-index/index.json", "POST")).statusCode).toBe(404);
     expect((await get("/src/main.tsx")).passed).toBe(true);

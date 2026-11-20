@@ -21,7 +21,15 @@ export function serveFhirIndex(dir: string) {
       next();
       return;
     }
-    const relative = decodeURIComponent(url.slice(FHIR_INDEX_PATH.length).split("?")[0] ?? "");
+    let relative: string;
+    try {
+      relative = decodeURIComponent(url.slice(FHIR_INDEX_PATH.length).split("?")[0] ?? "");
+    } catch {
+      // A malformed escape (URIError) is a bad request, never an unhandled rejection.
+      response.statusCode = 400;
+      response.end();
+      return;
+    }
     const file = resolve(root, relative);
     const inside = file.startsWith(root + sep);
     if (request.method !== "GET" || !inside || !file.endsWith(".json")) {
