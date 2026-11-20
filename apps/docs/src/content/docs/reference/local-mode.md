@@ -63,14 +63,14 @@ The new slice is saved in the role and shows open under its element, ready for a
 
 **Transforms.** Enter, F2 or a double-click on a Transform or Values cell opens the row's transform:
 
-| Transform     | What it writes                                                                                                                                                              |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Copy          | The column's value as it is; its type must fit the element                                                                                                                  |
-| Conversion    | The value converted: integer to decimal, date to dateTime, any type to string; for dates, the format in the data file (`dd/MM/yyyy`), taken from the column when it has one |
-| Value map     | Each value as a code, a coding or true/false, through one of the project's value maps                                                                                       |
-| Quantity      | The number with a fixed UCUM unit (`kg`, `mm[Hg]`), or with the unit read from another column and turned into UCUM by a value map                                           |
-| Coding        | The column's value as a code of one code system, written as a Coding or a CodeableConcept, with the display from another column if you choose one                           |
-| Concatenation | Several columns of the row joined into one text, in the order you choose them; the FML export does not translate it yet                                                     |
+| Transform     | What it writes                                                                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Copy          | The column's value as it is; its type must fit the element                                                                                                                                    |
+| Conversion    | The value converted: integer to decimal, date to dateTime, any type to string; for dates, the format in the data file (`dd/MM/yyyy`), taken from the column when it has one                   |
+| Value map     | Each value as a code, a coding or true/false, through one of the project's value maps                                                                                                         |
+| Quantity      | The number with a fixed UCUM unit (`kg`, `mm[Hg]`), or with the unit read from another column and turned into UCUM by a value map                                                             |
+| Coding        | The column's value as a code of one code system, written as a Coding or a CodeableConcept, with the display from another column if you choose one                                             |
+| Concatenation | Not offered yet: the FML export cannot write it (#98). A row that already has one, from the project file, shows it with a notice, and `cindermed export` refuses it (`TRANSFORM_UNSUPPORTED`) |
 
 A row of a multiple-choice column can also write **one repetition per selected value** (`repeat`), for a repeating element such as `Procedure.bodySite`. **Add constant row** writes the same value in every resource of a role, with no column: choose the role, the element and the value's type and value. A code typed by hand is saved as `manual`. References are set with the roles' context, and value maps are edited, in later versions; until then they come from the project file.
 

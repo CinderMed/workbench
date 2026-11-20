@@ -102,7 +102,22 @@ describe("guided transforms (D5)", () => {
   it("offers the transforms of a row and the conversions of its column", () => {
     const project = metastra();
     const date = columnOf(project, rowByCode(project, "R-003"));
-    expect(kindsFor(date)).toEqual(["copy", "cast", "valueMap", "quantity", "coding", "concat"]);
+    expect(kindsFor(date)).toEqual(["copy", "cast", "valueMap", "quantity", "coding"]);
+    // Concatenation only for a row that already has one (the export cannot write it yet, #98).
+    expect(kindsFor(date, "concat")).toEqual([
+      "copy",
+      "cast",
+      "valueMap",
+      "quantity",
+      "coding",
+      "concat",
+    ]);
+    expect(
+      draftOf(
+        { ...rowByCode(project, "R-003"), transform: { kind: "concat", columnIds: ["a", "b"] } },
+        date,
+      ).kind,
+    ).toBe("concat");
     expect(kindsFor(undefined)).toEqual(["constant"]);
     expect(castTypes(date)).toEqual(["string", "date", "dateTime"]);
     expect(castTypes(columnOf(project, rowByCode(project, "R-007")))).toEqual([

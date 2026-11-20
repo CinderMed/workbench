@@ -41,11 +41,19 @@ export const CONSTANT_TYPES = [
   "CodeableConcept",
 ] as const;
 
-/** The transforms a row can take: by column, or a constant without one. */
-export function kindsFor(column: Column | undefined): readonly EditableKind[] {
-  return column === undefined
-    ? ["constant"]
-    : ["copy", "cast", "valueMap", "quantity", "coding", "concat"];
+/**
+ * The transforms a row can take: by column, or a constant without one. A concatenation is not
+ * offered until the generator writes it (#98, module 3b; the export refuses it with
+ * `TRANSFORM_UNSUPPORTED`); a row that already has one keeps it in the list, so it is shown as it
+ * is and can be changed.
+ */
+export function kindsFor(
+  column: Column | undefined,
+  current?: Transform["kind"],
+): readonly EditableKind[] {
+  if (column === undefined) return ["constant"];
+  const kinds: EditableKind[] = ["copy", "cast", "valueMap", "quantity", "coding"];
+  return current === "concat" ? [...kinds, "concat"] : kinds;
 }
 
 /** The conversions a column can take (specification, "Transforms and the types they produce"). */
@@ -77,7 +85,7 @@ export interface TransformDraft {
 /** The form for a row: its transform's fields, and defaults for the other kinds. */
 export function draftOf(row: MappingRow, column: Column | undefined): TransformDraft {
   const t = row.transform;
-  const kinds = kindsFor(column);
+  const kinds = kindsFor(column, t.kind);
   const kind: EditableKind = kinds.find((k) => k === t.kind) ?? kinds[0] ?? "copy";
   const date = column?.dataType === "date" || column?.dataType === "dateTime";
   return {
