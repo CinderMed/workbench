@@ -14,7 +14,9 @@ import type { ProjectFile, ValidationResult } from "@cindermed/model";
 import { type DragEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type FileAccess, blobAccess } from "../storage/file-access";
+import { MappingGrid } from "../grid/MappingGrid";
 import { LocalFileStore, NotAProjectError } from "../storage/local-file-store";
+import type { Loaded } from "../storage/project-store";
 
 type State =
   | { readonly kind: "empty" }
@@ -27,6 +29,7 @@ type State =
       readonly kind: "open";
       readonly store: LocalFileStore;
       readonly project: ProjectFile;
+      readonly versions: ReadonlyMap<string, string>;
       readonly migratedFrom?: string;
     };
 
@@ -62,11 +65,12 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
       }
       const store = new LocalFileStore(access);
       try {
-        const { project } = await store.load();
+        const { project, versions } = await store.load();
         setState({
           kind: "open",
           store,
           project,
+          versions,
           ...(store.migratedFrom === undefined ? {} : { migratedFrom: store.migratedFrom }),
         });
       } catch (error) {
@@ -83,6 +87,14 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
     },
     [t],
   );
+
+  const onLoaded = useCallback((loaded: Loaded) => {
+    setState((current) =>
+      current.kind === "open"
+        ? { ...current, project: loaded.project, versions: loaded.versions }
+        : current,
+    );
+  }, []);
 
   const openWithPicker = useCallback(async () => {
     if (pickFile === undefined) {
@@ -116,7 +128,7 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
   }, [store]);
 
   return (
-    <Container size="md" py="xl">
+    <Container size="xl" py="xl">
       <Stack gap="lg">
         <Group justify="space-between">
           <Title order={1}>{t("app.name")}</Title>
@@ -212,6 +224,15 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
               </Group>
             </Stack>
           </Paper>
+        )}
+
+        {state.kind === "open" && (
+          <MappingGrid
+            project={state.project}
+            versions={state.versions}
+            store={state.store}
+            onLoaded={onLoaded}
+          />
         )}
       </Stack>
     </Container>

@@ -1,0 +1,527 @@
+import { Alert, Badge, Group, SegmentedControl, Text } from "@mantine/core";
+import {
+  type Instance,
+  type MappingRow,
+  type ProjectFile,
+  type ValidationResult,
+  nextRowCode,
+  objectKey,
+} from "@cindermed/model";
+import { createColumnHelper, tableFeatures, useTable } from "@tanstack/react-table";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
+import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
+
+export const ROW_HEIGHT = 40;
+
+/** The grid's columns, in order; `editable` ones open an editor with Enter. */
+const COLUMNS = [
+  { id: "code", width: "90px" },
+  { id: "column", width: "minmax(160px, 1.4fr)" },
+  { id: "type", width: "110px" },
+  { id: "role", width: "minmax(160px, 1.2fr)", editable: true },
+  { id: "element", width: "minmax(180px, 1.5fr)", editable: true },
+  { id: "transform", width: "120px" },
+  { id: "values", width: "minmax(140px, 1fr)" },
+  { id: "status", width: "110px" },
+] as const;
+type ColumnId = (typeof COLUMNS)[number]["id"];
+const TEMPLATE = COLUMNS.map((c) => c.width).join(" ");
+const isEditable = (col: number) => {
+  const column = COLUMNS[col];
+  return column !== undefined && "editable" in column;
+};
+
+const features = tableFeatures({});
+const helper = createColumnHelper<typeof features, GridRow>();
+const tableColumns = helper.columns(COLUMNS.map((c) => helper.display({ id: c.id, header: c.id })));
+
+/** A row being created: a column with no mapping row yet, and what has been chosen so far. */
+interface Draft {
+  readonly instanceId?: string;
+  readonly path?: string;
+}
+
+interface Editing {
+  readonly row: number;
+  readonly col: number;
+  readonly value: string;
+}
+
+export interface MappingGridProps {
+  readonly project: ProjectFile;
+  readonly versions: ReadonlyMap<string, string>;
+  readonly store: Pick<ProjectStore, "apply" | "newId">;
+  /** The project after an accepted change, or the current one after a conflict. */
+  readonly onLoaded: (loaded: Loaded) => void;
+}
+
+/**
+ * The mapping grid (D1): one table at a time, one line per mapping row and one per column without
+ * rows; Role and Element are edited from the keyboard. Rows are virtualized, so only the visible
+ * lines are in the page.
+ */
+export function MappingGrid({ project, versions, store, onLoaded }: MappingGridProps) {
+  const { t } = useTranslation();
+  const [sourceId, setSourceId] = useState(project.sources[0].id);
+  const source = project.sources.find((s) => s.id === sourceId) ?? project.sources[0];
+  const rows = useMemo(() => gridRows(project, source), [project, source]);
+  const table = useTable({ features, columns: tableColumns, data: rows, getRowId: (r) => r.key });
+  const model = table.getRowModel().rows;
+
+  const [active, setActive] = useState({ row: 0, col: 1 });
+  const [editing, setEditingState] = useState<Editing | undefined>();
+  /** The edit in progress, read synchronously: Enter and the blur that follows commit once. */
+  const editingRef = useRef<Editing | undefined>(undefined);
+  const setEditing = useCallback((next: Editing | undefined) => {
+    editingRef.current = next;
+    setEditingState(next);
+  }, []);
+  const [drafts, setDrafts] = useState<ReadonlyMap<string, Draft>>(new Map());
+  /** Input the store refused, kept in its cell with the reason (ADR-0021). */
+  const [refused, setRefused] = useState<ReadonlyMap<string, { value: string; message: string }>>(
+    new Map(),
+  );
+  const [notice, setNotice] = useState<string | undefined>();
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  // React Compiler cannot memoize TanStack Virtual's API and skips this component, which is what
+  // the grid needs: the virtual rows must follow every scroll and resize.
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: model.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    getItemKey: (index) => model[index]?.id ?? index,
+    overscan: 8,
+  });
+
+  const lastRow = Math.max(model.length - 1, 0);
+  useEffect(() => {
+    if (active.row > lastRow) setActive((a) => ({ ...a, row: lastRow }));
+  }, [active.row, lastRow]);
+
+  const move = useCallback(
+    (row: number, col: number) => {
+      const next = {
+        row: Math.min(Math.max(row, 0), lastRow),
+        col: Math.min(Math.max(col, 0), COLUMNS.length - 1),
+      };
+      setActive(next);
+      virtualizer.scrollToIndex(next.row, { align: "auto" });
+    },
+    [lastRow, virtualizer],
+  );
+
+  const roles = project.instances;
+  const cellKey = (row: GridRow, col: ColumnId) => `${row.key}/${col}`;
+
+  const report = useCallback(
+    (result: StoreResult, key: string, value: string): boolean => {
+      if (result.ok) {
+        onLoaded(result);
+        setRefused((m) => withoutKey(m, key));
+        return true;
+      }
+      if (result.reason === "invalid")
+        setRefused((m) => new Map(m).set(key, { value, message: firstMessage(result.results) }));
+      else if (result.reason === "conflict") {
+        onLoaded(result.current);
+        setNotice(t("grid.conflict"));
+      } else setNotice(t("grid.notSaved", { message: result.message }));
+      return false;
+    },
+    [onLoaded, t],
+  );
+
+  const commit = useCallback(
+    async (rowIndex: number, col: number, value: string) => {
+      const row = model[rowIndex]?.original;
+      const column = COLUMNS[col]?.id;
+      if (row === undefined || (column !== "role" && column !== "element")) return;
+      const key = cellKey(row, column);
+      const mapping = row.mapping;
+      if (mapping !== undefined) {
+        const next: MappingRow =
+          column === "role"
+            ? { ...mapping, instanceId: value }
+            : { ...mapping, path: value.trim() };
+        if (next.instanceId === mapping.instanceId && next.path === mapping.path) return;
+        const change: StoreChange = {
+          op: "update",
+          kind: "mapping",
+          id: mapping.id,
+          value: next,
+          ...readVersion(versions, objectKey("mapping", mapping.id)),
+        };
+        report(await store.apply([change]), key, value);
+        return;
+      }
+      // A column without rows: keep the choices until role and element are both set.
+      if (row.column === undefined) return;
+      const columnId = row.column.id;
+      const draft: Draft = {
+        ...drafts.get(columnId),
+        ...(column === "role" ? { instanceId: value } : { path: value.trim() }),
+      };
+      setDrafts((m) => new Map(m).set(columnId, draft));
+      if (!draft.instanceId || !draft.path) return;
+      const created: MappingRow = {
+        id: store.newId("mapping"),
+        code: nextRowCode(project),
+        columnId,
+        instanceId: draft.instanceId,
+        path: draft.path,
+        transform: { kind: "copy" },
+      };
+      if (
+        report(await store.apply([{ op: "create", kind: "mapping", value: created }]), key, value)
+      )
+        setDrafts((m) => withoutKey(m, columnId));
+    },
+    [drafts, model, project, report, store, versions],
+  );
+
+  const startEditing = useCallback(
+    (rowIndex: number, col: number) => {
+      const row = model[rowIndex]?.original;
+      if (row === undefined || !isEditable(col)) return;
+      const column = COLUMNS[col]?.id;
+      const draft = row.column === undefined ? undefined : drafts.get(row.column.id);
+      const kept = column === undefined ? undefined : refused.get(cellKey(row, column));
+      const value =
+        kept?.value ??
+        (column === "role"
+          ? (row.mapping?.instanceId ?? draft?.instanceId ?? "")
+          : (row.mapping?.path ?? draft?.path ?? ""));
+      setEditing({ row: rowIndex, col, value });
+    },
+    [drafts, model, refused, setEditing],
+  );
+
+  const stopEditing = useCallback(
+    (save: boolean, then?: { row: number; col: number }) => {
+      const current = editingRef.current;
+      if (current === undefined) return;
+      setEditing(undefined);
+      if (save) void commit(current.row, current.col, current.value);
+      if (then !== undefined) move(then.row, then.col);
+      gridRef.current?.focus();
+    },
+    [commit, move, setEditing],
+  );
+
+  const onGridKey = (event: KeyboardEvent) => {
+    if (editing !== undefined) return;
+    const { row, col } = active;
+    const keys: Record<string, () => void> = {
+      ArrowUp: () => {
+        move(row - 1, col);
+      },
+      ArrowDown: () => {
+        move(row + 1, col);
+      },
+      ArrowLeft: () => {
+        move(row, col - 1);
+      },
+      ArrowRight: () => {
+        move(row, col + 1);
+      },
+      Home: () => {
+        move(row, 0);
+      },
+      End: () => {
+        move(row, COLUMNS.length - 1);
+      },
+      Tab: () => {
+        const last = COLUMNS.length - 1;
+        if (event.shiftKey) move(col > 0 ? row : row - 1, col > 0 ? col - 1 : last);
+        else move(col < last ? row : row + 1, col < last ? col + 1 : 0);
+      },
+      Enter: () => {
+        startEditing(row, col);
+      },
+      F2: () => {
+        startEditing(row, col);
+      },
+    };
+    const action = keys[event.key];
+    if (action === undefined) return;
+    if (
+      event.key === "Tab" &&
+      ((event.shiftKey && row === 0 && col === 0) ||
+        (!event.shiftKey && row === lastRow && col === COLUMNS.length - 1))
+    )
+      return; // Leave the grid.
+    event.preventDefault();
+    action();
+  };
+
+  const onEditorKey = (event: KeyboardEvent) => {
+    if (editing === undefined) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      stopEditing(false);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      stopEditing(true, { row: editing.row + 1, col: editing.col });
+    } else if (event.key === "Tab") {
+      event.preventDefault();
+      stopEditing(true, { row: editing.row, col: editing.col + (event.shiftKey ? -1 : 1) });
+    }
+  };
+
+  const display = (row: GridRow, column: ColumnId): ReactNode => {
+    const draft = row.column === undefined ? undefined : drafts.get(row.column.id);
+    const kept = refused.get(cellKey(row, column));
+    if (kept !== undefined) return kept.value;
+    switch (column) {
+      case "code":
+        return row.mapping?.code ?? "";
+      case "column":
+        return row.column?.name ?? t("grid.noColumn");
+      case "type":
+        return row.column === undefined ? "" : t(`grid.dataType.${row.column.dataType}`);
+      case "role": {
+        const id = row.mapping?.instanceId ?? draft?.instanceId;
+        const role = roles.find((r) => r.id === id);
+        return role === undefined
+          ? id === undefined
+            ? "—"
+            : t("grid.roleMissing")
+          : roleName(role);
+      }
+      case "element":
+        return row.mapping?.path ?? draft?.path ?? "—";
+      case "transform":
+        return row.mapping === undefined ? "—" : t(`grid.transform.${row.mapping.transform.kind}`);
+      case "values": {
+        const summary = valuesSummary(project, row.mapping);
+        return summary.kind === "none" ? "—" : t(`grid.values.${summary.kind}`, summary);
+      }
+      case "status":
+        return row.mapping?.review === undefined
+          ? ""
+          : t(`grid.status.${row.mapping.review.status}`);
+    }
+  };
+
+  const editor = (row: GridRow, column: ColumnId, value: string) => {
+    const label = t(`grid.column.${column}`);
+    const change = (next: string) => {
+      if (editingRef.current !== undefined) setEditing({ ...editingRef.current, value: next });
+    };
+    return column === "role" ? (
+      <select
+        aria-label={label}
+        autoFocus
+        value={value}
+        onChange={(e) => {
+          change(e.currentTarget.value);
+        }}
+        onKeyDown={onEditorKey}
+        onBlur={() => {
+          stopEditing(true);
+        }}
+        style={{ width: "100%" }}
+      >
+        <option value="">—</option>
+        {rolesFor(roles, row.column === undefined ? undefined : source.id).map((r) => (
+          <option key={r.id} value={r.id}>
+            {roleName(r)}
+          </option>
+        ))}
+      </select>
+    ) : (
+      <input
+        aria-label={label}
+        autoFocus
+        value={value}
+        onChange={(e) => {
+          change(e.currentTarget.value);
+        }}
+        onKeyDown={onEditorKey}
+        onBlur={() => {
+          stopEditing(true);
+        }}
+        style={{ width: "100%", fontFamily: "var(--mantine-font-family-monospace)" }}
+      />
+    );
+  };
+
+  const items = virtualizer.getVirtualItems();
+  return (
+    <div>
+      <Group justify="space-between" mb="xs">
+        {project.sources.length > 1 ? (
+          <SegmentedControl
+            aria-label={t("grid.tables")}
+            value={source.id}
+            onChange={(id) => {
+              setSourceId(id);
+              setActive({ row: 0, col: 1 });
+              setEditing(undefined);
+            }}
+            data={project.sources.map((s) => ({ value: s.id, label: s.name }))}
+          />
+        ) : (
+          <Text fw={500}>{source.name}</Text>
+        )}
+        <Badge variant="light">{t("grid.rowCount", { count: rows.length })}</Badge>
+      </Group>
+      {notice !== undefined && (
+        <Alert
+          color="orange"
+          mb="xs"
+          withCloseButton
+          onClose={() => {
+            setNotice(undefined);
+          }}
+        >
+          {notice}
+        </Alert>
+      )}
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={t("grid.label", { table: source.name })}
+        aria-rowcount={rows.length + 1}
+        aria-colcount={COLUMNS.length}
+        tabIndex={0}
+        onKeyDown={onGridKey}
+        style={{ border: "1px solid var(--mantine-color-default-border)", borderRadius: 4 }}
+      >
+        <div role="row" aria-rowindex={1} style={rowStyle(true)}>
+          {table.getHeaderGroups()[0]?.headers.map((header, col) => (
+            <div
+              key={header.id}
+              role="columnheader"
+              aria-colindex={col + 1}
+              style={cellStyle(false, false)}
+            >
+              {t(`grid.column.${header.column.id}`)}
+            </div>
+          ))}
+        </div>
+        <div ref={scrollRef} data-testid="grid-scroll" style={{ height: "60vh", overflow: "auto" }}>
+          <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+            {items.map((item) => {
+              const row = model[item.index];
+              if (row === undefined) return null;
+              return (
+                <div
+                  key={row.id}
+                  role="row"
+                  aria-rowindex={item.index + 2}
+                  data-index={item.index}
+                  style={{
+                    ...rowStyle(false),
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${String(item.start)}px)`,
+                  }}
+                >
+                  {COLUMNS.map((column, col) => {
+                    const isActive = active.row === item.index && active.col === col;
+                    const kept = refused.get(cellKey(row.original, column.id));
+                    return (
+                      <div
+                        key={column.id}
+                        role="gridcell"
+                        aria-colindex={col + 1}
+                        aria-selected={isActive}
+                        aria-invalid={kept === undefined ? undefined : true}
+                        title={kept?.message}
+                        onClick={() => {
+                          // A click inside the open editor stays there (it would blur and save it).
+                          if (
+                            editingRef.current?.row === item.index &&
+                            editingRef.current.col === col
+                          )
+                            return;
+                          setActive({ row: item.index, col });
+                          gridRef.current?.focus();
+                        }}
+                        onDoubleClick={() => {
+                          setActive({ row: item.index, col });
+                          startEditing(item.index, col);
+                        }}
+                        style={cellStyle(isActive, kept !== undefined)}
+                      >
+                        {editing?.row === item.index && editing.col === col
+                          ? editor(row.original, column.id, editing.value)
+                          : display(row.original, column.id)}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <Text size="xs" c="dimmed" mt={4}>
+        {t("grid.keys")}
+      </Text>
+    </div>
+  );
+}
+
+/** The roles a row can choose: the table's roles first, then the others (references, `via`). */
+function rolesFor(roles: readonly Instance[], sourceId: string | undefined): Instance[] {
+  return [...roles].sort(
+    (a, b) => Number(b.sourceId === sourceId) - Number(a.sourceId === sourceId),
+  );
+}
+
+function readVersion(versions: ReadonlyMap<string, string>, key: string) {
+  const version = versions.get(key);
+  return version === undefined ? {} : { readVersion: version };
+}
+
+function withoutKey<V>(map: ReadonlyMap<string, V>, key: string): Map<string, V> {
+  const next = new Map(map);
+  next.delete(key);
+  return next;
+}
+
+function firstMessage(results: readonly ValidationResult[]): string {
+  return results[0]?.message ?? "";
+}
+
+function rowStyle(header: boolean) {
+  return {
+    display: "grid",
+    gridTemplateColumns: TEMPLATE,
+    height: ROW_HEIGHT,
+    borderBottom: "1px solid var(--mantine-color-default-border)",
+    ...(header ? { fontWeight: 600, background: "var(--mantine-color-default-hover)" } : {}),
+  } as const;
+}
+
+function cellStyle(active: boolean, invalid: boolean) {
+  return {
+    padding: "0 8px",
+    display: "flex",
+    alignItems: "center",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    outline: active ? "2px solid var(--mantine-color-blue-filled)" : undefined,
+    outlineOffset: -2,
+    background: invalid ? "var(--mantine-color-red-light)" : undefined,
+  } as const;
+}
