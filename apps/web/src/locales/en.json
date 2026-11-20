@@ -242,14 +242,14 @@
     "unitFixed": "Fixed unit",
     "unitColumn": "Unit from a column",
     "concatOrder": "Joined in this order: {{columns}}",
-    "concatNotExported": "The FML export does not translate a concatenation yet: the row shows an error until it does.",
+    "concatNotExported": "The FML export cannot write a concatenation yet: it refuses this row (TRANSFORM_UNSUPPORTED). Choose another transform to export it; concatenation comes in a later version.",
     "help": {
       "copy": "The column's value as it is. Its type must fit the element.",
       "cast": "The value converted to another type: integer to decimal, date to dateTime, or any type to string.",
       "valueMap": "Each value of the column becomes a code, a coding or true/false, as the value map says.",
       "quantity": "The number with its unit: a fixed UCUM unit, or the unit read from another column and translated by a value map.",
       "coding": "The column's value is the code of one code system; the display can come from another column of the same row.",
-      "concat": "The values of several columns of the same row, joined into one text.",
+      "concat": "The values of several columns of the same row, joined into one text. Not offered for new rows until the export can write it.",
       "constant": "The same value in every resource, with no column."
     },
     "field": {
