@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { type FileAccess, blobAccess } from "../storage/file-access";
 import { MappingGrid } from "../grid/MappingGrid";
 import { RolesPanel } from "../roles/RolesPanel";
+import { type Validator, useValidation } from "../validation/use-validation";
 import { LocalFileStore, NotAProjectError } from "../storage/local-file-store";
 import type { Loaded } from "../storage/project-store";
 
@@ -40,6 +41,8 @@ export interface LocalAppProps {
   readonly pickFile?: () => Promise<FileAccess | undefined>;
   /** Saves a text as a download. */
   readonly download: (name: string, text: string) => void;
+  /** Validates the open project (a Web Worker in the browser, ADR-0021). */
+  readonly validator: Validator;
 }
 
 /** Only project files are opened, never data files: anything not named .json is not even read. */
@@ -50,7 +53,7 @@ const MAX_RESULTS_SHOWN = 10;
  * Local mode (ADR-0021): one project file on this computer, opened from a file, kept in memory and
  * saved back through `LocalFileStore`. Runs only in the Vite dev server, bound to localhost.
  */
-export function LocalApp({ pickFile, download }: LocalAppProps) {
+export function LocalApp({ pickFile, download, validator }: LocalAppProps) {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "empty" });
   const input = useRef<HTMLInputElement>(null);
@@ -229,32 +232,84 @@ export function LocalApp({ pickFile, download }: LocalAppProps) {
         )}
 
         {state.kind === "open" && (
-          <Tabs defaultValue="grid" keepMounted={false}>
-            <Tabs.List>
-              <Tabs.Tab value="grid">{t("local.tabGrid")}</Tabs.Tab>
-              <Tabs.Tab value="roles">
-                {t("local.tabRoles", { count: state.project.instances.length })}
-              </Tabs.Tab>
-            </Tabs.List>
-            <Tabs.Panel value="grid" pt="sm">
-              <MappingGrid
-                project={state.project}
-                versions={state.versions}
-                store={state.store}
-                onLoaded={onLoaded}
-              />
-            </Tabs.Panel>
-            <Tabs.Panel value="roles" pt="sm">
-              <RolesPanel
-                project={state.project}
-                versions={state.versions}
-                store={state.store}
-                onLoaded={onLoaded}
-              />
-            </Tabs.Panel>
-          </Tabs>
+          <ProjectView
+            project={state.project}
+            versions={state.versions}
+            store={state.store}
+            onLoaded={onLoaded}
+            validator={validator}
+          />
         )}
       </Stack>
     </Container>
+  );
+}
+
+interface ProjectViewProps {
+  readonly project: ProjectFile;
+  readonly versions: ReadonlyMap<string, string>;
+  readonly store: LocalFileStore;
+  readonly onLoaded: (loaded: Loaded) => void;
+  readonly validator: Validator;
+}
+
+/** The open project: its validation summary, the grid and the roles. */
+function ProjectView({ project, versions, store, onLoaded, validator }: ProjectViewProps) {
+  const { t } = useTranslation();
+  const validation = useValidation(project, validator);
+  const errors = validation?.results.filter((r) => r.severity === "error").length ?? 0;
+  const warnings = (validation?.results.length ?? 0) - errors;
+  const fhir = validation?.fhir;
+  return (
+    <Stack gap="sm">
+      <Group gap="xs" data-testid="validation-summary">
+        {validation === undefined ? (
+          <Text size="sm" c="dimmed">
+            {t("validation.running")}
+          </Text>
+        ) : (
+          <>
+            <Badge color={errors > 0 ? "red" : "green"} variant="light">
+              {t("validation.errors", { count: errors })}
+            </Badge>
+            <Badge color={warnings > 0 ? "yellow" : "gray"} variant="light">
+              {t("validation.warnings", { count: warnings })}
+            </Badge>
+            <Text size="sm" c="dimmed">
+              {fhir?.kind === "checked"
+                ? t("validation.fhirChecked", { version: fhir.fhirVersion })
+                : fhir?.kind === "otherVersion"
+                  ? t("validation.fhirOtherVersion", {
+                      index: fhir.indexVersion,
+                      project: project.project.fhirVersion,
+                    })
+                  : fhir?.kind === "unavailable"
+                    ? t("validation.fhirUnavailable")
+                    : t("validation.fhirNotRun")}
+            </Text>
+          </>
+        )}
+      </Group>
+      <Tabs defaultValue="grid" keepMounted={false}>
+        <Tabs.List>
+          <Tabs.Tab value="grid">{t("local.tabGrid")}</Tabs.Tab>
+          <Tabs.Tab value="roles">
+            {t("local.tabRoles", { count: project.instances.length })}
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="grid" pt="sm">
+          <MappingGrid
+            project={project}
+            versions={versions}
+            store={store}
+            onLoaded={onLoaded}
+            {...(validation === undefined ? {} : { findings: validation.results })}
+          />
+        </Tabs.Panel>
+        <Tabs.Panel value="roles" pt="sm">
+          <RolesPanel project={project} versions={versions} store={store} onLoaded={onLoaded} />
+        </Tabs.Panel>
+      </Tabs>
+    </Stack>
   );
 }

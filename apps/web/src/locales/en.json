@@ -120,5 +120,16 @@
     "idRuleKept": "The id rule follows the type, index and table while it is the default one.",
     "cancel": "Cancel",
     "save": "Save"
+  },
+  "validation": {
+    "running": "Checking the project…",
+    "errors_one": "{{count}} error",
+    "errors_other": "{{count}} errors",
+    "warnings_one": "{{count}} warning",
+    "warnings_other": "{{count}} warnings",
+    "fhirChecked": "Checked against FHIR {{version}}, as in cindermed validate.",
+    "fhirOtherVersion": "FHIR checks not run: the definitions are for FHIR {{index}}, the project for FHIR {{project}}. Write them again with cindermed fhir-index.",
+    "fhirUnavailable": "FHIR checks not run: write the definitions with cindermed fhir-index <project> --out apps/web/.fhir-index.",
+    "fhirNotRun": "FHIR checks not run: the project does not match the schema."
   }
 }
