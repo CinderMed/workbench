@@ -33,7 +33,8 @@ interface Form {
   /** The role being edited, or undefined for a new one. */
   readonly role?: Instance;
   readonly resourceType: string;
-  readonly index: number;
+  /** The index as typed: empty while the field is cleared to type another one. */
+  readonly index: number | "";
   /** Whether the index was typed by hand (otherwise it follows the resource type). */
   readonly indexTouched: boolean;
   readonly label: string;
@@ -80,7 +81,12 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
     });
   };
 
-  const save = async (current: Form) => {
+  const save = async (form: Form) => {
+    if (form.index === "") {
+      setForm({ ...form, error: t("roles.indexRequired") });
+      return;
+    }
+    const current = { ...form, index: form.index };
     const resourceType = current.resourceType.trim();
     const label = current.label.trim();
     const fields = {
@@ -308,7 +314,7 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
                 onChange={(value) => {
                   setForm({
                     ...form,
-                    index: typeof value === "number" ? value : 0,
+                    index: typeof value === "number" ? value : "",
                     indexTouched: true,
                   });
                 }}
@@ -332,7 +338,12 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
                 {form.role === undefined
                   ? (describeIdRule(
                       project,
-                      defaultIdRule(project, form.sourceId, form.resourceType.trim(), form.index),
+                      defaultIdRule(
+                        project,
+                        form.sourceId,
+                        form.resourceType.trim(),
+                        form.index === "" ? 0 : form.index,
+                      ),
                     ) ?? t("roles.noRowKey"))
                   : t("roles.idRuleKept")}
               </Text>

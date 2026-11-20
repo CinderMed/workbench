@@ -31,7 +31,11 @@ function initLike(withRowKey: boolean): ProjectFile {
 async function renderPanel(project: ProjectFile) {
   const store = new LocalFileStore(
     blobAccess({ name: "p.json", text: () => Promise.resolve(JSON.stringify(project)) }),
-    () => "abcdefghij",
+    // The first id is fixed for the tests that read it; later ones differ.
+    (() => {
+      let n = 0;
+      return () => (n++ === 0 ? "abcdefghij" : `abcdefgh${String(n).padStart(2, "0")}`);
+    })(),
   );
   const loaded = await store.load();
   let latest: Loaded = loaded;
@@ -187,5 +191,27 @@ describe("RolesPanel", () => {
     const after = latest().project.instances.find((i) => i.id === before?.id);
     expect(after).not.toHaveProperty("slices");
     expect({ ...after, slices: before?.slices }).toEqual(before);
+  });
+
+  it("replaces an index typed over the one proposed, and refuses an empty index", async () => {
+    const { latest } = await renderPanel(initLike(true));
+    for (const label of ["first", "second"]) {
+      const { user, dialog } = await fillRole("Observation", label);
+      if (label === "second") {
+        const index = within(dialog).getByLabelText<HTMLInputElement>("Index");
+        expect(index.value).toBe("1"); // Proposed: the next free index.
+        await user.clear(index);
+        expect(index.value).toBe(""); // Stays empty, not 0, so typing replaces it.
+        await user.click(within(dialog).getByRole("button", { name: "Save" }));
+        expect(await within(dialog).findByText("Give the role's index: 0 or more.")).toBeTruthy();
+        await user.type(index, "4");
+        expect(index.value).toBe("4");
+      }
+      await user.click(within(dialog).getByRole("button", { name: "Save" }));
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+    }
+    expect(latest().project.instances.map((r) => r.index)).toEqual([0, 4]);
   });
 });

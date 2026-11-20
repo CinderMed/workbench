@@ -1,4 +1,14 @@
-import { Alert, Badge, Button, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
+import {
+  Alert,
+  Badge,
+  Button,
+  Group,
+  NativeSelect,
+  SegmentedControl,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import {
   type Instance,
   type MappingRow,
@@ -27,6 +37,16 @@ import { withSlice } from "../slices/slices";
 import { TransformEditor } from "../transforms/TransformEditor";
 import type { BrowserDefinitions } from "../validation/index-fetch";
 import { type CellAddress, type CellFinding, cellFindings } from "./findings";
+import {
+  type BulkAction,
+  NONE,
+  NO_FILTER,
+  type RowFilter,
+  STATUSES,
+  bulkRows,
+  filterRows,
+  isFiltered,
+} from "./filters";
 import { type Grouping, type Line, gridLines } from "./groups";
 import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
 
@@ -107,9 +127,21 @@ export function MappingGrid({
   const cells = useMemo(() => cellFindings(rows, findings ?? []), [rows, findings]);
   const [grouping, setGrouping] = useState<Grouping>("section");
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  /** The filters (D8): the rows shown. */
+  const [filter, setFilterState] = useState<RowFilter>(NO_FILTER);
+  /** The mapping rows selected for a bulk action (D8), by id. */
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  /** The row a Shift-click selects from. */
+  const anchor = useRef<string | undefined>(undefined);
+  const setFilter = (next: RowFilter) => {
+    setFilterState(next);
+    setSelected(new Set()); // A bulk action writes only rows on screen.
+    anchor.current = undefined;
+  };
+  const shown = useMemo(() => filterRows(rows, filter), [rows, filter]);
   const lines = useMemo(
-    () => gridLines(project, source, rows, grouping, collapsed),
-    [project, source, rows, grouping, collapsed],
+    () => gridLines(project, source, shown, grouping, collapsed),
+    [project, source, shown, grouping, collapsed],
   );
   const table = useTable({ features, columns: tableColumns, data: lines, getRowId: (l) => l.key });
   const model = table.getRowModel().rows;
@@ -183,7 +215,12 @@ export function MappingGrid({
   }, [target]);
   useEffect(() => {
     if (pending?.sourceId !== source.id) return;
-    const all = gridLines(project, source, rows, grouping, new Set());
+    if (!shown.some((r) => r.key === pending.rowKey) && isFiltered(filter)) {
+      setFilterState(NO_FILTER); // The cell asked for is filtered out: show every row.
+      setSelected(new Set());
+      return; // Selected once the rows show.
+    }
+    const all = gridLines(project, source, shown, grouping, new Set());
     const at = all.findIndex((l) => l.kind === "row" && l.key === pending.rowKey);
     const header = all
       .slice(0, Math.max(at, 0))
@@ -204,7 +241,7 @@ export function MappingGrid({
     const col = COLUMNS.findIndex((c) => c.id === pending.column);
     move(index, col < 0 ? 0 : col);
     gridRef.current?.focus();
-  }, [pending, source, project, rows, grouping, collapsed, lines, move, setEditing]);
+  }, [pending, source, project, shown, filter, grouping, collapsed, lines, move, setEditing]);
 
   const roles = project.instances;
   const cellKey = (row: GridRow, col: ColumnId) => `${row.key}/${col}`;
@@ -397,6 +434,56 @@ export function MappingGrid({
       ? undefined
       : project.sources.flatMap((s) => s.columns).find((c) => c.id === transformRow.columnId);
 
+  /** Selects or unselects one saved row (Space, Ctrl or Cmd-click). */
+  const toggleSelected = (id: string) => {
+    anchor.current = id;
+    setSelected((current) => {
+      const next = new Set(current);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  };
+  /** Shift-click: the saved rows on screen from the last one chosen to this one. */
+  const selectRange = (id: string) => {
+    const ids = lines.flatMap((l) =>
+      l.kind === "row" && l.row.mapping !== undefined ? [l.row.mapping.id] : [],
+    );
+    const from = anchor.current === undefined ? -1 : ids.indexOf(anchor.current);
+    const to = ids.indexOf(id);
+    if (from < 0 || to < 0) {
+      toggleSelected(id);
+      return;
+    }
+    const range = ids.slice(Math.min(from, to), Math.max(from, to) + 1);
+    setSelected((current) => new Set([...current, ...range]));
+  };
+  const selectShown = () => {
+    setSelected(new Set(shown.flatMap((r) => (r.mapping === undefined ? [] : [r.mapping.id]))));
+  };
+  /** A role or a status on every selected row, in one batch: all of them or none. */
+  const bulk = async (action: BulkAction) => {
+    const changed = bulkRows(
+      project.mappings.filter((m) => selected.has(m.id)),
+      action,
+    );
+    if (changed.length === 0) {
+      setNotice(t("bulk.nothing"));
+      return;
+    }
+    const failed = answer(
+      await store.apply(
+        changed.map((row): StoreChange => ({
+          op: "update",
+          kind: "mapping",
+          id: row.id,
+          value: row,
+          ...readVersion(versions, objectKey("mapping", row.id)),
+        })),
+      ),
+    );
+    setNotice(failed ?? t("bulk.done", { count: changed.length }));
+  };
+
   /** The row the picker places: the saved row, or the copy an empty line will become. */
   const placedRow = (rowIndex: number, role: Instance): MappingRow => {
     const row = rowAt(rowIndex);
@@ -465,6 +552,10 @@ export function MappingGrid({
         const line = model[row]?.original;
         if (line?.kind === "group") toggleGroup(line.key);
         else edit(row, col);
+      },
+      " ": () => {
+        const id = rowAt(row)?.mapping?.id;
+        if (id !== undefined) toggleSelected(id);
       },
       F2: () => {
         if (isDialog(col)) editTransform(row);
@@ -595,6 +686,7 @@ export function MappingGrid({
             value={source.id}
             onChange={(id) => {
               setSourceId(id);
+              setFilter(NO_FILTER); // Sections and rows belong to the table.
               setActive({ row: 0, col: 1 });
               setEditing(undefined);
             }}
@@ -624,6 +716,115 @@ export function MappingGrid({
           <Badge variant="light">{t("grid.rowCount", { count: rows.length })}</Badge>
         </Group>
       </Group>
+      <Group gap="xs" mb="xs" align="flex-end">
+        <NativeSelect
+          size="xs"
+          label={t("filters.status")}
+          value={filter.status ?? ""}
+          data={[
+            { value: "", label: t("filters.all") },
+            ...STATUSES.map((s) => ({ value: s, label: t(`grid.status.${s}`) })),
+            { value: NONE, label: t("filters.noStatus") },
+          ]}
+          onChange={(event) => {
+            const value = event.currentTarget.value;
+            const status = value === NONE ? NONE : STATUSES.find((s) => s === value);
+            setFilter({ ...filter, status });
+          }}
+        />
+        <NativeSelect
+          size="xs"
+          label={t("filters.role")}
+          value={filter.roleId ?? ""}
+          data={[
+            { value: "", label: t("filters.all") },
+            ...roles.map((r) => ({ value: r.id, label: roleName(r) })),
+            { value: NONE, label: t("filters.noRole") },
+          ]}
+          onChange={(event) => {
+            const roleId = event.currentTarget.value;
+            setFilter({ ...filter, roleId: roleId === "" ? undefined : roleId });
+          }}
+        />
+        {(source.sections ?? []).length > 0 && (
+          <NativeSelect
+            size="xs"
+            label={t("filters.section")}
+            value={filter.sectionId ?? ""}
+            data={[
+              { value: "", label: t("filters.all") },
+              ...(source.sections ?? []).map((s) => ({ value: s.id, label: s.name })),
+              { value: NONE, label: t("filters.noSection") },
+            ]}
+            onChange={(event) => {
+              const sectionId = event.currentTarget.value;
+              setFilter({ ...filter, sectionId: sectionId === "" ? undefined : sectionId });
+            }}
+          />
+        )}
+        {isFiltered(filter) && (
+          <Button
+            size="xs"
+            variant="subtle"
+            onClick={() => {
+              setFilter(NO_FILTER);
+            }}
+          >
+            {t("filters.clear")}
+          </Button>
+        )}
+        <Text size="xs" c="dimmed">
+          {t("filters.shown", { shown: shown.length, total: rows.length })}
+        </Text>
+      </Group>
+      <Group gap="xs" mb="xs" aria-label={t("bulk.label")} role="toolbar">
+        <Button size="xs" variant="default" onClick={selectShown}>
+          {t("bulk.selectShown")}
+        </Button>
+        {selected.size > 0 && (
+          <>
+            <Text size="sm" fw={500}>
+              {t("bulk.selected", { count: selected.size })}
+            </Text>
+            <NativeSelect
+              size="xs"
+              aria-label={t("bulk.setRole")}
+              value=""
+              data={[
+                { value: "", label: t("bulk.setRole") },
+                ...roles.map((r) => ({ value: r.id, label: roleName(r) })),
+              ]}
+              onChange={(event) => {
+                const roleId = event.currentTarget.value;
+                if (roleId !== "") void bulk({ kind: "role", roleId });
+              }}
+            />
+            <NativeSelect
+              size="xs"
+              aria-label={t("bulk.setStatus")}
+              value=""
+              data={[
+                { value: "", label: t("bulk.setStatus") },
+                ...STATUSES.map((s) => ({ value: s, label: t(`grid.status.${s}`) })),
+              ]}
+              onChange={(event) => {
+                const status = STATUSES.find((s) => s === event.currentTarget.value);
+                if (status !== undefined) void bulk({ kind: "status", status });
+              }}
+            />
+            <Button
+              size="xs"
+              variant="subtle"
+              onClick={() => {
+                setSelected(new Set());
+                anchor.current = undefined;
+              }}
+            >
+              {t("bulk.clear")}
+            </Button>
+          </>
+        )}
+      </Group>
       {notice !== undefined && (
         <Alert
           color="orange"
@@ -643,6 +844,7 @@ export function MappingGrid({
         aria-label={t("grid.label", { table: source.name })}
         aria-rowcount={lines.length + 1}
         aria-colcount={COLUMNS.length}
+        aria-multiselectable
         tabIndex={0}
         onKeyDown={onGridKey}
         style={{ border: "1px solid var(--mantine-color-default-border)", borderRadius: 4 }}
@@ -711,14 +913,23 @@ export function MappingGrid({
                 );
               }
               const gridRow = line.row;
+              const mappingId = gridRow.mapping?.id;
+              const isSelected = mappingId !== undefined && selected.has(mappingId);
               return (
                 <div
                   key={row.id}
                   role="row"
                   aria-rowindex={item.index + 2}
+                  aria-selected={mappingId === undefined ? undefined : isSelected}
                   data-index={item.index}
+                  onClick={(event) => {
+                    if (mappingId === undefined) return;
+                    if (event.shiftKey) selectRange(mappingId);
+                    else if (event.ctrlKey || event.metaKey) toggleSelected(mappingId);
+                  }}
                   style={{
                     ...rowStyle(false),
+                    ...(isSelected ? { background: "var(--mantine-primary-color-light)" } : {}),
                     position: "absolute",
                     top: 0,
                     left: 0,

@@ -252,7 +252,7 @@ export function LocalApp({ pickFile, download, validator, definitions }: LocalAp
   );
 }
 
-interface ProjectViewProps {
+export interface ProjectViewProps {
   readonly project: ProjectFile;
   readonly versions: ReadonlyMap<string, string>;
   readonly store: LocalFileStore;
@@ -262,7 +262,7 @@ interface ProjectViewProps {
 }
 
 /** The open project: its validation summary, the grid and the roles. */
-function ProjectView({
+export function ProjectView({
   project,
   versions,
   store,
