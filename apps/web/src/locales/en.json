@@ -10,5 +10,21 @@
     "signOut": "Sign out",
     "error": "Sign-in failed: {{message}}",
     "retry": "Try again"
+  },
+  "local": {
+    "badge": "Local mode · this computer only",
+    "explanation": "Works on a project file on this computer, without login or server. Only project files (.json) are opened here, never data files.",
+    "dropHint": "Drop a project file here, or open one.",
+    "open": "Open project…",
+    "openAnother": "Open another project…",
+    "onlyProjectFiles": "{{file}} was not opened: only project files (.json) can be opened here, never data files.",
+    "notAProject": "{{file}} is not a valid project file",
+    "cannotRead": "{{file}} could not be read",
+    "summary": "{{file}} · FHIR {{fhirVersion}} · {{tables}} tables, {{columns}} columns, {{roles}} roles, {{rows}} rows",
+    "migrated": "The file was in format {{from}}; it will be saved in format {{to}}.",
+    "savedToFile": "Every change is saved to {{file}}.",
+    "unsaved": "Unsaved changes: download the project to keep them.",
+    "downloadToSave": "This browser cannot write the file: save by downloading it.",
+    "download": "Download project"
   }
 }

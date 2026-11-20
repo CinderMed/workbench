@@ -60,3 +60,13 @@ export {
   serializeProject,
   validateProject,
 } from "./project-file/index.js";
+export {
+  type ApplyResult,
+  type Change,
+  type ObjectValues,
+  type StoredKind,
+  type Touched,
+  applyChanges,
+  nextRowCode,
+  objectKey,
+} from "./changes/index.js";
