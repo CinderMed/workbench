@@ -61,9 +61,22 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 
 The new slice is saved in the role and shows open under its element, ready for a child such as `component[nrs].valueInteger`. The resource gets the repetition only when one of its rows has a value.
 
+**Transforms.** Enter, F2 or a double-click on a Transform or Values cell opens the row's transform:
+
+| Transform     | What it writes                                                                                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Copy          | The column's value as it is; its type must fit the element                                                                                                                  |
+| Conversion    | The value converted: integer to decimal, date to dateTime, any type to string; for dates, the format in the data file (`dd/MM/yyyy`), taken from the column when it has one |
+| Value map     | Each value as a code, a coding or true/false, through one of the project's value maps                                                                                       |
+| Quantity      | The number with a fixed UCUM unit (`kg`, `mm[Hg]`), or with the unit read from another column and turned into UCUM by a value map                                           |
+| Coding        | The column's value as a code of one code system, written as a Coding or a CodeableConcept, with the display from another column if you choose one                           |
+| Concatenation | Several columns of the row joined into one text, in the order you choose them; the FML export does not translate it yet                                                     |
+
+A row of a multiple-choice column can also write **one repetition per selected value** (`repeat`), for a repeating element such as `Procedure.bodySite`. **Add constant row** writes the same value in every resource of a role, with no column: choose the role, the element and the value's type and value. A code typed by hand is saved as `manual`. References are set with the roles' context, and value maps are edited, in later versions; until then they come from the project file.
+
 **Groups.** The switch above the grid groups the rows **by section** of the source table (the columns' sections, in their order) or **by role** (the role each row writes to). Rows with no section or no role come last, under "No section" or "No role"; a table without sections is one list when grouped by section. A group's header shows how many rows it holds; Enter or a click on it closes and opens it.
 
-The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
+The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. **Role** and **Element** are edited in their cells; **Transform** and **Values / code** open the transform editor. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
 
 ## Checks while you map
 

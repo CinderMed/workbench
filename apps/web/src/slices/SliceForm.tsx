@@ -3,6 +3,8 @@ import type { TreeNode } from "@cindermed/fhir-defs";
 import type { Instance } from "@cindermed/model";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ValueFields } from "../values/ValueFields";
+import { errorKey } from "../values/fhir-value";
 import { type SliceDraft, buildSlice, discriminatorChoices, slicesOn, valueKind } from "./slices";
 
 type Slice = NonNullable<Instance["slices"]>[number];
@@ -46,7 +48,7 @@ export function SliceForm({ role, element, elements, newId, onSave, onCancel }: 
     const taken = slicesOn(role, element.path).map((s) => s.name);
     const built = buildSlice(newId(), element.path, kind, draft, taken);
     if ("error" in built) {
-      setError(t(`slices.error.${built.error}`));
+      setError(t(errorKey(built.error, "slices.error")));
       return;
     }
     setSaving(true);
@@ -73,7 +75,7 @@ export function SliceForm({ role, element, elements, newId, onSave, onCancel }: 
           description={t("slices.field.nameHint", {
             example: `${element.path}[${draft.name.trim() === "" ? "nrs" : draft.name.trim()}]`,
           })}
-          required
+          withAsterisk
           data-autofocus
           autoFocus
           value={draft.name}
@@ -96,60 +98,15 @@ export function SliceForm({ role, element, elements, newId, onSave, onCancel }: 
             }}
           />
         )}
-        {kind?.kind === "coding" && (
-          <>
-            <TextInput
-              label={t("slices.field.system")}
-              required
-              value={draft.system}
-              onChange={(event) => {
-                set({ system: event.currentTarget.value });
-              }}
-            />
-            <TextInput
-              label={t("slices.field.code")}
-              required
-              value={draft.code}
-              onChange={(event) => {
-                set({ code: event.currentTarget.value });
-              }}
-            />
-            <TextInput
-              label={t("slices.field.display")}
-              value={draft.display}
-              onChange={(event) => {
-                set({ display: event.currentTarget.value });
-              }}
-            />
-            <Text size="xs" c="dimmed">
-              {t("slices.manual")}
-            </Text>
-          </>
+        {kind !== undefined && (
+          <ValueFields
+            kind={kind}
+            value={draft}
+            onChange={(value) => {
+              set(value);
+            }}
+          />
         )}
-        {kind?.kind === "primitive" &&
-          (kind.type === "boolean" ? (
-            <NativeSelect
-              label={t("slices.field.value", { type: kind.type })}
-              value={draft.value}
-              data={[
-                { value: "", label: "—" },
-                { value: "true", label: "true" },
-                { value: "false", label: "false" },
-              ]}
-              onChange={(event) => {
-                set({ value: event.currentTarget.value });
-              }}
-            />
-          ) : (
-            <TextInput
-              label={t("slices.field.value", { type: kind.type })}
-              required
-              value={draft.value}
-              onChange={(event) => {
-                set({ value: event.currentTarget.value });
-              }}
-            />
-          ))}
         {error !== undefined && <Alert color="red">{error}</Alert>}
         <Group justify="flex-end">
           <Button variant="default" onClick={onCancel}>

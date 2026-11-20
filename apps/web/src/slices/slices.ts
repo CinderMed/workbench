@@ -6,30 +6,14 @@
  */
 import type { TreeNode } from "@cindermed/fhir-defs";
 import type { Instance, ProjectFile } from "@cindermed/model";
+import { type ValueError, type ValueKind, buildValue, kindOfType } from "../values/fhir-value";
+
+export type { ValueKind } from "../values/fhir-value";
 
 type Slice = NonNullable<Instance["slices"]>[number];
-type FhirValue = Slice["discriminator"][number]["value"];
 
 /** Slice names a project path can hold (project format 1.4.0, ADR-0020). */
 const NAME = /^[A-Za-z][A-Za-z0-9-]*$/;
-
-/** The primitive types a discriminator value can have (`FhirValue` in the project schema). */
-const PRIMITIVES = [
-  "string",
-  "code",
-  "boolean",
-  "integer",
-  "decimal",
-  "date",
-  "dateTime",
-  "uri",
-] as const;
-type Primitive = (typeof PRIMITIVES)[number];
-
-/** How a discriminator value is entered: a coding, or a primitive of a given type. */
-export type ValueKind =
-  | { readonly kind: "coding"; readonly type: "Coding" | "CodeableConcept" }
-  | { readonly kind: "primitive"; readonly type: Primitive };
 
 /** Whether an element repeats (`max` above 1), so it can hold named slices. */
 export const repeats = (node: Pick<TreeNode, "max">) => node.max === "*" || Number(node.max) > 1;
@@ -45,10 +29,7 @@ export const slicePath = (slice: Pick<Slice, "path" | "name">) => `${slice.path}
 /** How a value of this element is entered, or undefined when the element cannot discriminate. */
 export function valueKind(node: TreeNode): ValueKind | undefined {
   if (node.types.length !== 1) return undefined;
-  const code = node.types[0]?.code ?? "";
-  if (code === "Coding" || code === "CodeableConcept") return { kind: "coding", type: code };
-  const primitive = PRIMITIVES.find((p) => p === code);
-  return primitive === undefined ? undefined : { kind: "primitive", type: primitive };
+  return kindOfType(node.types[0]?.code ?? "");
 }
 
 /** The children of a repeating element that can tell its slices apart; `code` first when it can. */
@@ -70,36 +51,7 @@ export interface SliceDraft {
 }
 
 export type SliceError =
-  | "nameRequired"
-  | "nameInvalid"
-  | "nameTaken"
-  | "discriminatorRequired"
-  | "systemRequired"
-  | "codeRequired"
-  | "valueRequired"
-  | "valueInvalid";
-
-const DATE = /^\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01]))?)?$/;
-const DATE_TIME =
-  /^\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\d|3[01])(T([01]\d|2[0-3]):[0-5]\d:([0-5]\d|60)(\.\d+)?(Z|[+-]((0\d|1[0-3]):[0-5]\d|14:00)))?)?)?$/;
-
-/** The typed value of a primitive, or undefined when the text is not one (strict, no guessing). */
-function primitiveValue(type: Primitive, text: string): string | number | boolean | undefined {
-  switch (type) {
-    case "boolean":
-      return text === "true" ? true : text === "false" ? false : undefined;
-    case "integer":
-      return /^-?\d+$/.test(text) ? Number(text) : undefined;
-    case "decimal":
-      return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : undefined;
-    case "date":
-      return DATE.test(text) ? text : undefined;
-    case "dateTime":
-      return DATE_TIME.test(text) ? text : undefined;
-    default:
-      return text;
-  }
-}
+  "nameRequired" | "nameInvalid" | "nameTaken" | "discriminatorRequired" | ValueError;
 
 /**
  * The slice the form describes, or the first thing wrong with it. A coding entered here is
@@ -119,29 +71,9 @@ export function buildSlice(
   if (taken.includes(name)) return { error: "nameTaken" };
   if (draft.discriminatorPath === "" || kind === undefined)
     return { error: "discriminatorRequired" };
-  let value: FhirValue;
-  if (kind.kind === "coding") {
-    const system = draft.system.trim();
-    const code = draft.code.trim();
-    const display = draft.display.trim();
-    if (system === "") return { error: "systemRequired" };
-    if (code === "") return { error: "codeRequired" };
-    value = {
-      type: kind.type,
-      coding: {
-        system,
-        code,
-        ...(display === "" ? {} : { display }),
-        verification: { status: "manual" },
-      },
-    };
-  } else {
-    const text = draft.value.trim();
-    if (text === "") return { error: "valueRequired" };
-    const typed = primitiveValue(kind.type, text);
-    if (typed === undefined) return { error: "valueInvalid" };
-    value = { type: kind.type, value: typed };
-  }
+  const built = buildValue(kind, draft);
+  if ("error" in built) return built;
+  const { value } = built;
   return {
     slice: { id, path, name, discriminator: [{ path: draft.discriminatorPath, value }] },
   };
