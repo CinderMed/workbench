@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 import { createI18n } from "../i18n";
 import { type FileAccess, type FileHandle, handleAccess } from "../storage/file-access";
+import { workerValidator } from "../validation/use-validation";
 import { LocalApp } from "./LocalApp";
 
 /** The File System Access API's picker, where the browser has it (Chromium). */
@@ -40,11 +41,18 @@ function download(name: string, text: string): void {
 /** Starts the local mode (ADR-0021). Imported only by the Vite dev server: see main.tsx. */
 export function startLocalMode(root: HTMLElement): void {
   const pickFile = filePicker();
+  const validator = workerValidator(
+    new Worker(new URL("../validation/validation.worker.ts", import.meta.url), { type: "module" }),
+  );
   createRoot(root).render(
     <StrictMode>
       <I18nextProvider i18n={createI18n()}>
         <MantineProvider defaultColorScheme="auto">
-          <LocalApp {...(pickFile === undefined ? {} : { pickFile })} download={download} />
+          <LocalApp
+            {...(pickFile === undefined ? {} : { pickFile })}
+            download={download}
+            validator={validator}
+          />
         </MantineProvider>
       </I18nextProvider>
     </StrictMode>,

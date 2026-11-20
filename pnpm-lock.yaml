@@ -276,6 +276,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@cindermed/fhir-defs':
+        specifier: workspace:*
+        version: link:../../packages/fhir-defs
       '@cindermed/model':
         specifier: workspace:*
         version: link:../../packages/model

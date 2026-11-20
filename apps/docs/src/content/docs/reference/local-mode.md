@@ -53,6 +53,14 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 
 The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the path picker and the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
 
+## Checks while you map
+
+After every change the project is checked again, with the same rules as [`cindermed validate`](/workbench/reference/cli/#cindermed-validate): schema, integrity and quality, then the FHIR checks (paths, types, bindings, references, cardinality) when the definitions are there. The checks run in the background, and an older check never colours the cells after a newer change.
+
+- Above the grid, the number of errors and warnings, and whether the FHIR checks ran. Without definitions, it says how to write them with `cindermed fhir-index`.
+- In the grid, a cell with an error is red and a cell with a warning is yellow; the reason shows when you point at it. For example a `boolean` column copied to `Patient.name`, a HumanName, makes the Element cell red.
+- Errors block the export, as on the command line, but never stop you from saving.
+
 ## Roles
 
 The **Roles** tab lists the project's roles: the FHIR resources made from each record, such as `Patient[0]` or `Observation[1]`. A new project from `cindermed init` has none, so this is where mapping starts.

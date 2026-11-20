@@ -3,6 +3,7 @@ import {
   type Instance,
   type MappingRow,
   type ProjectFile,
+  type Severity,
   type ValidationResult,
   nextRowCode,
   objectKey,
@@ -20,6 +21,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
+import { cellFindings } from "./findings";
 import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
 
 export const ROW_HEIGHT = 40;
@@ -64,6 +66,8 @@ export interface MappingGridProps {
   readonly store: Pick<ProjectStore, "apply" | "newId">;
   /** The project after an accepted change, or the current one after a conflict. */
   readonly onLoaded: (loaded: Loaded) => void;
+  /** Validation results of the current project (D7 inline): their cells are coloured. */
+  readonly findings?: readonly ValidationResult[];
 }
 
 /**
@@ -71,11 +75,12 @@ export interface MappingGridProps {
  * rows; Role and Element are edited from the keyboard. Rows are virtualized, so only the visible
  * lines are in the page.
  */
-export function MappingGrid({ project, versions, store, onLoaded }: MappingGridProps) {
+export function MappingGrid({ project, versions, store, onLoaded, findings }: MappingGridProps) {
   const { t } = useTranslation();
   const [sourceId, setSourceId] = useState(project.sources[0].id);
   const source = project.sources.find((s) => s.id === sourceId) ?? project.sources[0];
   const rows = useMemo(() => gridRows(project, source), [project, source]);
+  const cells = useMemo(() => cellFindings(rows, findings ?? []), [rows, findings]);
   const table = useTable({ features, columns: tableColumns, data: rows, getRowId: (r) => r.key });
   const model = table.getRowModel().rows;
 
@@ -408,7 +413,7 @@ export function MappingGrid({ project, versions, store, onLoaded }: MappingGridP
               key={header.id}
               role="columnheader"
               aria-colindex={col + 1}
-              style={cellStyle(false, false)}
+              style={cellStyle(false, undefined)}
             >
               {t(`grid.column.${header.column.id}`)}
             </div>
@@ -437,14 +442,18 @@ export function MappingGrid({ project, versions, store, onLoaded }: MappingGridP
                   {COLUMNS.map((column, col) => {
                     const isActive = active.row === item.index && active.col === col;
                     const kept = refused.get(cellKey(row.original, column.id));
+                    const found = cells.get(cellKey(row.original, column.id));
                     return (
                       <div
                         key={column.id}
                         role="gridcell"
                         aria-colindex={col + 1}
                         aria-selected={isActive}
-                        aria-invalid={kept === undefined ? undefined : true}
-                        title={kept?.message}
+                        aria-invalid={
+                          kept !== undefined || found?.severity === "error" ? true : undefined
+                        }
+                        data-severity={kept === undefined ? found?.severity : "error"}
+                        title={kept?.message ?? found?.messages.join("\n")}
                         onClick={() => {
                           // A click inside the open editor stays there (it would blur and save it).
                           if (
@@ -459,7 +468,7 @@ export function MappingGrid({ project, versions, store, onLoaded }: MappingGridP
                           setActive({ row: item.index, col });
                           startEditing(item.index, col);
                         }}
-                        style={cellStyle(isActive, kept !== undefined)}
+                        style={cellStyle(isActive, kept === undefined ? found?.severity : "error")}
                       >
                         {editing?.row === item.index && editing.col === col
                           ? editor(row.original, column.id, editing.value)
@@ -512,7 +521,7 @@ function rowStyle(header: boolean) {
   } as const;
 }
 
-function cellStyle(active: boolean, invalid: boolean) {
+function cellStyle(active: boolean, severity: Severity | undefined) {
   return {
     padding: "0 8px",
     display: "flex",
@@ -522,6 +531,11 @@ function cellStyle(active: boolean, invalid: boolean) {
     textOverflow: "ellipsis",
     outline: active ? "2px solid var(--mantine-color-blue-filled)" : undefined,
     outlineOffset: -2,
-    background: invalid ? "var(--mantine-color-red-light)" : undefined,
+    background:
+      severity === "error"
+        ? "var(--mantine-color-red-light)"
+        : severity === "warning"
+          ? "var(--mantine-color-yellow-light)"
+          : undefined,
   } as const;
 }

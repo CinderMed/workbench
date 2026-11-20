@@ -6,18 +6,23 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import metastraProject from "../../../../fixtures/fml-examples/metastra/project.json";
 import { createI18n } from "../i18n";
 import type { FileAccess } from "../storage/file-access";
+import { type Validator } from "../validation/use-validation";
+import { validateAll } from "../validation/validate";
 import { LocalApp, type LocalAppProps } from "./LocalApp";
 
 afterEach(cleanup);
 
 const metastraText = JSON.stringify(metastraProject);
+/** Validation in the test process, without FHIR definitions. */
+const noDefinitions: Validator = (project) =>
+  validateAll(project, { message: "no definitions in this test" });
 
 function renderLocal(props: Partial<LocalAppProps> = {}) {
   const download = vi.fn<(name: string, text: string) => void>();
   render(
     <I18nextProvider i18n={createI18n()}>
       <MantineProvider>
-        <LocalApp download={download} {...props} />
+        <LocalApp download={download} validator={noDefinitions} {...props} />
       </MantineProvider>
     </I18nextProvider>,
   );
