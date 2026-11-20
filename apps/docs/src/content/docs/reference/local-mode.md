@@ -51,6 +51,8 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 | Transform, Values / code | The transform, and a summary: the value map, the unit, the code system or the target role |
 | Status                   | The review status                                                                         |
 
+**Groups.** The switch above the grid groups the rows **by section** of the source table (the columns' sections, in their order) or **by role** (the role each row writes to). Rows with no section or no role come last, under "No section" or "No role"; a table without sections is one list when grouped by section. A group's header shows how many rows it holds; Enter or a click on it closes and opens it.
+
 The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the path picker and the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
 
 ## Checks while you map

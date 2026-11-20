@@ -34,7 +34,7 @@
     "tables": "Tables",
     "rowCount_one": "{{count}} row",
     "rowCount_other": "{{count}} rows",
-    "keys": "Arrows or Tab to move, Enter to edit, Esc to cancel. Role and Element are edited here; a new row is saved once it has both.",
+    "keys": "Arrows or Tab to move, Enter to edit (on a group: open or close it), Esc to cancel. Role and Element are edited here; a new row is saved once it has both.",
     "noColumn": "(no column)",
     "roleMissing": "role missing",
     "conflict": "This object was changed elsewhere: the grid now shows the current project. Make your change again.",
@@ -85,7 +85,12 @@
       "approved": "Approved",
       "notMappable": "Not mappable",
       "excluded": "Excluded"
-    }
+    },
+    "grouping": "Group rows",
+    "bySection": "By section",
+    "byRole": "By role",
+    "noSection": "No section",
+    "noRole": "No role"
   },
   "roles": {
     "title": "Roles",

@@ -42,10 +42,15 @@ const load = (document: unknown): ProjectFile => {
   return copy;
 };
 
-/** The grid over a real LocalFileStore (download mode), as LocalApp wires it. */
-async function renderGrid(document: unknown) {
+/**
+ * The grid over a real LocalFileStore (download mode), as LocalApp wires it. `grouped: false`
+ * removes the tables' sections, so the grid is one flat list (the D1 tests); D2 keeps them.
+ */
+async function renderGrid(document: unknown, { grouped = false } = {}) {
+  const project = load(document);
+  if (!grouped) for (const source of project.sources) delete source.sections;
   const store = new LocalFileStore(
-    blobAccess({ name: "p.json", text: () => Promise.resolve(JSON.stringify(load(document))) }),
+    blobAccess({ name: "p.json", text: () => Promise.resolve(JSON.stringify(project)) }),
   );
   const loaded = await store.load();
   let latest: Loaded = loaded;
@@ -205,5 +210,45 @@ describe("MappingGrid", () => {
     const indexes = bodyRows(grid).map((r) => Number(r.getAttribute("aria-rowindex")));
     expect(indexes).toContain(total + 1);
     expect(indexes).not.toContain(2);
+  });
+
+  it("groups by section (D2): headers with counts, Enter closes and opens a group", async () => {
+    const user = userEvent.setup();
+    const { grid } = await renderGrid(metastraProject, { grouped: true });
+    const groupLines = () =>
+      within(grid)
+        .getAllByRole("row")
+        .filter((r) => r.hasAttribute("aria-expanded"));
+    const first = must(groupLines()[0]);
+    expect(first.getAttribute("aria-expanded")).toBe("true");
+    expect(first.textContent).toMatch(/^▾ Demographic data\d+ rows?$/);
+    grid.focus();
+    await user.keyboard("{Enter}");
+    expect(must(groupLines()[0]).getAttribute("aria-expanded")).toBe("false");
+    // The next line is now the next group's header.
+    expect(must(bodyRows(grid)[1]).hasAttribute("aria-expanded")).toBe(true);
+    await user.keyboard("{Enter}");
+    expect(must(groupLines()[0]).getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("groups by role with the toggle, and edits rows inside a group", async () => {
+    const user = userEvent.setup();
+    const { grid, latest } = await renderGrid(metastraProject, { grouped: true });
+    await user.click(screen.getByText("By role"));
+    const header = must(bodyRows(grid)[0]);
+    const role = must(load(metastraProject).instances[0]);
+    expect(header.textContent).toContain(`${role.resourceType}[${String(role.index)}]`);
+    grid.focus();
+    await user.keyboard("{ArrowDown}{ArrowRight}{ArrowRight}{ArrowRight}{Enter}");
+    const input = within(grid).getByRole("textbox", { name: "Element" });
+    const before = input.getAttribute("value") ?? "";
+    await user.clear(input);
+    await user.type(input, "note.text{Enter}");
+    await waitFor(() => {
+      expect(
+        latest().project.mappings.some((m) => m.instanceId === role.id && m.path === "note.text"),
+      ).toBe(true);
+    });
+    expect(before).not.toBe("note.text");
   });
 });
