@@ -167,67 +167,67 @@ importers:
   .:
     devDependencies:
       '@changesets/cli':
-        specifier: ^3.0.3
+        specifier: 3.0.3
         version: 3.0.3
       '@commitlint/cli':
-        specifier: ^21.2.4
+        specifier: 21.2.4
         version: 21.2.4(conventional-commits-parser@7.1.4)(typescript@6.0.3)
       '@commitlint/config-conventional':
-        specifier: ^21.2.4
+        specifier: 21.2.4
         version: 21.2.4
       '@eslint/js':
-        specifier: ^10.0.1
+        specifier: 10.0.1
         version: 10.0.1(eslint@10.14.0(jiti@2.7.0)(supports-color@7.2.0))
       '@types/node':
-        specifier: ^22.20.5
+        specifier: 22.20.5
         version: 22.20.5
       '@vitest/coverage-v8':
-        specifier: ^5.1.0
+        specifier: 5.1.0
         version: 5.1.0(vitest@5.1.0)
       antlr-ng:
         specifier: 1.0.10
         version: 1.0.10
       dependency-cruiser:
-        specifier: ^18.7.2
+        specifier: 18.7.2
         version: 18.7.2
       eslint:
-        specifier: ^10.14.0
+        specifier: 10.14.0
         version: 10.14.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier:
-        specifier: ^10.1.8
+        specifier: 10.1.8
         version: 10.1.8(eslint@10.14.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-react-hooks:
-        specifier: ^7.1.1
+        specifier: 7.1.1
         version: 7.1.1(eslint@10.14.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
       globals:
-        specifier: ^17.14.0
+        specifier: 17.14.0
         version: 17.14.0
       json-schema-to-typescript:
-        specifier: ^16.0.0
+        specifier: 16.0.0
         version: 16.0.0
       lefthook:
-        specifier: ^2.2.2
+        specifier: 2.2.2
         version: 2.2.2
       prettier:
-        specifier: ^3.9.10
+        specifier: 3.9.10
         version: 3.9.10
       typescript:
-        specifier: ~6.0.3
+        specifier: 6.0.3
         version: 6.0.3
       typescript-eslint:
-        specifier: ^8.72.1
+        specifier: 8.72.1
         version: 8.72.1(eslint@10.14.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vitest:
-        specifier: ^5.1.0
+        specifier: 5.1.0
         version: 5.1.0(@types/node@22.20.5)(@vitest/coverage-v8@5.1.0)(jsdom@31.0.0(@noble/hashes@2.4.0))(vite@8.3.7(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1))
       yaml:
-        specifier: ^2.9.1
+        specifier: 2.9.1
         version: 2.9.1
 
   apps/api:
     dependencies:
       fastify:
-        specifier: ^5.12.8
+        specifier: 5.12.8
         version: 5.12.8
 
   apps/cli:
@@ -252,78 +252,78 @@ importers:
   apps/docs:
     dependencies:
       '@astrojs/starlight':
-        specifier: ^0.42.10
+        specifier: 0.42.10
         version: 0.42.10(astro@7.4.8(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1))(supports-color@7.2.0)(typescript@6.0.3)
       astro:
-        specifier: ^7.4.8
+        specifier: 7.4.8
         version: 7.4.8(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1)
       sharp:
-        specifier: ^0.35.5
+        specifier: 0.35.5
         version: 0.35.5(@types/node@22.20.5)
     devDependencies:
       '@astrojs/check':
-        specifier: ^0.9.12
+        specifier: 0.9.12
         version: 0.9.12(prettier@3.9.10)(typescript@6.0.3)
       starlight-links-validator:
-        specifier: ^0.27.0
+        specifier: 0.27.0
         version: 0.27.0(@astrojs/starlight@0.42.10(astro@7.4.8(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1))(supports-color@7.2.0)(typescript@6.0.3))(astro@7.4.8(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1))(supports-color@7.2.0)
       typescript:
-        specifier: ~6.0.3
+        specifier: 6.0.3
         version: 6.0.3
 
   apps/web:
     dependencies:
       '@mantine/core':
-        specifier: ^9.8.0
+        specifier: 9.8.0
         version: 9.8.0(@mantine/hooks@9.8.0(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mantine/hooks':
-        specifier: ^9.8.0
+        specifier: 9.8.0
         version: 9.8.0(react@19.3.1)
       i18next:
-        specifier: ^27.0.1
+        specifier: 27.0.1
         version: 27.0.1(typescript@6.0.3)
       oidc-client-ts:
-        specifier: ^3.5.0
+        specifier: 3.5.0
         version: 3.5.0
       react:
-        specifier: ^19.3.1
+        specifier: 19.3.1
         version: 19.3.1
       react-dom:
-        specifier: ^19.3.1
+        specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
       react-i18next:
-        specifier: ^18.0.1
+        specifier: 18.0.1
         version: 18.0.1(@types/react@19.3.0)(i18next@27.0.1(typescript@6.0.3))(react@19.3.1)(typescript@6.0.3)
     devDependencies:
       '@testing-library/dom':
-        specifier: ^10.4.2
+        specifier: 10.4.2
         version: 10.4.2
       '@testing-library/react':
-        specifier: ^16.3.3
+        specifier: 16.3.3
         version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@testing-library/user-event':
-        specifier: ^14.6.8
+        specifier: 14.6.8
         version: 14.6.8(@testing-library/dom@10.4.2)
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 19.3.0
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19.3.0
+        specifier: 19.3.0
         version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
-        specifier: ^6.3.0
+        specifier: 6.3.0
         version: 6.3.0(vite@8.3.7(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1))
       jsdom:
-        specifier: ^31.0.0
+        specifier: 31.0.0
         version: 31.0.0(@noble/hashes@2.4.0)
       postcss:
-        specifier: ^8.5.32
+        specifier: 8.5.32
         version: 8.5.32
       postcss-preset-mantine:
-        specifier: ^1.18.0
+        specifier: 1.18.0
         version: 1.18.0(postcss@8.5.32)
       vite:
-        specifier: ^8.3.7
+        specifier: 8.3.7
         version: 8.3.7(@types/node@22.20.5)(jiti@2.7.0)(sugarss@5.0.2(postcss@8.5.32))(yaml@2.9.1)
 
   packages/export:
@@ -365,10 +365,10 @@ importers:
   packages/model:
     dependencies:
       ajv:
-        specifier: ^8.20.0
+        specifier: 8.20.0
         version: 8.20.0
       ajv-formats:
-        specifier: ^3.0.1
+        specifier: 3.0.1
         version: 3.0.1(ajv@8.20.0)
 
   packages/normalizer:
