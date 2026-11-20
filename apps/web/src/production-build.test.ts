@@ -2,7 +2,7 @@
 // The production build of the web app (the Docker image) does not contain the local mode
 // (ADR-0021): the local mode has no login and runs only in the Vite dev server, bound to localhost.
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -39,6 +39,11 @@ describe("web production build", () => {
 
   it("is built", () => {
     expect(bundle.length).toBeGreaterThan(0);
+  });
+
+  it("does not contain the FHIR definition index of the local mode", () => {
+    expect(existsSync(join(outDir, "fhir-index"))).toBe(false);
+    expect(bundle).not.toContain("/fhir-index/");
   });
 
   it.each(LOCAL_MODE_CODE)("does not contain the local mode (%s)", (marker) => {

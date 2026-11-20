@@ -58,6 +58,7 @@ const COMMAND_OPTIONS = {
   validate: ["format", "no-fhir", "offline", "fhir-cache"],
   export: ["format", "out", "package-version", "created-at", "no-fhir", "offline", "fhir-cache"],
   "mapping-table": ["format", "delimiter", "out", "created-at"],
+  "fhir-index": ["out", "offline", "fhir-cache"],
   init: [
     "out",
     "name",
@@ -85,6 +86,8 @@ Commands:
   mapping-table <project.json>
                             Write the mapping table for documentation and review (sheets
                             Mapping, Value maps, Roles, Columns)
+  fhir-index <project.json> Write the compact FHIR definition index of the project's FHIR version
+                            and packages into a folder (--out), for the web app's local mode
   init <data.csv>           Write an empty project from a data file's header: one table, every
                             column string, no roles and no rows (needs --fhir-version and
                             --canonical-base)
@@ -108,6 +111,8 @@ Options:
                             a path not ending in .zip is a folder
   --out <file.xlsx|folder>  mapping-table: where to write it (default: <name>-mapping-table.xlsx,
                             or the folder <name>-mapping-table for csv)
+  --out <folder>            fhir-index: the folder to write the index into (required; for the
+                            local mode: apps/web/.fhir-index)
   --out <project.json>      init: where to write the project (default: <table>.project.json);
                             an existing file is never overwritten
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
@@ -115,8 +120,8 @@ Options:
                             time zone (default: now)
   --no-fhir                 validate, export: skip the FHIR checks (paths and types against the
                             FHIR definitions)
-  --offline                 validate, export: use only the FHIR package cache, never download
-  --fhir-cache <folder>     validate, export: the FHIR package cache (default: ~/.fhir/packages)
+  --offline                 validate, export, fhir-index: use only the FHIR package cache, never download
+  --fhir-cache <folder>     validate, export, fhir-index: the FHIR package cache (default: ~/.fhir/packages)
   -h, --help                Show this help
 
 Exit codes: 0 done, 1 the project has errors (nothing is written), 2 the command could not run.
@@ -504,6 +509,44 @@ async function init(path: string, values: Values, io: CliIo): Promise<ExitCode> 
   return ExitCode.OK;
 }
 
+/** A path inside the index (`types/Patient.json`): relative, without `..`, a JSON file. */
+const INDEX_PATH = /^(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._#-]+(?:\/[A-Za-z0-9._#-]+)*\.json$/;
+
+/** `cindermed fhir-index`: the compact definition index of a project's FHIR version and packages. */
+async function fhirIndex(path: string, out: string, fhir: FhirFlags, io: CliIo): Promise<ExitCode> {
+  const text = await readProject(path, io);
+  if (text === undefined) return ExitCode.USAGE;
+  const parsed = parseProject(text);
+  if (parsed.project === undefined) {
+    const lines = [`${path}: no index written, ${plural(parsed.results.length, "error")}`];
+    lines.push(...parsed.results.map(describeResult));
+    io.stdout(`${lines.join("\n")}\n`);
+    return ExitCode.INVALID;
+  }
+  const load = await definitionsFor(path, parsed.project, fhir, io);
+  if (load?.loaded === undefined) return ExitCode.USAGE;
+  const { index } = load.loaded;
+  const files: [string, string][] = [["index.json", index.manifestText], ...index.files];
+  const unsafe = files.find(([file]) => !INDEX_PATH.test(file));
+  if (unsafe !== undefined) {
+    io.stderr(`cindermed: the index has a file name that cannot be written safely: ${unsafe[0]}\n`);
+    return ExitCode.USAGE;
+  }
+  const folder = out.replace(/\/+$/, "");
+  const encoder = new TextEncoder();
+  try {
+    for (const [file, content] of files)
+      await io.writeFile(`${folder}/${file}`, encoder.encode(content));
+  } catch (error) {
+    io.stderr(`cindermed: cannot write ${folder} (${errorCode(error, "write error")})\n`);
+    return ExitCode.USAGE;
+  }
+  io.stdout(
+    `${path}: wrote the FHIR ${parsed.project.project.fhirVersion} definition index to ${folder} (${plural(files.length - 1, "document")}; ${load.packages.join(", ")})\n`,
+  );
+  return ExitCode.OK;
+}
+
 function usageError(message: string, io: CliIo): ExitCode {
   io.stderr(`cindermed: ${message}\n\n${USAGE}`);
   return ExitCode.USAGE;
@@ -576,6 +619,20 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
   }
 
   if (command === "init") return init(path, values, io);
+  if (command === "fhir-index") {
+    if (values.out === undefined) return usageError("fhir-index needs --out <folder>", io);
+    const cacheDir = values["fhir-cache"];
+    return fhirIndex(
+      path,
+      values.out,
+      {
+        skip: false,
+        offline: values.offline === true,
+        ...(cacheDir === undefined ? {} : { cacheDir }),
+      },
+      io,
+    );
+  }
 
   if (command === "mapping-table") {
     const format = values.format ?? "xlsx";

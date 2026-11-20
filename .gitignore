@@ -18,6 +18,8 @@ tools/gen/
 # tools downloaded or cached in CI and locally
 validator_cli.jar
 .fhir/
+# FHIR definition index served to the local mode (cindermed fhir-index, ADR-0021)
+apps/web/.fhir-index/
 
 # secrets and local settings
 .env

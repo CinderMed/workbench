@@ -20,6 +20,14 @@ pnpm --filter @cindermed/web dev
 
 Open `http://127.0.0.1:5173`. A project to start from can be written with [`cindermed init`](/workbench/reference/cli/#cindermed-init).
 
+The grid checks the project against the FHIR definitions in the browser, with the same rules as the command line. Write the definitions of the project's FHIR version and packages once (again when the project's packages change):
+
+```bash
+pnpm cindermed fhir-index my-project.json --out apps/web/.fhir-index
+```
+
+The development server serves that folder under `/fhir-index/`, only on `127.0.0.1`. The folder is not in git and not in the production build.
+
 ## Open and save
 
 - **Open** a project file with the button, or drop it on the page. Only project files (`.json`) are opened. Data files are never opened or read here: a file with another name is refused before it is read.
