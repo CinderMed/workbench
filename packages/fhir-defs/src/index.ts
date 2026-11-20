@@ -67,3 +67,4 @@ export {
 export { MAX_VALUE_SET_CODES } from "./build-index.js";
 export { ReferenceCode, checkReferences } from "./references.js";
 export { CardinalityCode, checkCardinality, exclusive, requirements } from "./cardinality.js";
+export { SliceNameCode, checkSliceNames, usableSliceName } from "./slice-names.js";

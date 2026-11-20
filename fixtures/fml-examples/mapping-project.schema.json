@@ -905,7 +905,7 @@
         },
         "name": {
           "type": "string",
-          "pattern": "^[a-z][A-Za-z0-9-]*$",
+          "pattern": "^[A-Za-z][A-Za-z0-9-]*$",
           "examples": [
             "nrs",
             "vas"
@@ -940,7 +940,7 @@
     "ElementPath": {
       "description": "Path inside the role, without the resource type, with optional named slices. E.g. 'valueCodeableConcept', 'component[nrs].valueInteger', 'verificationStatus'. Rule: without a slice, all rows that touch a repeating element write into the SAME repetition (the first); several repetitions need a named slice.",
       "type": "string",
-      "pattern": "^[a-z][A-Za-z0-9]*(\\[[a-z][A-Za-z0-9-]*\\])?(\\.[a-z][A-Za-z0-9]*(\\[[a-z][A-Za-z0-9-]*\\])?)*$"
+      "pattern": "^[a-z][A-Za-z0-9]*(\\[[A-Za-z][A-Za-z0-9-]*\\])?(\\.[a-z][A-Za-z0-9]*(\\[[A-Za-z][A-Za-z0-9-]*\\])?)*$"
     },
     "Coding": {
       "type": "object",

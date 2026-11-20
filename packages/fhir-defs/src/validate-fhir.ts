@@ -30,6 +30,7 @@ import type { FhirDefinitions, IndexFetch } from "./definitions.js";
 import { BindingCode, checkBinding, rowCodes, valueCodes } from "./binding.js";
 import { checkCardinality } from "./cardinality.js";
 import { checkReferences } from "./references.js";
+import { checkSliceNames } from "./slice-names.js";
 import { type TypeFinding, checkRowTypes, checkValueType } from "./type-compat.js";
 import {
   type PathIssueCode,
@@ -319,6 +320,8 @@ export function validateFhir(project: ProjectFile, defs: FhirDefinitions): Valid
   results.push(...checkReferences(project, defs, (instance) => roleDefinition(defs, instance)));
   // Cardinality, first version (ADR-0018).
   results.push(...checkCardinality(project, defs, (instance) => roleDefinition(defs, instance)));
+  // Profile slice names a project cannot write (#150, ADR-0020).
+  results.push(...checkSliceNames(project, defs, (instance) => roleDefinition(defs, instance)));
   return results;
 }
 

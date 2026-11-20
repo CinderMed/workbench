@@ -107,6 +107,26 @@ describe("validateProjectSchema", () => {
     );
   });
 
+  it("accepts profile slice names that start with an upper-case letter (#150, format 1.4.0)", () => {
+    const project = copy(metastraProject);
+    const row = first(list(project, "mappings"));
+    const role = list(project, "instances").find((i) => i["slices"] !== undefined);
+    if (role === undefined) throw new Error("no role with slices in metastra");
+    const slice = first(role["slices"] as Json[]);
+    row["path"] = "category[VSCat].text";
+    slice["name"] = "VSCat";
+    expect(validateProjectSchema(project)).toEqual([]);
+    for (const name of ["VS_Cat", "1st", "a/b", "a@b", "-a"]) {
+      row["path"] = `category[${name}].text`;
+      slice["name"] = name;
+      const results = validateProjectSchema(project);
+      expect(results).toContainEqual(
+        expect.objectContaining({ objectKind: "mapping", field: "path" }),
+      );
+      expect(results).toContainEqual(expect.objectContaining({ objectKind: "instance" }));
+    }
+  });
+
   it("rejects a document that is not an object", () => {
     expect(validateProjectSchema([])).toContainEqual(
       expect.objectContaining({
