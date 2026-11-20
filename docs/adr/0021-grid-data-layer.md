@@ -63,7 +63,7 @@ interface ProjectStore {
 
 ### 3. Local mode
 
-- **Localhost only.** The local mode runs only in the Vite dev server, bound to `127.0.0.1` with `strictPort`. A test fails if the configuration binds any other address. The production build (and so the Docker image) does not contain `LocalFileStore`: the store is chosen at build time, and the production build uses only `ApiStore`. There is no login in local mode, so it must never run on an address other people can reach.
+- **Localhost only.** The local mode runs only in the Vite dev server, bound to `127.0.0.1` with `strictPort`. A test fails if the configuration binds any other address. The production build (and so the Docker image) does not contain `LocalFileStore`: the store is chosen at build time, and the production build uses only `ApiStore`. There is no login in local mode, so it must never run on an address other people can reach. Vite's host check stays on: `server.allowedHosts` is never `true`, and the same test checks it.
 - **Project files only.** The web app opens project files only (`.json`, checked with `parseProject`), never data files. Data files are read only by the CLI (`cindermed init`, the normalizer), which writes no cell values into the project.
 - **No cell values in the browser.** The project is kept in memory only. Nothing is copied to `localStorage`, `sessionStorage` or IndexedDB. Closing the tab with unsaved changes asks for confirmation.
 - **Writing the file.** `LocalFileStore` rewrites the whole file after each accepted change:
@@ -77,7 +77,7 @@ The browser uses the compact definition index (ADR-0013), never whole packages. 
 
 ### 5. Validation in the browser
 
-The grid runs the same checks as the CLI (`validateProject` from `@cindermed/model`, `validateFhir` from `@cindermed/fhir-defs`) in a Web Worker after each accepted change. Results colour the cells through their `objectKind`, `id` and `field`.
+The grid runs the same checks as the CLI (`validateProject` from `@cindermed/model`, `validateFhir` from `@cindermed/fhir-defs`) in a Web Worker after each accepted change. Results colour the cells through their `objectKind`, `id` and `field`. A new change cancels a run still in progress (the worker run is aborted, or its results are dropped by their change number), so results of an older project never colour the cells.
 
 ## Consequences
 
