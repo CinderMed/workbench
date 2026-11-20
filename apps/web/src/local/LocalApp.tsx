@@ -5,6 +5,7 @@ import {
   Container,
   Group,
   List,
+  Modal,
   Paper,
   Stack,
   Tabs,
@@ -17,6 +18,8 @@ import { useTranslation } from "react-i18next";
 import { type FileAccess, blobAccess } from "../storage/file-access";
 import { MappingGrid } from "../grid/MappingGrid";
 import { RolesPanel } from "../roles/RolesPanel";
+import { FindingsList } from "../validation/FindingsList";
+import type { CellAddress } from "../grid/findings";
 import { type Validator, useValidation } from "../validation/use-validation";
 import { LocalFileStore, NotAProjectError } from "../storage/local-file-store";
 import type { Loaded } from "../storage/project-store";
@@ -261,6 +264,9 @@ function ProjectView({ project, versions, store, onLoaded, validator }: ProjectV
   const errors = validation?.results.filter((r) => r.severity === "error").length ?? 0;
   const warnings = (validation?.results.length ?? 0) - errors;
   const fhir = validation?.fhir;
+  const [tab, setTab] = useState<string | null>("grid");
+  const [listOpen, setListOpen] = useState(false);
+  const [target, setTarget] = useState<{ address: CellAddress; nonce: number } | undefined>();
   return (
     <Stack gap="sm">
       <Group gap="xs" data-testid="validation-summary">
@@ -292,10 +298,37 @@ function ProjectView({ project, versions, store, onLoaded, validator }: ProjectV
                     ? t("validation.fhirUnavailable")
                     : t("validation.fhirNotRun")}
             </Text>
+            <Button
+              size="xs"
+              variant="subtle"
+              onClick={() => {
+                setListOpen(true);
+              }}
+            >
+              {t("findings.open")}
+            </Button>
           </>
         )}
       </Group>
-      <Tabs defaultValue="grid" keepMounted={false}>
+      <Modal
+        opened={listOpen}
+        onClose={() => {
+          setListOpen(false);
+        }}
+        title={t("findings.title")}
+        size="xl"
+      >
+        <FindingsList
+          project={project}
+          results={validation?.results ?? []}
+          onChoose={(address) => {
+            setListOpen(false);
+            setTab("grid");
+            setTarget((current) => ({ address, nonce: (current?.nonce ?? 0) + 1 }));
+          }}
+        />
+      </Modal>
+      <Tabs value={tab} onChange={setTab} keepMounted={false}>
         <Tabs.List>
           <Tabs.Tab value="grid">{t("local.tabGrid")}</Tabs.Tab>
           <Tabs.Tab value="roles">
@@ -309,6 +342,7 @@ function ProjectView({ project, versions, store, onLoaded, validator }: ProjectV
             store={store}
             onLoaded={onLoaded}
             {...(validation === undefined ? {} : { findings: validation.results })}
+            {...(target === undefined ? {} : { target })}
           />
         </Tabs.Panel>
         <Tabs.Panel value="roles" pt="sm">

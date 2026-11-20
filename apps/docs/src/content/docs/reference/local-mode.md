@@ -60,7 +60,9 @@ The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter
 After every change the project is checked again, with the same rules as [`cindermed validate`](/workbench/reference/cli/#cindermed-validate): schema, integrity and quality, then the FHIR checks (paths, types, bindings, references, cardinality) when the definitions are there. The checks run in the background, and an older check never colours the cells after a newer change.
 
 - Above the grid, the number of errors and warnings, and whether the FHIR checks ran. Without definitions, it says how to write them with `cindermed fhir-index`.
-- In the grid, a cell with an error is red and a cell with a warning is yellow; the reason shows when you point at it. For example a `boolean` column copied to `Patient.name`, a HumanName, makes the Element cell red.
+- In the grid, a cell with an error is red and a cell with a warning is yellow. For example a `boolean` column copied to `Patient.name`, a HumanName, makes the Element cell red.
+- **Details bar.** Under the grid, a bar shows every finding of the selected cell: its severity, code and message. It follows the selection, with the mouse and the keyboard, and screen readers read it as the cell's description. Pointing at a cell shows the same in a tooltip.
+- **All findings.** "Show all findings" in the summary lists every finding with its code, message, row and column. Choosing one selects its cell, switching table or opening its group when needed. Findings that belong to no cell (for example a role no row uses) are listed too.
 - Errors block the export, as on the command line, but never stop you from saving.
 
 ## Roles

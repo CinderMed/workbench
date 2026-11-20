@@ -153,7 +153,9 @@ describe("MappingGrid", () => {
       .getAllByRole("gridcell")
       .find((c) => c.getAttribute("aria-invalid") === "true");
     expect(refused?.textContent).toBe("Not A Path");
-    expect(refused?.getAttribute("title")).toMatch(/pattern/);
+    // Back up to the refused cell: the details bar gives the reason.
+    await user.keyboard("{ArrowUp}");
+    expect(screen.getByTestId("cell-details").textContent).toMatch(/Not saved.*pattern/);
     expect(latest().project).toBe(before);
   });
 

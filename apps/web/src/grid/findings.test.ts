@@ -24,10 +24,7 @@ describe("cellFindings", () => {
       result({ objectKind: "mapping", id: "map_active", field: "transform.kind" }),
       result({ objectKind: "mapping", id: "map_active" }),
     ]);
-    expect(cells.get("map_name01/element")).toEqual({
-      severity: "error",
-      messages: ["not HumanName"],
-    });
+    expect(cells.get("map_name01/element")?.items.map((r) => r.message)).toEqual(["not HumanName"]);
     expect(cells.get("map_name01/role")?.severity).toBe("warning");
     expect(cells.get("map_active/transform")?.severity).toBe("error");
     expect(cells.get("map_active/code")?.severity).toBe("error");
@@ -38,9 +35,9 @@ describe("cellFindings", () => {
       result({ objectKind: "column", id: "col_flag01", severity: "warning", message: "no values" }),
       result({ objectKind: "instance", id: "ins_pat001", message: "unknown type" }),
     ]);
-    expect(cells.get("map_active/column")?.messages).toEqual(["no values"]);
-    expect(cells.get("map_name01/column")?.messages).toEqual(["no values"]);
-    expect(cells.get("map_active/role")?.messages).toEqual(["unknown type"]);
+    expect(cells.get("map_active/column")?.items.map((r) => r.message)).toEqual(["no values"]);
+    expect(cells.get("map_name01/column")?.items.map((r) => r.message)).toEqual(["no values"]);
+    expect(cells.get("map_active/role")?.items.map((r) => r.message)).toEqual(["unknown type"]);
   });
 
   it("keeps the worst severity and every message of a cell, and ignores results elsewhere", () => {
@@ -56,7 +53,9 @@ describe("cellFindings", () => {
       result({ objectKind: "mapping", id: "map_other1", field: "path" }),
       result({ objectKind: "project" }),
     ]);
-    expect(cells.get("map_name01/element")).toEqual({ severity: "error", messages: ["a", "b"] });
+    const cell = cells.get("map_name01/element");
+    expect(cell?.severity).toBe("error");
+    expect(cell?.items.map((r) => r.message)).toEqual(["b", "a"]); // Errors first.
     expect(cells.size).toBe(1);
   });
 });

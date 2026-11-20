@@ -55,7 +55,21 @@ describe("inline validation in the local mode (D7)", () => {
     expect(element?.textContent).toBe("name");
     expect(element?.getAttribute("aria-invalid")).toBe("true");
     expect(element?.getAttribute("data-severity")).toBe("error");
-    expect(element?.getAttribute("title")).toMatch(/Patient\.name \(HumanName\)/);
+    // From the keyboard: R-002 is the second row; Element is the fifth column.
+    const user = userEvent.setup();
+    grid.focus();
+    await user.keyboard("{ArrowDown}{ArrowRight}{ArrowRight}{ArrowRight}");
+    expect(element?.getAttribute("aria-selected")).toBe("true");
+    const details = screen.getByTestId("cell-details");
+    expect(element?.getAttribute("aria-describedby")).toBe(details.id);
+    expect(grid.getAttribute("aria-describedby")).toBe(details.id);
+    expect(details.textContent).toContain("R-002 · Element");
+    expect(details.textContent).toMatch(/Error\s*COMPLEX_TARGET.*Patient\.name \(HumanName\)/);
+    // Valid HTML: no block element (the badge) inside a paragraph.
+    expect(details.querySelector("p div")).toBeNull();
+    // Another cell: the bar follows the selection.
+    await user.keyboard("{ArrowUp}");
+    expect(details.textContent).toBe("R-001 · Element: no findings.");
     // The same column copied to Patient.active is fine.
     const activeRow = rows.find((r) => within(r).queryByText("R-001"));
     expect(
