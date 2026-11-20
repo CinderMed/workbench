@@ -1,4 +1,10 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "vitest.config.ts"]
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/test-setup.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
 }

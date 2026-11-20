@@ -15,6 +15,7 @@
     "vite.config.ts",
     "vite-localhost.ts",
     "vite-fhir-index.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "playwright.config.ts"
   ]
 }
