@@ -1,5 +1,31 @@
 # @cindermed/export
 
+## 0.2.0
+
+### Minor Changes
+
+- f142b7f: Type compatibility (D7, ADR-0015): `cindermed validate` checks that each row's transform produces a value of the element's type, in R4 and R5 — `TYPE_MISMATCH`, `TYPE_NEEDS_TRANSFORM` (naming the transform), `COMPLEX_TARGET` (listing the elements that fit; a boolean on `Patient.name` is one), `TYPE_PRECISION` (warning), `EXPRESSION_NOT_TYPE_CHECKED` (warning) — and that fixed values, discriminators and value actions fit their elements. `cindermed export` runs the FHIR checks too, and their errors block the export (`--offline`, `--fhir-cache`, `--no-fhir`). `exportPackage` takes optional `definitions`.
+
+### Patch Changes
+
+- 7f23a9a: Coding from a code column (project format 1.4.0, #106, ADR-0019): a new transform `{ kind: "coding", system, as: "Coding" | "CodeableConcept", displayColumnId? }` writes the column's value as the code of a fixed system, with the display from another column when it has a value, as one FML rule with a typed `create` (so choice elements work). Type checks (string, categorical or integer column; `as` must be the element's type), binding checks on the column's allowed values, integrity checks on the display column, and the mapping table describe it.
+- 33c11dd: Cells the generator and the HL7 engine cannot write yet are reported instead of exported (#156, ADR-0015 addendum): on a choice element, a value of another type than the chosen one (casts to string, a date into `…DateTime`, a dateTime constant); a quantity into Age, Duration, Distance or Count; a Quantity constant; a reference into a choice element (`TYPE_MISMATCH`). The export also blocks paths whose choice names the generator would write wrongly (`PATH_UNSUPPORTED`).
+- Updated dependencies [7f23a9a]
+- Updated dependencies [40357b2]
+- Updated dependencies [3ddd95c]
+- Updated dependencies [db6c645]
+- Updated dependencies [f142b7f]
+- Updated dependencies [568b998]
+- Updated dependencies [fb72156]
+- Updated dependencies [66425f3]
+- Updated dependencies [e7b00e9]
+- Updated dependencies [87fe1bd]
+- Updated dependencies [911e043]
+- Updated dependencies [33c11dd]
+  - @cindermed/model@0.4.0
+  - @cindermed/fml@0.2.0
+  - @cindermed/fhir-defs@0.1.0
+
 ## 0.1.0
 
 ### Minor Changes
