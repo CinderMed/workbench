@@ -4,7 +4,7 @@
   "project": {
     "id": "prj_type_combinations",
     "name": "Type combinations",
-    "description": "Golden case: every type combination the compatibility table allows that the other examples do not cover, on one synthetic row (#153).",
+    "description": "Golden case: every type combination the compatibility table allows that the other examples do not cover, on one synthetic row (#153), and the coding transform (#106).",
     "fhirVersion": "4.0.1",
     "packages": [],
     "canonicalBase": "http://example.org/fhir/type-combinations",
@@ -179,6 +179,32 @@
           "name": "note",
           "label": "note",
           "dataType": "string"
+        },
+        {
+          "id": "col_finding",
+          "name": "finding_code",
+          "label": "finding_code",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_finding_label",
+          "name": "finding_label",
+          "label": "finding_label",
+          "dataType": "string"
+        },
+        {
+          "id": "col_enc_class",
+          "name": "encounter_class",
+          "label": "encounter_class",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "AMB"
+            },
+            {
+              "code": "IMP"
+            }
+          ]
         }
       ]
     }
@@ -529,20 +555,6 @@
           "value": {
             "type": "code",
             "value": "finished"
-          }
-        },
-        {
-          "path": "class",
-          "value": {
-            "type": "Coding",
-            "coding": {
-              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-              "code": "AMB",
-              "display": "ambulatory",
-              "verification": {
-                "status": "manual"
-              }
-            }
           }
         }
       ]
@@ -1044,6 +1056,31 @@
         "targetInstanceId": "ins_pat",
         "auto": true
       }
+    },
+    {
+      "id": "map_0037",
+      "code": "R-037",
+      "instanceId": "ins_obs-weight",
+      "path": "valueCodeableConcept",
+      "transform": {
+        "kind": "coding",
+        "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-findings",
+        "as": "CodeableConcept",
+        "displayColumnId": "col_finding_label"
+      },
+      "columnId": "col_finding"
+    },
+    {
+      "id": "map_0038",
+      "code": "R-038",
+      "instanceId": "ins_enc",
+      "path": "class",
+      "transform": {
+        "kind": "coding",
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "as": "Coding"
+      },
+      "columnId": "col_enc_class"
     }
   ],
   "valueMaps": []

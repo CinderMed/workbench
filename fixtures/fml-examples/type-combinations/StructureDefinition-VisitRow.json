@@ -441,6 +441,60 @@
         ]
       },
       {
+        "id": "VisitRow.finding_code",
+        "path": "VisitRow.finding_code",
+        "short": "finding_code",
+        "definition": "finding_code",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.finding_code",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.finding_label",
+        "path": "VisitRow.finding_label",
+        "short": "finding_label",
+        "definition": "finding_label",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.finding_label",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.encounter_class",
+        "path": "VisitRow.encounter_class",
+        "short": "encounter_class",
+        "definition": "encounter_class",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.encounter_class",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
         "id": "VisitRow.id_Patient0",
         "path": "VisitRow.id_Patient0",
         "short": "Computed id of Patient[0]",
@@ -1023,6 +1077,60 @@
         "max": "1",
         "base": {
           "path": "VisitRow.note",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.finding_code",
+        "path": "VisitRow.finding_code",
+        "short": "finding_code",
+        "definition": "finding_code",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.finding_code",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.finding_label",
+        "path": "VisitRow.finding_label",
+        "short": "finding_label",
+        "definition": "finding_label",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.finding_label",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.encounter_class",
+        "path": "VisitRow.encounter_class",
+        "short": "encounter_class",
+        "definition": "encounter_class",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.encounter_class",
           "min": 0,
           "max": "1"
         },

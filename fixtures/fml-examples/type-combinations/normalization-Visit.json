@@ -135,6 +135,25 @@
       "name": "note",
       "sourceName": "note",
       "type": "string"
+    },
+    {
+      "name": "finding_code",
+      "sourceName": "finding_code",
+      "type": "integer"
+    },
+    {
+      "name": "finding_label",
+      "sourceName": "finding_label",
+      "type": "string"
+    },
+    {
+      "name": "encounter_class",
+      "sourceName": "encounter_class",
+      "type": "string",
+      "allowedValues": [
+        "AMB",
+        "IMP"
+      ]
     }
   ],
   "ids": [

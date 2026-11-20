@@ -21,7 +21,8 @@ verification prototypes, not the final generator, which will be written in TypeS
   be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
 - `type-combinations/` — 1 table (Visit), 9 roles, one synthetic row: every combination of the type-compatibility table
   that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
-  casts; Quantity, Duration and SimpleQuantity; constants of each type), checked value by value by
+  casts; Quantity, Duration and SimpleQuantity; Coding and CodeableConcept from a code column, #106; constants of
+  each type), checked value by value by
   `tests/type-combinations.py` (#153). Written with `tooling/golden/write-fixture.mjs` from `project.json`
   - `project.json` — project file
   - `*.map` — StructureMaps in FML (written by applying the generator rules)

@@ -1,2 +1,2 @@
-patient_id,id_system,language,record_version,photo_url,profile_url,photo_size,weight_kg,height_cm,ref_low,ref_high,ratio,count,smoker,visit_date,visit_at,obs_status,obs_label,onset_age,supply_days,dose_number,vaccinated_on,note
-P-100,urn:example:patients,it,1,https://cindermed.org/photo.png,http://hl7.org/fhir/StructureDefinition/Patient,1024,72,180,50.5,90,0.75,42,true,2023-05-04,2023-05-04,final,weight,47,30.5,2,2023-04-01,free text
+patient_id,id_system,language,record_version,photo_url,profile_url,photo_size,weight_kg,height_cm,ref_low,ref_high,ratio,count,smoker,visit_date,visit_at,obs_status,obs_label,onset_age,supply_days,dose_number,vaccinated_on,note,finding_code,finding_label,encounter_class
+P-100,urn:example:patients,it,1,https://cindermed.org/photo.png,http://hl7.org/fhir/StructureDefinition/Patient,1024,72,180,50.5,90,0.75,42,true,2023-05-04,2023-05-04,final,weight,47,30.5,2,2023-04-01,free text,123,Elevated weight,AMB
