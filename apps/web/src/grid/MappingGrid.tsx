@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
 import { cellFindings } from "./findings";
+import { type Grouping, type Line, gridLines } from "./groups";
 import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
 
 export const ROW_HEIGHT = 40;
@@ -45,7 +46,7 @@ const isEditable = (col: number) => {
 };
 
 const features = tableFeatures({});
-const helper = createColumnHelper<typeof features, GridRow>();
+const helper = createColumnHelper<typeof features, Line>();
 const tableColumns = helper.columns(COLUMNS.map((c) => helper.display({ id: c.id, header: c.id })));
 
 /** A row being created: a column with no mapping row yet, and what has been chosen so far. */
@@ -81,8 +82,29 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
   const source = project.sources.find((s) => s.id === sourceId) ?? project.sources[0];
   const rows = useMemo(() => gridRows(project, source), [project, source]);
   const cells = useMemo(() => cellFindings(rows, findings ?? []), [rows, findings]);
-  const table = useTable({ features, columns: tableColumns, data: rows, getRowId: (r) => r.key });
+  const [grouping, setGrouping] = useState<Grouping>("section");
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const lines = useMemo(
+    () => gridLines(project, source, rows, grouping, collapsed),
+    [project, source, rows, grouping, collapsed],
+  );
+  const table = useTable({ features, columns: tableColumns, data: lines, getRowId: (l) => l.key });
   const model = table.getRowModel().rows;
+  /** The grid row on a line, or undefined on a group header. */
+  const rowAt = useCallback(
+    (index: number): GridRow | undefined => {
+      const line = model[index]?.original;
+      return line?.kind === "row" ? line.row : undefined;
+    },
+    [model],
+  );
+  const toggleGroup = (key: string) => {
+    setCollapsed((current) => {
+      const next = new Set(current);
+      if (!next.delete(key)) next.add(key);
+      return next;
+    });
+  };
 
   const [active, setActive] = useState({ row: 0, col: 1 });
   const [editing, setEditingState] = useState<Editing | undefined>();
@@ -152,7 +174,7 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
 
   const commit = useCallback(
     async (rowIndex: number, col: number, value: string) => {
-      const row = model[rowIndex]?.original;
+      const row = rowAt(rowIndex);
       const column = COLUMNS[col]?.id;
       if (row === undefined || (column !== "role" && column !== "element")) return;
       const key = cellKey(row, column);
@@ -195,12 +217,12 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
       )
         setDrafts((m) => withoutKey(m, columnId));
     },
-    [drafts, model, project, report, store, versions],
+    [drafts, project, report, rowAt, store, versions],
   );
 
   const startEditing = useCallback(
     (rowIndex: number, col: number) => {
-      const row = model[rowIndex]?.original;
+      const row = rowAt(rowIndex);
       if (row === undefined || !isEditable(col)) return;
       const column = COLUMNS[col]?.id;
       const draft = row.column === undefined ? undefined : drafts.get(row.column.id);
@@ -212,7 +234,7 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
           : (row.mapping?.path ?? draft?.path ?? ""));
       setEditing({ row: rowIndex, col, value });
     },
-    [drafts, model, refused, setEditing],
+    [drafts, refused, rowAt, setEditing],
   );
 
   const stopEditing = useCallback(
@@ -255,7 +277,9 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
         else move(col < last ? row : row + 1, col < last ? col + 1 : 0);
       },
       Enter: () => {
-        startEditing(row, col);
+        const line = model[row]?.original;
+        if (line?.kind === "group") toggleGroup(line.key);
+        else startEditing(row, col);
       },
       F2: () => {
         startEditing(row, col);
@@ -383,7 +407,23 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
         ) : (
           <Text fw={500}>{source.name}</Text>
         )}
-        <Badge variant="light">{t("grid.rowCount", { count: rows.length })}</Badge>
+        <Group gap="xs">
+          <SegmentedControl
+            aria-label={t("grid.grouping")}
+            size="xs"
+            value={grouping}
+            onChange={(value) => {
+              setGrouping(value === "role" ? "role" : "section");
+              setActive({ row: 0, col: 1 });
+              setEditing(undefined);
+            }}
+            data={[
+              { value: "section", label: t("grid.bySection") },
+              { value: "role", label: t("grid.byRole") },
+            ]}
+          />
+          <Badge variant="light">{t("grid.rowCount", { count: rows.length })}</Badge>
+        </Group>
       </Group>
       {notice !== undefined && (
         <Alert
@@ -401,7 +441,7 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
         ref={gridRef}
         role="grid"
         aria-label={t("grid.label", { table: source.name })}
-        aria-rowcount={rows.length + 1}
+        aria-rowcount={lines.length + 1}
         aria-colcount={COLUMNS.length}
         tabIndex={0}
         onKeyDown={onGridKey}
@@ -424,6 +464,53 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
             {items.map((item) => {
               const row = model[item.index];
               if (row === undefined) return null;
+              const line = row.original;
+              if (line.kind === "group") {
+                const isActive = active.row === item.index;
+                return (
+                  <div
+                    key={row.id}
+                    role="row"
+                    aria-rowindex={item.index + 2}
+                    aria-expanded={!line.collapsed}
+                    data-index={item.index}
+                    style={{
+                      ...groupStyle,
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${String(item.start)}px)`,
+                    }}
+                  >
+                    <div
+                      role="gridcell"
+                      aria-colindex={1}
+                      aria-colspan={COLUMNS.length}
+                      aria-selected={isActive}
+                      onClick={() => {
+                        setActive({ row: item.index, col: active.col });
+                        toggleGroup(line.key);
+                        gridRef.current?.focus();
+                      }}
+                      style={{
+                        ...cellStyle(isActive, undefined),
+                        gridColumn: "1 / -1",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {line.collapsed ? "▸ " : "▾ "}
+                      {line.label ??
+                        (grouping === "section" ? t("grid.noSection") : t("grid.noRole"))}
+                      <Text span c="dimmed" ml={8} size="sm">
+                        {t("grid.rowCount", { count: line.count })}
+                      </Text>
+                    </div>
+                  </div>
+                );
+              }
+              const gridRow = line.row;
               return (
                 <div
                   key={row.id}
@@ -441,8 +528,8 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
                 >
                   {COLUMNS.map((column, col) => {
                     const isActive = active.row === item.index && active.col === col;
-                    const kept = refused.get(cellKey(row.original, column.id));
-                    const found = cells.get(cellKey(row.original, column.id));
+                    const kept = refused.get(cellKey(gridRow, column.id));
+                    const found = cells.get(cellKey(gridRow, column.id));
                     return (
                       <div
                         key={column.id}
@@ -471,8 +558,8 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
                         style={cellStyle(isActive, kept === undefined ? found?.severity : "error")}
                       >
                         {editing?.row === item.index && editing.col === col
-                          ? editor(row.original, column.id, editing.value)
-                          : display(row.original, column.id)}
+                          ? editor(gridRow, column.id, editing.value)
+                          : display(gridRow, column.id)}
                       </div>
                     );
                   })}
@@ -520,6 +607,14 @@ function rowStyle(header: boolean) {
     ...(header ? { fontWeight: 600, background: "var(--mantine-color-default-hover)" } : {}),
   } as const;
 }
+
+const groupStyle = {
+  display: "grid",
+  gridTemplateColumns: TEMPLATE,
+  height: ROW_HEIGHT,
+  borderBottom: "1px solid var(--mantine-color-default-border)",
+  background: "var(--mantine-color-default-hover)",
+} as const;
 
 function cellStyle(active: boolean, severity: Severity | undefined) {
   return {

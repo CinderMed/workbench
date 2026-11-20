@@ -19,6 +19,9 @@ export default defineConfig({
           environment: "jsdom",
           include: ["apps/web/src/**/*.test.{ts,tsx}"],
           setupFiles: ["apps/web/src/test-setup.ts"],
+          // UI tests type through user-event, key by key: under the whole parallel suite they can
+          // pass 5 s without being stuck.
+          testTimeout: 20_000,
         },
       },
       { test: { name: "tooling", include: ["tooling/**/*.test.ts"] } },
