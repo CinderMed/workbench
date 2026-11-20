@@ -137,5 +137,38 @@
     "fhirUnavailable": "FHIR checks not run: write the definitions with cindermed fhir-index <project> --out apps/web/.fhir-index.",
     "fhirNotRun": "FHIR checks not run: the project does not match the schema.",
     "failed": "The check failed: {{message}}. It runs again after your next change."
+  },
+  "details": {
+    "noCell": "Select a cell to see its findings.",
+    "none": "{{cell}}: no findings.",
+    "notSaved": "Not saved",
+    "error": "Error",
+    "warning": "Warning"
+  },
+  "findings": {
+    "title": "All findings",
+    "open": "Show all findings",
+    "none": "No findings: the project passes every check.",
+    "goTo": "Go to the cell of {{finding}}",
+    "column": {
+      "severity": "Severity",
+      "code": "Code",
+      "message": "Message",
+      "row": "Row",
+      "where": "Where"
+    },
+    "object": {
+      "project": "project settings",
+      "source": "table",
+      "section": "section",
+      "column": "column",
+      "sourceRelation": "table relation",
+      "instance": "role (no row uses it)",
+      "mapping": "row",
+      "valueMap": "value map",
+      "valueMapEntry": "value map entry",
+      "template": "template",
+      "normalization": "normalization"
+    }
   }
 }

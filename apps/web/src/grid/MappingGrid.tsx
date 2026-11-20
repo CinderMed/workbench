@@ -1,4 +1,4 @@
-import { Alert, Badge, Group, SegmentedControl, Text } from "@mantine/core";
+import { Alert, Badge, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
 import {
   type Instance,
   type MappingRow,
@@ -15,13 +15,14 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
-import { cellFindings } from "./findings";
+import { type CellAddress, type CellFinding, cellFindings } from "./findings";
 import { type Grouping, type Line, gridLines } from "./groups";
 import { type GridRow, gridRows, roleName, valuesSummary } from "./rows";
 
@@ -69,6 +70,8 @@ export interface MappingGridProps {
   readonly onLoaded: (loaded: Loaded) => void;
   /** Validation results of the current project (D7 inline): their cells are coloured. */
   readonly findings?: readonly ValidationResult[];
+  /** A cell to select (from the list of findings); a new `nonce` selects it again. */
+  readonly target?: { readonly address: CellAddress; readonly nonce: number };
 }
 
 /**
@@ -76,7 +79,15 @@ export interface MappingGridProps {
  * rows; Role and Element are edited from the keyboard. Rows are virtualized, so only the visible
  * lines are in the page.
  */
-export function MappingGrid({ project, versions, store, onLoaded, findings }: MappingGridProps) {
+export function MappingGrid({
+  project,
+  versions,
+  store,
+  onLoaded,
+  findings,
+  target,
+}: MappingGridProps) {
+  const detailsId = useId();
   const { t } = useTranslation();
   const [sourceId, setSourceId] = useState(project.sources[0].id);
   const source = project.sources.find((s) => s.id === sourceId) ?? project.sources[0];
@@ -150,6 +161,38 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
     },
     [lastRow, virtualizer],
   );
+
+  // Select a cell asked from outside: its table, its group opened, then the cell itself.
+  const [pending, setPending] = useState<CellAddress | undefined>();
+  useEffect(() => {
+    if (target === undefined) return;
+    setSourceId(target.address.sourceId);
+    setPending(target.address);
+  }, [target]);
+  useEffect(() => {
+    if (pending?.sourceId !== source.id) return;
+    const all = gridLines(project, source, rows, grouping, new Set());
+    const at = all.findIndex((l) => l.kind === "row" && l.key === pending.rowKey);
+    const header = all
+      .slice(0, Math.max(at, 0))
+      .reverse()
+      .find((l) => l.kind === "group");
+    if (header !== undefined && collapsed.has(header.key)) {
+      setCollapsed((current) => {
+        const next = new Set(current);
+        next.delete(header.key);
+        return next;
+      });
+      return; // Selected once the group is open.
+    }
+    const index = lines.findIndex((l) => l.kind === "row" && l.key === pending.rowKey);
+    setPending(undefined);
+    if (index < 0) return;
+    setEditing(undefined);
+    const col = COLUMNS.findIndex((c) => c.id === pending.column);
+    move(index, col < 0 ? 0 : col);
+    gridRef.current?.focus();
+  }, [pending, source, project, rows, grouping, collapsed, lines, move, setEditing]);
 
   const roles = project.instances;
   const cellKey = (row: GridRow, col: ColumnId) => `${row.key}/${col}`;
@@ -390,6 +433,16 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
   };
 
   const items = virtualizer.getVirtualItems();
+  const activeRow = rowAt(active.row);
+  const activeColumn = COLUMNS[active.col]?.id;
+  const activeKey =
+    activeRow === undefined || activeColumn === undefined
+      ? undefined
+      : cellKey(activeRow, activeColumn);
+  const activeCell =
+    activeRow === undefined || activeColumn === undefined
+      ? undefined
+      : `${activeRow.mapping?.code ?? activeRow.column?.name ?? ""} · ${t(`grid.column.${activeColumn}`)}`;
   return (
     <div>
       <Group justify="space-between" mb="xs">
@@ -440,6 +493,7 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
       <div
         ref={gridRef}
         role="grid"
+        aria-describedby={detailsId}
         aria-label={t("grid.label", { table: source.name })}
         aria-rowcount={lines.length + 1}
         aria-colcount={COLUMNS.length}
@@ -540,7 +594,7 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
                           kept !== undefined || found?.severity === "error" ? true : undefined
                         }
                         data-severity={kept === undefined ? found?.severity : "error"}
-                        title={kept?.message ?? found?.messages.join("\n")}
+                        aria-describedby={isActive ? detailsId : undefined}
                         onClick={() => {
                           // A click inside the open editor stays there (it would blur and save it).
                           if (
@@ -557,9 +611,23 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
                         }}
                         style={cellStyle(isActive, kept === undefined ? found?.severity : "error")}
                       >
-                        {editing?.row === item.index && editing.col === col
-                          ? editor(gridRow, column.id, editing.value)
-                          : display(gridRow, column.id)}
+                        {editing?.row === item.index && editing.col === col ? (
+                          editor(gridRow, column.id, editing.value)
+                        ) : kept !== undefined || found !== undefined ? (
+                          <Tooltip
+                            label={tooltip(kept?.message, found)}
+                            openDelay={400}
+                            multiline
+                            maw={420}
+                            withinPortal
+                          >
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {display(gridRow, column.id)}
+                            </span>
+                          </Tooltip>
+                        ) : (
+                          display(gridRow, column.id)
+                        )}
                       </div>
                     );
                   })}
@@ -569,6 +637,12 @@ export function MappingGrid({ project, versions, store, onLoaded, findings }: Ma
           </div>
         </div>
       </div>
+      <CellDetails
+        id={detailsId}
+        refusedMessage={activeKey === undefined ? undefined : refused.get(activeKey)?.message}
+        finding={activeKey === undefined ? undefined : cells.get(activeKey)}
+        cell={activeCell}
+      />
       <Text size="xs" c="dimmed" mt={4}>
         {t("grid.keys")}
       </Text>
@@ -633,4 +707,78 @@ function cellStyle(active: boolean, severity: Severity | undefined) {
           ? "var(--mantine-color-yellow-light)"
           : undefined,
   } as const;
+}
+
+/** The tooltip of a cell with findings: each one on its line, errors first. */
+function tooltip(refusedMessage: string | undefined, finding: CellFinding | undefined): ReactNode {
+  const lines = [
+    ...(refusedMessage === undefined ? [] : [refusedMessage]),
+    ...(finding?.items.map((r) => `${r.code}: ${r.message}`) ?? []),
+  ];
+  return lines.map((line, i) => <div key={i}>{line}</div>);
+}
+
+/**
+ * The details bar under the grid: every finding on the active cell (severity, code, message),
+ * following the selection from the mouse and the keyboard. The grid and the active cell point to
+ * it with aria-describedby.
+ */
+function CellDetails({
+  id,
+  cell,
+  refusedMessage,
+  finding,
+}: {
+  readonly id: string;
+  readonly cell: string | undefined;
+  readonly refusedMessage: string | undefined;
+  readonly finding: CellFinding | undefined;
+}) {
+  const { t } = useTranslation();
+  const empty = refusedMessage === undefined && finding === undefined;
+  return (
+    <div
+      id={id}
+      data-testid="cell-details"
+      style={{
+        marginTop: 6,
+        padding: "6px 8px",
+        minHeight: 36,
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: 4,
+      }}
+    >
+      {cell === undefined ? (
+        <Text size="sm" c="dimmed">
+          {t("details.noCell")}
+        </Text>
+      ) : empty ? (
+        <Text size="sm" c="dimmed">
+          {t("details.none", { cell })}
+        </Text>
+      ) : (
+        <Stack gap={2}>
+          <Text size="xs" c="dimmed">
+            {cell}
+          </Text>
+          {refusedMessage !== undefined && (
+            <Text size="sm">
+              <Badge color="red" size="sm" mr={6}>
+                {t("details.notSaved")}
+              </Badge>
+              {refusedMessage}
+            </Text>
+          )}
+          {finding?.items.map((r, i) => (
+            <Text size="sm" key={i}>
+              <Badge color={r.severity === "error" ? "red" : "yellow"} size="sm" mr={6}>
+                {t(`details.${r.severity}`)}
+              </Badge>
+              <code>{r.code}</code> {r.message}
+            </Text>
+          ))}
+        </Stack>
+      )}
+    </div>
+  );
 }
