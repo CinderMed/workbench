@@ -1,5 +1,13 @@
 # @cindermed/fhir-defs
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [84850af]
+- Updated dependencies [232b1ec]
+  - @cindermed/model@0.5.0
+
 ## 0.1.0
 
 ### Minor Changes

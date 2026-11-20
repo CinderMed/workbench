@@ -1,5 +1,13 @@
 # @cindermed/fml
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [84850af]
+- Updated dependencies [232b1ec]
+  - @cindermed/model@0.5.0
+
 ## 0.2.0
 
 ### Minor Changes
