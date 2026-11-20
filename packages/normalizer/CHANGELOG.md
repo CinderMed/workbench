@@ -1,5 +1,15 @@
 # @cindermed/normalizer
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [7f23a9a]
+- Updated dependencies [db6c645]
+- Updated dependencies [87fe1bd]
+- Updated dependencies [911e043]
+  - @cindermed/model@0.4.0
+
 ## 0.1.0
 
 ### Minor Changes
