@@ -26,5 +26,63 @@
     "unsaved": "Unsaved changes: download the project to keep them.",
     "downloadToSave": "This browser cannot write the file: save by downloading it.",
     "download": "Download project"
+  },
+  "grid": {
+    "label": "Mapping grid of table {{table}}",
+    "tables": "Tables",
+    "rowCount_one": "{{count}} row",
+    "rowCount_other": "{{count}} rows",
+    "keys": "Arrows or Tab to move, Enter to edit, Esc to cancel. Role and Element are edited here; a new row is saved once it has both.",
+    "noColumn": "(no column)",
+    "roleMissing": "role missing",
+    "conflict": "This object was changed elsewhere: the grid now shows the current project. Make your change again.",
+    "notSaved": "Not saved: {{message}}",
+    "column": {
+      "code": "ID",
+      "column": "Source variable",
+      "type": "Type",
+      "role": "Role",
+      "element": "Element",
+      "transform": "Transform",
+      "values": "Values / code",
+      "status": "Status"
+    },
+    "dataType": {
+      "string": "string",
+      "integer": "integer",
+      "decimal": "decimal",
+      "date": "date",
+      "dateTime": "date-time",
+      "boolean": "boolean",
+      "categorical": "categorical",
+      "multipleChoice": "multiple choice"
+    },
+    "transform": {
+      "copy": "Copy",
+      "cast": "Conversion",
+      "constant": "Constant",
+      "valueMap": "Value map",
+      "quantity": "Quantity",
+      "coding": "Coding",
+      "concat": "Concatenation",
+      "reference": "Reference",
+      "expression": "Expression"
+    },
+    "values": {
+      "valueMap": "{{name}} · {{entries}}",
+      "unit": "unit {{unit}}",
+      "unitColumn": "unit: {{column}}",
+      "system": "{{system}}",
+      "constant": "{{value}}",
+      "target": "→ {{role}}"
+    },
+    "status": {
+      "todo": "To do",
+      "draft": "Draft",
+      "toReview": "To review",
+      "approved": "Approved",
+      "notMappable": "Not mappable",
+      "excluded": "Excluded"
+    }
   }
 }

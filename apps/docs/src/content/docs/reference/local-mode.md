@@ -37,3 +37,18 @@ The development server serves that folder under `/fhir-index/`, only on `127.0.0
   - In other browsers, the changes stay in the page until you **download** the project. Closing the tab with unsaved changes asks first.
 - A change is refused only when the project would not match the schema. Integrity and FHIR errors are shown, and block the export as in the command line, but they never stop you from saving work in progress.
 - Nothing is kept in the browser's storage: the project lives only in the page and in your file.
+
+## The mapping grid
+
+Once a project is open, the mapping grid shows one table at a time; a project with several tables has a switcher above the grid. Each line is a mapping row, and each column of the table that no row reads yet has an empty line, so every column is on screen. Rows without a column (constants and references) come last.
+
+| Column                   | Shows                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| ID                       | The row code (`R-031`)                                                                    |
+| Source variable, Type    | The column the row reads                                                                  |
+| Role                     | The role it writes to, as `Type[n] · label`                                               |
+| Element                  | The path in the role (`valueQuantity`, `component[nrs].valueInteger`)                     |
+| Transform, Values / code | The transform, and a summary: the value map, the unit, the code system or the target role |
+| Status                   | The review status                                                                         |
+
+The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the path picker and the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.

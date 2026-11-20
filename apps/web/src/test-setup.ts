@@ -14,3 +14,14 @@ if (typeof window !== "undefined")
       dispatchEvent: () => false,
     }),
   });
+
+// jsdom lacks ResizeObserver, which Mantine components (SegmentedControl) use.
+if (typeof window !== "undefined" && !("ResizeObserver" in window))
+  Object.defineProperty(window, "ResizeObserver", {
+    writable: true,
+    value: class {
+      observe = () => undefined;
+      unobserve = () => undefined;
+      disconnect = () => undefined;
+    },
+  });
