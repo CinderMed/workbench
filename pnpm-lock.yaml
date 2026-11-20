@@ -241,6 +241,9 @@ importers:
       '@cindermed/model':
         specifier: workspace:*
         version: link:../../packages/model
+      '@cindermed/normalizer':
+        specifier: workspace:*
+        version: link:../../packages/normalizer
       tar:
         specifier: 7.5.22
         version: 7.5.22

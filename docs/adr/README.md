@@ -27,3 +27,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0019](0019-coding-from-a-code-column.md)                    | Coding from a code column                        | accepted |
 | [0020](0020-profile-slice-names.md)                          | Profile slice names in element paths             | accepted |
 | [0021](0021-grid-data-layer.md)                              | Grid data layer and local mode                   | accepted |
+| [0022](0022-cindermed-init.md)                               | `cindermed init`                                 | accepted |
