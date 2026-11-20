@@ -65,6 +65,8 @@ describe("inline validation in the local mode (D7)", () => {
     expect(grid.getAttribute("aria-describedby")).toBe(details.id);
     expect(details.textContent).toContain("R-002 · Element");
     expect(details.textContent).toMatch(/Error\s*COMPLEX_TARGET.*Patient\.name \(HumanName\)/);
+    // Valid HTML: no block element (the badge) inside a paragraph.
+    expect(details.querySelector("p div")).toBeNull();
     // Another cell: the bar follows the selection.
     await user.keyboard("{ArrowUp}");
     expect(details.textContent).toBe("R-001 · Element: no findings.");

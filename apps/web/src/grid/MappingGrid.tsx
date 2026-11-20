@@ -762,7 +762,8 @@ function CellDetails({
             {cell}
           </Text>
           {refusedMessage !== undefined && (
-            <Text size="sm">
+            // A div, not a <p>: the badge inside is a block element.
+            <Text size="sm" component="div">
               <Badge color="red" size="sm" mr={6}>
                 {t("details.notSaved")}
               </Badge>
@@ -770,7 +771,7 @@ function CellDetails({
             </Text>
           )}
           {finding?.items.map((r, i) => (
-            <Text size="sm" key={i}>
+            <Text size="sm" component="div" key={i}>
               <Badge color={r.severity === "error" ? "red" : "yellow"} size="sm" mr={6}>
                 {t(`details.${r.severity}`)}
               </Badge>
