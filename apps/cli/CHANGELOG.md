@@ -1,5 +1,21 @@
 # @cindermed/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 3801a69: `cindermed fhir-index <project.json> --out <folder>` writes the compact FHIR definition index of a project's FHIR version and packages (#173, ADR-0021); the web app's dev server serves `apps/web/.fhir-index` under `/fhir-index/` to the local mode, on localhost only and never in the production build.
+- 99d4448: `cindermed init <data.csv>` writes an empty project from a data file's header (#172, ADR-0022): one table, every column `string`, no roles or rows. Options `--delimiter`, `--encoding`, `--header-row`, `--fhir-version`, `--canonical-base`, `--name`, `--table`, `--out`; empty or duplicate headers are errors, and an existing file is never overwritten. `--infer` writes a separate type report with suggested types and counts only, never cell values.
+
+### Patch Changes
+
+- Updated dependencies [84850af]
+- Updated dependencies [232b1ec]
+  - @cindermed/model@0.5.0
+  - @cindermed/export@0.2.1
+  - @cindermed/fhir-defs@0.1.1
+  - @cindermed/normalizer@0.1.2
+
 ## 0.3.0
 
 ### Minor Changes
