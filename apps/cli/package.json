@@ -26,6 +26,7 @@
     "@cindermed/export": "workspace:*",
     "@cindermed/fhir-defs": "workspace:*",
     "@cindermed/model": "workspace:*",
+    "@cindermed/normalizer": "workspace:*",
     "tar": "7.5.22"
   },
   "devDependencies": {

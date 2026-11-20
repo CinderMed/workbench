@@ -13,6 +13,14 @@ import {
   parseProject,
 } from "@cindermed/model";
 import type { LoadedDefinitions, PackageOptions } from "./fhir-packages.js";
+import {
+  ENCODINGS,
+  type Encoding,
+  FHIR_VERSIONS,
+  type FhirVersion,
+  initProject,
+  readDataFile,
+} from "./init.js";
 
 /** Exit codes: 0 valid, 1 the project has errors, 2 the command could not run. */
 export const ExitCode = { OK: 0, INVALID: 1, USAGE: 2 } as const;
@@ -20,6 +28,10 @@ export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];
 
 export interface CliIo {
   readonly readFile: (path: string) => Promise<string>;
+  /** Reads a file as bytes, chunk by chunk (init: a data file of any size). */
+  readonly readChunks: (path: string) => AsyncIterable<Uint8Array>;
+  /** Whether a file exists (init never overwrites one). */
+  readonly exists: (path: string) => Promise<boolean>;
   readonly stdout: (text: string) => void;
   readonly stderr: (text: string) => void;
   /** Writes a file, creating its folders. */
@@ -46,6 +58,17 @@ const COMMAND_OPTIONS = {
   validate: ["format", "no-fhir", "offline", "fhir-cache"],
   export: ["format", "out", "package-version", "created-at", "no-fhir", "offline", "fhir-cache"],
   "mapping-table": ["format", "delimiter", "out", "created-at"],
+  init: [
+    "out",
+    "name",
+    "table",
+    "fhir-version",
+    "canonical-base",
+    "delimiter",
+    "encoding",
+    "header-row",
+    "infer",
+  ],
 } as const;
 type Command = keyof typeof COMMAND_OPTIONS;
 
@@ -62,16 +85,31 @@ Commands:
   mapping-table <project.json>
                             Write the mapping table for documentation and review (sheets
                             Mapping, Value maps, Roles, Columns)
+  init <data.csv>           Write an empty project from a data file's header: one table, every
+                            column string, no roles and no rows (needs --fhir-version and
+                            --canonical-base)
 
 Options:
   --format text|json        validate, export: output format (default: text)
   --format xlsx|csv         mapping-table: one XLSX workbook (default; use it for Excel), or one
                             CSV file per sheet in a folder
   --delimiter <char>        mapping-table, csv: field delimiter (default: ","; ";" for Excel in Italian)
+                            init: the data file's delimiter (default: ",")
+  --encoding <name>         init: utf-8 (default), utf-8-bom, windows-1252 or iso-8859-1
+  --header-row <n>          init: the header is the n-th non-empty record (default: 1)
+  --fhir-version <v>        init: 4.0.1 or 5.0.0
+  --canonical-base <url>    init: base of the project's canonical URLs
+  --name <name>             init: project name (default: the table name)
+  --table <name>            init: table name (default: the file name without its extension)
+  --infer                   init: also read the data rows and write a type report next to the
+                            project (<out>.types.json): suggested types and counts only, no
+                            values; the project's columns stay string
   --out <file.zip|folder>   export: where to write the package (default: <name>-mapping-<version>.zip);
                             a path not ending in .zip is a folder
   --out <file.xlsx|folder>  mapping-table: where to write it (default: <name>-mapping-table.xlsx,
                             or the folder <name>-mapping-table for csv)
+  --out <project.json>      init: where to write the project (default: <table>.project.json);
+                            an existing file is never overwritten
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
   --created-at <date-time>  export, mapping-table: date of the package or workbook, ISO 8601 with
                             time zone (default: now)
@@ -360,6 +398,112 @@ async function mappingTable(
   return ExitCode.OK;
 }
 
+/** A delimiter is one character other than a quote or a line end. */
+function badDelimiter(delimiter: string): boolean {
+  return Array.from(delimiter).length !== 1 || /["\r\n]/.test(delimiter);
+}
+
+type Values = ReturnType<typeof parseCommandLine>["values"];
+
+/** `cindermed init`: an empty project from a data file's header (and a type report, --infer). */
+async function init(path: string, values: Values, io: CliIo): Promise<ExitCode> {
+  const fhirVersion = values["fhir-version"];
+  if (fhirVersion === undefined || !(FHIR_VERSIONS as readonly string[]).includes(fhirVersion))
+    return usageError(`init needs --fhir-version ${FHIR_VERSIONS.join(" or ")}`, io);
+  const canonicalBase = values["canonical-base"];
+  if (canonicalBase === undefined) return usageError("init needs --canonical-base <url>", io);
+  const delimiter = values.delimiter ?? ",";
+  if (badDelimiter(delimiter))
+    return usageError(
+      `--delimiter must be one character other than a quote or a line end, not '${delimiter}'`,
+      io,
+    );
+  const encoding = values.encoding ?? "utf-8";
+  if (!(ENCODINGS as readonly string[]).includes(encoding))
+    return usageError(`--encoding must be ${ENCODINGS.join(", ")}, not '${encoding}'`, io);
+  const headerText = values["header-row"] ?? "1";
+  const headerRow = /^[1-9]\d*$/.test(headerText) ? Number(headerText) : undefined;
+  if (headerRow === undefined)
+    return usageError(`--header-row must be a whole number from 1, not '${headerText}'`, io);
+
+  const fileName = path.replace(/^.*[\\/]/, "");
+  const table = values.table ?? fileName.replace(/\.[^.]*$/, "");
+  const out = values.out ?? `${table}.project.json`;
+  const reportPath = `${out.replace(/\.json$/i, "")}.types.json`;
+  const infer = values.infer === true;
+  for (const target of infer ? [out, reportPath] : [out])
+    if (await io.exists(target)) {
+      io.stderr(`cindermed: ${target} already exists: remove it or choose another --out\n`);
+      return ExitCode.USAGE;
+    }
+
+  const read = { delimiter, encoding: encoding as Encoding, headerRow };
+  let result: Awaited<ReturnType<typeof readDataFile>>;
+  try {
+    result = await readDataFile(io.readChunks(path), read, { infer, fileName });
+  } catch (error) {
+    io.stderr(`cindermed: cannot read ${path} (${errorCode(error, "read error")})\n`);
+    return ExitCode.USAGE;
+  }
+  if (!result.ok) {
+    const lines = [`${path}: no project written, ${plural(result.errors.length, "error")}`];
+    lines.push(...result.errors.map((e) => `  error: ${e.message}`));
+    io.stdout(`${lines.join("\n")}\n`);
+    return ExitCode.INVALID;
+  }
+  const project = initProject(result.names, {
+    name: values.name ?? table,
+    table,
+    fileName,
+    fhirVersion: fhirVersion as FhirVersion,
+    canonicalBase,
+    read,
+    importedAt: isoSecond(io.now()),
+  });
+  const parsed = parseProject(JSON.stringify(project));
+  if (parsed.project === undefined) {
+    const lines = [`${path}: no project written, ${plural(parsed.results.length, "error")}`];
+    lines.push(...parsed.results.map(describeResult));
+    io.stdout(`${lines.join("\n")}\n`);
+    return ExitCode.USAGE;
+  }
+  const encoder = new TextEncoder();
+  try {
+    await io.writeFile(out, encoder.encode(`${JSON.stringify(project, null, 2)}\n`));
+    if (result.report !== undefined)
+      await io.writeFile(reportPath, encoder.encode(`${JSON.stringify(result.report, null, 2)}\n`));
+  } catch (error) {
+    io.stderr(`cindermed: cannot write ${out} (${errorCode(error, "write error")})\n`);
+    return ExitCode.USAGE;
+  }
+  const lines = [
+    `${path}: wrote ${out}: table ${table}, ${plural(result.names.length, "column")}, all string`,
+  ];
+  if (result.report !== undefined) {
+    lines.push(
+      `  type report ${reportPath}: ${plural(result.report.rowsRead, "row")} read; suggested types (the project is unchanged):`,
+    );
+    for (const column of result.report.columns) {
+      const s = column.suggested;
+      const format =
+        s.dateFormat !== undefined
+          ? ` ${s.dateFormat}`
+          : s.decimalSeparator !== undefined
+            ? ` separator '${s.decimalSeparator}'`
+            : "";
+      lines.push(
+        `    ${column.name}: ${s.dataType}${format} (${plural(column.emptyCells, "empty cell")})`,
+      );
+    }
+    if (result.report.rowsWithOtherCellCount > 0)
+      lines.push(
+        `  note: ${plural(result.report.rowsWithOtherCellCount, "row")} with a number of cells other than the header's`,
+      );
+  }
+  io.stdout(`${lines.join("\n")}\n`);
+  return ExitCode.OK;
+}
+
 function usageError(message: string, io: CliIo): ExitCode {
   io.stderr(`cindermed: ${message}\n\n${USAGE}`);
   return ExitCode.USAGE;
@@ -377,6 +521,13 @@ function parseCommandLine(args: readonly string[]) {
       "no-fhir": { type: "boolean" },
       offline: { type: "boolean" },
       "fhir-cache": { type: "string" },
+      name: { type: "string" },
+      table: { type: "string" },
+      "fhir-version": { type: "string" },
+      "canonical-base": { type: "string" },
+      encoding: { type: "string" },
+      "header-row": { type: "string" },
+      infer: { type: "boolean" },
       help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
@@ -401,7 +552,8 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
   if (command === undefined) return usageError("missing command", io);
   if (!isCommand(command)) return usageError(`unknown command '${command}'`, io);
   const [path, ...rest] = operands;
-  if (path === undefined) return usageError(`${command} needs a project file`, io);
+  if (path === undefined)
+    return usageError(`${command} needs a ${command === "init" ? "data" : "project"} file`, io);
   if (rest.length > 0) return usageError(`unexpected argument '${rest.join(" ")}'`, io);
   const given = Object.entries(values)
     .filter(([key]) => key !== "help")
@@ -423,6 +575,8 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
     );
   }
 
+  if (command === "init") return init(path, values, io);
+
   if (command === "mapping-table") {
     const format = values.format ?? "xlsx";
     if (!(TABLE_FORMATS as readonly string[]).includes(format)) {
@@ -432,10 +586,7 @@ export async function run(args: readonly string[], io: CliIo): Promise<ExitCode>
     if (delimiter !== undefined && format !== "csv") {
       return usageError("--delimiter only applies to --format csv", io);
     }
-    if (
-      delimiter !== undefined &&
-      (Array.from(delimiter).length !== 1 || /["\r\n]/.test(delimiter))
-    ) {
+    if (delimiter !== undefined && badDelimiter(delimiter)) {
       return usageError(
         `--delimiter must be one character other than a quote or a line end, not '${delimiter}'`,
         io,

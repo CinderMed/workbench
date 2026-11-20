@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { run } from "./cli.js";
 import { loadDefinitions } from "./fhir-packages.js";
@@ -12,6 +13,12 @@ const manifest = JSON.parse(
 
 process.exitCode = await run(process.argv.slice(2), {
   readFile: (path) => readFile(path, "utf8"),
+  readChunks: (path) => createReadStream(path),
+  exists: (path) =>
+    access(path).then(
+      () => true,
+      () => false,
+    ),
   stdout: (text) => process.stdout.write(text),
   stderr: (text) => process.stderr.write(text),
   writeFile: async (path, data) => {
