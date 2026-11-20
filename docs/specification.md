@@ -672,7 +672,7 @@ A row is valid only if its transform produces a value of the target element's ty
 
 The check acts at three moments:
 
-1. **In the path picker**: only elements compatible with the chosen column and transform can be selected; the others stay visible in grey, with the reason.
+1. **In the path picker**: only elements compatible with the chosen column and transform can be selected; the others stay visible in grey, with the reason. A row that is still a copy (every new row starts as one, and its transform is set after the element) is checked against every transform its column can take: an element none of them fits is greyed, and one that only another transform fits can be selected, with the picker naming that transform. Once a transform is chosen, only that transform counts. Errors that do not depend on the element (the column's type, a conversion not allowed) are shown but do not grey it.
 2. **In the grid**: if the column, element or transform changes later, the cell turns red and the message proposes a fix (a sub-element or a suitable transform).
 3. **On export**: type errors block the export like the other validation errors.
 
