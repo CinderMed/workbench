@@ -9,7 +9,7 @@ ARG VITE_OIDC_AUTHORITY=http://localhost:8081/realms/cindermed
 ARG VITE_OIDC_CLIENT_ID=cindermed-web
 ENV VITE_OIDC_AUTHORITY=$VITE_OIDC_AUTHORITY VITE_OIDC_CLIENT_ID=$VITE_OIDC_CLIENT_ID
 RUN pnpm install --frozen-lockfile --ignore-scripts --filter "@cindermed/web..." \
- && pnpm --filter @cindermed/web build
+ && pnpm --filter "@cindermed/web..." build
 
 FROM nginxinc/nginx-unprivileged:1.31.7-alpine
 COPY docker/web/nginx.conf /etc/nginx/conf.d/default.conf

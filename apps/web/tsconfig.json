@@ -10,5 +10,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "vite.config.ts", "vite-localhost.ts", "vitest.config.ts"]
 }

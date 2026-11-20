@@ -276,6 +276,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@cindermed/model':
+        specifier: workspace:*
+        version: link:../../packages/model
       '@mantine/core':
         specifier: 9.8.0
         version: 9.8.0(@mantine/hooks@9.8.0(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

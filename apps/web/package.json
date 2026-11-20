@@ -7,12 +7,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "@cindermed/model": "workspace:*",
     "@mantine/core": "9.8.0",
     "@mantine/hooks": "9.8.0",
     "i18next": "27.0.1",
