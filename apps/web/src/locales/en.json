@@ -34,7 +34,7 @@
     "tables": "Tables",
     "rowCount_one": "{{count}} row",
     "rowCount_other": "{{count}} rows",
-    "keys": "Arrows or Tab to move, Enter to edit (on Element: the path picker, F2 to type the path; on Transform or Values: the transform), Esc to cancel. On a group: Enter opens or closes it. A new row is saved once it has a role and an element.",
+    "keys": "Arrows or Tab to move, Enter to edit (on Element: the path picker, F2 to type the path; on Transform or Values: the transform), Esc to cancel, Space to select a row (Ctrl-click or Shift-click with the mouse). On a group: Enter opens or closes it. A new row is saved once it has a role and an element.",
     "noColumn": "(no column)",
     "roleMissing": "role missing",
     "conflict": "This object was changed elsewhere: the grid now shows the current project. Make your change again.",
@@ -132,7 +132,8 @@
     "deleteSliceTitle": "Delete {{slice}} of {{role}}?",
     "deleteSliceWarning_zero": "No row writes to this slice.",
     "deleteSliceWarning_one": "{{count}} row writes to this slice: it will show an error until you change its path.",
-    "deleteSliceWarning_other": "{{count}} rows write to this slice: they will show an error until you change their paths."
+    "deleteSliceWarning_other": "{{count}} rows write to this slice: they will show an error until you change their paths.",
+    "indexRequired": "Give the role's index: 0 or more."
   },
   "validation": {
     "running": "Checking the project…",
@@ -286,5 +287,28 @@
       "roleRequired": "Choose the role.",
       "pathRequired": "Give the element."
     }
+  },
+  "filters": {
+    "status": "Status",
+    "role": "Role",
+    "section": "Section",
+    "all": "All",
+    "noStatus": "No status",
+    "noRole": "No role",
+    "noSection": "No section",
+    "clear": "Clear filters",
+    "shown": "{{shown}} of {{total}} lines"
+  },
+  "bulk": {
+    "label": "Bulk actions",
+    "selectShown": "Select all shown",
+    "selected_one": "{{count}} row selected",
+    "selected_other": "{{count}} rows selected",
+    "setRole": "Set role…",
+    "setStatus": "Set status…",
+    "clear": "Clear selection",
+    "nothing": "The selected rows already have it: nothing to change.",
+    "done_one": "{{count}} row updated.",
+    "done_other": "{{count}} rows updated."
   }
 }
