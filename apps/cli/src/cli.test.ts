@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -20,13 +21,19 @@ interface Captured {
 }
 
 /** Real file reads (fixtures only, never written), captured output and writes, a fixed clock. */
-function capture(files: Readonly<Record<string, string>> = {}): Captured {
+function capture(files: Readonly<Record<string, string | Uint8Array>> = {}): Captured {
   let out = "";
   let err = "";
   const written = new Map<string, Uint8Array>();
   return {
     io: {
-      readFile: async (path) => files[path] ?? (await readFile(path, "utf8")),
+      readFile: async (path) => {
+        const file = files[path];
+        if (file === undefined) return readFile(path, "utf8");
+        return typeof file === "string" ? file : new TextDecoder().decode(file);
+      },
+      readChunks: (path) => chunks(files[path] ?? readFileSync(path)),
+      exists: (path) => Promise.resolve(path in files || written.has(path)),
       stdout: (text) => (out += text),
       stderr: (text) => (err += text),
       writeFile: (path, data) => {
@@ -42,6 +49,15 @@ function capture(files: Readonly<Record<string, string>> = {}): Captured {
     stderr: () => err,
     written,
   };
+}
+
+/** A file in chunks of 7 bytes, so records and characters are split across chunks. */
+async function* chunks(file: string | Uint8Array): AsyncIterable<Uint8Array> {
+  const bytes = typeof file === "string" ? new TextEncoder().encode(file) : file;
+  for (let i = 0; i < bytes.length; i += 7) {
+    await Promise.resolve();
+    yield bytes.slice(i, i + 7);
+  }
 }
 
 async function exampleText(name: string): Promise<string> {
@@ -600,5 +616,140 @@ describe("cindermed mapping-table", () => {
     const cli = capture();
     expect(await run(args, cli.io)).toBe(ExitCode.USAGE);
     expect(cli.stderr()).toContain(message);
+  });
+});
+
+describe("cindermed init", () => {
+  const metastraCsv = `${examples}metastra/test-data/sample-row.csv`;
+  const required = ["--fhir-version", "4.0.1", "--canonical-base", "https://cindermed.org/fhir/m"];
+  const written = (cli: Captured, path: string): unknown => {
+    const data = cli.written.get(path);
+    if (data === undefined) throw new Error(`${path} not written`);
+    return JSON.parse(new TextDecoder().decode(data));
+  };
+
+  it("writes the Metastra columns, with the fixture's names in order, all string", async () => {
+    const cli = capture();
+    expect(await run(["init", metastraCsv, ...required, "--out", "m.json"], cli.io)).toBe(
+      ExitCode.OK,
+    );
+    expect(cli.stdout()).toBe(
+      `${metastraCsv}: wrote m.json: table sample-row, 11 columns, all string\n`,
+    );
+    const project = written(cli, "m.json") as {
+      sources: { columns: { id: string; name: string; dataType: string }[] }[];
+    };
+    const fixture = JSON.parse(await exampleText("metastra")) as typeof project;
+    expect(project.sources[0]?.columns.map((c) => c.name)).toEqual(
+      fixture.sources[0]?.columns.map((c) => c.name),
+    );
+    expect(project.sources[0]?.columns.map((c) => c.id)).toEqual(
+      project.sources[0]?.columns.map((c) => `col_${c.name}`),
+    );
+    expect(new Set(project.sources[0]?.columns.map((c) => c.dataType))).toEqual(
+      new Set(["string"]),
+    );
+    expect(parseProject(JSON.stringify(project)).results).toEqual([]);
+    expect([...cli.written.keys()]).toEqual(["m.json"]);
+  });
+
+  it("reads a windows-1252 file with ';' and a title line", async () => {
+    const latin = Uint8Array.from([
+      ...new TextEncoder().encode("Export\nid;Et"),
+      0xe0, // à in windows-1252
+      ...new TextEncoder().encode(";Costo "),
+      0x80, // € in windows-1252
+      ...new TextEncoder().encode("\nX1;40;3\n"),
+    ]);
+    const args = ["init", "v.csv", ...required, "--delimiter", ";", "--header-row", "2"];
+    const cli = capture({ "v.csv": latin });
+    expect(await run([...args, "--encoding", "windows-1252"], cli.io)).toBe(ExitCode.OK);
+    const project = written(cli, "v.project.json") as {
+      sources: { columns: { name: string }[] }[];
+    };
+    expect(project.sources[0]?.columns.map((c) => c.name)).toEqual(["id", "Età", "Costo €"]);
+
+    const utf8 = capture({ "v.csv": latin });
+    expect(await run(args, utf8.io)).toBe(ExitCode.INVALID);
+    expect(utf8.stdout()).toContain("give the file's encoding with --encoding");
+    expect(utf8.written.size).toBe(0);
+  });
+
+  it("refuses empty or duplicate headers and writes nothing", async () => {
+    const cli = capture({ "bad.csv": "id,,age,id\n1,2,3,4\n" });
+    expect(await run(["init", "bad.csv", ...required], cli.io)).toBe(ExitCode.INVALID);
+    expect(cli.stdout()).toBe(
+      "bad.csv: no project written, 2 errors\n" +
+        "  error: column 2 has an empty header\n" +
+        "  error: columns 1 and 4 have the same header 'id'\n",
+    );
+    expect(cli.written.size).toBe(0);
+  });
+
+  it("needs a FHIR version and a canonical base, and checks the reading options", async () => {
+    const cases: [string[], string][] = [
+      [["--canonical-base", "https://x.org/f"], "init needs --fhir-version 4.0.1 or 5.0.0"],
+      [["--fhir-version", "4.0.1"], "init needs --canonical-base <url>"],
+      [
+        [...required, "--encoding", "latin9"],
+        "--encoding must be utf-8, utf-8-bom, windows-1252, iso-8859-1, not 'latin9'",
+      ],
+      [[...required, "--header-row", "0"], "--header-row must be a whole number from 1, not '0'"],
+      [[...required, "--delimiter", "ab"], "--delimiter must be one character"],
+      [[...required, "--format", "json"], "--format does not apply to init"],
+    ];
+    for (const [options, message] of cases) {
+      const cli = capture({ "a.csv": "a\n" });
+      expect(await run(["init", "a.csv", ...options], cli.io)).toBe(ExitCode.USAGE);
+      expect(cli.stderr()).toContain(message);
+    }
+    const none = capture();
+    expect(await run(["init"], none.io)).toBe(ExitCode.USAGE);
+    expect(none.stderr()).toContain("init needs a data file");
+  });
+
+  it("never overwrites a file", async () => {
+    const cli = capture({ "a.csv": "a\n", "a.project.json": "{}" });
+    expect(await run(["init", "a.csv", ...required], cli.io)).toBe(ExitCode.USAGE);
+    expect(cli.stderr()).toBe(
+      "cindermed: a.project.json already exists: remove it or choose another --out\n",
+    );
+    expect(cli.written.size).toBe(0);
+  });
+
+  it("--infer writes a type report with counts and no cell values; the project stays string", async () => {
+    const values = ["MTS-0003", "Elevated", "12/03/2024", "11,25", "4711", "Sì"];
+    const csv =
+      "patient_id,note,visit,hb,code,ok\n" +
+      `${values[0] ?? ""},${values[1] ?? ""},${values[2] ?? ""},"${values[3] ?? ""}",${values[4] ?? ""},yes\n` +
+      `MTS-0042,,05/07/1956,"9,5",815,${values[5] ?? ""}\n`;
+    const cli = capture({ "d.csv": csv });
+    expect(await run(["init", "d.csv", ...required, "--infer"], cli.io)).toBe(ExitCode.OK);
+    expect(cli.stdout()).toBe(
+      "d.csv: wrote d.project.json: table d, 6 columns, all string\n" +
+        "  type report d.project.types.json: 2 rows read; suggested types (the project is unchanged):\n" +
+        "    patient_id: string (0 empty cells)\n" +
+        "    note: string (1 empty cell)\n" +
+        "    visit: date dd/MM/yyyy (0 empty cells)\n" +
+        "    hb: decimal separator ',' (0 empty cells)\n" +
+        "    code: integer (0 empty cells)\n" +
+        "    ok: string (0 empty cells)\n",
+    );
+    const report = written(cli, "d.project.types.json") as {
+      rowsRead: number;
+      columns: { name: string; candidates: { dataType: string; cellsNotConverting: number }[] }[];
+    };
+    expect(report.rowsRead).toBe(2);
+    const ok = report.columns.find((c) => c.name === "ok");
+    expect(ok?.candidates.find((c) => c.dataType === "boolean")?.cellsNotConverting).toBe(1);
+    const text = [...cli.written.values()].map((b) => new TextDecoder().decode(b)).join("\n");
+    for (const value of [...values, "MTS-0042", "05/07/1956", "9,5", "815"])
+      expect(text).not.toContain(value);
+    expect(cli.stdout()).not.toContain("MTS-");
+    const project = written(cli, "d.project.json") as {
+      sources: { columns: { dataType: string; allowedValues?: unknown }[] }[];
+    };
+    expect(project.sources[0]?.columns.every((c) => c.dataType === "string")).toBe(true);
+    expect(project.sources[0]?.columns.some((c) => c.allowedValues !== undefined)).toBe(false);
   });
 });

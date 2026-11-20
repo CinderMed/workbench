@@ -177,10 +177,33 @@ fixtures/fml-examples/metastra/project.json: wrote the mapping table to metastra
 
 The project must match the schema. A project with integrity errors or quality warnings still gets its table, because the table helps to review exactly those projects; the findings are listed after the summary.
 
+## `cindermed init`
+
+```text
+cindermed init <data.csv> --fhir-version 4.0.1|5.0.0 --canonical-base <url>
+               [--delimiter <char>] [--encoding <name>] [--header-row <n>]
+               [--name <name>] [--table <name>] [--out <project.json>] [--infer]
+```
+
+Writes an empty project from the header of a data file: one table whose columns are the header's names, every column `string`, and no roles, rows or value maps. It is the starting point for the mapping grid. Column types, descriptions and allowed values come from the dictionary (module 5) or are set by hand, never from the data.
+
+```text
+$ pnpm cindermed init fixtures/fml-examples/metastra/test-data/sample-row.csv \
+    --fhir-version 4.0.1 --canonical-base https://cindermed.org/fhir/metastra --out metastra.json
+fixtures/fml-examples/metastra/test-data/sample-row.csv: wrote metastra.json: table sample-row, 11 columns, all string
+```
+
+- Reading the file: `--delimiter` (default `,`), `--encoding` (`utf-8`, the default, `utf-8-bom`, `windows-1252` or `iso-8859-1`) and `--header-row` (the header is the n-th non-empty record; default 1). Italian files often use `;` and windows-1252. The file is read as the normalizer reads it: empty records are skipped, and names are trimmed.
+- Without `--infer`, only the header is read.
+- An empty or duplicate header is an error, with the column positions; nothing is written. Characters that are not valid in the encoding are an error that suggests `--encoding`.
+- Column ids are `col_<name>`, with other characters turned into `_`; the table is named after the file unless `--table` is given, and the project after the table unless `--name` is given.
+- `--out`: the project file; without it, `<table>.project.json`. An existing file is never overwritten.
+- `--infer` also reads the data rows and writes a type report next to the project (`<out>.types.json`). For each column it gives the suggested type (the most specific one that every non-empty cell converts to: integer, decimal with `.` or `,`, boolean, date or date-time in ISO or day-first forms, otherwise string), the number of empty cells, and for every type the number of cells that do not convert. The report holds **counts only, never a cell value**, and the project is not changed: its columns stay `string`.
+
 ## Exit codes
 
-| Code | Meaning                                                                                                                  |
-| ---- | ------------------------------------------------------------------------------------------------------------------------ |
-| 0    | The project is valid (`validate`), or the package or table was written (`export`, `mapping-table`)                       |
-| 1    | The project has errors, including a file that is not JSON; `export` writes nothing                                       |
-| 2    | The command could not run: wrong arguments, a file it cannot read or write, or (`validate`) FHIR packages it cannot load |
+| Code | Meaning                                                                                                                            |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | The project is valid (`validate`), or the package, table or project was written (`export`, `mapping-table`, `init`)                |
+| 1    | The project has errors, including a file that is not JSON (`export` writes nothing), or the data file's header has errors (`init`) |
+| 2    | The command could not run: wrong arguments, a file it cannot read or write, or (`validate`) FHIR packages it cannot load           |

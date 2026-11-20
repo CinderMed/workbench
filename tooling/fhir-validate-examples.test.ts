@@ -51,6 +51,10 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       let err = "";
       const code = await run(["validate", path, "--offline"], {
         readFile: (file) => Promise.resolve(readFileSync(file, "utf8")),
+        readChunks: () => {
+          throw new Error("validate reads no data file");
+        },
+        exists: () => Promise.resolve(false),
         stdout: (text) => (out += text),
         stderr: (text) => (err += text),
         writeFile: () => Promise.reject(new Error("validate writes nothing")),
@@ -94,6 +98,10 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
       let out = "";
       const code = await run(["validate", "flag.json", "--offline"], {
         readFile: () => Promise.resolve(JSON.stringify(project)),
+        readChunks: () => {
+          throw new Error("validate reads no data file");
+        },
+        exists: () => Promise.resolve(false),
         stdout: (text) => (out += text),
         stderr: (text) => (out += text),
         writeFile: () => Promise.reject(new Error("validate writes nothing")),
