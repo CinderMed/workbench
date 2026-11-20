@@ -397,6 +397,20 @@ export function MappingGrid({
       ? undefined
       : project.sources.flatMap((s) => s.columns).find((c) => c.id === transformRow.columnId);
 
+  /** The row the picker places: the saved row, or the copy an empty line will become. */
+  const placedRow = (rowIndex: number, role: Instance): MappingRow => {
+    const row = rowAt(rowIndex);
+    return (
+      row?.mapping ?? {
+        id: "new",
+        code: nextRowCode(project),
+        ...(row?.column === undefined ? {} : { columnId: row.column.id }),
+        instanceId: role.id,
+        path: "",
+        transform: { kind: "copy" },
+      }
+    );
+  };
   const ELEMENT = COLUMNS.findIndex((c) => c.id === "element");
   /** Enter or a double-click: the path picker on Element when it can open, else the editor. */
   const edit = (rowIndex: number, col: number) => {
@@ -779,6 +793,7 @@ export function MappingGrid({
             ? {}
             : { current: rowAt(picking.row)?.mapping?.path ?? "" })}
           definitions={definitions}
+          fit={{ project, row: placedRow(picking.row, pickingRole) }}
           onCreateSlice={(slice) => createSlice(pickingRole, slice)}
           newSliceId={() => store.newId("slice")}
           onClose={() => {

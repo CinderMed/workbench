@@ -190,9 +190,11 @@
     "pattern": "pattern",
     "selected": "Selected path:",
     "use": "Use this element",
-    "keys": "Up and Down to move, Right to open, Left to close, Enter to choose. Complex types open when you need them; the search finds the opened ones. On a repeating element, name a repetition to write to it apart from the others.",
+    "keys": "Up and Down to move, Right to open, Left to close, Enter to choose. Complex types open when you need them; the search finds the opened ones. Greyed elements cannot take the row. On a repeating element, name a repetition to write to it apart from the others.",
     "noRole": "Choose the row's role first: the element tree depends on it.",
-    "unavailable": "No FHIR definitions in the browser: type the path, or write them with cindermed fhir-index."
+    "unavailable": "No FHIR definitions in the browser: type the path, or write them with cindermed fhir-index.",
+    "blocked": "The row cannot be written here: {{message}}",
+    "needs": "The row can be written here with another transform: {{transforms}}. Set it in the Transform cell after choosing."
   },
   "slices": {
     "add": "Name a repetition of {{element}}",
