@@ -1,4 +1,4 @@
-import { Alert, Badge, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
+import { Alert, Badge, Button, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
 import {
   type Instance,
   type MappingRow,
@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
 import { PathPicker } from "../picker/PathPicker";
 import { withSlice } from "../slices/slices";
+import { TransformEditor } from "../transforms/TransformEditor";
 import type { BrowserDefinitions } from "../validation/index-fetch";
 import { type CellAddress, type CellFinding, cellFindings } from "./findings";
 import { type Grouping, type Line, gridLines } from "./groups";
@@ -38,8 +39,8 @@ const COLUMNS = [
   { id: "type", width: "110px" },
   { id: "role", width: "minmax(160px, 1.2fr)", editable: true },
   { id: "element", width: "minmax(180px, 1.5fr)", editable: true },
-  { id: "transform", width: "120px" },
-  { id: "values", width: "minmax(140px, 1fr)" },
+  { id: "transform", width: "120px", dialog: true },
+  { id: "values", width: "minmax(140px, 1fr)", dialog: true },
   { id: "status", width: "110px" },
 ] as const;
 type ColumnId = (typeof COLUMNS)[number]["id"];
@@ -47,6 +48,11 @@ const TEMPLATE = COLUMNS.map((c) => c.width).join(" ");
 const isEditable = (col: number) => {
   const column = COLUMNS[col];
   return column !== undefined && "editable" in column;
+};
+/** Cells edited in a dialog: the transform editor (D5). */
+const isDialog = (col: number) => {
+  const column = COLUMNS[col];
+  return column !== undefined && "dialog" in column;
 };
 
 const features = tableFeatures({});
@@ -317,6 +323,10 @@ export function MappingGrid({
         ...readVersion(versions, objectKey("instance", role.id)),
       },
     ]);
+    return answer(result);
+  };
+  /** Takes a store's answer: undefined when saved, else why not (a conflict reloads). */
+  const answer = (result: StoreResult): string | undefined => {
     if (result.ok) {
       onLoaded(result);
       return undefined;
@@ -328,10 +338,73 @@ export function MappingGrid({
     }
     return t("grid.notSaved", { message: result.message });
   };
+
+  /** The transform editor (D5): on a row, or on a new constant row. */
+  const [transforming, setTransforming] = useState<
+    { readonly rowId: string } | { readonly constant: MappingRow } | undefined
+  >();
+  const tableRoles = roles.filter((r) => r.sourceId === source.id);
+  const editTransform = (rowIndex: number) => {
+    const mapping = rowAt(rowIndex)?.mapping;
+    if (mapping === undefined) setNotice(t("transforms.needsRow"));
+    else if (mapping.transform.kind === "reference") setNotice(t("transforms.reference"));
+    else if (mapping.transform.kind === "expression") setNotice(t("transforms.expression"));
+    else setTransforming({ rowId: mapping.id });
+  };
+  const addConstant = () => {
+    if (tableRoles.length === 0) {
+      setNotice(t("transforms.noRoles"));
+      return;
+    }
+    setTransforming({
+      constant: {
+        id: store.newId("mapping"),
+        code: nextRowCode(project),
+        instanceId: tableRoles.length === 1 ? (tableRoles[0]?.id ?? "") : "",
+        path: "",
+        transform: { kind: "constant", value: { type: "string", value: "" } },
+      },
+    });
+  };
+  const saveTransform = async (row: MappingRow, isNew: boolean) => {
+    const failed = answer(
+      await store.apply([
+        isNew
+          ? { op: "create", kind: "mapping", value: row }
+          : {
+              op: "update",
+              kind: "mapping",
+              id: row.id,
+              value: row,
+              ...readVersion(versions, objectKey("mapping", row.id)),
+            },
+      ]),
+    );
+    if (failed === undefined) {
+      setTransforming(undefined);
+      gridRef.current?.focus();
+    }
+    return failed;
+  };
+  const transformRow =
+    transforming === undefined
+      ? undefined
+      : "constant" in transforming
+        ? transforming.constant
+        : project.mappings.find((m) => m.id === transforming.rowId);
+  const transformColumn =
+    transformRow?.columnId === undefined
+      ? undefined
+      : project.sources.flatMap((s) => s.columns).find((c) => c.id === transformRow.columnId);
+
   const ELEMENT = COLUMNS.findIndex((c) => c.id === "element");
   /** Enter or a double-click: the path picker on Element when it can open, else the editor. */
   const edit = (rowIndex: number, col: number) => {
     const row = rowAt(rowIndex);
+    if (isDialog(col)) {
+      editTransform(rowIndex);
+      return;
+    }
     if (col !== ELEMENT || definitions === undefined || row === undefined) {
       startEditing(rowIndex, col);
       return;
@@ -380,7 +453,8 @@ export function MappingGrid({
         else edit(row, col);
       },
       F2: () => {
-        startEditing(row, col);
+        if (isDialog(col)) editTransform(row);
+        else startEditing(row, col);
       },
     };
     const action = keys[event.key];
@@ -530,6 +604,9 @@ export function MappingGrid({
               { value: "role", label: t("grid.byRole") },
             ]}
           />
+          <Button size="xs" variant="light" onClick={addConstant}>
+            {t("grid.addConstant")}
+          </Button>
           <Badge variant="light">{t("grid.rowCount", { count: rows.length })}</Badge>
         </Group>
       </Group>
@@ -712,6 +789,20 @@ export function MappingGrid({
             const row = picking.row;
             setPicking(undefined);
             void commit(row, ELEMENT, path);
+            gridRef.current?.focus();
+          }}
+        />
+      )}
+      {transforming !== undefined && transformRow !== undefined && (
+        <TransformEditor
+          key={transformRow.id}
+          project={project}
+          row={transformRow}
+          {...(transformColumn === undefined ? {} : { column: transformColumn })}
+          {...("constant" in transforming ? { roles: tableRoles } : {})}
+          onSave={(row) => saveTransform(row, "constant" in transforming)}
+          onClose={() => {
+            setTransforming(undefined);
             gridRef.current?.focus();
           }}
         />

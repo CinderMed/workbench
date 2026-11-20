@@ -34,7 +34,7 @@
     "tables": "Tables",
     "rowCount_one": "{{count}} row",
     "rowCount_other": "{{count}} rows",
-    "keys": "Arrows or Tab to move, Enter to edit (on Element: the path picker; F2 to type the path), Esc to cancel. On a group: Enter opens or closes it. A new row is saved once it has a role and an element.",
+    "keys": "Arrows or Tab to move, Enter to edit (on Element: the path picker, F2 to type the path; on Transform or Values: the transform), Esc to cancel. On a group: Enter opens or closes it. A new row is saved once it has a role and an element.",
     "noColumn": "(no column)",
     "roleMissing": "role missing",
     "conflict": "This object was changed elsewhere: the grid now shows the current project. Make your change again.",
@@ -90,7 +90,8 @@
     "bySection": "By section",
     "byRole": "By role",
     "noSection": "No section",
-    "noRole": "No role"
+    "noRole": "No role",
+    "addConstant": "Add constant row"
   },
   "roles": {
     "title": "Roles",
@@ -200,24 +201,88 @@
     "field": {
       "name": "Name",
       "nameHint": "Letters, digits and '-', starting with a letter: {{example}}",
-      "discriminator": "Told apart by",
-      "system": "Code system",
-      "code": "Code",
-      "display": "Display (optional)",
-      "value": "Value ({{type}})"
+      "discriminator": "Told apart by"
     },
-    "manual": "The code is saved as entered by hand: it is not checked against a terminology server.",
     "noDiscriminator": "{{element}} has no child with a code or simple value to tell its repetitions apart.",
     "create": "Create slice",
     "error": {
       "nameRequired": "Give the slice a name.",
       "nameInvalid": "The name can hold letters, digits and '-', and starts with a letter.",
       "nameTaken": "The role already has a slice with this name on this element.",
-      "discriminatorRequired": "Choose the element that tells the repetitions apart.",
+      "discriminatorRequired": "Choose the element that tells the repetitions apart."
+    }
+  },
+  "values": {
+    "system": "Code system",
+    "code": "Code",
+    "display": "Display (optional)",
+    "value": "Value ({{type}})",
+    "manual": "The code is saved as entered by hand: it is not checked against a terminology server.",
+    "error": {
       "systemRequired": "Give the code system.",
       "codeRequired": "Give the code.",
       "valueRequired": "Give the value.",
       "valueInvalid": "The value is not of the element's type."
+    }
+  },
+  "transforms": {
+    "title": "Transform of {{code}} ({{column}})",
+    "newConstant": "New constant row",
+    "choose": "Choose…",
+    "none": "none",
+    "needsRow": "Choose the row's role and element first: the transform is set on a saved row.",
+    "reference": "References are set with the roles' context, in a later version.",
+    "expression": "Expert expressions are not edited here: they come in a later version.",
+    "noRoles": "Add a role for this table first: a constant row writes to a role.",
+    "noValueMaps": "The project has no value maps yet. Value maps are edited in a later version; until then they come from the project file.",
+    "valueMapOption": "{{name}} → {{target}} ({{count}} values)",
+    "unitFixed": "Fixed unit",
+    "unitColumn": "Unit from a column",
+    "concatOrder": "Joined in this order: {{columns}}",
+    "concatNotExported": "The FML export does not translate a concatenation yet: the row shows an error until it does.",
+    "help": {
+      "copy": "The column's value as it is. Its type must fit the element.",
+      "cast": "The value converted to another type: integer to decimal, date to dateTime, or any type to string.",
+      "valueMap": "Each value of the column becomes a code, a coding or true/false, as the value map says.",
+      "quantity": "The number with its unit: a fixed UCUM unit, or the unit read from another column and translated by a value map.",
+      "coding": "The column's value is the code of one code system; the display can come from another column of the same row.",
+      "concat": "The values of several columns of the same row, joined into one text.",
+      "constant": "The same value in every resource, with no column."
+    },
+    "field": {
+      "kind": "Transform",
+      "castTo": "Convert to",
+      "inputFormat": "Format in the data file",
+      "inputFormatHint": "For example dd/MM/yyyy; leave it empty when the column's format is enough.",
+      "valueMap": "Value map",
+      "unitMode": "Where the unit comes from",
+      "unit": "UCUM unit",
+      "unitHint": "The UCUM code, for example kg, cm, mm[Hg] or g/dL.",
+      "unitDisplay": "Unit display (optional)",
+      "unitColumn": "Unit column",
+      "unitValueMap": "Unit value map",
+      "unitValueMapHint": "Turns the unit column's values into UCUM units.",
+      "as": "Written as",
+      "displayColumn": "Display from column (optional)",
+      "columns": "Columns to join",
+      "separator": "Separator",
+      "valueType": "Value type",
+      "pathHint": "The element in the role, for example identifier.system; the path picker can change it later.",
+      "repeat": "One repetition per selected value",
+      "repeatHint": "For a multiple-choice column: the element repeats for each value chosen in the record."
+    },
+    "error": {
+      "castToRequired": "Choose the type to convert to.",
+      "castNotAllowed": "This column cannot be converted to that type.",
+      "valueMapRequired": "Choose a value map.",
+      "unitRequired": "Give the UCUM unit.",
+      "unitColumnRequired": "Choose the column that holds the unit.",
+      "unitValueMapRequired": "Choose the value map that turns the unit column into UCUM units.",
+      "concatTooFew": "Choose at least two columns to join.",
+      "constantTypeRequired": "Choose the value type.",
+      "repeatNeedsMultipleChoice": "One repetition per value needs a multiple-choice column.",
+      "roleRequired": "Choose the role.",
+      "pathRequired": "Give the element."
     }
   }
 }
