@@ -177,6 +177,19 @@ fixtures/fml-examples/metastra/project.json: wrote the mapping table to metastra
 
 The project must match the schema. A project with integrity errors or quality warnings still gets its table, because the table helps to review exactly those projects; the findings are listed after the summary.
 
+## `cindermed fhir-index`
+
+```text
+cindermed fhir-index <project.json> --out <folder> [--offline] [--fhir-cache <folder>]
+```
+
+Writes the compact FHIR definition index of the project's FHIR version and packages into a folder: `index.json` and one small document per type, profile and bound ValueSet. The web app's [local mode](/workbench/reference/local-mode/) reads it from `apps/web/.fhir-index`. The packages come from the shared cache, as for `validate`.
+
+```text
+$ pnpm cindermed fhir-index fixtures/fml-examples/metastra/project.json --out apps/web/.fhir-index
+fixtures/fml-examples/metastra/project.json: wrote the FHIR 4.0.1 definition index to apps/web/.fhir-index (574 documents; hl7.fhir.r4.core#4.0.1)
+```
+
 ## `cindermed init`
 
 ```text

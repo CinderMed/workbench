@@ -753,3 +753,61 @@ describe("cindermed init", () => {
     expect(project.sources[0]?.columns.some((c) => c.allowedValues !== undefined)).toBe(false);
   });
 });
+
+describe("cindermed fhir-index", () => {
+  const metastra = `${examples}metastra/project.json`;
+  const fakeIndex = (files: [string, string][]) =>
+    ({
+      index: {
+        manifest: { packages: [{ id: "hl7.fhir.r4.core", version: "4.0.1" }] },
+        manifestText: '{"formatVersion":"1.1.0"}',
+        files: new Map(files),
+      },
+      definitions: {},
+      issues: [],
+    }) as unknown as Awaited<ReturnType<CliIo["loadDefinitions"]>>;
+
+  it("writes the index of the project's FHIR version into a folder", async () => {
+    const cli = capture();
+    const calls: unknown[] = [];
+    const io: CliIo = {
+      ...cli.io,
+      loadDefinitions: (...args) => {
+        calls.push(args);
+        return Promise.resolve(fakeIndex([["types/Patient.json", '{"type":"Patient"}']]));
+      },
+    };
+    expect(await run(["fhir-index", metastra, "--out", "web/.fhir-index/", "--offline"], io)).toBe(
+      ExitCode.OK,
+    );
+    expect(calls).toEqual([["4.0.1", [], { offline: true }]]);
+    expect([...cli.written.keys()]).toEqual([
+      "web/.fhir-index/index.json",
+      "web/.fhir-index/types/Patient.json",
+    ]);
+    expect(cli.stdout()).toBe(
+      `${metastra}: wrote the FHIR 4.0.1 definition index to web/.fhir-index (1 document; hl7.fhir.r4.core#4.0.1)\n`,
+    );
+  });
+
+  it("refuses a file name that would leave the folder", async () => {
+    const cli = capture();
+    const io: CliIo = {
+      ...cli.io,
+      loadDefinitions: () => Promise.resolve(fakeIndex([["../escape.json", "{}"]])),
+    };
+    expect(await run(["fhir-index", metastra, "--out", "idx"], io)).toBe(ExitCode.USAGE);
+    expect(cli.stderr()).toContain("cannot be written safely: ../escape.json");
+    expect(cli.written.size).toBe(0);
+  });
+
+  it("needs --out and a valid project", async () => {
+    const none = capture();
+    expect(await run(["fhir-index", metastra], none.io)).toBe(ExitCode.USAGE);
+    expect(none.stderr()).toContain("fhir-index needs --out <folder>");
+    const broken = capture({ "b.json": "{}" });
+    expect(await run(["fhir-index", "b.json", "--out", "idx"], broken.io)).toBe(ExitCode.INVALID);
+    expect(broken.stdout()).toContain("b.json: no index written");
+    expect(broken.written.size).toBe(0);
+  });
+});
