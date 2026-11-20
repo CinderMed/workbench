@@ -19,6 +19,7 @@ import { type FileAccess, blobAccess } from "../storage/file-access";
 import { MappingGrid } from "../grid/MappingGrid";
 import { RolesPanel } from "../roles/RolesPanel";
 import { FindingsList } from "../validation/FindingsList";
+import type { BrowserDefinitions } from "../validation/index-fetch";
 import type { CellAddress } from "../grid/findings";
 import { type Validator, useValidation } from "../validation/use-validation";
 import { LocalFileStore, NotAProjectError } from "../storage/local-file-store";
@@ -46,6 +47,8 @@ export interface LocalAppProps {
   readonly download: (name: string, text: string) => void;
   /** Validates the open project (a Web Worker in the browser, ADR-0021). */
   readonly validator: Validator;
+  /** The FHIR definitions for the path picker; without them paths are typed by hand. */
+  readonly definitions?: () => Promise<BrowserDefinitions>;
 }
 
 /** Only project files are opened, never data files: anything not named .json is not even read. */
@@ -56,7 +59,7 @@ const MAX_RESULTS_SHOWN = 10;
  * Local mode (ADR-0021): one project file on this computer, opened from a file, kept in memory and
  * saved back through `LocalFileStore`. Runs only in the Vite dev server, bound to localhost.
  */
-export function LocalApp({ pickFile, download, validator }: LocalAppProps) {
+export function LocalApp({ pickFile, download, validator, definitions }: LocalAppProps) {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "empty" });
   const input = useRef<HTMLInputElement>(null);
@@ -241,6 +244,7 @@ export function LocalApp({ pickFile, download, validator }: LocalAppProps) {
             store={state.store}
             onLoaded={onLoaded}
             validator={validator}
+            {...(definitions === undefined ? {} : { definitions })}
           />
         )}
       </Stack>
@@ -254,10 +258,18 @@ interface ProjectViewProps {
   readonly store: LocalFileStore;
   readonly onLoaded: (loaded: Loaded) => void;
   readonly validator: Validator;
+  readonly definitions?: () => Promise<BrowserDefinitions>;
 }
 
 /** The open project: its validation summary, the grid and the roles. */
-function ProjectView({ project, versions, store, onLoaded, validator }: ProjectViewProps) {
+function ProjectView({
+  project,
+  versions,
+  store,
+  onLoaded,
+  validator,
+  definitions,
+}: ProjectViewProps) {
   const { t } = useTranslation();
   const state = useValidation(project, validator);
   const validation = state === undefined || "failed" in state ? undefined : state;
@@ -343,6 +355,7 @@ function ProjectView({ project, versions, store, onLoaded, validator }: ProjectV
             onLoaded={onLoaded}
             {...(validation === undefined ? {} : { findings: validation.results })}
             {...(target === undefined ? {} : { target })}
+            {...(definitions === undefined ? {} : { definitions })}
           />
         </Tabs.Panel>
         <Tabs.Panel value="roles" pt="sm">
