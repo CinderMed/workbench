@@ -60,8 +60,15 @@ describe("GitHub Actions", () => {
   it("runs the required CI jobs", () => {
     const ci = load(".github/workflows/ci.yml") as Workflow;
     expect(Object.keys(ci.jobs).sort()).toEqual(
-      ["build", "compose", "fixtures", "golden", "lint", "test", "typecheck"].sort(),
+      ["build", "compose", "e2e", "fixtures", "golden", "lint", "test", "typecheck"].sort(),
     );
+  });
+
+  it("runs the local-mode smoke test in a browser, with the FHIR core packages cached (#187)", () => {
+    const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf8");
+    expect(ci).toContain("name: E2E (local mode)");
+    expect(ci).toContain("playwright install --with-deps --only-shell chromium");
+    expect(ci).toContain("pnpm --filter @cindermed/web e2e");
   });
 
   it("runs the 1,000,000-row memory test of the normalizer nightly", () => {

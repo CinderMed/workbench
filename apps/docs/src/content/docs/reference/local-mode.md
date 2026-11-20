@@ -74,3 +74,13 @@ The **Roles** tab lists the project's roles: the FHIR resources made from each r
 - **Delete** asks first, and says how many rows use the role. Those rows stay, with an error, until you give them another role.
 
 How many resources a role makes, its conditions, slices and fixed values are set in a later version.
+
+## Smoke test in a browser
+
+A Playwright test checks the local mode end to end in Chromium: it writes the real FHIR R4 definitions of the Metastra example, starts the development server on `127.0.0.1`, opens Metastra, breaks a path and expects the cell to turn red with `PATH_NOT_FOUND` in the details bar, and no error in the browser console. It runs in CI ("E2E (local mode)"); to run it on your computer:
+
+```bash
+pnpm -r build
+pnpm --filter @cindermed/web exec playwright install --only-shell chromium   # once: about 130 MB in ~/.cache/ms-playwright
+pnpm --filter @cindermed/web e2e
+```
