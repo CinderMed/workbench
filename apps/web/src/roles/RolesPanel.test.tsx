@@ -165,4 +165,27 @@ describe("RolesPanel", () => {
     });
     expect(latest().project.mappings.some((m) => m.instanceId === role.id)).toBe(true);
   });
+
+  it("lists a role's named slices and deletes one after saying which rows write to it", async () => {
+    const { latest } = await renderPanel(load(metastraProject));
+    const user = userEvent.setup();
+    expect(screen.getByText("component[nrs]")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /^Delete component\[nrs\] of / }));
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      within(dialog).getByText(
+        "1 row writes to this slice: it will show an error until you change its path.",
+      ),
+    ).toBeTruthy();
+    await user.click(within(dialog).getByRole("button", { name: "Delete" }));
+    await waitFor(() => {
+      expect(latest().project.instances.flatMap((i) => i.slices ?? [])).toEqual([]);
+    });
+    expect(screen.queryByText("component[nrs]")).toBeNull();
+    // The role is otherwise unchanged, with no empty slice list.
+    const before = load(metastraProject).instances.find((i) => i.slices !== undefined);
+    const after = latest().project.instances.find((i) => i.id === before?.id);
+    expect(after).not.toHaveProperty("slices");
+    expect({ ...after, slices: before?.slices }).toEqual(before);
+  });
 });

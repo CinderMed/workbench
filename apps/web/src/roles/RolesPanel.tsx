@@ -1,6 +1,8 @@
 import {
   Alert,
+  Badge,
   Button,
+  CloseButton,
   Group,
   Modal,
   NativeSelect,
@@ -15,7 +17,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { roleName } from "../grid/rows";
 import type { Loaded, ProjectStore, StoreResult } from "../storage/project-store";
+import { describeDiscriminator, rowsUsingSlice, slicePath, withoutSlice } from "../slices/slices";
 import { defaultIdRule, describeIdRule, nextIndex, rowsUsing } from "./role-defaults";
+
+type Slice = NonNullable<Instance["slices"]>[number];
 
 export interface RolesPanelProps {
   readonly project: ProjectFile;
@@ -38,12 +43,16 @@ interface Form {
 
 /**
  * The minimal role editor (#174): create, edit and delete roles with their resource type, index,
- * label and table, and a default id rule from the table's row key. The rest of a role is module 6.
+ * label and table, and a default id rule from the table's row key; the role's named slices (D4),
+ * added from the path picker, are listed and can be deleted. The rest of a role is module 6.
  */
 export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelProps) {
   const { t } = useTranslation();
   const [form, setForm] = useState<Form | undefined>();
   const [deleting, setDeleting] = useState<Instance | undefined>();
+  const [deletingSlice, setDeletingSlice] = useState<
+    { readonly role: Instance; readonly slice: Slice } | undefined
+  >();
   const [notice, setNotice] = useState<string | undefined>();
   const sources = new Map(project.sources.map((s) => [s.id, s.name]));
 
@@ -134,6 +143,22 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
     else setNotice(failure(result));
   };
 
+  const removeSlice = async (role: Instance, slice: Slice) => {
+    const version = versions.get(objectKey("instance", role.id));
+    const result = await store.apply([
+      {
+        op: "update",
+        kind: "instance",
+        id: role.id,
+        value: withoutSlice(role, slice.id),
+        ...(version === undefined ? {} : { readVersion: version }),
+      },
+    ]);
+    setDeletingSlice(undefined);
+    if (result.ok) onLoaded(result);
+    else setNotice(failure(result));
+  };
+
   return (
     <Stack gap="sm">
       <Group justify="space-between">
@@ -162,6 +187,7 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
               <Table.Th>{t("roles.column.role")}</Table.Th>
               <Table.Th>{t("roles.column.table")}</Table.Th>
               <Table.Th>{t("roles.column.idRule")}</Table.Th>
+              <Table.Th>{t("roles.column.slices")}</Table.Th>
               <Table.Th>{t("roles.column.rows")}</Table.Th>
               <Table.Th />
             </Table.Tr>
@@ -173,6 +199,38 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
                 <Table.Td>{sources.get(role.sourceId) ?? t("roles.tableMissing")}</Table.Td>
                 <Table.Td style={{ fontFamily: "var(--mantine-font-family-monospace)" }}>
                   {describeIdRule(project, role.idRule) ?? t("roles.noIdRule")}
+                </Table.Td>
+                <Table.Td>
+                  {(role.slices ?? []).length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                      {t("roles.noSlices")}
+                    </Text>
+                  ) : (
+                    <Group gap={4}>
+                      {(role.slices ?? []).map((slice) => (
+                        <Badge
+                          key={slice.id}
+                          variant="light"
+                          tt="none"
+                          title={describeDiscriminator(slice)}
+                          rightSection={
+                            <CloseButton
+                              size="xs"
+                              aria-label={t("roles.deleteSlice", {
+                                slice: slicePath(slice),
+                                role: roleName(role),
+                              })}
+                              onClick={() => {
+                                setDeletingSlice({ role, slice });
+                              }}
+                            />
+                          }
+                        >
+                          {slicePath(slice)}
+                        </Badge>
+                      ))}
+                    </Group>
+                  )}
                 </Table.Td>
                 <Table.Td>{rowsUsing(project, role.id)}</Table.Td>
                 <Table.Td>
@@ -318,6 +376,48 @@ export function RolesPanel({ project, versions, store, onLoaded }: RolesPanelPro
                 color="red"
                 onClick={() => {
                   void remove(deleting);
+                }}
+              >
+                {t("roles.delete")}
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+      <Modal
+        opened={deletingSlice !== undefined}
+        onClose={() => {
+          setDeletingSlice(undefined);
+        }}
+        title={
+          deletingSlice === undefined
+            ? ""
+            : t("roles.deleteSliceTitle", {
+                slice: slicePath(deletingSlice.slice),
+                role: roleName(deletingSlice.role),
+              })
+        }
+      >
+        {deletingSlice !== undefined && (
+          <Stack gap="sm">
+            <Text>
+              {t("roles.deleteSliceWarning", {
+                count: rowsUsingSlice(project, deletingSlice.role.id, deletingSlice.slice),
+              })}
+            </Text>
+            <Group justify="flex-end">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setDeletingSlice(undefined);
+                }}
+              >
+                {t("roles.cancel")}
+              </Button>
+              <Button
+                color="red"
+                onClick={() => {
+                  void removeSlice(deletingSlice.role, deletingSlice.slice);
                 }}
               >
                 {t("roles.delete")}

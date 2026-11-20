@@ -7,7 +7,6 @@
  */
 import {
   type ProjectFile,
-  type StoredKind,
   type ValidationResult,
   applyChanges,
   objectKey,
@@ -16,6 +15,7 @@ import {
 } from "@cindermed/model";
 import { type FileAccess, FileChangedError } from "./file-access";
 import {
+  type IdKind,
   type Loaded,
   type ProjectStore,
   type StoreChange,
@@ -33,7 +33,7 @@ export class NotAProjectError extends Error {
   }
 }
 
-const PREFIXES: Record<StoredKind, string> = {
+const PREFIXES: Record<IdKind, string> = {
   project: "prj",
   source: "src",
   column: "col",
@@ -41,6 +41,7 @@ const PREFIXES: Record<StoredKind, string> = {
   instance: "ins",
   mapping: "map",
   valueMap: "vm",
+  slice: "slc",
 };
 
 export class LocalFileStore implements ProjectStore {
@@ -113,7 +114,7 @@ export class LocalFileStore implements ProjectStore {
     return { ok: true, ...this.current() };
   }
 
-  newId(kind: StoredKind): string {
+  newId(kind: IdKind): string {
     return `${PREFIXES[kind]}_${this.random()}`;
   }
 

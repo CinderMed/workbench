@@ -1,7 +1,8 @@
 /**
- * Tests only: a tiny R4 definition index (Patient with `active` and `name`, HumanName and a few
- * primitives) built with `@cindermed/fhir-defs`, served through an in-memory `fetch`, as the dev
- * server serves `cindermed fhir-index` output. Enough to show the boolean on Patient.name.
+ * Tests only: a tiny R4 definition index (Patient with `active` and `name`, Observation with its
+ * repeating `component`, HumanName, CodeableConcept, Coding and a few primitives) built with
+ * `@cindermed/fhir-defs`, served through an in-memory `fetch`, as the dev server serves
+ * `cindermed fhir-index` output. Enough to show the boolean on Patient.name and a named slice.
  */
 import { FhirDefinitions, type IndexFetch, buildIndex } from "@cindermed/fhir-defs";
 import type { ProjectFile } from "@cindermed/model";
@@ -38,13 +39,34 @@ export function syntheticDefinitions(): { defs: FhirDefinitions; fetch: IndexFet
       fhirVersions: ["4.0.1"],
       resources: [
         { ...sd("Resource", "resource", { Resource: {} }), abstract: true, derivation: undefined },
-        ...["string", "boolean", "code", "uri", "integer"].map((p) =>
+        ...["string", "boolean", "code", "uri", "integer", "decimal"].map((p) =>
           sd(p, "primitive-type", { [p]: {} }),
         ),
         sd("HumanName", "complex-type", {
           HumanName: {},
           "HumanName.family": { type: [{ code: "string" }] },
           "HumanName.text": { type: [{ code: "string" }] },
+        }),
+        sd("Coding", "complex-type", {
+          Coding: {},
+          "Coding.system": { type: [{ code: "uri" }] },
+          "Coding.code": { type: [{ code: "code" }] },
+          "Coding.display": { type: [{ code: "string" }] },
+        }),
+        sd("CodeableConcept", "complex-type", {
+          CodeableConcept: {},
+          "CodeableConcept.coding": { max: "*", type: [{ code: "Coding" }] },
+          "CodeableConcept.text": { type: [{ code: "string" }] },
+        }),
+        sd("Observation", "resource", {
+          Observation: {},
+          "Observation.status": { min: 1, type: [{ code: "code" }] },
+          "Observation.code": { min: 1, type: [{ code: "CodeableConcept" }] },
+          "Observation.component": { max: "*", type: [{ code: "BackboneElement" }] },
+          "Observation.component.code": { min: 1, type: [{ code: "CodeableConcept" }] },
+          "Observation.component.value[x]": {
+            type: [{ code: "integer" }, { code: "string" }],
+          },
         }),
         sd("Patient", "resource", {
           Patient: {},
@@ -109,6 +131,46 @@ export function patientProject(): ProjectFile {
         columnId: "col_flag01",
         instanceId: "ins_pat001",
         path: "name",
+        transform: { kind: "copy" },
+      },
+    ],
+    valueMaps: [],
+  };
+}
+
+/** A pain table: a score (integer) for an Observation with a repeating `component` (D4). */
+export function painProject(): ProjectFile {
+  return {
+    formatVersion: "1.4.0",
+    project: {
+      id: "prj_pain01",
+      name: "Pain",
+      fhirVersion: "4.0.1",
+      canonicalBase: "https://cindermed.org/fhir/p",
+    },
+    sources: [
+      {
+        id: "src_pain01",
+        name: "Pain",
+        columns: [{ id: "col_nrs001", name: "nrs", dataType: "integer" }],
+      },
+    ],
+    instances: [
+      {
+        id: "ins_obs001",
+        resourceType: "Observation",
+        index: 0,
+        sourceId: "src_pain01",
+        multiplicity: { kind: "perRow" },
+      },
+    ],
+    mappings: [
+      {
+        id: "map_nrs001",
+        code: "R-001",
+        columnId: "col_nrs001",
+        instanceId: "ins_obs001",
+        path: "component",
         transform: { kind: "copy" },
       },
     ],
