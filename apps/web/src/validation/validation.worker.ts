@@ -1,15 +1,9 @@
 /**
- * Validation off the main thread (ADR-0021, section 5). Takes `{ run, project }`, answers
- * `{ run, validation }`; the page drops answers of older runs. The definition index is read from
- * the dev server (`/fhir-index/`, local mode) once, then documents are loaded as projects need them.
+ * Validation off the main thread (ADR-0021, section 5): `validationQueue` with the dev server's
+ * definition index (`/fhir-index/`, written by `cindermed fhir-index`) and the real checks.
  */
-import type { ProjectFile } from "@cindermed/model";
+import { type ValidationRequest, validationQueue } from "./validation-queue";
 import { openDefinitions, validateAll } from "./validate";
-
-export interface ValidationRequest {
-  readonly run: number;
-  readonly project: ProjectFile;
-}
 
 const BASE = "/fhir-index/";
 const fetchIndex = async (file: string): Promise<string> => {
@@ -20,19 +14,16 @@ const fetchIndex = async (file: string): Promise<string> => {
     );
   return response.text();
 };
-let opened: ReturnType<typeof openDefinitions> | undefined;
+
+const take = validationQueue({
+  open: () => openDefinitions(fetchIndex),
+  validate: validateAll,
+  fetch: fetchIndex,
+  post: (answer) => {
+    self.postMessage(answer);
+  },
+});
 
 self.onmessage = (event: MessageEvent<ValidationRequest>) => {
-  const { run, project } = event.data;
-  opened ??= openDefinitions(fetchIndex);
-  void opened
-    .then((definitions) =>
-      validateAll(
-        project,
-        "defs" in definitions ? { ...definitions, fetch: fetchIndex } : definitions,
-      ),
-    )
-    .then((validation) => {
-      self.postMessage({ run, validation });
-    });
+  take(event.data);
 };

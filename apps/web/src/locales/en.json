@@ -135,6 +135,7 @@
     "fhirChecked": "Checked against FHIR {{version}}, as in cindermed validate.",
     "fhirOtherVersion": "FHIR checks not run: the definitions are for FHIR {{index}}, the project for FHIR {{project}}. Write them again with cindermed fhir-index.",
     "fhirUnavailable": "FHIR checks not run: write the definitions with cindermed fhir-index <project> --out apps/web/.fhir-index.",
-    "fhirNotRun": "FHIR checks not run: the project does not match the schema."
+    "fhirNotRun": "FHIR checks not run: the project does not match the schema.",
+    "failed": "The check failed: {{message}}. It runs again after your next change."
   }
 }
