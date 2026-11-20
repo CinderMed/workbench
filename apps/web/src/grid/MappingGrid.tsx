@@ -23,6 +23,7 @@ import {
 import { useTranslation } from "react-i18next";
 import type { Loaded, ProjectStore, StoreChange, StoreResult } from "../storage/project-store";
 import { PathPicker } from "../picker/PathPicker";
+import { withSlice } from "../slices/slices";
 import type { BrowserDefinitions } from "../validation/index-fetch";
 import { type CellAddress, type CellFinding, cellFindings } from "./findings";
 import { type Grouping, type Line, gridLines } from "./groups";
@@ -298,7 +299,35 @@ export function MappingGrid({
   );
 
   /** The path picker, open on a row (D3). */
-  const [picking, setPicking] = useState<{ row: number; role: Instance } | undefined>();
+  const [picking, setPicking] = useState<{ row: number; roleId: string } | undefined>();
+  /** The picker's role as it is now: a slice added in the picker shows in it. */
+  const pickingRole =
+    picking === undefined ? undefined : roles.find((r) => r.id === picking.roleId);
+  /** Adds a named slice to a role (D4): the reason it was not saved, or undefined. */
+  const createSlice = async (
+    role: Instance,
+    slice: NonNullable<Instance["slices"]>[number],
+  ): Promise<string | undefined> => {
+    const result = await store.apply([
+      {
+        op: "update",
+        kind: "instance",
+        id: role.id,
+        value: withSlice(role, slice),
+        ...readVersion(versions, objectKey("instance", role.id)),
+      },
+    ]);
+    if (result.ok) {
+      onLoaded(result);
+      return undefined;
+    }
+    if (result.reason === "invalid") return firstMessage(result.results);
+    if (result.reason === "conflict") {
+      onLoaded(result.current);
+      return t("grid.conflict");
+    }
+    return t("grid.notSaved", { message: result.message });
+  };
   const ELEMENT = COLUMNS.findIndex((c) => c.id === "element");
   /** Enter or a double-click: the path picker on Element when it can open, else the editor. */
   const edit = (rowIndex: number, col: number) => {
@@ -315,7 +344,7 @@ export function MappingGrid({
       setNotice(t("picker.noRole"));
       return;
     }
-    setPicking({ row: rowIndex, role });
+    setPicking({ row: rowIndex, roleId: role.id });
   };
 
   const onGridKey = (event: KeyboardEvent) => {
@@ -663,9 +692,9 @@ export function MappingGrid({
           </div>
         </div>
       </div>
-      {picking !== undefined && definitions !== undefined && (
+      {picking !== undefined && pickingRole !== undefined && definitions !== undefined && (
         <PathPicker
-          role={picking.role}
+          role={pickingRole}
           {...(rowAt(picking.row)?.column === undefined
             ? {}
             : { columnName: rowAt(picking.row)?.column?.name ?? "" })}
@@ -673,6 +702,8 @@ export function MappingGrid({
             ? {}
             : { current: rowAt(picking.row)?.mapping?.path ?? "" })}
           definitions={definitions}
+          onCreateSlice={(slice) => createSlice(pickingRole, slice)}
+          newSliceId={() => store.newId("slice")}
           onClose={() => {
             setPicking(undefined);
             gridRef.current?.focus();

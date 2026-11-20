@@ -94,14 +94,15 @@
   },
   "roles": {
     "title": "Roles",
-    "explanation": "A role is a FHIR resource made from each record, such as Patient[0] or Observation[1]. Here you set its type, index, label and table; the rest of a role comes later.",
+    "explanation": "A role is a FHIR resource made from each record, such as Patient[0] or Observation[1]. Here you set its type, index, label and table, and see its named slices (added from the path picker); the rest of a role comes later.",
     "add": "Add role",
     "none": "No roles yet: add one to start mapping.",
     "column": {
       "role": "Role",
       "table": "Table",
       "idRule": "Id rule",
-      "rows": "Rows"
+      "rows": "Rows",
+      "slices": "Named slices"
     },
     "tableMissing": "table missing",
     "noIdRule": "no id rule",
@@ -124,7 +125,13 @@
     "noRowKey": "The table has no row key yet, so the role gets no id rule: it is added with the row key.",
     "idRuleKept": "The id rule follows the type, index and table while it is the default one.",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "noSlices": "none",
+    "deleteSlice": "Delete {{slice}} of {{role}}",
+    "deleteSliceTitle": "Delete {{slice}} of {{role}}?",
+    "deleteSliceWarning_zero": "No row writes to this slice.",
+    "deleteSliceWarning_one": "{{count}} row writes to this slice: it will show an error until you change its path.",
+    "deleteSliceWarning_other": "{{count}} rows write to this slice: they will show an error until you change their paths."
   },
   "validation": {
     "running": "Checking the project…",
@@ -182,8 +189,35 @@
     "pattern": "pattern",
     "selected": "Selected path:",
     "use": "Use this element",
-    "keys": "Up and Down to move, Right to open, Left to close, Enter to choose. Complex types open when you need them; the search finds the opened ones.",
+    "keys": "Up and Down to move, Right to open, Left to close, Enter to choose. Complex types open when you need them; the search finds the opened ones. On a repeating element, name a repetition to write to it apart from the others.",
     "noRole": "Choose the row's role first: the element tree depends on it.",
     "unavailable": "No FHIR definitions in the browser: type the path, or write them with cindermed fhir-index."
+  },
+  "slices": {
+    "add": "Name a repetition of {{element}}",
+    "formTitle": "New named slice of {{element}}",
+    "explanation": "A named slice is one repetition of {{element}}, told apart from the others by a fixed value. Rows write to it with its name, and it is created only when one of them has a value.",
+    "field": {
+      "name": "Name",
+      "nameHint": "Letters, digits and '-', starting with a letter: {{example}}",
+      "discriminator": "Told apart by",
+      "system": "Code system",
+      "code": "Code",
+      "display": "Display (optional)",
+      "value": "Value ({{type}})"
+    },
+    "manual": "The code is saved as entered by hand: it is not checked against a terminology server.",
+    "noDiscriminator": "{{element}} has no child with a code or simple value to tell its repetitions apart.",
+    "create": "Create slice",
+    "error": {
+      "nameRequired": "Give the slice a name.",
+      "nameInvalid": "The name can hold letters, digits and '-', and starts with a letter.",
+      "nameTaken": "The role already has a slice with this name on this element.",
+      "discriminatorRequired": "Choose the element that tells the repetitions apart.",
+      "systemRequired": "Give the code system.",
+      "codeRequired": "Give the code.",
+      "valueRequired": "Give the value.",
+      "valueInvalid": "The value is not of the element's type."
+    }
   }
 }

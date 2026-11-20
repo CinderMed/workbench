@@ -53,6 +53,14 @@ Once a project is open, the mapping grid shows one table at a time; a project wi
 
 **Path picker.** Enter (or a double-click) on an Element cell opens the element tree of the row's role, from the FHIR definitions written by `cindermed fhir-index`: each element with its cardinality and types, choice elements under their concrete names (`valueQuantity`, `valueCodeableConcept`). Up and Down move, Right opens an element, Left closes it, Enter chooses; the search box finds elements by name among those opened (backbone elements such as `component` are always opened, datatypes such as `HumanName` when you open them). F2 types the path by hand instead, and so does the cell when there are no definitions. A row needs its role before the picker can open.
 
+**Named slices.** Without a slice, every row that writes to a repeating element such as `component` writes into the same repetition. To write several, give each one a name: select the repeating element in the picker and choose "Name a repetition of component". The form asks for:
+
+- the **name**: letters, digits and `-`, starting with a letter (`nrs` gives `component[nrs]`);
+- the child that **tells the repetitions apart**, `code` when the element has one;
+- its **fixed value**: a code system and code (and an optional display) for a code, or a value of the child's type. A code typed here is saved as entered by hand (`manual`), not checked against a terminology server.
+
+The new slice is saved in the role and shows open under its element, ready for a child such as `component[nrs].valueInteger`. The resource gets the repetition only when one of its rows has a value.
+
 **Groups.** The switch above the grid groups the rows **by section** of the source table (the columns' sections, in their order) or **by role** (the role each row writes to). Rows with no section or no role come last, under "No section" or "No role"; a table without sections is one list when grouped by section. A group's header shows how many rows it holds; Enter or a click on it closes and opens it.
 
 The grid works from the keyboard, as a spreadsheet: arrows or Tab to move, Enter (or F2) to edit, Enter again to save and go down, Esc to cancel. For now **Role** and **Element** are edited in the grid; the transform editors come next. On an empty line, the new row is saved once it has both a role and an element. A value the project cannot take (for example an element that is not a path) stays in its cell, in red, with the reason.
@@ -74,8 +82,9 @@ The **Roles** tab lists the project's roles: the FHIR resources made from each r
 - **Add role** asks for the resource type (as in FHIR: `Patient`, `Observation`), the index (the next free one for that type), a label and the table. A new role makes one resource per record.
 - **Id rule.** A role gets a default id rule: its name (`observation1`) and the table's row key columns, so two roles of the same table get different ids. A table without a row key (as `cindermed init` writes it) gives no id rule yet. While the id rule is the default one, it follows the role's type, index and table when they change.
 - **Delete** asks first, and says how many rows use the role. Those rows stay, with an error, until you give them another role.
+- **Named slices.** Each role lists its named slices (`component[nrs]`); pointing at one shows its fixed value. The cross on a slice deletes it, after saying how many rows write to it. Those rows stay, with an error, until you change their paths. Slices are added from the path picker.
 
-How many resources a role makes, its conditions, slices and fixed values are set in a later version.
+How many resources a role makes, its conditions and fixed values are set in a later version.
 
 ## Smoke test in a browser
 

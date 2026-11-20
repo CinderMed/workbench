@@ -42,9 +42,15 @@ export interface ProjectStore {
   load(): Promise<Loaded>;
   /** Applies one change, or a batch (all or nothing). */
   apply(changes: readonly StoreChange[]): Promise<StoreResult>;
-  /** A new id for an object of this kind (the server assigns them in module 4). */
-  newId(kind: StoredKind): string;
+  /**
+   * A new id for an object of this kind (the server assigns them in module 4). A slice is part of
+   * its role, not an object of its own, but has an id like one.
+   */
+  newId(kind: IdKind): string;
 }
+
+/** The kinds of object that get an id: the stored kinds, and the slices inside a role. */
+export type IdKind = StoredKind | "slice";
 
 /** Every object of a project with its key, for the initial versions. */
 export function objectKeys(project: ProjectFile): string[] {

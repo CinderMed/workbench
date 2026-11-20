@@ -1,6 +1,12 @@
+import type { Instance } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
 import { patientProject, syntheticDefinitions } from "../validation/synthetic-definitions";
-import { cardinality, loadLevels, roleDefinition, treeLines } from "./tree";
+import { cardinality, loadLevels, roleDefinition, treeLines, withSlices } from "./tree";
+
+const must = <T>(value: T | undefined): T => {
+  if (value === undefined) throw new Error("missing");
+  return value;
+};
 
 const role = () => {
   const found = patientProject().instances[0];
@@ -64,5 +70,76 @@ describe("the picker's tree", () => {
       "contact.name",
     ]);
     expect(treeLines(levels, new Set(), "zzz")).toEqual([]);
+  });
+
+  it("shows a role's named slices after their repeating element, opened like it (D4)", async () => {
+    const { defs, fetch } = syntheticDefinitions();
+    const coding = {
+      type: "CodeableConcept" as const,
+      coding: { system: "http://snomed.info/sct", code: "1284852002" },
+    };
+    const slices: NonNullable<Instance["slices"]> = [
+      {
+        id: "slc_nrs",
+        path: "component",
+        name: "nrs",
+        discriminator: [{ path: "code", value: coding }],
+      },
+      {
+        id: "slc_vas",
+        path: "component",
+        name: "vas",
+        discriminator: [{ path: "code", value: coding }],
+      },
+      // A slice on an element that does not repeat shows nowhere (validation reports it).
+      {
+        id: "slc_bad",
+        path: "status",
+        name: "x",
+        discriminator: [{ path: "code", value: coding }],
+      },
+    ];
+    const loaded = await loadLevels(defs, fetch, "Observation", "", new Map(), 4, slices);
+    if ("message" in loaded) throw new Error(loaded.message);
+    // The backbone slices are loaded with the root, so the search finds inside them.
+    expect(loaded.levels.get("component[nrs]")?.map((n) => n.path)).toEqual([
+      "component[nrs].code",
+      "component[nrs].valueInteger",
+      "component[nrs].valueString",
+    ]);
+    const root = treeLines(loaded.levels, new Set(), "", slices);
+    expect(root.map((l) => [l.node.name, cardinality(l.node), l.node.sliceId])).toEqual([
+      ["status", "1..1", undefined],
+      ["code", "1..1", undefined],
+      ["component", "0..*", undefined],
+      ["component[nrs]", "0..1", "slc_nrs"],
+      ["component[vas]", "0..1", "slc_vas"],
+    ]);
+    expect(
+      treeLines(loaded.levels, new Set(["component[nrs]"]), "", slices).map((l) => l.node.path),
+    ).toContain("component[nrs].valueInteger");
+    expect(treeLines(loaded.levels, new Set(), "valueint", slices).map((l) => l.node.path)).toEqual(
+      [
+        "component",
+        "component.valueInteger",
+        "component[nrs]",
+        "component[nrs].valueInteger",
+        "component[vas]",
+        "component[vas].valueInteger",
+      ],
+    );
+    // Without slices the level is unchanged; a profile slice of the same name is not repeated.
+    const level = loaded.levels.get("") ?? [];
+    expect(withSlices(level, [])).toBe(level);
+    const profiled = [
+      ...level,
+      {
+        ...must(level[2]),
+        name: "component[nrs]",
+        path: "component[nrs]",
+        sliceName: "nrs",
+      },
+    ];
+    expect(withSlices(profiled, slices).filter((n) => n.path === "component[nrs]")).toHaveLength(1);
   });
 });

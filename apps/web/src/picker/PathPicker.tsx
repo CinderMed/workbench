@@ -4,8 +4,17 @@ import type { Instance } from "@cindermed/model";
 import { type KeyboardEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { roleName } from "../grid/rows";
+import { SliceForm } from "../slices/SliceForm";
+import { repeats, slicePath } from "../slices/slices";
 import type { BrowserDefinitions } from "../validation/index-fetch";
-import { type Levels, cardinality, loadLevels, roleDefinition, treeLines } from "./tree";
+import {
+  type Levels,
+  type PickerNode,
+  cardinality,
+  loadLevels,
+  roleDefinition,
+  treeLines,
+} from "./tree";
 
 export interface PathPickerProps {
   readonly role: Instance;
@@ -16,7 +25,16 @@ export interface PathPickerProps {
   readonly definitions: () => Promise<BrowserDefinitions>;
   readonly onPick: (path: string) => void;
   readonly onClose: () => void;
+  /**
+   * Adds a named slice to the role (D4); resolves to why it was not saved, or undefined. Without
+   * it, the picker offers no new slices.
+   */
+  readonly onCreateSlice?: (slice: Slice) => Promise<string | undefined>;
+  /** A new slice id. */
+  readonly newSliceId?: () => string;
 }
+
+type Slice = NonNullable<Instance["slices"]>[number];
 
 type State =
   | { readonly kind: "loading" }
@@ -30,7 +48,8 @@ type State =
 /**
  * The path picker (D3): the element tree of the role's resource or profile, with cardinality and
  * types, searched by name; choice elements under their concrete names (`valueQuantity`). Up and
- * Down move, Right opens, Left closes, Enter chooses.
+ * Down move, Right opens, Left closes, Enter chooses. On a repeating element, a new named slice
+ * (D4) adds a repetition the rows can write to (`component[nrs].valueInteger`).
  */
 export function PathPicker({
   role,
@@ -39,6 +58,8 @@ export function PathPicker({
   definitions,
   onPick,
   onClose,
+  onCreateSlice,
+  newSliceId,
 }: PathPickerProps) {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -47,8 +68,22 @@ export function PathPicker({
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const [error, setError] = useState<string | undefined>();
+  /** The repeating element a new slice is being named for. */
+  const [creating, setCreating] = useState<TreeNode | undefined>();
+  const slices = useMemo(() => role.slices ?? [], [role.slices]);
+  // The tree depends on the role's type and profile, not on its other fields (a new slice).
+  const { resourceType, profile } = role;
+  /** The slices when the tree loads, for the prefetch; later ones load when created. */
+  const slicesRef = useRef(slices);
+  /** Whether the tree takes the focus when it shows again (after the slice form). */
+  const refocus = useRef(false);
   const treeRef = useRef<HTMLDivElement>(null);
   const treeId = useId();
+
+  // Declared before the loading effect, so it reads the slices of this render.
+  useEffect(() => {
+    slicesRef.current = slices;
+  }, [slices]);
 
   useEffect(() => {
     const run = { live: true };
@@ -60,21 +95,40 @@ export function PathPicker({
         setState({ kind: "unavailable", message: found.message });
         return;
       }
-      const ref = roleDefinition(found.defs, role);
+      const ref = roleDefinition(found.defs, {
+        resourceType,
+        ...(profile === undefined ? {} : { profile }),
+      });
       if (ref === undefined) {
         setState({
           kind: "unavailable",
-          message: t("picker.unknownType", { type: role.resourceType }),
+          message: t("picker.unknownType", { type: resourceType }),
         });
         return;
       }
-      const loaded = await loadLevels(found.defs, found.fetch, ref, "", new Map());
+      const loaded = await loadLevels(
+        found.defs,
+        found.fetch,
+        ref,
+        "",
+        new Map(),
+        4,
+        slicesRef.current,
+      );
       if (!live()) return;
       if ("message" in loaded) setState({ kind: "unavailable", message: loaded.message });
       else {
         setLevels(loaded.levels);
-        // Start on the row's current path when it is on the first level.
-        const at = treeLines(loaded.levels, new Set(), "").findIndex(
+        // Start on the row's current path, with its loaded ancestors open.
+        const parts = (current ?? "").split(".");
+        const ancestors = new Set(
+          parts
+            .slice(0, -1)
+            .map((_, i) => parts.slice(0, i + 1).join("."))
+            .filter((path) => loaded.levels.has(path)),
+        );
+        setExpanded(ancestors);
+        const at = treeLines(loaded.levels, ancestors, "", slicesRef.current).findIndex(
           (l) => l.node.path === current,
         );
         setActive(Math.max(at, 0));
@@ -84,9 +138,12 @@ export function PathPicker({
     return () => {
       run.live = false;
     };
-  }, [current, definitions, role, t]);
+  }, [current, definitions, resourceType, profile, t]);
 
-  const lines = useMemo(() => treeLines(levels, expanded, query), [levels, expanded, query]);
+  const lines = useMemo(
+    () => treeLines(levels, expanded, query, slices),
+    [levels, expanded, query, slices],
+  );
   const selected = lines[Math.min(active, Math.max(lines.length - 1, 0))];
 
   const open = async (node: TreeNode) => {
@@ -107,6 +164,71 @@ export function PathPicker({
     setLevels(loaded.levels);
     setExpanded((e) => new Set(e).add(node.path));
   };
+
+  /** Whether a new named slice can be added on a node: a repeating element, not a slice. */
+  const canSlice = (node: PickerNode | undefined): node is PickerNode =>
+    onCreateSlice !== undefined &&
+    newSliceId !== undefined &&
+    node !== undefined &&
+    node.sliceId === undefined &&
+    node.sliceName === undefined &&
+    repeats(node);
+
+  /** Opens the slice form on a repeating element, with its children loaded for the discriminator. */
+  const startSlice = async (node: TreeNode) => {
+    if (state.kind !== "ready") return;
+    const loaded = await loadLevels(
+      state.found.defs,
+      state.found.fetch,
+      state.ref,
+      node.path,
+      levels,
+      0,
+    );
+    if ("message" in loaded) {
+      setError(loaded.message);
+      return;
+    }
+    setError(undefined);
+    setLevels(loaded.levels);
+    setCreating(node);
+  };
+
+  /** Saves a new slice, then shows it open and selected under its element. */
+  const saveSlice = async (slice: Slice): Promise<string | undefined> => {
+    if (onCreateSlice === undefined || state.kind !== "ready") return undefined;
+    const failed = await onCreateSlice(slice);
+    if (failed !== undefined) return failed;
+    const path = slicePath(slice);
+    const loaded = await loadLevels(
+      state.found.defs,
+      state.found.fetch,
+      state.ref,
+      path,
+      levels,
+      0,
+    );
+    const nextLevels = "message" in loaded ? levels : loaded.levels;
+    const nextExpanded = new Set(expanded).add(slice.path);
+    if (!("message" in loaded)) nextExpanded.add(path);
+    setLevels(nextLevels);
+    setExpanded(nextExpanded);
+    setQuery("");
+    // Select the slice in the lines it shows in, with the role's new slice.
+    const at = treeLines(nextLevels, nextExpanded, "", [...slices, slice]).findIndex(
+      (l) => l.node.path === path,
+    );
+    setActive(Math.max(at, 0));
+    refocus.current = true;
+    setCreating(undefined);
+    return undefined;
+  };
+
+  useEffect(() => {
+    if (creating !== undefined || !refocus.current) return;
+    refocus.current = false;
+    treeRef.current?.focus();
+  }, [creating]);
   const close = (node: TreeNode) => {
     setExpanded((e) => {
       const next = new Set(e);
@@ -143,6 +265,9 @@ export function PathPicker({
   useEffect(() => {
     treeRef.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
   }, [active]);
+
+  const selectedNode = selected?.node;
+  const sliceTarget = canSlice(selectedNode) ? selectedNode : undefined;
 
   const types = (node: TreeNode) => node.types.map((type) => type.code).join(" | ");
   const extra = (node: TreeNode) =>
@@ -187,7 +312,20 @@ export function PathPicker({
         {state.kind === "loading" && <Loader size="sm" />}
         {state.kind === "unavailable" && <Alert color="orange">{state.message}</Alert>}
         {error !== undefined && <Alert color="red">{error}</Alert>}
-        {state.kind === "ready" && (
+        {state.kind === "ready" && creating !== undefined && newSliceId !== undefined && (
+          <SliceForm
+            role={role}
+            element={creating}
+            elements={levels.get(creating.path) ?? []}
+            newId={newSliceId}
+            onSave={saveSlice}
+            onCancel={() => {
+              refocus.current = true;
+              setCreating(undefined);
+            }}
+          />
+        )}
+        {state.kind === "ready" && creating === undefined && (
           <div
             ref={treeRef}
             id={treeId}
@@ -265,11 +403,21 @@ export function PathPicker({
             <code data-testid="picker-selected">{selected?.node.path ?? "—"}</code>
           </Text>
           <Group gap="xs">
+            {sliceTarget !== undefined && creating === undefined && (
+              <Button
+                variant="light"
+                onClick={() => {
+                  void startSlice(sliceTarget);
+                }}
+              >
+                {t("slices.add", { element: sliceTarget.path })}
+              </Button>
+            )}
             <Button variant="default" onClick={onClose}>
               {t("roles.cancel")}
             </Button>
             <Button
-              disabled={selected === undefined}
+              disabled={selected === undefined || creating !== undefined}
               onClick={() => {
                 if (selected !== undefined) onPick(selected.node.path);
               }}
