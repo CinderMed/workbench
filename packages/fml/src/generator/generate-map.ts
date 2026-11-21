@@ -13,6 +13,10 @@
  *   role's condition (`<code>-guard`), and so is a row with its own condition.
  * - Value maps and quantities come with the value-map rules (#11, #12); `concat` with #98;
  *   expert expressions are not supported in the MVP.
+ * - Element names and choice types come from the FHIR definitions, resolved by the export and
+ *   passed as plain data (`WrittenPaths`, ADR-0023). On a choice element, a value whose type is not
+ *   the chosen one is written with that type: `res.value = create('string') as x, x.value = v`; a
+ *   path through a choice opens it with its type: `res.value = create('Quantity') as p` (#156).
  */
 import type {
   Coding,
@@ -38,7 +42,7 @@ import {
   type Target,
   type Transform,
 } from "../fml-ast.js";
-import { GeneratorCode } from "./codes.js";
+import { GeneratorCode, GeneratorInputError } from "./codes.js";
 import {
   conditionExpr,
   hasExpression,
@@ -49,6 +53,7 @@ import {
 import { logicalModelName, logicalModelUrl } from "./logical-model.js";
 import { valueRuleNames } from "./rule-names.js";
 import { roleKey, type Planned, type TablePlan } from "./table-plan.js";
+import { pathKey, type WrittenPaths } from "./written-paths.js";
 
 const HL7_SD = "http://hl7.org/fhir/StructureDefinition";
 const src = ident("src");
@@ -59,35 +64,20 @@ const req = ident("req");
 export const MAIN_GROUP_COMMENT =
   "Main group: one transaction Bundle per normalized record.\nEach role becomes an entry with PUT on its deterministic id (computed by the normalization).";
 
-/**
- * Choice elements of R4 resources (`value[x]`, `effective[x]`, …): in a path they carry their type
- * (`valueQuantity`), while the FML target is the element name (`value`) and the engine picks the
- * type from the value. Until the FHIR definitions arrive (module 3, D7), only these names are
- * recognised; any other name is written as it is (`birthDate`, `recordedDate`).
- */
-const CHOICE_ELEMENTS =
-  "value effective onset abatement deceased multipleBirth occurrence performed timing born age serviced collected asNeeded dose rate medication reported product allowed used".split(
-    " ",
-  );
-/** FHIR data types that can follow a choice element name. */
-const CHOICE_TYPES =
-  "Boolean Canonical Code Date DateTime Decimal Id Instant Integer Markdown Oid PositiveInt String Time UnsignedInt Uri Url Uuid Address Age Annotation Attachment CodeableConcept Coding ContactPoint Count Distance Duration HumanName Identifier Money Period Quantity Range Ratio Reference SampledData Signature Timing".split(
-    " ",
-  );
-const CHOICE = new RegExp(`^(${CHOICE_ELEMENTS.join("|")})(${CHOICE_TYPES.join("|")})$`);
-
-/** Element name as FML writes it: a choice element without its type suffix. */
-export function fmlElement(name: string): Identifier {
-  return ident(CHOICE.exec(name)?.[1] ?? name);
-}
-
-interface Segment {
+/** A segment of a project path. */
+interface PathSegment {
   readonly name: string;
   readonly slice?: string;
 }
 
-function parsePath(path: string): Segment[] | undefined {
-  const segments: Segment[] = [];
+/** A segment as written: its FML element and, on a choice element, the chosen type. */
+interface Segment extends PathSegment {
+  readonly element: Identifier;
+  readonly choiceType?: string;
+}
+
+function parsePath(path: string): PathSegment[] | undefined {
+  const segments: PathSegment[] = [];
   for (const part of path.split(".")) {
     const match = /^([A-Za-z][A-Za-z0-9]*)(?:\[([A-Za-z0-9_-]+)\])?$/.exec(part);
     if (match?.[1] === undefined) return undefined;
@@ -105,10 +95,12 @@ class Generation {
 
   readonly project: ProjectFile;
   readonly plan: TablePlan;
+  readonly written: WrittenPaths;
 
-  constructor(project: ProjectFile, plan: TablePlan) {
+  constructor(project: ProjectFile, plan: TablePlan, written: WrittenPaths) {
     this.project = project;
     this.plan = plan;
+    this.written = written;
     this.columns = new Map(
       plan.columns.map((c) => [c.column.id, { element: c.element, name: c.column.name }]),
     );
@@ -153,6 +145,36 @@ class Generation {
     return field;
   }
 
+  /**
+   * The segments of a role's path, as written. `undefined` when the path is not a project path
+   * (validation reports it); an error when it was not resolved (the export resolves every path of
+   * `pathsToWrite`).
+   */
+  segments(instance: Instance, path: string): Segment[] | undefined {
+    const parsed = parsePath(path);
+    if (parsed === undefined) return undefined;
+    const written = this.written.get(pathKey(instance.id, path));
+    if (written?.length !== parsed.length)
+      throw new GeneratorInputError(
+        `Path "${path}" of role ${this.role(instance)} was not resolved: pass the written paths of every path in pathsToWrite.`,
+      );
+    return parsed.map((segment, i) => {
+      const { name, choiceType } = written[i] ?? { name: segment.name };
+      return {
+        ...segment,
+        element: ident(name),
+        ...(choiceType === undefined ? {} : { choiceType }),
+      };
+    });
+  }
+
+  /** The FHIR type of a column's normalized value, as the HL7 engine reads it. */
+  columnType(id: Id | undefined): string | undefined {
+    const column = this.plan.columns.find((c) => c.column.id === id)?.column;
+    if (column === undefined) return undefined;
+    return COLUMN_TYPES[column.dataType];
+  }
+
   columnElement(id: Id | undefined): Identifier {
     const found = id === undefined ? undefined : this.columns.get(id);
     if (found === undefined)
@@ -161,6 +183,78 @@ class Generation {
       );
     return found.element;
   }
+}
+
+/** The FHIR type of each column type's normalized value in the logical model. */
+const COLUMN_TYPES: Readonly<Record<string, string>> = {
+  string: "string",
+  categorical: "string",
+  multipleChoice: "string",
+  integer: "integer",
+  decimal: "decimal",
+  boolean: "boolean",
+  date: "date",
+  dateTime: "dateTime",
+};
+
+/** The FHIR type of the value a transform writes, as the HL7 engine reads it. */
+function writtenType(value: Transform): string | undefined {
+  switch (value.kind) {
+    case "literal":
+      return typeof value.value === "string"
+        ? "string"
+        : typeof value.value === "boolean"
+          ? "boolean"
+          : Number.isInteger(value.value)
+            ? "integer"
+            : "decimal";
+    case "c":
+      return "Coding";
+    case "cc":
+      return "CodeableConcept";
+    case "create":
+      return String(value.type);
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * `owner.element = value`. On a choice element, a value whose type is not the chosen one is
+ * written with that type, or the HL7 engine would take the value's (#156):
+ * `owner.element = create('<type>') as x, x.value = value`.
+ */
+function assign(
+  owner: Identifier,
+  segment: Segment,
+  value: Transform,
+  valueType: string | undefined,
+): Target[] {
+  const chosen = segment.choiceType;
+  if (chosen === undefined || valueType === undefined || valueType === chosen)
+    return [{ context: owner, element: segment.element, transform: value }];
+  const x = ident("x");
+  return [
+    {
+      context: owner,
+      element: segment.element,
+      transform: { kind: "create", type: ident(chosen) },
+      alias: x,
+    },
+    { context: x, element: ident("value"), transform: value },
+  ];
+}
+
+/** `owner.element as alias`; a choice element is created with its chosen type (#156). */
+function open(owner: Identifier, segment: Segment, alias: Identifier): Target {
+  return segment.choiceType === undefined
+    ? { context: owner, element: segment.element, alias }
+    : {
+        context: owner,
+        element: segment.element,
+        transform: { kind: "create", type: ident(segment.choiceType) },
+        alias,
+      };
 }
 
 /** A fixed value as an FML transform, or `undefined` when the subset cannot write it. */
@@ -244,6 +338,23 @@ function roleEntry(g: Generation, instance: Instance): Rule {
 }
 
 /**
+ * The targets writing `value` on one segment (`res.status = v`) or two, the parent inline
+ * (`res.period as p, p.start = v`); choice elements with their type (#156).
+ */
+function writeOn(
+  owner: Identifier,
+  segments: readonly Segment[],
+  value: Transform,
+  type: string | undefined,
+): Target[] {
+  const [first, second] = segments;
+  if (first === undefined) return [];
+  if (second === undefined) return assign(owner, first, value, type);
+  const p = ident("p");
+  return [open(owner, first, p), ...assign(p, second, value, type)];
+}
+
+/**
  * The rule of one row writing its value on `context`: one segment writes the element, two write
  * the parent inline (`res.period as p, p.start = v`).
  */
@@ -255,17 +366,8 @@ function valueRule(
 ): Rule | undefined {
   const name = ruleName(row.code);
   const transform = row.transform;
-  const write = (owner: Identifier, value: Transform): Target[] => {
-    const [first, second] = segments;
-    if (first === undefined) return [];
-    if (second === undefined)
-      return [{ context: owner, element: fmlElement(first.name), transform: value }];
-    const p = ident("p");
-    return [
-      { context: owner, element: fmlElement(first.name), alias: p },
-      { context: p, element: fmlElement(second.name), transform: value },
-    ];
-  };
+  const write = (owner: Identifier, value: Transform, type: string | undefined): Target[] =>
+    writeOn(owner, segments, value, type);
   switch (transform.kind) {
     case "copy":
     case "cast": {
@@ -273,7 +375,12 @@ function valueRule(
       return {
         name,
         source: { context: src, element: g.columnElement(row.columnId), alias: v },
-        targets: write(context, { kind: "copy", variable: v }),
+        targets: write(
+          context,
+          { kind: "copy", variable: v },
+          // A cast is written as a copy: the engine sees the column's type, not the cast's.
+          g.columnType(row.columnId),
+        ),
       };
     }
     case "constant": {
@@ -288,7 +395,7 @@ function valueRule(
         );
         return undefined;
       }
-      return { name, source: { context: src }, targets: write(context, fixed) };
+      return { name, source: { context: src }, targets: write(context, fixed, writtenType(fixed)) };
     }
     case "reference": {
       const target = g.project.instances.find((i) => i.id === transform.targetInstanceId);
@@ -313,7 +420,7 @@ function valueRule(
         name,
         source: { context: src, element: g.idField(target), alias: t },
         targets: [
-          { context, element: fmlElement(first.name), alias: r },
+          open(context, first, r),
           {
             context: r,
             element: ident("reference"),
@@ -370,9 +477,16 @@ function entryTransform(map: ValueMap, entry: ValueMapEntry): Transform | undefi
 /** `res.path = value` targets of `setElement` and `use.also` (top-level elements only). */
 function setTargets(g: Generation, row: MappingRow, set: readonly SetElement[]): Target[] {
   const targets: Target[] = [];
+  const instance = g.project.instances.find((i) => i.id === row.instanceId);
   for (const item of set) {
     const transform = fixedTransform(item.value);
-    if (transform === undefined || item.path.includes(".") || item.path.includes("[")) {
+    const segment = instance === undefined ? undefined : g.segments(instance, item.path)?.[0];
+    if (
+      transform === undefined ||
+      segment === undefined ||
+      item.path.includes(".") ||
+      item.path.includes("[")
+    ) {
       g.error(
         GeneratorCode.FIXED_VALUE_UNSUPPORTED,
         "mapping",
@@ -382,7 +496,7 @@ function setTargets(g: Generation, row: MappingRow, set: readonly SetElement[]):
       );
       continue;
     }
-    targets.push({ context: res, element: fmlElement(item.path), transform });
+    targets.push(...assign(res, segment, transform, writtenType(transform)));
   }
   return targets;
 }
@@ -499,17 +613,8 @@ function rowRules(
   segments: readonly Segment[],
 ): Rule[] {
   const transform = row.transform;
-  const write = (value: Transform): Target[] => {
-    const [first, second] = segments;
-    if (first === undefined) return [];
-    if (second === undefined)
-      return [{ context, element: fmlElement(first.name), transform: value }];
-    const p = ident("p");
-    return [
-      { context, element: fmlElement(first.name), alias: p },
-      { context: p, element: fmlElement(second.name), transform: value },
-    ];
-  };
+  const write = (value: Transform): Target[] =>
+    writeOn(context, segments, value, writtenType(value));
   if (transform.kind === "valueMap") {
     const map = g.project.valueMaps.find((m) => m.id === transform.valueMapId);
     if (map === undefined)
@@ -541,7 +646,11 @@ function rowRules(
   if (transform.kind === "quantity") {
     const v = ident("v");
     const q = ident("q");
-    const [target] = write({ kind: "create", type: ident("Quantity") });
+    // On a choice, the chosen type: Quantity, or a type derived from it (Age, Duration, #156).
+    const [target] = write({
+      kind: "create",
+      type: ident(segments[0]?.choiceType ?? "Quantity"),
+    });
     if (target === undefined || segments.length > 1) {
       g.error(
         GeneratorCode.PATH_UNSUPPORTED,
@@ -709,7 +818,8 @@ function roleGroup(g: Generation, instance: Instance): Group {
   const rules: Rule[] = [];
   for (const fixed of instance.fixedValues ?? []) {
     const transform = fixedTransform(fixed.value);
-    if (fixed.path.includes(".") || fixed.path.includes("[")) {
+    const segment = g.segments(instance, fixed.path)?.[0];
+    if (segment === undefined || fixed.path.includes(".") || fixed.path.includes("[")) {
       g.error(
         GeneratorCode.PATH_UNSUPPORTED,
         "instance",
@@ -732,12 +842,12 @@ function roleGroup(g: Generation, instance: Instance): Group {
     rules.push({
       name: ruleName(`fixed-${fixed.path}`),
       source: { context: src },
-      targets: [{ context: res, element: fmlElement(fixed.path), transform }],
+      targets: assign(res, segment, transform, writtenType(transform)),
     });
   }
 
   const rows = g.project.mappings.filter((row) => row.instanceId === instance.id);
-  const parsed = new Map(rows.map((row) => [row.id, parsePath(row.path)]));
+  const parsed = new Map(rows.map((row) => [row.id, g.segments(instance, row.path)]));
   const parentOf = (row: MappingRow): string | undefined => {
     const segments = parsed.get(row.id);
     if (segments === undefined || segments.length < 2) return undefined;
@@ -792,11 +902,14 @@ function roleGroup(g: Generation, instance: Instance): Group {
         );
         for (const discriminator of slice?.discriminator ?? []) {
           const transform = fixedTransform(discriminator.value);
-          if (transform === undefined) continue;
+          const element = g
+            .segments(instance, `${first.name}[${first.slice}].${discriminator.path}`)
+            ?.at(-1);
+          if (transform === undefined || element === undefined) continue;
           inner.push({
             name: ruleName(`slice-${first.slice}-${discriminator.path}`),
             source: { context: src },
-            targets: [{ context: alias, element: fmlElement(discriminator.path), transform }],
+            targets: assign(alias, element, transform, writtenType(transform)),
           });
         }
       }
@@ -822,7 +935,7 @@ function roleGroup(g: Generation, instance: Instance): Group {
             ? `${first.name}: written by ${String(block.length)} rows (${codes}) → one shared instance`
             : `${first.name}[${first.slice}]: named slice, created only if the column has a value`,
         source: where === undefined ? { context: src } : { context: src, where },
-        targets: [{ context: res, element: fmlElement(first.name), alias }],
+        targets: [open(res, first, alias)],
         then: { kind: "rules", rules: inner },
       });
       continue;
@@ -869,8 +982,12 @@ function checkRuleNames(g: Generation, group: Group): void {
 }
 
 /** The FML syntax tree of one table, or the generator errors that prevent it. */
-export function generateMap(project: ProjectFile, plan: TablePlan): Planned<StructureMapAst> {
-  const g = new Generation(project, plan);
+export function generateMap(
+  project: ProjectFile,
+  plan: TablePlan,
+  written: WrittenPaths,
+): Planned<StructureMapAst> {
+  const g = new Generation(project, plan, written);
   const roles = project.instances.filter((instance) => instance.sourceId === plan.source.id);
   for (const instance of roles) {
     if (instance.multiplicity.kind === "perValue") {

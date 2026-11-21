@@ -7,8 +7,11 @@ import { printMap } from "../fml-print.js";
 import { parseFml } from "../grammar-check.js";
 import { GeneratorCode } from "./codes.js";
 import { roleCondition, type ColumnNames } from "./conditions.js";
-import { fmlElement, generateMap } from "./generate-map.js";
+import { GeneratorInputError } from "./codes.js";
+import { generateMap } from "./generate-map.js";
 import { planTable } from "./table-plan.js";
+import { pathKey, type WrittenSegment } from "./written-paths.js";
+import { testWrittenPaths } from "../test-support/written-paths.js";
 
 function copy(document: unknown): ProjectFile {
   const file = JSON.parse(JSON.stringify(document)) as unknown;
@@ -19,7 +22,7 @@ function copy(document: unknown): ProjectFile {
 function generate(file: ProjectFile, sourceId: string) {
   const planned = planTable(file, sourceId);
   if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-  return generateMap(file, planned.value);
+  return generateMap(file, planned.value, testWrittenPaths(file));
 }
 
 function printed(file: ProjectFile, sourceId: string): string {
@@ -47,19 +50,6 @@ function metastraWithoutValueMaps(): ProjectFile {
   );
   return file;
 }
-
-describe("fmlElement", () => {
-  it("drops the type of a choice element and keeps other names", () => {
-    expect(fmlElement("valueQuantity")).toBe("value");
-    expect(fmlElement("valueInteger")).toBe("value");
-    expect(fmlElement("effectiveDateTime")).toBe("effective");
-    expect(fmlElement("onsetAge")).toBe("onset");
-    expect(fmlElement("birthDate")).toBe("birthDate");
-    expect(fmlElement("recordedDate")).toBe("recordedDate");
-    expect(fmlElement("deceasedBoolean")).toBe("deceased");
-    expect(fmlElement("status")).toBe("status");
-  });
-});
 
 describe("generateMap on Metastra rows (lines of the verified map)", () => {
   const text = printed(metastraWithoutValueMaps(), "src_firstoverview");
@@ -403,5 +393,131 @@ describe("generateMap with a profile slice name (#150, format 1.4.0)", () => {
     );
     expect(text).toContain('} "slice-VSCat";');
     expect(parseFml(text)).toEqual([]);
+  });
+});
+
+describe("choice elements written with their type (#156, ADR-0023)", () => {
+  const SOURCE = "src_firstoverview";
+  const OBS = "ins_obs1"; // Observation[1] · haemoglobin, written by R-010 (obs_bloodt_hb, decimal)
+
+  /** Metastra with Observation[1]'s rows replaced by `rows`, generated with `overrides`. */
+  function generateWith(
+    rows: Partial<MappingRow>[],
+    overrides: Record<string, WrittenSegment[]> = {},
+  ) {
+    const file = copy(metastraProject);
+    const base = row(file, "R-010");
+    file.mappings = [
+      ...file.mappings.filter((r) => r.instanceId !== OBS || r.transform.kind === "reference"),
+      ...rows.map((r, i): MappingRow => ({
+        ...base,
+        id: `map_t${String(i)}`,
+        code: `R-${String(100 + i)}`,
+        ...r,
+      })),
+    ];
+    const planned = planTable(file, SOURCE);
+    if (!planned.ok) throw new Error(JSON.stringify(planned.results));
+    const written = new Map(testWrittenPaths(file));
+    for (const [path, segments] of Object.entries(overrides))
+      written.set(pathKey(OBS, path), segments);
+    const map = generateMap(file, planned.value, written);
+    if (!map.ok) throw new Error(JSON.stringify(map.results));
+    return printMap(map.value);
+  }
+  const has = (text: string, line: string) => {
+    expect(text.split("\n").map((l) => l.trim())).toContain(line);
+  };
+
+  it("converts a value to the chosen type: a decimal cast to string on valueString", () => {
+    const text = generateWith([{ path: "valueString", transform: { kind: "cast", to: "string" } }]);
+    has(
+      text,
+      "src.obs_bloodt_hb as v -> res.value = create('string') as x, x.value = v \"R-100\";",
+    );
+  });
+
+  it("keeps a value that already has the chosen type as it is", () => {
+    const text = generateWith(
+      [{ path: "valueString", transform: { kind: "cast", to: "decimal" } }],
+      {
+        valueString: [{ name: "value", choiceType: "decimal" }],
+      },
+    );
+    has(text, 'src.obs_bloodt_hb as v -> res.value = v "R-100";');
+  });
+
+  it("writes a constant with the chosen type: a dateTime on effectiveDateTime", () => {
+    const text = generateWith([
+      {
+        path: "effectiveDateTime",
+        transform: {
+          kind: "constant",
+          value: { type: "dateTime", value: "2023-05-04T10:00:00+02:00" },
+        },
+      },
+    ]);
+    has(
+      text,
+      "src -> res.effective = create('dateTime') as x, x.value = '2023-05-04T10:00:00+02:00' \"R-100\";",
+    );
+  });
+
+  it("creates a quantity with the derived type a choice chooses (Age)", () => {
+    const text = generateWith(
+      [
+        {
+          path: "onsetAge",
+          transform: { kind: "quantity", unit: { system: "http://unitsofmeasure.org", code: "a" } },
+        },
+      ],
+      { onsetAge: [{ name: "onset", choiceType: "Age" }] },
+    );
+    has(text, "src.obs_bloodt_hb as v -> res.onset = create('Age') as q then {");
+  });
+
+  it("opens a path through a choice with its type, inline and in a shared block", () => {
+    const inline = generateWith([{ path: "valueQuantity.value", transform: { kind: "copy" } }]);
+    has(
+      inline,
+      "src.obs_bloodt_hb as v -> res.value = create('Quantity') as p, p.value = v \"R-100\";",
+    );
+    const shared = generateWith([
+      { path: "valueQuantity.value", transform: { kind: "copy" } },
+      {
+        path: "valueQuantity.unit",
+        transform: { kind: "constant", value: { type: "string", value: "g/dL" } },
+      },
+    ]);
+    has(
+      shared,
+      "src where ($this.obs_bloodt_hb.exists()) -> res.value = create('Quantity') as p then {",
+    );
+  });
+
+  it("takes every element name from the written paths, not from a list of names", () => {
+    // doseQuantity is not a choice in R4: written by its own name.
+    const text = generateWith(
+      [
+        {
+          path: "doseQuantity",
+          transform: {
+            kind: "quantity",
+            unit: { system: "http://unitsofmeasure.org", code: "mL" },
+          },
+        },
+      ],
+      { doseQuantity: [{ name: "doseQuantity" }] },
+    );
+    has(text, "src.obs_bloodt_hb as v -> res.doseQuantity = create('Quantity') as q then {");
+  });
+
+  it("stops on a path that was not resolved", () => {
+    const file = copy(metastraProject);
+    const planned = planTable(file, SOURCE);
+    if (!planned.ok) throw new Error("plan");
+    const written = new Map(testWrittenPaths(file));
+    written.delete(pathKey("ins_obs0", "component[nrs].valueInteger"));
+    expect(() => generateMap(file, planned.value, written)).toThrow(GeneratorInputError);
   });
 });

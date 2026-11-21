@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest";
 import metastraProject from "../../../fixtures/fml-examples/metastra/project.json?raw";
 import motuProject from "../../../fixtures/fml-examples/motu/project.json?raw";
 import { ExportCode, cleanProject, exportPackage, loadOrder, packageVersion } from "./index.js";
+import { r4Definitions } from "./test-support/r4-definitions.js";
 
 const options = {
+  definitions: r4Definitions(),
   createdAt: "2026-11-12T10:20:30Z",
   generator: { name: "cindermed", version: "test" },
 };
@@ -201,7 +203,8 @@ describe("blocking results and warnings", () => {
     const result = exportPackage(JSON.stringify(unsupported), options);
     expect(result.ok ? [] : result.results.map((r) => r.code)).toContain("TRANSFORM_UNSUPPORTED");
 
-    // MotuPatient also references Encounter[0] of HospitalStay, which references MotuPatient.
+    // An Observation of MotuPatient references Encounter[0] of HospitalStay, which references
+    // MotuPatient. FHIR-valid, so the export reaches the cycle check (the FHIR level runs first).
     const cyclic = project(motuProject);
     const encounter = cyclic.instances.find((i) => i.id === "ins_encounter0");
     if (encounter === undefined) throw new Error("fixture changed");
@@ -211,11 +214,29 @@ describe("blocking results and warnings", () => {
       from: { sourceId: "src_patient", columnIds: ["col_p_id"] },
       to: { sourceId: "src_stay", columnIds: ["col_s_id"] },
     });
+    cyclic.instances.push({
+      id: "ins_obs_back",
+      resourceType: "Observation",
+      index: 0,
+      sourceId: "src_patient",
+      multiplicity: { kind: "perRow" },
+      idRule: { parts: [{ literal: "obs" }, { columnId: "col_p_id" }] },
+      fixedValues: [
+        { path: "status", value: { type: "code", value: "final" } },
+        {
+          path: "code",
+          value: {
+            type: "CodeableConcept",
+            coding: { system: "http://loinc.org", code: "8302-2" },
+          },
+        },
+      ],
+    });
     cyclic.mappings.push({
       id: "map_back",
       code: "R-099",
-      instanceId: "ins_patient0",
-      path: "link",
+      instanceId: "ins_obs_back",
+      path: "encounter",
       transform: { kind: "reference", targetInstanceId: "ins_encounter0", via: "rel_back" },
     });
     expect(loadOrder(cyclic).cycle).toEqual(["Fall", "HospitalStay", "MotuPatient"]);

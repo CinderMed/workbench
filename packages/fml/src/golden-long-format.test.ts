@@ -30,6 +30,7 @@ import { normalizationSpec } from "./generator/normalization-spec.js";
 import { planTable } from "./generator/table-plan.js";
 import { checkGrammar } from "./grammar.js";
 import { toStructureMap } from "./structure-map.js";
+import { testWrittenPaths } from "./test-support/written-paths.js";
 
 function project(document: unknown): ProjectFile {
   if (!isProjectFile(document)) throw new Error("fixture is not a valid project");
@@ -45,7 +46,7 @@ describe.each([
 ] as const)("long-format golden case, table %s", (_name, sourceId, map, json, model, spec) => {
   const planned = planTable(file, sourceId);
   if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-  const generated = generateMap(file, planned.value);
+  const generated = generateMap(file, planned.value, testWrittenPaths(file));
   if (!generated.ok) throw new Error(JSON.stringify(generated.results));
 
   it("prints the committed map byte for byte and passes the grammar check", () => {

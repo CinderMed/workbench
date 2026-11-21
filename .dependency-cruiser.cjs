@@ -33,6 +33,14 @@ module.exports = {
       to: { path: IO_LIBRARIES },
     },
     {
+      name: "fml-not-to-fhir-defs",
+      comment:
+        "The generator gets element names and choice types as plain data from the export; @cindermed/fml never reads the FHIR definitions (ADR-0023).",
+      severity: "error",
+      from: { path: "^packages/fml/" },
+      to: { path: "^packages/fhir-defs/|^@cindermed/fhir-defs($|/)" },
+    },
+    {
       name: "web-not-to-api",
       comment: "The web app talks to the API over HTTP only.",
       severity: "error",

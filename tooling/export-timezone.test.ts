@@ -11,8 +11,12 @@ const script = `
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { exportPackage } from ${JSON.stringify(resolve(root, "packages/export/dist/index.js"))};
+import { FhirDefinitions } from ${JSON.stringify(resolve(root, "packages/fhir-defs/dist/index.js"))};
+const subset = JSON.parse(readFileSync(${JSON.stringify(resolve(root, "packages/export/src/test-support/r4-index.json"))}, "utf8"));
+const definitions = FhirDefinitions.open(JSON.parse(subset.manifest)).value;
+for (const [file, doc] of Object.entries(subset.files)) definitions.add(file, doc);
 const text = readFileSync(${JSON.stringify(resolve(root, "fixtures/fml-examples/motu/project.json"))}, "utf8");
-const result = exportPackage(text, { createdAt: "2026-11-12T23:30:00Z", packageVersion: "0.1.0", generator: { name: "cindermed", version: "test" } });
+const result = exportPackage(text, { definitions, createdAt: "2026-11-12T23:30:00Z", packageVersion: "0.1.0", generator: { name: "cindermed", version: "test" } });
 if (!result.ok) throw new Error("export failed");
 process.stdout.write(createHash("sha256").update(result.zip).digest("hex"));
 `;
