@@ -40,15 +40,12 @@ describe("how elements fit the row in the picker (type compatibility, point 1)",
     expect(fit("name.family")).toEqual({ kind: "needs", transforms: ["cast"] });
   });
 
-  it("names the coding for a code element from an integer copy, and greys the engine's limits", async () => {
+  it("names the transform a code or string element needs from an integer copy", async () => {
     const project = painProject();
     const fit = await fits(project, first(project), "Observation");
     expect(fit("component.valueInteger")).toEqual({ kind: "ok" });
-    // A conversion to another type on a choice element is an engine limit for now (#156).
-    expect(fit("component.valueString")).toMatchObject({
-      kind: "blocked",
-      message: expect.stringContaining("#156") as unknown,
-    });
+    // A conversion to string on a choice is written with the chosen type (#156, ADR-0023).
+    expect(fit("component.valueString")).toEqual({ kind: "needs", transforms: ["cast"] });
     expect(fit("component.code")).toEqual({ kind: "needs", transforms: ["coding"] });
     expect(fit("component")).toMatchObject({ kind: "blocked" });
   });

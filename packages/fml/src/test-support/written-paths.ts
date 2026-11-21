@@ -25,6 +25,7 @@ const CHOICES = new Set([
   "Patient.multipleBirth",
   "Patient.deceased",
   "Procedure.performed",
+  "RiskAssessment.occurrence",
 ]);
 
 /** Primitive types, named in lower camel case after a choice element (`valueDateTime` → dateTime). */

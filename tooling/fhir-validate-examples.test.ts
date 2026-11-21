@@ -18,7 +18,8 @@ const fixtures = resolve(import.meta.dirname, "../fixtures/fml-examples");
  * gives none.
  */
 const EXPECTED_WARNINGS: Readonly<Record<string, readonly string[]>> = {
-  "type-combinations": [...Array.from({ length: 10 }, () => "TYPE_PRECISION"), "ROLE_ORPHAN"],
+  // 12: two of them come from the #156 cells (integer → doseNumberPositiveInt, integer → valueQuantity.value).
+  "type-combinations": [...Array.from({ length: 12 }, () => "TYPE_PRECISION"), "ROLE_ORPHAN"],
 };
 
 const examples = readdirSync(fixtures, { withFileTypes: true })

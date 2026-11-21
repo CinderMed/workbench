@@ -169,18 +169,10 @@ describe("checkRowTypes", () => {
           "R-001: column note (string) cannot be converted to integer: a conversion goes to string, to the same type, from integer to decimal or from date to dateTime",
       },
     ]);
-    // A cast to string works on an element that is not a choice; on a choice the engine keeps
-    // the column's type (#156), so that cell is off.
+    // A cast to string works on any element; on a choice the generator writes it with the chosen
+    // type (#156, ADR-0023; golden case type-combinations).
     expect(check("code.text", { kind: "cast", to: "string" }, "t")).toEqual([]);
-    expect(check("valueString", { kind: "cast", to: "string" }, "t")).toEqual([
-      {
-        code: TypeCode.TYPE_MISMATCH,
-        severity: "error",
-        field: "path",
-        message:
-          "R-001: column seen (dateTime) is written to Observation.valueString (string), a choice element, as a dateTime: the HL7 engine would make it a valueDateTime, not a valueString; write it to an element that is not a choice (#156)",
-      },
-    ]);
+    expect(check("valueString", { kind: "cast", to: "string" }, "t")).toEqual([]);
     expect(check("valueBoolean", { kind: "cast", to: "string" }, "t")[0]?.message).toBe(
       "R-001: column seen converted to string cannot be written to Observation.valueBoolean (boolean); use valueString",
     );
@@ -443,22 +435,16 @@ describe("cells the generator and the HL7 engine cannot write yet (#156)", () =>
     ]);
   }
 
-  it("turns off a value whose type is not the choice's", () => {
-    // date → dateTime is allowed by the table, but on a choice the engine would write onsetDate.
-    expect(on("Condition", "onsetDateTime", { kind: "copy" }, "d")).toEqual([
-      [
-        "TYPE_MISMATCH",
-        "path",
-        "R-001: column seen (date) is written to Condition.onsetDateTime (dateTime), a choice element, as a date: the HL7 engine would make it an onsetDate, not an onsetDateTime; write it to an element that is not a choice (#156)",
-      ],
-    ]);
+  it("allows a value of another type on a choice: written with the chosen type (ADR-0023)", () => {
+    // date → dateTime on a choice: the generator writes create('dateTime') (golden case).
+    expect(on("Condition", "onsetDateTime", { kind: "copy" }, "d")).toEqual([]);
     expect(on("Thing", "when", { kind: "copy" }, "d")).toEqual([]);
     expect(
       on("Condition", "onsetDateTime", {
         kind: "constant",
         value: { type: "dateTime", value: "2023-05-04T10:00:00+02:00" },
-      })[0]?.[0],
-    ).toBe("TYPE_MISMATCH");
+      }),
+    ).toEqual([]);
     expect(
       on("Thing", "when", {
         kind: "constant",
@@ -470,13 +456,17 @@ describe("cells the generator and the HL7 engine cannot write yet (#156)", () =>
     ).toEqual([]);
   });
 
-  it("turns off quantities into types derived from Quantity, and Quantity constants", () => {
-    const age =
-      "R-001: the quantity transform writes a Quantity, but Condition.onsetAge (Age) needs an Age, which the generator cannot create yet (#156)";
-    expect(on("Condition", "onsetAge", { kind: "quantity" }, "n")).toEqual([
-      ["TYPE_MISMATCH", "path", age],
+  it("allows Age on a choice, and still turns off other derived types and Quantity constants", () => {
+    // On a choice the generator creates the chosen type (create('Age'), golden case onsetAge).
+    expect(on("Condition", "onsetAge", { kind: "quantity" }, "n")).toEqual([]);
+    // An Age that is not a choice is still created as Quantity: off until a golden case.
+    expect(on("Thing", "age", { kind: "quantity" }, "n")).toEqual([
+      [
+        "TYPE_MISMATCH",
+        "path",
+        "R-001: the quantity transform writes a Quantity, but Thing.age (Age) needs an Age, which the generator cannot create yet (#156)",
+      ],
     ]);
-    expect(on("Thing", "age", { kind: "quantity" }, "n")[0]?.[0]).toBe("TYPE_MISMATCH");
     expect(on("Thing", "size", { kind: "quantity" }, "n")).toEqual([]);
     expect(
       on("Thing", "size", {
@@ -515,6 +505,7 @@ describe("cells the generator and the HL7 engine cannot write yet (#156)", () =>
       return r.value;
     };
     const dateTime = { type: "dateTime", value: "2023-05-04T10:00:00+02:00" } as const;
+    // On a choice: written with the chosen type (ADR-0023; golden case occurrenceDateTime).
     expect(
       checkValueType(
         engine,
@@ -522,10 +513,8 @@ describe("cells the generator and the HL7 engine cannot write yet (#156)", () =>
         "Condition",
         resolved("Condition", "onsetDateTime"),
         "fixed value",
-      )?.message,
-    ).toBe(
-      "fixed value: the value is written to Condition.onsetDateTime (dateTime), a choice element, as a string: the HL7 engine would make it an onsetString, not an onsetDateTime; write it to an element that is not a choice (#156)",
-    );
+      ),
+    ).toBeUndefined();
     expect(
       checkValueType(engine, dateTime, "Thing", resolved("Thing", "when"), "fixed value"),
     ).toBeUndefined();

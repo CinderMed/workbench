@@ -19,7 +19,7 @@ verification prototypes, not the final generator, which will be written in TypeS
   `packages/fml/src/test-support/boolean-value-map.ts` (not written by hand) and compiled with the HL7 engine
 - `element-names/` — 1 table (Visit): a column named `a b` is used in a creation condition. Its element name must
   be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
-- `type-combinations/` — 1 table (Visit), 9 roles, one synthetic row: every combination of the type-compatibility table
+- `type-combinations/` — 1 table (Visit), 10 roles, one synthetic row: every combination of the type-compatibility table
   that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
   casts; Quantity, Duration and SimpleQuantity; Coding and CodeableConcept from a code column, #106; constants of
   each type), checked value by value by
@@ -197,3 +197,24 @@ manifests changed (the project's format version and the digest of the cleaned `p
 normalization specifications and Bundles are unchanged.
 Each extension of 1.4.0 that changes the project schema changes one line of every manifest: the digest of the included
 `schemas/mapping-project.schema.json`. With the coding transform (#106) nothing else changed.
+
+## Choice elements with their type (21 November 2026, #156)
+The generator now takes element names and choice types from the FHIR definitions (ADR-0023). On a choice element, a
+value whose type is not the chosen one is written with that type: `res.value = create('string') as x, x.value = v`.
+`type-combinations` gets a golden case for each rule. Its project gains a decimal column `score` (`1.50`), four
+component slices, a fixed value, a third Observation and rows R-039 to R-052:
+- casts to string on a choice: decimal `1.50` → `valueString: "1.50"` (trailing zeros kept), date, integer and
+  boolean;
+- a date column on `effectiveDateTime`;
+- a dateTime with an offset (`2023-05-04T10:30:00+02:00`) as a constant on `effectiveDateTime` and as a fixed value
+  on `RiskAssessment.occurrenceDateTime`;
+- a quantity on `Condition.onsetAge`, created as `Age`;
+- `Immunization.doseQuantity`, which is not a choice in R4 (the old name list wrote it as `dose`);
+- `protocolApplied.doseNumberPositiveInt`, created as `positiveInt`;
+- a path through a choice: `valueQuantity.value` with unit, system and code constants, opened with
+  `create('Quantity')`.
+
+A dateTime column whose values carry an offset is not covered: the normalization rejects the offset until the time
+zone is declared at the border (#107). The package was written with `tooling/golden/write-fixture.mjs`, and the HL7
+validator 7.0.5 compiled the map (plus `status: draft`). `tests/type-combinations.py` checks 51 values with their
+JSON types, and the Bundle validates with 0 errors. The other examples do not change.
