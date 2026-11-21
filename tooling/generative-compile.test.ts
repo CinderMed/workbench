@@ -15,6 +15,7 @@ import {
   toStructureMap,
 } from "../packages/fml/src/index.js";
 import { randomProject } from "../packages/fml/src/test-support/random-projects.js";
+import { testWrittenPaths } from "../packages/fml/src/test-support/written-paths.js";
 
 const root = resolve(import.meta.dirname, "..");
 const work = join(root, ".tmp", "generative-compile");
@@ -41,7 +42,7 @@ describe.runIf(enabled)("generative: the HL7 engine compiles the generated maps"
     for (const source of project.sources) {
       const planned = planTable(project, source.id);
       if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-      const map = generateMap(project, planned.value);
+      const map = generateMap(project, planned.value, testWrittenPaths(project));
       if (!map.ok) throw new Error(JSON.stringify(map.results));
       const ig = join(work, `seed-${String(seed)}`, source.name);
       mkdirSync(ig, { recursive: true });

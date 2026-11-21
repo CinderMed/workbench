@@ -16,6 +16,7 @@ import { checkGrammar } from "./grammar.js";
 import { toStructureMap } from "./structure-map.js";
 import { emptyStrings } from "./test-support/empty-strings.js";
 import { HARD_COLUMN_NAMES, HARD_VALUES, randomProject } from "./test-support/random-projects.js";
+import { testWrittenPaths } from "./test-support/written-paths.js";
 
 export const SEEDS = 300;
 const FHIR_ID = /^[A-Za-z0-9.-]{1,64}$/;
@@ -49,7 +50,7 @@ describe("generative: random projects translate to grammar-valid FML", () => {
     for (const source of project.sources) {
       const planned = planTable(project, source.id);
       if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-      const map = generateMap(project, planned.value);
+      const map = generateMap(project, planned.value, testWrittenPaths(project));
       if (!map.ok) throw new Error(JSON.stringify(map.results));
       expect(printMap(map.value)).toBe(printMap(map.value));
       expect(

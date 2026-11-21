@@ -20,6 +20,7 @@ import motuManifest from "../../../fixtures/fml-examples/motu/manifest.json?raw"
 import motuProject from "../../../fixtures/fml-examples/motu/project.json?raw";
 import normalizationSchemaText from "../../../fixtures/fml-examples/normalization.schema.json?raw";
 import { cleanProject, exportPackage } from "./index.js";
+import { r4Definitions } from "./test-support/r4-definitions.js";
 
 /** Fixture files, by folder and name (Vite glob of the raw text). */
 const fixtureFiles = import.meta.glob<string>(
@@ -54,6 +55,7 @@ describe.each([
 ])("export of %s", (folder, projectText, manifestText) => {
   const expected = JSON.parse(manifestText) as ExportManifest;
   const result = exportPackage(projectText, {
+    definitions: r4Definitions(),
     createdAt: expected.package.createdAt,
     packageVersion: "0.1.0",
     generator: expected.package.generator,

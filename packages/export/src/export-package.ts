@@ -20,7 +20,7 @@ import {
   type ValidationResult,
 } from "@cindermed/model";
 import { type FhirDefinitions, validateFhir } from "@cindermed/fhir-defs";
-import { choicePathResults } from "./choice-paths.js";
+import { writtenPaths } from "./written-paths.js";
 import {
   conceptMaps,
   generateMap,
@@ -47,10 +47,10 @@ export const ExportCode = {
 export interface ExportOptions {
   /**
    * The FHIR definitions of the project's FHIR version, with every document the project needs
-   * loaded (ADR-0013). When given, the FHIR level of validation runs (D7: paths and types) and
-   * its errors block the export. The CLI always gives them, unless `--no-fhir` says otherwise.
+   * loaded (ADR-0013). Always needed (ADR-0023): the FHIR level of validation runs (D7) and its
+   * errors block the export, and the generator writes element names and choice types from them.
    */
-  readonly definitions?: FhirDefinitions;
+  readonly definitions: FhirDefinitions;
   /** ISO 8601 date-time of the package, also the timestamp of every zip entry. */
   readonly createdAt: string;
   /** Package version; absent = `0.0.0-dev.<first 12 hex of the SHA-256 of the project text>`. */
@@ -111,14 +111,7 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
     return { ok: false, results: parsed.results };
   const project = parsed.project;
   // FHIR level (D7): its errors block the export like the other levels' errors.
-  const fhir =
-    options.definitions === undefined
-      ? []
-      : [
-          ...validateFhir(project, options.definitions),
-          // Paths through choice elements the generator cannot write yet (#156).
-          ...choicePathResults(project, options.definitions),
-        ];
+  const fhir = validateFhir(project, options.definitions);
   if (fhir.some((r) => r.severity === "error"))
     return { ok: false, results: [...parsed.results, ...fhir] };
   const warnings = [...parsed.results, ...fhir].filter((r) => r.severity !== "error");
@@ -139,6 +132,8 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
     });
   }
 
+  // Every path the generator writes, resolved with the definitions (ADR-0023).
+  const written = writtenPaths(project, options.definitions);
   const text = new Map<string, string>();
   const tables: ExportManifest["tables"][number][] = [];
   for (const source of project.sources) {
@@ -148,7 +143,7 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
       continue;
     }
     const plan = planned.value;
-    const map = generateMap(project, plan);
+    const map = generateMap(project, plan, written);
     if (!map.ok) {
       results.push(...map.results);
       continue;

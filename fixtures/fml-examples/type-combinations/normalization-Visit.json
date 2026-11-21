@@ -154,6 +154,11 @@
         "AMB",
         "IMP"
       ]
+    },
+    {
+      "name": "score",
+      "sourceName": "score",
+      "type": "decimal"
     }
   ],
   "ids": [
@@ -257,6 +262,18 @@
       "field": "id_Immunization0",
       "literals": [
         "imm"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation2",
+      "literals": [
+        "obs-through"
       ],
       "columns": [
         "patient_id"

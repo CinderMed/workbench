@@ -9,6 +9,31 @@ import { unzipSync } from "fflate";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadDefinitions } from "./fhir-packages.js";
 import { type CliIo, ExitCode, USAGE, packageName, run } from "./index.js";
+import { FhirDefinitions, parseManifest } from "@cindermed/fhir-defs";
+
+/** The R4 subset of the export tests (ADR-0023), as the CLI's loader gives definitions. */
+const R4_INDEX = fileURLToPath(
+  new URL("../../../packages/export/src/test-support/r4-index.json", import.meta.url),
+);
+function r4Loaded(): Awaited<ReturnType<CliIo["loadDefinitions"]>> {
+  const subset = JSON.parse(readFileSync(R4_INDEX, "utf8")) as {
+    manifest: string;
+    files: Record<string, string>;
+  };
+  const manifest = parseManifest(JSON.parse(subset.manifest));
+  const opened = FhirDefinitions.open(JSON.parse(subset.manifest));
+  if (!manifest.ok || !opened.ok) throw new Error("the R4 test index does not open");
+  for (const [file, text] of Object.entries(subset.files)) opened.value.add(file, text);
+  return {
+    index: {
+      manifest: manifest.value,
+      manifestText: subset.manifest,
+      files: new Map(Object.entries(subset.files)),
+    },
+    definitions: opened.value,
+    issues: [],
+  };
+}
 
 const examples = fileURLToPath(new URL("../../../fixtures/fml-examples/", import.meta.url));
 
@@ -395,14 +420,20 @@ describe("cindermed usage", () => {
 
 describe("cindermed export", () => {
   const motu = `${examples}motu/project.json`;
-  const fixed = ["--package-version", "0.1.0", "--created-at", "2026-11-12T00:00:00Z", "--no-fhir"];
+  const fixed = ["--package-version", "0.1.0", "--created-at", "2026-11-12T00:00:00Z"];
+  /** The export always loads the FHIR definitions (ADR-0023): here the R4 subset of the tests. */
+  const exporting = (files: Readonly<Record<string, string>> = {}) => {
+    const cli = capture(files);
+    return { ...cli, io: { ...cli.io, loadDefinitions: () => Promise.resolve(r4Loaded()) } };
+  };
 
   it("writes the deterministic zip of the export package", async () => {
-    const cli = capture();
+    const cli = exporting();
     expect(await run(["export", motu, ...fixed, "--out", "out/motu.zip"], cli.io)).toBe(
       ExitCode.OK,
     );
     const expected = exportPackage(await exampleText("motu"), {
+      definitions: r4Loaded().definitions,
       createdAt: "2026-11-12T00:00:00Z",
       packageVersion: "0.1.0",
       generator: { name: "cindermed", version: "9.9.9" },
@@ -410,14 +441,11 @@ describe("cindermed export", () => {
     if (!expected.ok) throw new Error("fixture export failed");
     expect([...cli.written.keys()]).toEqual(["out/motu.zip"]);
     expect(cli.written.get("out/motu.zip")).toEqual(expected.zip);
-    expect(cli.stdout()).toBe(
-      `${motu}: exported motu-mapping 0.1.0 to out/motu.zip (18 files)\n` +
-        "  note: FHIR checks skipped (--no-fhir)\n",
-    );
+    expect(cli.stdout()).toBe(`${motu}: exported motu-mapping 0.1.0 to out/motu.zip (18 files)\n`);
   });
 
   it("writes the files into a folder when --out does not end in .zip", async () => {
-    const cli = capture();
+    const cli = exporting();
     expect(await run(["export", motu, ...fixed, "--out", "pkg/"], cli.io)).toBe(ExitCode.OK);
     const paths = [...cli.written.keys()];
     expect(paths).toContain("pkg/manifest.json");
@@ -430,8 +458,8 @@ describe("cindermed export", () => {
   });
 
   it("uses a dev version from the project, the clock and the package name by default", async () => {
-    const cli = capture();
-    expect(await run(["export", motu, "--no-fhir"], cli.io)).toBe(ExitCode.OK);
+    const cli = exporting();
+    expect(await run(["export", motu], cli.io)).toBe(ExitCode.OK);
     const [out] = [...cli.written.keys()];
     expect(out).toMatch(/^motu-mapping-0\.0\.0-dev\.[0-9a-f]{12}\.zip$/);
     const entries = unzipSync(cli.written.get(out ?? "") ?? new Uint8Array());
@@ -442,7 +470,7 @@ describe("cindermed export", () => {
   });
 
   it("reports in JSON", async () => {
-    const cli = capture();
+    const cli = exporting();
     expect(await run(["export", motu, ...fixed, "--format", "json"], cli.io)).toBe(ExitCode.OK);
     expect(JSON.parse(cli.stdout())).toMatchObject({
       file: motu,
@@ -458,19 +486,32 @@ describe("cindermed export", () => {
     const [first, second] = broken.mappings;
     if (first === undefined || second === undefined) throw new Error("fixture changed");
     second.code = first.code;
-    const cli = capture({ "broken.json": JSON.stringify(broken) });
+    const cli = exporting({ "broken.json": JSON.stringify(broken) });
     expect(await run(["export", "broken.json", ...fixed], cli.io)).toBe(ExitCode.INVALID);
     expect(cli.written.size).toBe(0);
     expect(cli.stdout()).toMatch(
-      /^broken\.json: export blocked, 1 error\n {2}note: FHIR checks skipped \(--no-fhir\)\n {2}error DUPLICATE_ROW_CODE/,
+      /^broken\.json: export blocked, 1 error\n {2}error DUPLICATE_ROW_CODE/,
     );
-    const json = capture({ "broken.json": JSON.stringify(broken) });
-    await run(["export", "broken.json", "--format", "json", "--no-fhir"], json.io);
+    const json = exporting({ "broken.json": JSON.stringify(broken) });
+    await run(["export", "broken.json", "--format", "json"], json.io);
     expect(JSON.parse(json.stdout())).toMatchObject({
       ok: false,
-      fhir: { checks: "skipped", packages: [] },
+      fhir: { checks: "done", packages: ["hl7.fhir.r4.core#4.0.1"] },
       results: [{ code: "DUPLICATE_ROW_CODE" }],
     });
+  });
+
+  it("always needs the FHIR definitions: no --no-fhir, and stops when they cannot be loaded", async () => {
+    const flag = exporting();
+    expect(await run(["export", motu, "--no-fhir"], flag.io)).toBe(ExitCode.USAGE);
+    expect(flag.stderr()).toContain("--no-fhir does not apply to export");
+    const missing = capture(); // Its loader fails, as an offline cache without the packages.
+    expect(await run(["export", motu, ...fixed], missing.io)).toBe(ExitCode.USAGE);
+    expect(missing.written.size).toBe(0);
+    expect(missing.stderr()).toBe(
+      `cindermed: cannot load the FHIR definitions for ${motu}: no FHIR packages in this test\n` +
+        "  use --fhir-cache <folder> for a cache that holds the packages: the export always needs the FHIR definitions\n",
+    );
   });
 
   it.each([
@@ -490,7 +531,7 @@ describe("cindermed export", () => {
   });
 
   it("reports a file it cannot write", async () => {
-    const cli = capture();
+    const cli = exporting();
     const io = {
       ...cli.io,
       writeFile: () => Promise.reject(Object.assign(new Error("denied"), { code: "EACCES" })),

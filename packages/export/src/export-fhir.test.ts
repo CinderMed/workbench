@@ -3,6 +3,7 @@ import { FhirDefinitions, buildIndex } from "@cindermed/fhir-defs";
 import { describe, expect, it } from "vitest";
 import visitProject from "../../../fixtures/fml-examples/boolean-value-map/project.json?raw";
 import { exportPackage } from "./export-package.js";
+import { r4Definitions } from "./test-support/r4-definitions.js";
 
 /** Definitions of FHIR 5.0.0 with no types: enough to show that the FHIR level runs. */
 function r5Definitions(): FhirDefinitions {
@@ -24,7 +25,7 @@ describe("exportPackage with FHIR definitions", () => {
     expect(result.ok ? [] : result.results.map((r) => r.code)).toEqual(["FHIR_VERSION_MISMATCH"]);
   });
 
-  it("does not run the FHIR level without definitions", () => {
-    expect(exportPackage(visitProject, options).ok).toBe(true);
+  it("exports with the project's definitions (always needed, ADR-0023)", () => {
+    expect(exportPackage(visitProject, { ...options, definitions: r4Definitions() }).ok).toBe(true);
   });
 });

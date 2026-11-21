@@ -495,6 +495,24 @@
         ]
       },
       {
+        "id": "VisitRow.score",
+        "path": "VisitRow.score",
+        "short": "score",
+        "definition": "score",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.score",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
         "id": "VisitRow.id_Patient0",
         "path": "VisitRow.id_Patient0",
         "short": "Computed id of Patient[0]",
@@ -647,6 +665,24 @@
         "max": "1",
         "base": {
           "path": "VisitRow.id_Immunization0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation2",
+        "path": "VisitRow.id_Observation2",
+        "short": "Computed id of Observation[2]",
+        "definition": "Deterministic id of the resource of role Observation[2] (through choice), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation2",
           "min": 0,
           "max": "1"
         },
@@ -1141,6 +1177,24 @@
         ]
       },
       {
+        "id": "VisitRow.score",
+        "path": "VisitRow.score",
+        "short": "score",
+        "definition": "score",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.score",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
         "id": "VisitRow.id_Patient0",
         "path": "VisitRow.id_Patient0",
         "short": "Computed id of Patient[0]",
@@ -1293,6 +1347,24 @@
         "max": "1",
         "base": {
           "path": "VisitRow.id_Immunization0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation2",
+        "path": "VisitRow.id_Observation2",
+        "short": "Computed id of Observation[2]",
+        "definition": "Deterministic id of the resource of role Observation[2] (through choice), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation2",
           "min": 0,
           "max": "1"
         },

@@ -205,6 +205,12 @@
               "code": "IMP"
             }
           ]
+        },
+        {
+          "id": "col_score",
+          "name": "score",
+          "label": "score",
+          "dataType": "decimal"
         }
       ]
     }
@@ -328,6 +334,13 @@
           "value": {
             "type": "code",
             "value": "final"
+          }
+        },
+        {
+          "path": "occurrenceDateTime",
+          "value": {
+            "type": "dateTime",
+            "value": "2023-05-04T10:30:00+02:00"
           }
         }
       ]
@@ -476,6 +489,90 @@
                   "system": "http://loinc.org",
                   "code": "8311-3",
                   "display": "dateTime",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_d2s",
+          "path": "component",
+          "name": "d2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+                  "code": "d2s",
+                  "display": "decimal as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_da2s",
+          "path": "component",
+          "name": "da2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+                  "code": "da2s",
+                  "display": "date as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_i2s",
+          "path": "component",
+          "name": "i2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+                  "code": "i2s",
+                  "display": "integer as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_bo2s",
+          "path": "component",
+          "name": "bo2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+                  "code": "bo2s",
+                  "display": "boolean as text",
                   "verification": {
                     "status": "manual"
                   }
@@ -656,6 +753,53 @@
           "value": {
             "type": "dateTime",
             "value": "2023-05-04T10:00:00+02:00"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs-through",
+      "resourceType": "Observation",
+      "index": 2,
+      "label": "through choice",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-through"
+          },
+          {
+            "columnId": "col_pid"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "context": {
+        "patientInstanceId": "ins_pat"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+              "code": "through",
+              "display": "path through a choice",
+              "verification": {
+                "status": "manual"
+              }
+            }
           }
         }
       ]
@@ -1081,6 +1225,173 @@
         "as": "Coding"
       },
       "columnId": "col_enc_class"
+    },
+    {
+      "id": "map_0039",
+      "code": "R-039",
+      "instanceId": "ins_obs-panel",
+      "path": "component[d2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_score"
+    },
+    {
+      "id": "map_0040",
+      "code": "R-040",
+      "instanceId": "ins_obs-panel",
+      "path": "component[da2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_visit_date"
+    },
+    {
+      "id": "map_0041",
+      "code": "R-041",
+      "instanceId": "ins_obs-panel",
+      "path": "component[i2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_count"
+    },
+    {
+      "id": "map_0042",
+      "code": "R-042",
+      "instanceId": "ins_obs-panel",
+      "path": "component[bo2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_smoker"
+    },
+    {
+      "id": "map_0043",
+      "code": "R-043",
+      "instanceId": "ins_obs-weight",
+      "path": "effectiveDateTime",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_visit_date"
+    },
+    {
+      "id": "map_0044",
+      "code": "R-044",
+      "instanceId": "ins_obs-panel",
+      "path": "effectiveDateTime",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "dateTime",
+          "value": "2023-05-04T10:30:00+02:00"
+        }
+      }
+    },
+    {
+      "id": "map_0045",
+      "code": "R-045",
+      "instanceId": "ins_cond",
+      "path": "onsetAge",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "a",
+          "display": "year"
+        }
+      },
+      "columnId": "col_age"
+    },
+    {
+      "id": "map_0046",
+      "code": "R-046",
+      "instanceId": "ins_imm",
+      "path": "doseQuantity",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "mL",
+          "display": "milliliter"
+        }
+      },
+      "columnId": "col_dose"
+    },
+    {
+      "id": "map_0047",
+      "code": "R-047",
+      "instanceId": "ins_imm",
+      "path": "protocolApplied.doseNumberPositiveInt",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_dose"
+    },
+    {
+      "id": "map_0048",
+      "code": "R-048",
+      "instanceId": "ins_obs-through",
+      "path": "valueQuantity.value",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_weight"
+    },
+    {
+      "id": "map_0049",
+      "code": "R-049",
+      "instanceId": "ins_obs-through",
+      "path": "valueQuantity.unit",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "string",
+          "value": "kg"
+        }
+      }
+    },
+    {
+      "id": "map_0050",
+      "code": "R-050",
+      "instanceId": "ins_obs-through",
+      "path": "valueQuantity.system",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "uri",
+          "value": "http://unitsofmeasure.org"
+        }
+      }
+    },
+    {
+      "id": "map_0051",
+      "code": "R-051",
+      "instanceId": "ins_obs-through",
+      "path": "valueQuantity.code",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "code",
+          "value": "kg"
+        }
+      }
+    },
+    {
+      "id": "map_0052",
+      "code": "R-052",
+      "instanceId": "ins_obs-through",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_pat",
+        "auto": true
+      }
     }
   ],
   "valueMaps": []

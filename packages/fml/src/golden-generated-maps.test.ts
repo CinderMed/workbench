@@ -29,6 +29,7 @@ import { generateMap } from "./generator/generate-map.js";
 import { planTable } from "./generator/table-plan.js";
 import { checkGrammar } from "./grammar.js";
 import { toStructureMap } from "./structure-map.js";
+import { testWrittenPaths } from "./test-support/written-paths.js";
 
 function project(document: unknown): ProjectFile {
   if (!isProjectFile(document)) throw new Error("fixture is not a valid project");
@@ -38,7 +39,7 @@ function project(document: unknown): ProjectFile {
 function generate(file: ProjectFile, sourceId: string) {
   const planned = planTable(file, sourceId);
   if (!planned.ok) throw new Error(JSON.stringify(planned.results));
-  const map = generateMap(file, planned.value);
+  const map = generateMap(file, planned.value, testWrittenPaths(file));
   if (!map.ok) throw new Error(JSON.stringify(map.results));
   return map.value;
 }

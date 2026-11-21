@@ -523,37 +523,14 @@ function tableValueType(
 
 // ---------------------------------------------------------------------------------------------
 // What the generator and the HL7 engine can write today (#156). The table above says what FHIR
-// allows; these cells are allowed by it but give an invalid or wrong resource, so they are turned
-// off until the generator writes them with an explicit type.
+// allows. Since ADR-0023 the generator writes a value of another type on a choice element with the
+// chosen type (create('<type>')), and the golden case type-combinations covers copies, casts,
+// constants and fixed values on a choice, a quantity on onsetAge, and a path through a choice.
+// Still turned off, with no golden case yet: a value map to code on a choice, a quantity into a
+// type derived from Quantity other than Age on a choice (or any derived type elsewhere), a
+// reference on a choice, and a Quantity constant.
 
 const ISSUE = "#156";
-
-/** The FHIR type of a column in the logical model of the normalized row (the generator's table). */
-const COLUMN_TYPES: Readonly<Record<ColumnType, string>> = {
-  string: "string",
-  integer: "integer",
-  decimal: "decimal",
-  boolean: "boolean",
-  date: "date",
-  dateTime: "dateTime",
-  categorical: "string",
-  multipleChoice: "string",
-};
-
-/** The type of the FML literal the generator writes for a typed value. */
-function literalType(value: FhirValue): string {
-  switch (value.type) {
-    case "boolean":
-    case "integer":
-    case "decimal":
-    case "Coding":
-    case "CodeableConcept":
-    case "Quantity":
-      return value.type;
-    default:
-      return "string"; // string, code, uri, date, dateTime: a quoted literal.
-  }
-}
 
 const VALUE_MAP_TYPES: Readonly<Record<string, string>> = {
   code: "string",
@@ -595,18 +572,11 @@ function engineRowTypes(
     message: `${row.code}: ${message}`,
   });
   const transform = row.transform;
-  const column = row.columnId === undefined ? undefined : context.columns.get(row.columnId);
   let why: string | undefined;
   switch (transform.kind) {
     case "copy":
     case "cast":
-      if (column !== undefined)
-        why = choiceFinding(
-          element,
-          COLUMN_TYPES[column.dataType],
-          `column ${column.name} (${column.dataType})`,
-          where,
-        );
+      // Written with the chosen type on a choice (ADR-0023; golden case type-combinations).
       break;
     case "constant":
       if (transform.value.type === "Quantity")
@@ -616,7 +586,6 @@ function engineRowTypes(
             `a Quantity constant cannot be written in the FML subset yet (${ISSUE})`,
           ),
         ];
-      why = choiceFinding(element, literalType(transform.value), "the constant", where);
       break;
     case "valueMap": {
       const valueMap = context.valueMaps.get(transform.valueMapId);
@@ -626,6 +595,8 @@ function engineRowTypes(
       break;
     }
     case "quantity": {
+      // On a choice the generator creates the chosen type; Age has a golden case (onsetAge).
+      if (element.choice?.type === "Age") break;
       const derived = element.types
         .map((t) => fhirType(t.code))
         .find((t) => isDerivedQuantity(defs, t));
@@ -683,17 +654,12 @@ export function checkValueType(
 ): TypeFinding | undefined {
   const table = tableValueType(defs, value, resourceType, element, label);
   if (table !== undefined) return table;
-  const where = target(resourceType, element);
-  const message =
-    value.type === "Quantity"
-      ? `a Quantity value cannot be written in the FML subset yet (${ISSUE})`
-      : choiceFinding(element, literalType(value), "the value", where);
-  return message === undefined
-    ? undefined
-    : {
-        code: TypeCode.TYPE_MISMATCH,
-        severity: "error",
-        field: "value",
-        message: `${label}: ${message}`,
-      };
+  // On a choice, a value of another type is written with the chosen type (ADR-0023).
+  if (value.type !== "Quantity") return undefined;
+  return {
+    code: TypeCode.TYPE_MISMATCH,
+    severity: "error",
+    field: "value",
+    message: `${label}: a Quantity value cannot be written in the FML subset yet (${ISSUE})`,
+  };
 }

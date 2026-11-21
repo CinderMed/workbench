@@ -43,6 +43,7 @@
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
       },
+      "effectiveDateTime" : "2023-05-04",
       "valueCodeableConcept" : {
         "coding" : [{
           "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-findings",
@@ -84,6 +85,7 @@
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
       },
+      "occurrenceDateTime" : "2023-05-04T10:30:00+02:00",
       "prediction" : [{
         "relativeRisk" : 0.75
       }],
@@ -110,6 +112,7 @@
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
       },
+      "effectiveDateTime" : "2023-05-04T10:30:00+02:00",
       "valueQuantity" : {
         "value" : 180,
         "unit" : "centimeter",
@@ -165,6 +168,46 @@
           }]
         },
         "valueDateTime" : "2023-05-04"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+            "code" : "d2s",
+            "display" : "decimal as text"
+          }]
+        },
+        "valueString" : "1.50"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+            "code" : "da2s",
+            "display" : "date as text"
+          }]
+        },
+        "valueString" : "2023-05-04"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+            "code" : "i2s",
+            "display" : "integer as text"
+          }]
+        },
+        "valueString" : "42"
+      },
+      {
+        "code" : {
+          "coding" : [{
+            "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+            "code" : "bo2s",
+            "display" : "boolean as text"
+          }]
+        },
+        "valueString" : "true"
       }]
     },
     "request" : {
@@ -186,6 +229,12 @@
       },
       "subject" : {
         "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "onsetAge" : {
+        "value" : 47,
+        "unit" : "year",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "a"
       }
     },
     "request" : {
@@ -264,11 +313,48 @@
       },
       "occurrenceDateTime" : "2023-04-01",
       "recorded" : "2023-05-04T10:00:00+02:00",
-      "lotNumber" : "2023-05-04"
+      "lotNumber" : "2023-05-04",
+      "doseQuantity" : {
+        "value" : 2,
+        "unit" : "milliliter",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "mL"
+      },
+      "protocolApplied" : [{
+        "doseNumberPositiveInt" : 2
+      }]
     },
     "request" : {
       "method" : "PUT",
       "url" : "Immunization/imm-ac1aebf0638b7020804eed3b"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/type-combinations/Observation/obs-through-ac1aebf0638b7020804eed3b",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-through-ac1aebf0638b7020804eed3b",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "https://cindermed.org/fhir/CodeSystem/type-combinations-checks",
+          "code" : "through",
+          "display" : "path through a choice"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-ac1aebf0638b7020804eed3b"
+      },
+      "valueQuantity" : {
+        "value" : 72,
+        "unit" : "kg",
+        "system" : "http://unitsofmeasure.org",
+        "code" : "kg"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-through-ac1aebf0638b7020804eed3b"
     }
   }]
 }
