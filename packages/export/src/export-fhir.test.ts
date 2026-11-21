@@ -3,7 +3,7 @@ import { FhirDefinitions, buildIndex } from "@cindermed/fhir-defs";
 import { describe, expect, it } from "vitest";
 import visitProject from "../../../fixtures/fml-examples/boolean-value-map/project.json?raw";
 import { exportPackage } from "./export-package.js";
-import { r4Definitions } from "./test-support/r4-definitions.js";
+import { r4Definitions } from "./test-support/test-definitions.js";
 
 /** Definitions of FHIR 5.0.0 with no types: enough to show that the FHIR level runs. */
 function r5Definitions(): FhirDefinitions {

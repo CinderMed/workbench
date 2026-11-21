@@ -1,0 +1,2 @@
+patient_id,sex,visit_date,encounter_class,measure,score,pain,onset_age
+R5-001,F,2024-03-12,AMB,72.40,1.50,6,58

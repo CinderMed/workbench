@@ -1,0 +1,122 @@
+{
+  "$schema": "../manifest.schema.json",
+  "formatVersion": "1.0.0",
+  "package": {
+    "name": "r5 visit-mapping",
+    "version": "0.1.0",
+    "createdAt": "2026-11-12T00:00:00Z",
+    "generator": {
+      "name": "cindermed",
+      "version": "0.0.0"
+    }
+  },
+  "project": {
+    "id": "prj_r5_visit",
+    "name": "R5 visit",
+    "formatVersion": "1.4.0",
+    "file": "project.json"
+  },
+  "fhirVersion": "5.0.0",
+  "packages": [
+    {
+      "name": "hl7.fhir.r5.core",
+      "version": "5.0.0"
+    }
+  ],
+  "output": {
+    "bundleType": "transaction",
+    "requestMethod": "PUT",
+    "fullUrlBase": "http://example.org/fhir/r5-visit"
+  },
+  "loadOrder": [
+    [
+      "Visit"
+    ]
+  ],
+  "tables": [
+    {
+      "source": "Visit",
+      "dependsOn": [],
+      "structureMap": {
+        "url": "http://example.org/fhir/r5-visit/StructureMap/Visit",
+        "fml": "Visit.map",
+        "json": "StructureMap-Visit.json"
+      },
+      "logicalModel": {
+        "url": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+        "file": "StructureDefinition-VisitRow.json"
+      },
+      "normalization": "normalization-Visit.json",
+      "creates": [
+        "Patient[0] · patient",
+        "Encounter[0] · visit",
+        "Observation[0] · measurement",
+        "Condition[0] · condition"
+      ]
+    }
+  ],
+  "conceptMaps": [
+    {
+      "url": "http://example.org/fhir/r5-visit/ConceptMap/sex",
+      "file": "ConceptMap-sex.json"
+    }
+  ],
+  "verification": {
+    "grammar": {
+      "source": "HL7/mapping-language-ig input/images/mapping.g4",
+      "commit": "8bb04b4",
+      "result": "passed"
+    },
+    "compile": {
+      "result": "skipped"
+    },
+    "checkedAt": "2026-11-12T00:00:00Z"
+  },
+  "files": [
+    {
+      "path": "project.json",
+      "sha256": "45a6b8a210bc62abcc8959567eb868a62cd9e82d11c0e2835e7ffed1be5b3a88",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "Visit.map",
+      "sha256": "0dfaf611b30b4b16f57d008087d14c23fa709276b77309e231088018b8f2ff89",
+      "mediaType": "text/fhir-mapping"
+    },
+    {
+      "path": "StructureMap-Visit.json",
+      "sha256": "9886e3d3060ba0c76edbef610f7474ab83b96fa1001c9df6d00ae7a802f1c1d9",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "StructureDefinition-VisitRow.json",
+      "sha256": "56c81e8883446d8fab79794d4c9b254db61d50f0353f13628c3b7794ecdb310c",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "normalization-Visit.json",
+      "sha256": "d60d7b167556a3dc6ed5a6f5316461a4bdba8caed258d581818a1473cbd2f20d",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "ConceptMap-sex.json",
+      "sha256": "ce7b9912f176bd0d071df8e9a56221829316c0052d0ea0ba96bcb516592b28da",
+      "mediaType": "application/fhir+json"
+    },
+    {
+      "path": "schemas/mapping-project.schema.json",
+      "sha256": "17e13a84b338c904f33a65805f9a8ba1c92217f231d87f37a3fdbe620a40b7b7",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/normalization.schema.json",
+      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "schemas/manifest.schema.json",
+      "sha256": "4449ea8ad84c808ed623e1afc9b76cb661babc33e72a3fd44d06b4216903ce7c",
+      "mediaType": "application/json"
+    }
+  ]
+}

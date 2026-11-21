@@ -1,0 +1,85 @@
+map "http://example.org/fhir/r5-visit/StructureMap/Visit" = `Visit`
+
+uses "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow" alias VisitRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://hl7.org/fhir/StructureDefinition/Encounter" alias Encounter as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
+uses "http://hl7.org/fhir/StructureDefinition/Condition" alias Condition as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Visit(source src : VisitRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+  // Encounter[0] · visit — always
+  src where ($this.id_Encounter0.exists()) -> bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {
+    src.id_Encounter0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Encounter/' + $this) "Encounter0-id";
+    src then Encounter0(src, res) "Encounter0-body";
+  } "Encounter0";
+  // Observation[0] · measurement — always
+  src where ($this.id_Observation0.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Observation/' + $this) "Observation0-id";
+    src then Observation0(src, res) "Observation0-body";
+  } "Observation0";
+  // Condition[0] · condition — always
+  src where ($this.id_Condition0.exists()) -> bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {
+    src.id_Condition0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Condition/' + $this) "Condition0-id";
+    src then Condition0(src, res) "Condition0-body";
+  } "Condition0";
+}
+
+group Patient0(source src : VisitRow, target res : Patient) {
+  src.patient_id as v -> res.identifier as p, p.value = v "R-001";
+  // R-002: value map sex (one rule per value; ConceptMap exported separately)
+  src.sex as v where ($this = 'M') -> res.gender = 'male' "R-002-M";
+  src.sex as v where ($this = 'F') -> res.gender = 'female' "R-002-F";
+  src.sex as v where ($this = 'U') -> res.gender = 'unknown' "R-002-U";
+}
+
+group Encounter0(source src : VisitRow, target res : Encounter) {
+  src -> res.status = 'completed' "fixed-status";
+  src.encounter_class as v -> res.class = create('CodeableConcept') as cn then {
+    v -> cn.coding = create('Coding') as cd then {
+      v -> cd.system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode', cd.code = v "R-003-code";
+    } "R-003-coding";
+  } "R-003";
+  src.visit_date as v -> res.actualPeriod as p, p.start = v "R-004";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-005";
+}
+
+group Observation0(source src : VisitRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'measure', 'synthetic measurement') "fixed-code";
+  src.measure as v -> res.value = create('Quantity') as q then {
+    v -> q.value = v "R-006-value";
+    src -> q.unit = 'kilogram', q.system = 'http://unitsofmeasure.org', q.code = 'kg' "R-006-unit";
+  } "R-006";
+  src -> res.effective = create('dateTime') as x, x.value = '2024-03-12T09:30:00+01:00' "R-007";
+  // component[d2s]: named slice, created only if the column has a value
+  src where ($this.score.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'd2s', 'decimal as text') "slice-d2s-code";
+    src.score as v -> slc.value = create('string') as x, x.value = v "R-008";
+  } "slice-d2s";
+  // component[pain]: named slice, created only if the column has a value
+  src where ($this.pain.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'pain', 'pain score') "slice-pain-code";
+    src.pain as v -> slc.value = v "R-009";
+  } "slice-pain";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-010";
+  src.id_Encounter0 as t -> res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) "R-011";
+}
+
+group Condition0(source src : VisitRow, target res : Condition) {
+  src -> res.clinicalStatus = cc('http://terminology.hl7.org/CodeSystem/condition-clinical', 'active', 'Active') "fixed-clinicalStatus";
+  src -> res.code = cc('http://snomed.info/sct', '38341003', 'Hypertensive disorder') "fixed-code";
+  src.onset_age as v -> res.onset = create('Age') as q then {
+    v -> q.value = v "R-012-value";
+    src -> q.unit = 'year', q.system = 'http://unitsofmeasure.org', q.code = 'a' "R-012-unit";
+  } "R-012";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-013";
+}

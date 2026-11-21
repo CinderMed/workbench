@@ -7,6 +7,9 @@ import { isProjectFile, type ProjectFile } from "@cindermed/model";
 import { describe, expect, it } from "vitest";
 import combosJson from "../../../fixtures/fml-examples/type-combinations/StructureMap-Visit.json" with { type: "json" };
 import combosMap from "../../../fixtures/fml-examples/type-combinations/Visit.map?raw";
+import r5Json from "../../../fixtures/fml-examples/r5-visit/StructureMap-Visit.json" with { type: "json" };
+import r5Map from "../../../fixtures/fml-examples/r5-visit/Visit.map?raw";
+import r5Project from "../../../fixtures/fml-examples/r5-visit/project.json" with { type: "json" };
 import combosProject from "../../../fixtures/fml-examples/type-combinations/project.json" with { type: "json" };
 import namesJson from "../../../fixtures/fml-examples/element-names/StructureMap-Visit.json" with { type: "json" };
 import namesMap from "../../../fixtures/fml-examples/element-names/Visit.map?raw";
@@ -58,6 +61,9 @@ const cases = [
   ["boolean-value-map Visit", visitProject, "src_visit", visitMap, visitJson],
   ["element-names Visit", namesProject, "src_visit", namesMap, namesJson],
   ["type-combinations Visit", combosProject, "src_visit", combosMap, combosJson],
+  // R5 (#78): the committed JSON is our R5 form, which validates as R5 and which the HL7 engine
+  // runs; the engine's own R5 compilation is compared in the golden suite (ADR-0007 addendum).
+  ["r5-visit Visit", r5Project, "src_visit", r5Map, r5Json],
 ] as const;
 
 describe.each(cases)("generator golden case %s", (_name, document, sourceId, map, json) => {
@@ -67,8 +73,9 @@ describe.each(cases)("generator golden case %s", (_name, document, sourceId, map
     expect(printMap(generated)).toBe(map);
   });
 
-  it("builds the StructureMap the HL7 engine compiled from it (+ status draft)", () => {
-    expect(toStructureMap(generated, { fhirRelease: "R4" })).toEqual(json);
+  it("builds the committed StructureMap (R4: the HL7 compilation + status draft)", () => {
+    const release = project(document).project.fhirVersion.startsWith("5.") ? "R5" : "R4";
+    expect(toStructureMap(generated, { fhirRelease: release })).toEqual(json);
   });
 
   it("passes the grammar check", () => {

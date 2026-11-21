@@ -20,6 +20,9 @@ const fixtures = resolve(import.meta.dirname, "../fixtures/fml-examples");
 const EXPECTED_WARNINGS: Readonly<Record<string, readonly string[]>> = {
   // 12: two of them come from the #156 cells (integer → doseNumberPositiveInt, integer → valueQuantity.value).
   "type-combinations": [...Array.from({ length: 12 }, () => "TYPE_PRECISION"), "ROLE_ORPHAN"],
+  // R5 core has no condition-clinical code system, so the required binding of
+  // Condition.clinicalStatus cannot be expanded offline (#78).
+  "r5-visit": ["BINDING_VIOLATION"],
 };
 
 const examples = readdirSync(fixtures, { withFileTypes: true })
@@ -64,7 +67,8 @@ describe.runIf(enabled)("FHIR path checks on the verified examples", () => {
         loadDefinitions,
       });
       const warnings = (EXPECTED_WARNINGS[name] ?? []).length;
-      const summary = warnings === 0 ? "" : `, ${String(warnings)} warnings`;
+      const summary =
+        warnings === 0 ? "" : `, ${String(warnings)} ${warnings === 1 ? "warning" : "warnings"}`;
       expect([code, out.split("\n")[0], err]).toEqual([
         ExitCode.OK,
         `${path}: valid (format 1.4.0)${summary}`,

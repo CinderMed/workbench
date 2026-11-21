@@ -1,6 +1,6 @@
 // Runs an FML StructureMap on a normalized row with the HL7 reference engine (org.hl7.fhir.core),
 // without a terminology server: ConceptMaps are local. Then validates the produced Bundle.
-// Usage: java -cp validator_cli.jar:. RunMap <ig-folder> <map-url> <input.json> <output.json>
+// Usage: java -cp validator_cli.jar:. RunMap <ig-folder> <map-url> <input.json> <output.json> [fhir-version]
 // The input is one normalized row, or an array of rows (long tables): each row is transformed into
 // its own Bundle, and the entries are joined, in row order, into one transaction Bundle.
 import org.hl7.fhir.validation.*;
@@ -14,7 +14,13 @@ import java.io.*; import java.nio.file.*; import java.util.*;
 
 public class RunMap {
   public static void main(String[] a) throws Exception {
-    ValidationEngine ve = new ValidationEngine.ValidationEngineBuilder().withVersion("4.0.1").withNoTerminologyServer().fromSource("hl7.fhir.r4.core#4.0.1");
+    // a[4]: the FHIR version of the example (default 4.0.1); 5.0.0 for the R5 golden case (#78).
+    String version = a.length > 4 ? a[4] : "4.0.1";
+    String core = version.startsWith("5.") ? "hl7.fhir.r5.core#5.0.0" : "hl7.fhir.r4.core#4.0.1";
+    ValidationEngine ve = new ValidationEngine.ValidationEngineBuilder().withVersion(version).withNoTerminologyServer().fromSource(core);
+    // R5 core does not carry the terminology code systems (v3-ActCode, condition-clinical): they
+    // are in hl7.terminology.r5, pinned here so the R5 golden case validates the same way everywhere.
+    if (version.startsWith("5.")) ve.getIgLoader().loadIg(ve.getIgs(), ve.getBinaries(), "hl7.terminology.r5#6.2.0", false);
     ve.getIgLoader().loadIg(ve.getIgs(), ve.getBinaries(), a[0], false);
     var ctx = ve.getContext();
     List<Base> outputs = new ArrayList<>();

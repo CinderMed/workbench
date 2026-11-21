@@ -1,0 +1,496 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.4.0",
+  "project": {
+    "id": "prj_r5_visit",
+    "name": "R5 visit",
+    "description": "Golden case of an R5 project (#78): the StructureMap in its R5 form, an R5 ConceptMap, elements that differ from R4 (Encounter.class as a CodeableConcept list, Encounter.actualPeriod, Condition.clinicalStatus required) and the choice elements written with their type (#156).",
+    "fhirVersion": "5.0.0",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/r5-visit",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/r5-visit",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One row per visit (synthetic).",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "Patient ID",
+          "dataType": "string"
+        },
+        {
+          "id": "col_sex",
+          "name": "sex",
+          "label": "Sex",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "M",
+              "label": "male"
+            },
+            {
+              "code": "F",
+              "label": "female"
+            },
+            {
+              "code": "U",
+              "label": "unknown"
+            }
+          ]
+        },
+        {
+          "id": "col_visit_date",
+          "name": "visit_date",
+          "label": "Visit date",
+          "dataType": "date"
+        },
+        {
+          "id": "col_class",
+          "name": "encounter_class",
+          "label": "Encounter class",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "AMB"
+            },
+            {
+              "code": "IMP"
+            }
+          ]
+        },
+        {
+          "id": "col_weight",
+          "name": "measure",
+          "label": "Measurement (kg)",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_score",
+          "name": "score",
+          "label": "Score",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_pain",
+          "name": "pain",
+          "label": "Pain (0-10)",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_age",
+          "name": "onset_age",
+          "label": "Age at onset (years)",
+          "dataType": "integer"
+        }
+      ]
+    }
+  ],
+  "sourceRelations": [],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_encounter0",
+      "resourceType": "Encounter",
+      "index": 0,
+      "label": "visit",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "enc"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "completed"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "measurement",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-weight"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "slices": [
+        {
+          "id": "slc_d2s",
+          "path": "component",
+          "name": "d2s",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks",
+                  "code": "d2s",
+                  "display": "decimal as text",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "slc_pain",
+          "path": "component",
+          "name": "pain",
+          "discriminator": [
+            {
+              "path": "code",
+              "value": {
+                "type": "CodeableConcept",
+                "coding": {
+                  "system": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks",
+                  "code": "pain",
+                  "display": "pain score",
+                  "verification": {
+                    "status": "manual"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks",
+              "code": "measure",
+              "display": "synthetic measurement",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ins_cond0",
+      "resourceType": "Condition",
+      "index": 0,
+      "label": "condition",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "cond"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "clinicalStatus",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active",
+              "display": "Active",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://snomed.info/sct",
+              "code": "38341003",
+              "display": "Hypertensive disorder",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_patient_id"
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "instanceId": "ins_patient0",
+      "path": "gender",
+      "transform": {
+        "kind": "valueMap",
+        "valueMapId": "vm_sex"
+      },
+      "columnId": "col_sex"
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "instanceId": "ins_encounter0",
+      "path": "class",
+      "transform": {
+        "kind": "coding",
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "as": "CodeableConcept"
+      },
+      "columnId": "col_class"
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "instanceId": "ins_encounter0",
+      "path": "actualPeriod.start",
+      "transform": {
+        "kind": "cast",
+        "to": "dateTime"
+      },
+      "columnId": "col_visit_date"
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "instanceId": "ins_encounter0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0006",
+      "code": "R-006",
+      "instanceId": "ins_obs0",
+      "path": "valueQuantity",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "kg",
+          "display": "kilogram"
+        }
+      },
+      "columnId": "col_weight"
+    },
+    {
+      "id": "map_0007",
+      "code": "R-007",
+      "instanceId": "ins_obs0",
+      "path": "effectiveDateTime",
+      "transform": {
+        "kind": "constant",
+        "value": {
+          "type": "dateTime",
+          "value": "2024-03-12T09:30:00+01:00"
+        }
+      }
+    },
+    {
+      "id": "map_0008",
+      "code": "R-008",
+      "instanceId": "ins_obs0",
+      "path": "component[d2s].valueString",
+      "transform": {
+        "kind": "cast",
+        "to": "string"
+      },
+      "columnId": "col_score"
+    },
+    {
+      "id": "map_0009",
+      "code": "R-009",
+      "instanceId": "ins_obs0",
+      "path": "component[pain].valueInteger",
+      "transform": {
+        "kind": "copy"
+      },
+      "columnId": "col_pain"
+    },
+    {
+      "id": "map_0010",
+      "code": "R-010",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0011",
+      "code": "R-011",
+      "instanceId": "ins_obs0",
+      "path": "encounter",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_encounter0",
+        "auto": true
+      }
+    },
+    {
+      "id": "map_0012",
+      "code": "R-012",
+      "instanceId": "ins_cond0",
+      "path": "onsetAge",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "a",
+          "display": "year"
+        }
+      },
+      "columnId": "col_age"
+    },
+    {
+      "id": "map_0013",
+      "code": "R-013",
+      "instanceId": "ins_cond0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": [
+    {
+      "id": "vm_sex",
+      "name": "sex",
+      "target": "code",
+      "entries": [
+        {
+          "sourceValue": "M",
+          "sourceLabel": "male",
+          "target": {
+            "value": "male"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "F",
+          "sourceLabel": "female",
+          "target": {
+            "value": "female"
+          },
+          "action": {
+            "kind": "use"
+          }
+        },
+        {
+          "sourceValue": "U",
+          "sourceLabel": "unknown",
+          "target": {
+            "value": "unknown"
+          },
+          "action": {
+            "kind": "use"
+          }
+        }
+      ]
+    }
+  ],
+  "templates": []
+}

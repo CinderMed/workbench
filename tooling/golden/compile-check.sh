@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Golden step (#76, ADR-0007 addendum): the HL7 engine compiles, in CI, every map that the exported
 # packages contain, from a folder with only the map and the logical models (an existing
-# StructureMap JSON in the folder would be loaded instead of the map). The compiled JSON must equal
-# the StructureMap JSON our builder wrote in the package, apart from `status`, which the compiler
-# does not write.
+# StructureMap JSON in the folder would be loaded instead of the map), with the package's FHIR
+# version. The compiled JSON must equal the StructureMap JSON our builder wrote in the package,
+# apart from `status`, which the compiler does not write; in R5, apart from the engine's known
+# serialization defects too (compare-structuremap.mjs, ADR-0007 addendum, #78).
 #
 # Usage: VALIDATOR=/abs/path/validator_cli.jar bash tooling/golden/compile-check.sh <export folder>
 set -euo pipefail
@@ -17,22 +18,19 @@ status=0
 count=0
 for package in "$export_dir"/*/; do
   url=$(node -e 'const m = require(process.argv[1]); for (const t of m.tables) console.log(t.structureMap.url + " " + t.structureMap.fml + " " + t.structureMap.json)' "$package/manifest.json")
+  version=$(node -e 'console.log(require(process.argv[1]).fhirVersion)' "$package/manifest.json")
   while read -r map_url fml json; do
     ig="$work/ig-$count"
     mkdir -p "$ig"
     cp "$package$fml" "$package"StructureDefinition-*.json "$ig/"
-    java -jar "$VALIDATOR" compile "$map_url" -version=4.0.1 -tx=n/a -ig="$ig" -output="$work/compiled-$count.json" >"$work/compile-$count.log" 2>&1 || {
+    java -jar "$VALIDATOR" compile "$map_url" -version="$version" -tx=n/a -ig="$ig" -output="$work/compiled-$count.json" >"$work/compile-$count.log" 2>&1 || {
       echo "compile: $(basename "$package")/$fml: the HL7 engine did not compile it" >&2
       cat "$work/compile-$count.log" >&2
       status=1
       continue
     }
-    if node -e '
-      const fs = require("fs");
-      const read = (f) => { const j = JSON.parse(fs.readFileSync(f, "utf8")); delete j.status; return j; };
-      process.exit(require("util").isDeepStrictEqual(read(process.argv[1]), read(process.argv[2])) ? 0 : 1);
-    ' "$work/compiled-$count.json" "$package$json"; then
-      echo "compile: $(basename "$package")/$fml: the HL7 compilation equals our StructureMap JSON (status aside)"
+    if node "$(dirname "$0")/compare-structuremap.mjs" "$work/compiled-$count.json" "$package$json" "$version"; then
+      echo "compile: $(basename "$package")/$fml: the HL7 compilation equals our StructureMap JSON (FHIR $version)"
     else
       echo "compile: $(basename "$package")/$fml: the HL7 compilation differs from our StructureMap JSON" >&2
       status=1

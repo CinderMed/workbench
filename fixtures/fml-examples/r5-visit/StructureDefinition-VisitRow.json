@@ -1,0 +1,479 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "VisitRow",
+  "url": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+  "version": "0.1.0",
+  "name": "VisitRow",
+  "title": "Normalized row of table Visit",
+  "status": "draft",
+  "fhirVersion": "5.0.0",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "definition": "One row per visit (synthetic).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "Patient ID",
+        "definition": "Patient ID",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.sex",
+        "path": "VisitRow.sex",
+        "short": "Sex",
+        "definition": "Sex",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.sex",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_date",
+        "path": "VisitRow.visit_date",
+        "short": "Visit date",
+        "definition": "Visit date",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_date",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.encounter_class",
+        "path": "VisitRow.encounter_class",
+        "short": "Encounter class",
+        "definition": "Encounter class",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.encounter_class",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.measure",
+        "path": "VisitRow.measure",
+        "short": "Measurement (kg)",
+        "definition": "Measurement (kg)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.measure",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.score",
+        "path": "VisitRow.score",
+        "short": "Score",
+        "definition": "Score",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.score",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.pain",
+        "path": "VisitRow.pain",
+        "short": "Pain (0-10)",
+        "definition": "Pain (0-10)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.pain",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.onset_age",
+        "path": "VisitRow.onset_age",
+        "short": "Age at onset (years)",
+        "definition": "Age at onset (years)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.onset_age",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Encounter0",
+        "path": "VisitRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (measurement), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Condition0",
+        "path": "VisitRow.id_Condition0",
+        "short": "Computed id of Condition[0]",
+        "definition": "Deterministic id of the resource of role Condition[0] (condition), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Condition0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "VisitRow",
+        "path": "VisitRow",
+        "definition": "One row per visit (synthetic).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "VisitRow",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "VisitRow.patient_id",
+        "path": "VisitRow.patient_id",
+        "short": "Patient ID",
+        "definition": "Patient ID",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.patient_id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.sex",
+        "path": "VisitRow.sex",
+        "short": "Sex",
+        "definition": "Sex",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.sex",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.visit_date",
+        "path": "VisitRow.visit_date",
+        "short": "Visit date",
+        "definition": "Visit date",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.visit_date",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.encounter_class",
+        "path": "VisitRow.encounter_class",
+        "short": "Encounter class",
+        "definition": "Encounter class",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.encounter_class",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.measure",
+        "path": "VisitRow.measure",
+        "short": "Measurement (kg)",
+        "definition": "Measurement (kg)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.measure",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.score",
+        "path": "VisitRow.score",
+        "short": "Score",
+        "definition": "Score",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.score",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.pain",
+        "path": "VisitRow.pain",
+        "short": "Pain (0-10)",
+        "definition": "Pain (0-10)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.pain",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.onset_age",
+        "path": "VisitRow.onset_age",
+        "short": "Age at onset (years)",
+        "definition": "Age at onset (years)",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.onset_age",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Patient0",
+        "path": "VisitRow.id_Patient0",
+        "short": "Computed id of Patient[0]",
+        "definition": "Deterministic id of the resource of role Patient[0] (patient), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Patient0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Encounter0",
+        "path": "VisitRow.id_Encounter0",
+        "short": "Computed id of Encounter[0]",
+        "definition": "Deterministic id of the resource of role Encounter[0] (visit), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Encounter0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Observation0",
+        "path": "VisitRow.id_Observation0",
+        "short": "Computed id of Observation[0]",
+        "definition": "Deterministic id of the resource of role Observation[0] (measurement), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Observation0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      },
+      {
+        "id": "VisitRow.id_Condition0",
+        "path": "VisitRow.id_Condition0",
+        "short": "Computed id of Condition[0]",
+        "definition": "Deterministic id of the resource of role Condition[0] (condition), computed by the normalization.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "VisitRow.id_Condition0",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "id"
+          }
+        ]
+      }
+    ]
+  }
+}

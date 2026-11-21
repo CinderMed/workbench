@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import metastraProject from "../../../fixtures/fml-examples/metastra/project.json?raw";
 import motuProject from "../../../fixtures/fml-examples/motu/project.json?raw";
 import { ExportCode, cleanProject, exportPackage, loadOrder, packageVersion } from "./index.js";
-import { r4Definitions } from "./test-support/r4-definitions.js";
+import { r4Definitions } from "./test-support/test-definitions.js";
 
 const options = {
   definitions: r4Definitions(),

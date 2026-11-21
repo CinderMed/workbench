@@ -19,6 +19,7 @@ verification prototypes, not the final generator, which will be written in TypeS
   `packages/fml/src/test-support/boolean-value-map.ts` (not written by hand) and compiled with the HL7 engine
 - `element-names/` — 1 table (Visit): a column named `a b` is used in a creation condition. Its element name must
   be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
+- `r5-visit/` — 1 table (Visit), 4 roles, one synthetic row, **FHIR R5** (#78): see "R5 golden case" below
 - `type-combinations/` — 1 table (Visit), 10 roles, one synthetic row: every combination of the type-compatibility table
   that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
   casts; Quantity, Duration and SimpleQuantity; Coding and CodeableConcept from a code column, #106; constants of
@@ -218,3 +219,25 @@ A dateTime column whose values carry an offset is not covered: the normalization
 zone is declared at the border (#107). The package was written with `tooling/golden/write-fixture.mjs`, and the HL7
 validator 7.0.5 compiled the map (plus `status: draft`). `tests/type-combinations.py` checks 51 values with their
 JSON types, and the Bundle validates with 0 errors. The other examples do not change.
+
+## R5 golden case (21 November 2026, #78)
+`r5-visit/` is the first R5 project (`fhirVersion` 5.0.0). The package was written with
+`tooling/golden/write-fixture.mjs` and the R5 definitions. It covers:
+- the StructureMap in its R5 form (ADR-0007);
+- an R5 ConceptMap (`relationship`, `targetVersion`);
+- elements that differ from R4: `Encounter.class` as a CodeableConcept list (a coding transform), `actualPeriod`,
+  and `Condition.clinicalStatus`, which is required;
+- the #156 choice rules in R5: a decimal `1.50` cast to `valueString` keeps `"1.50"`, a dateTime constant with an
+  offset, and a quantity on `onsetAge` created as `Age`.
+
+The HL7 engine compiles the map and runs it with `RunMap` (FHIR version as fifth argument). The Bundle validates
+in R5 with 0 errors, and `tests/r5-visit.py` checks 13 values with their JSON types.
+
+R5 core does not carry the terminology code systems (`v3-ActCode`, `condition-clinical`), so `RunMap` and
+`tooling/golden/validate-resources.sh` load `hl7.terminology.r5#6.2.0` for R5.
+
+**The committed StructureMap JSON is ours, not the engine's compilation.** Validator 7.0.5 compiles the R5 map into
+a StructureMap that is not valid R5 (111 errors). After the engine's listed defects are set aside, the two are
+identical (`tooling/golden/compare-structuremap.mjs`, ADR-0007 addendum). Our JSON validates as R5 with 0 errors,
+and the engine runs it.
+

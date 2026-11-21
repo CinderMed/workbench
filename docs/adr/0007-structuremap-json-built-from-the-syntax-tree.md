@@ -77,3 +77,19 @@ The CI golden job now proves the whole TypeScript chain, not only the stored fix
   - **#135** (seeds 1, 3, 16, 19): the narrative differs for characters outside the BMP (the engine writes `&#x1F600;`).
 
   Seeds 4, 14, 17 and 20 are listed as expected failures referencing #134 (`it.fails`): the job fails on any new failure, and on a known one that starts passing. Seeds 1, 3, 16 and 19 pass once #135 is fixed.
+
+## Addendum (2026-11-21): the R5 golden case (#78)
+
+The R5 form is now checked by the HL7 engine, on `fixtures/fml-examples/r5-visit`.
+
+- **The engine runs our R5 StructureMap.** The Bundle validates in R5 with 0 errors. Our JSON validates as an R5 StructureMap with 0 errors too.
+- **The engine's own R5 compilation is not valid R5.** Validator 7.0.5 compiles the R5 map into a StructureMap with 111 validation errors. Its known defects are:
+  - `element` written as a one-item array;
+  - rule names without their `-` (`R-001` → `R001`);
+  - FML comments copied into `documentation`, no narrative, and an unknown `resourceDefinition`;
+  - conditions without their outer parentheses.
+- **The comparison in R5.** `tooling/golden/compare-structuremap.mjs` sets aside exactly those defects, and the rest must be equal. With them set aside, the engine's compilation and ours are identical. R4 keeps the exact comparison (`status` aside).
+- **The committed and exported R5 JSON is ours**, not the engine's compilation (in R4 it is the engine's, plus `status: draft`).
+- **R5 terminology.** R5 core does not carry the terminology code systems, so the R5 run and validation load `hl7.terminology.r5#6.2.0`, pinned in `RunMap.java` and `validate-resources.sh`.
+
+If a later validator writes valid R5, the defects set aside here should disappear one by one. The comparison script then gets simpler, and the committed JSON can become the engine's compilation, as in R4.
