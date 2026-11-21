@@ -53,7 +53,7 @@ run element-names Visit visit-empty bundle-visit-empty 1
 # Type combinations (#153): every combination of the compatibility table that the other examples do
 # not cover, on one synthetic row. The values are checked one by one: a value of the wrong type can
 # still be valid FHIR.
-run type-combinations Visit visit bundle-visit 9
+run type-combinations Visit visit bundle-visit 10
 tc=$(python3 tests/type-combinations.py type-combinations/test-data/bundle-visit.json)
 echo "$tc" | grep -q "^OK " && ok=$((ok+1)) || ko=$((ko+1))
 printf '%-8s %-12s %s\n' "$(echo "$tc" | grep -q '^OK ' && echo OK || echo FAILED)" "types" "${tc#* }"

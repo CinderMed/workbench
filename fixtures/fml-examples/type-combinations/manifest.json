@@ -56,7 +56,8 @@
         "Condition[0] · condition",
         "Encounter[0] · visit",
         "MedicationDispense[0] · dispense",
-        "Immunization[0] · vaccination"
+        "Immunization[0] · vaccination",
+        "Observation[2] · through choice"
       ]
     }
   ],
@@ -75,27 +76,27 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "5c8e6bfa04728d9d2693db7536fea622b019caddd330d79355382f753a98f317",
+      "sha256": "f0aae3a64415ebcc7356af235adda46c2dcf06568d9f6250c412ba9a3ee3ffa0",
       "mediaType": "application/json"
     },
     {
       "path": "Visit.map",
-      "sha256": "137b8ad80b11efd215f3bf3f6d5e8f6a049da2632647ef7dc1129654342ee1d6",
+      "sha256": "5e05bd8c49d054c2af6e465dcf1e6233f21b2e84e7ac78c80c3b4ca3e39cd8a4",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Visit.json",
-      "sha256": "89960076c615f3edd0346b4ba8baba16d3b1ce2c218b58ea32e107b8b948c714",
+      "sha256": "19e5b62113247128bd0cd600e7997ef3c9e04fca127e42ea5f75c74bf374e426",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-VisitRow.json",
-      "sha256": "01824e1c40f6472f47360f579bfc42b40976a517c4de72e2587ca7ba84803ce6",
+      "sha256": "9fc3c78ea9ed576897f77b0f23ce612222dcac395c34bd2bbd230914be2e9836",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "normalization-Visit.json",
-      "sha256": "a293e1bc7a1474e32596ad79c962ebe6c4b76d6ab28ba3051ce1ed152b459d4b",
+      "sha256": "50f6cd442148313c15ccd416cfe8177f12b5ecdd7c5ec4adf995966df196acad",
       "mediaType": "application/json"
     },
     {

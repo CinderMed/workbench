@@ -60,6 +60,11 @@ group Visit(source src : VisitRow, target bundle : Bundle) {
     src.id_Immunization0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Immunization/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Immunization/' + $this) "Immunization0-id";
     src then Immunization0(src, res) "Immunization0-body";
   } "Immunization0";
+  // Observation[2] · through choice — always
+  src where ($this.id_Observation2.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation2 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/type-combinations/Observation/' + $this) "Observation2-id";
+    src then Observation2(src, res) "Observation2-body";
+  } "Observation2";
 }
 
 group Patient0(source src : VisitRow, target res : Patient) {
@@ -95,6 +100,7 @@ group Observation0(source src : VisitRow, target res : Observation) {
       src.finding_label as d -> cd.display = d "R-037-display";
     } "R-037-coding";
   } "R-037";
+  src.visit_date as v -> res.effective = create('dateTime') as x, x.value = v "R-043";
 }
 
 group Location0(source src : VisitRow, target res : Location) {
@@ -111,6 +117,7 @@ group Location0(source src : VisitRow, target res : Location) {
 
 group RiskAssessment0(source src : VisitRow, target res : RiskAssessment) {
   src -> res.status = 'final' "fixed-status";
+  src -> res.occurrence = create('dateTime') as x, x.value = '2023-05-04T10:30:00+02:00' "fixed-occurrenceDateTime";
   src.ratio as v -> res.prediction as p, p.relativeRisk = v "R-018";
   src.visit_date as v -> res.mitigation = v "R-019";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-020";
@@ -149,11 +156,36 @@ group Observation1(source src : VisitRow, target res : Observation) {
     src.visit_at as v -> slc.value = v "R-026";
   } "slice-dt2dt";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-027";
+  // component[d2s]: named slice, created only if the column has a value
+  src where ($this.score.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/type-combinations-checks', 'd2s', 'decimal as text') "slice-d2s-code";
+    src.score as v -> slc.value = create('string') as x, x.value = v "R-039";
+  } "slice-d2s";
+  // component[da2s]: named slice, created only if the column has a value
+  src where ($this.visit_date.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/type-combinations-checks', 'da2s', 'date as text') "slice-da2s-code";
+    src.visit_date as v -> slc.value = create('string') as x, x.value = v "R-040";
+  } "slice-da2s";
+  // component[i2s]: named slice, created only if the column has a value
+  src where ($this.count.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/type-combinations-checks', 'i2s', 'integer as text') "slice-i2s-code";
+    src.count as v -> slc.value = create('string') as x, x.value = v "R-041";
+  } "slice-i2s";
+  // component[bo2s]: named slice, created only if the column has a value
+  src where ($this.smoker.exists()) -> res.component as slc then {
+    src -> slc.code = cc('https://cindermed.org/fhir/CodeSystem/type-combinations-checks', 'bo2s', 'boolean as text') "slice-bo2s-code";
+    src.smoker as v -> slc.value = create('string') as x, x.value = v "R-042";
+  } "slice-bo2s";
+  src -> res.effective = create('dateTime') as x, x.value = '2023-05-04T10:30:00+02:00' "R-044";
 }
 
 group Condition0(source src : VisitRow, target res : Condition) {
   src -> res.code = cc('http://snomed.info/sct', '38341003', 'Hypertension') "fixed-code";
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-028";
+  src.onset_age as v -> res.onset = create('Age') as q then {
+    v -> q.value = v "R-045-value";
+    src -> q.unit = 'year', q.system = 'http://unitsofmeasure.org', q.code = 'a' "R-045-unit";
+  } "R-045";
 }
 
 group Encounter0(source src : VisitRow, target res : Encounter) {
@@ -186,4 +218,22 @@ group Immunization0(source src : VisitRow, target res : Immunization) {
   src.vaccinated_on as v -> res.occurrence = v "R-032";
   src.visit_at as v -> res.lotNumber = v "R-033";
   src.id_Patient0 as t -> res.patient as r, r.reference = evaluate(t, 'Patient/' + $this) "R-034";
+  src.dose_number as v -> res.doseQuantity = create('Quantity') as q then {
+    v -> q.value = v "R-046-value";
+    src -> q.unit = 'milliliter', q.system = 'http://unitsofmeasure.org', q.code = 'mL' "R-046-unit";
+  } "R-046";
+  src.dose_number as v -> res.protocolApplied as p, p.doseNumber = create('positiveInt') as x, x.value = v "R-047";
+}
+
+group Observation2(source src : VisitRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.code = cc('https://cindermed.org/fhir/CodeSystem/type-combinations-checks', 'through', 'path through a choice') "fixed-code";
+  // valueQuantity: written by 4 rows (R-048, R-049, R-050, R-051) → one shared instance
+  src where ($this.weight_kg.exists()) -> res.value = create('Quantity') as p then {
+    src.weight_kg as v -> p.value = v "R-048";
+    src -> p.unit = 'kg' "R-049";
+    src -> p.system = 'http://unitsofmeasure.org' "R-050";
+    src -> p.code = 'kg' "R-051";
+  } "Observation2-valueQuantity";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-052";
 }

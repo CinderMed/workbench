@@ -46,6 +46,15 @@ The probes on #156 ran 52 hand-written maps through validator 7.0.5. For every c
 
 ## Consequences
 
-- **Turning the cells back on.** The rule is in the generator, but the #156 cells stay turned off (`type-compat.ts`, `choice-paths.ts`) until the fixtures PR adds a golden case for each one, built by this generator and run by the HL7 engine. That PR adds a decimal with trailing zeros (`1.50` stays `"1.50"`) and a dateTime with an offset. It turns on only the cells it covers. The R5 versions come with #78.
+- **Turning the cells back on.** The fixtures PR that followed the generator change added a golden case for every cell it turns back on (`type-combinations`, rows R-039 to R-052, run by the HL7 engine):
+  - casts to string on a choice (a decimal `1.50` stays `"1.50"`);
+  - a date column on a dateTime choice;
+  - a dateTime with an offset, as a constant and as a fixed value;
+  - `onsetAge`;
+  - `doseQuantity` and `doseNumberPositiveInt`;
+  - a path through a choice.
+
+  The interim checks were removed for these cells (`choice-paths.ts` entirely). Still off, with no golden case: a value map to `code` on a choice, a reference on a choice, a quantity into a derived type that is not a choice chosen as `Age`, and a Quantity constant. A dateTime **column** whose values carry an offset needs the time zone at the border (#107): the normalization rejects the offset today. The R5 versions of these cases come with #78.
+
 - **Callers must pass the definitions.** Every caller of `exportPackage` gives definitions; `tooling/golden/write-fixture.mjs` loads them from the FHIR package cache.
 - **Only choices are created.** A type derived from Quantity on an element that is not a choice (`Encounter.length`, a Duration) is still created as `Quantity`, which the engine accepts and the golden case covers.
