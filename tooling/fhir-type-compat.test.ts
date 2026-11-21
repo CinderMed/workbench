@@ -85,27 +85,13 @@ const COPY: Record<Column["dataType"], { ok: string[]; warn: string[]; transform
 };
 
 /**
- * What the generator and the HL7 engine can write today (#156): on a choice element the engine
- * takes the type of the value written (the column's type in the logical model, or the literal's),
- * so a cell the table allows is off when that type is not the chosen one; quantities into types
- * derived from Quantity, and Quantity constants, are off too.
+ * What the generator and the HL7 engine can write today (#156, ADR-0023): on a choice element the
+ * generator writes a value of another type with the chosen type, so every cell the table allows
+ * is on (golden case type-combinations). Still off: quantities into a type derived from Quantity
+ * that is not a choice chosen as Age (Duration here: a plain element, created as Quantity), and
+ * Quantity constants.
  */
-const CHOICE_ELEMENTS = new Set(["integer", "dateTime", "time", "Quantity", "Age", "Period"]);
-const DERIVED_QUANTITIES = new Set(["Age", "Duration"]);
-const WRITTEN: Record<Column["dataType"], string> = {
-  string: "string",
-  integer: "integer",
-  decimal: "decimal",
-  boolean: "boolean",
-  date: "date",
-  dateTime: "dateTime",
-  categorical: "string",
-  multipleChoice: "string",
-};
-function engine(allowed: Outcome, type: string, written: string): Outcome {
-  if (allowed !== "ok" && allowed !== "TYPE_PRECISION") return allowed;
-  return CHOICE_ELEMENTS.has(type) && written !== type ? "TYPE_MISMATCH" : allowed;
-}
+const OFF_DERIVED_QUANTITIES = new Set(["Duration"]);
 
 function expectedCopy(column: Column["dataType"], type: string): Outcome {
   const rule = COPY[column];
@@ -118,7 +104,7 @@ function expectedCopy(column: Column["dataType"], type: string): Outcome {
         : COMPLEX.includes(type)
           ? "COMPLEX_TARGET"
           : "TYPE_MISMATCH";
-  return engine(allowed, type, WRITTEN[column]);
+  return allowed;
 }
 
 const column = (dataType: Column["dataType"]): Column => ({ id: "col", name: "c", dataType });
@@ -187,7 +173,7 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
   it.each([
     // Conversions allowed: to string, to the same type, integer → decimal, date → dateTime.
     ["integer", "decimal", "decimal", "ok"],
-    ["date", "dateTime", "dateTime", "TYPE_MISMATCH"], // on effectiveDateTime, a choice (#156)
+    ["date", "dateTime", "dateTime", "ok"], // on effectiveDateTime, a choice: create('dateTime')
     ["date", "date", "date", "ok"],
     ["integer", "string", "string", "ok"],
     ["decimal", "string", "string", "ok"],
@@ -224,8 +210,9 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
       [...QUANTITIES, "decimal", "CodeableConcept"].map((type) => [dataType, type] as const),
     ),
   )("quantity: %s column on %s", (dataType, type) => {
+    // Age is onsetAge, a choice: created as Age (#156, golden case).
     const fits =
-      QUANTITIES.includes(type) && dataType !== "string" && !DERIVED_QUANTITIES.has(type);
+      QUANTITIES.includes(type) && dataType !== "string" && !OFF_DERIVED_QUANTITIES.has(type);
     expect(outcome(type, { kind: "quantity" }, dataType)).toBe(fits ? "ok" : "TYPE_MISMATCH");
   });
 
@@ -283,11 +270,8 @@ describe.runIf(enabled).each(["4.0.1", "5.0.0"])("type compatibility in FHIR %s"
     ),
   )("constant %s on %s", (valueType, type, value) => {
     const allowed = valueType === type || (valueType === "Quantity" && QUANTITIES.includes(type));
-    // The literal's type: quoted for string, code, uri, date and dateTime; Quantity cannot be written.
-    const literal = ["string", "code", "uri", "date", "dateTime"].includes(valueType)
-      ? "string"
-      : valueType;
-    const fits = allowed && valueType !== "Quantity" && engine("ok", type, literal) === "ok";
+    // On a choice the literal is written with the chosen type (#156); Quantity cannot be written.
+    const fits = allowed && valueType !== "Quantity";
     expect(outcome(type, { kind: "constant", value })).toBe(fits ? "ok" : "TYPE_MISMATCH");
   });
 

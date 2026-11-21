@@ -26,6 +26,7 @@
   "finding_code": 123,
   "finding_label": "Elevated weight",
   "encounter_class": "AMB",
+  "score": 1.50,
   "id_Patient0": "pat-ac1aebf0638b7020804eed3b",
   "id_Observation0": "obs-weight-ac1aebf0638b7020804eed3b",
   "id_Location0": "loc-ac1aebf0638b7020804eed3b",
@@ -34,5 +35,6 @@
   "id_Condition0": "cond-ac1aebf0638b7020804eed3b",
   "id_Encounter0": "enc-ac1aebf0638b7020804eed3b",
   "id_MedicationDispense0": "disp-ac1aebf0638b7020804eed3b",
-  "id_Immunization0": "imm-ac1aebf0638b7020804eed3b"
+  "id_Immunization0": "imm-ac1aebf0638b7020804eed3b",
+  "id_Observation2": "obs-through-ac1aebf0638b7020804eed3b"
 }

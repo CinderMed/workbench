@@ -78,7 +78,13 @@ export {
   type TablePlan,
 } from "./generator/table-plan.js";
 export { baseValueRuleName, valueRuleNames } from "./generator/rule-names.js";
-export { MAIN_GROUP_COMMENT, fmlElement, generateMap } from "./generator/generate-map.js";
+export { MAIN_GROUP_COMMENT, generateMap } from "./generator/generate-map.js";
+export {
+  type WrittenPaths,
+  type WrittenSegment,
+  pathKey,
+  pathsToWrite,
+} from "./generator/written-paths.js";
 export {
   conditionText,
   roleCondition,

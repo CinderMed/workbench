@@ -56,7 +56,8 @@ type TableFormat = (typeof TABLE_FORMATS)[number];
 /** Options each command accepts (besides --help). */
 const COMMAND_OPTIONS = {
   validate: ["format", "no-fhir", "offline", "fhir-cache"],
-  export: ["format", "out", "package-version", "created-at", "no-fhir", "offline", "fhir-cache"],
+  // No --no-fhir: the export always needs the FHIR definitions (ADR-0023).
+  export: ["format", "out", "package-version", "created-at", "offline", "fhir-cache"],
   "mapping-table": ["format", "delimiter", "out", "created-at"],
   "fhir-index": ["out", "offline", "fhir-cache"],
   init: [
@@ -118,8 +119,8 @@ Options:
   --package-version <x.y.z> export: package version (default: 0.0.0-dev.<hash of the project file>)
   --created-at <date-time>  export, mapping-table: date of the package or workbook, ISO 8601 with
                             time zone (default: now)
-  --no-fhir                 validate, export: skip the FHIR checks (paths and types against the
-                            FHIR definitions)
+  --no-fhir                 validate: skip the FHIR checks (paths and types against the FHIR
+                            definitions); export always needs them
   --offline                 validate, export, fhir-index: use only the FHIR package cache, never download
   --fhir-cache <folder>     validate, export, fhir-index: the FHIR package cache (default: ~/.fhir/packages)
   -h, --help                Show this help
@@ -181,6 +182,7 @@ async function definitionsFor(
   project: ProjectFile | undefined,
   fhir: FhirFlags,
   io: CliIo,
+  command: "validate" | "export",
 ): Promise<FhirLoad | undefined> {
   if (project === undefined) return { status: "not run", packages: [] };
   if (fhir.skip) return { status: "skipped", packages: [] };
@@ -201,7 +203,9 @@ async function definitionsFor(
   } catch (error) {
     io.stderr(
       `cindermed: cannot load the FHIR definitions for ${path}: ${error instanceof Error ? error.message : String(error)}\n` +
-        "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n",
+        (command === "export"
+          ? "  use --fhir-cache <folder> for a cache that holds the packages: the export always needs the FHIR definitions\n"
+          : "  use --fhir-cache <folder> for a cache that holds the packages, or --no-fhir to skip the FHIR checks\n"),
     );
     return undefined;
   }
@@ -219,7 +223,7 @@ async function validate(
   const parsed = parseProject(text);
   const results: ValidationResult[] = [...parsed.results];
   const project = parsed.project;
-  const fhirLoad = await definitionsFor(path, project, fhir, io);
+  const fhirLoad = await definitionsFor(path, project, fhir, io, "validate");
   if (fhirLoad === undefined) return ExitCode.USAGE;
   if (project !== undefined && fhirLoad.loaded !== undefined)
     results.push(...validateFhir(project, fhirLoad.loaded.definitions));
@@ -277,16 +281,20 @@ async function exportProject(
 ): Promise<ExitCode> {
   const text = await readProject(path, io);
   if (text === undefined) return ExitCode.USAGE;
-  const fhirLoad = await definitionsFor(path, parseProject(text).project, flags.fhir, io);
+  const parsed = parseProject(text);
+  const fhirLoad = await definitionsFor(path, parsed.project, flags.fhir, io, "export");
   if (fhirLoad === undefined) return ExitCode.USAGE;
   const fhir = { checks: fhirLoad.status, packages: fhirLoad.packages };
-  const skipped = fhirLoad.status === "skipped" ? ["  note: FHIR checks skipped (--no-fhir)"] : [];
-  const result = exportPackage(text, {
-    createdAt: flags.createdAt ?? isoSecond(io.now()),
-    ...(flags.packageVersion === undefined ? {} : { packageVersion: flags.packageVersion }),
-    generator: { name: "cindermed", version: io.version },
-    ...(fhirLoad.loaded === undefined ? {} : { definitions: fhirLoad.loaded.definitions }),
-  });
+  // Without definitions the project did not pass the schema: blocked by those results.
+  const result =
+    fhirLoad.loaded === undefined
+      ? { ok: false as const, results: parsed.results }
+      : exportPackage(text, {
+          definitions: fhirLoad.loaded.definitions,
+          createdAt: flags.createdAt ?? isoSecond(io.now()),
+          ...(flags.packageVersion === undefined ? {} : { packageVersion: flags.packageVersion }),
+          generator: { name: "cindermed", version: io.version },
+        });
   if (!result.ok) {
     if (format === "json") {
       io.stdout(
@@ -294,7 +302,7 @@ async function exportProject(
       );
     } else {
       const errors = result.results.filter((r) => r.severity === "error").length;
-      const lines = [`${path}: export blocked, ${plural(errors, "error")}`, ...skipped];
+      const lines = [`${path}: export blocked, ${plural(errors, "error")}`];
       lines.push(...result.results.map(describeResult));
       io.stdout(`${lines.join("\n")}\n`);
     }
@@ -333,7 +341,6 @@ async function exportProject(
       result.warnings.length > 0 ? `, ${plural(result.warnings.length, "warning")}` : "";
     const lines = [
       `${path}: exported ${name} ${version} to ${out} (${plural(files.length, "file")}${extra})`,
-      ...skipped,
       ...result.warnings.map(describeResult),
     ];
     io.stdout(`${lines.join("\n")}\n`);
@@ -523,7 +530,7 @@ async function fhirIndex(path: string, out: string, fhir: FhirFlags, io: CliIo):
     io.stdout(`${lines.join("\n")}\n`);
     return ExitCode.INVALID;
   }
-  const load = await definitionsFor(path, parsed.project, fhir, io);
+  const load = await definitionsFor(path, parsed.project, fhir, io, "validate");
   if (load?.loaded === undefined) return ExitCode.USAGE;
   const { index } = load.loaded;
   const files: [string, string][] = [["index.json", index.manifestText], ...index.files];

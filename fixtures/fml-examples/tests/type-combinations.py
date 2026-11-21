@@ -57,6 +57,20 @@ CELLS = [
     ("copy dateTime → dateTime (choice)", "imm", ["occurrenceDateTime"], "2023-04-01"),
     ("constant dateTime", "imm", ["recorded"], "2023-05-04T10:00:00+02:00"),
     ("cast dateTime → string", "imm", ["lotNumber"], "2023-05-04"),
+    # Choice elements written with the chosen type (#156, ADR-0023): create('<type>').
+    ("cast decimal → string (choice), trailing zeros kept", "obs-panel", ["component", 5, "valueString"], "1.50"),
+    ("cast date → string (choice)", "obs-panel", ["component", 6, "valueString"], "2023-05-04"),
+    ("cast integer → string (choice)", "obs-panel", ["component", 7, "valueString"], "42"),
+    ("cast boolean → string (choice)", "obs-panel", ["component", 8, "valueString"], "true"),
+    ("copy date → dateTime (choice)", "obs-weight", ["effectiveDateTime"], "2023-05-04"),
+    ("constant dateTime with offset (choice)", "obs-panel", ["effectiveDateTime"], "2023-05-04T10:30:00+02:00"),
+    ("fixed dateTime with offset (choice)", "risk", ["occurrenceDateTime"], "2023-05-04T10:30:00+02:00"),
+    ("quantity → Age (choice)", "cond", ["onsetAge", "value"], 47),
+    ("quantity → Age unit", "cond", ["onsetAge", "code"], "a"),
+    ("quantity → Quantity, not a choice (doseQuantity)", "imm", ["doseQuantity", "value"], 2),
+    ("copy integer → positiveInt (choice)", "imm", ["protocolApplied", 0, "doseNumberPositiveInt"], 2),
+    ("path through a choice: valueQuantity.value", "obs-through", ["valueQuantity", "value"], 72),
+    ("path through a choice: valueQuantity.code", "obs-through", ["valueQuantity", "code"], "kg"),
 ]
 
 failed = []

@@ -109,10 +109,10 @@ Each item of `results` has the fields `severity`, `code`, `objectKind`, `id`, `f
 ```text
 cindermed export <project.json> [--out <file.zip|folder>] [--package-version <x.y.z>]
                  [--created-at <date-time>] [--format text|json]
-                 [--offline] [--fhir-cache <folder>] [--no-fhir]
+                 [--offline] [--fhir-cache <folder>]
 ```
 
-The project is validated first, the FHIR level included: any error blocks the export and nothing is written. The FHIR packages are loaded as for [`validate`](#fhir-packages), with the same options.
+The project is validated first, the FHIR level included: any error blocks the export and nothing is written. The FHIR packages are loaded as for [`validate`](#fhir-packages), with the same options. The export always needs them, because the map is written from the FHIR definitions (element names and choice types): there is no `--no-fhir`, and when the packages cannot be loaded the export stops with the reason.
 
 Writes the export package of a project: everything a conversion tool needs to turn the data files into FHIR, without the workbench.
 
