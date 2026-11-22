@@ -1,0 +1,15 @@
+{
+  "resourceType": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+  "patient_id": "R5-001",
+  "sex": "F",
+  "visit_date": "2024-03-12",
+  "encounter_class": "AMB",
+  "measure": 72.40,
+  "score": 1.50,
+  "pain": 6,
+  "onset_age": 58,
+  "id_Patient0": "pat-7bb90cd39f4cc90d32539d2b",
+  "id_Encounter0": "enc-7bb90cd39f4cc90d32539d2b",
+  "id_Observation0": "obs-weight-7bb90cd39f4cc90d32539d2b",
+  "id_Condition0": "cond-7bb90cd39f4cc90d32539d2b"
+}

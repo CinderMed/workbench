@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { r4Definitions } from "./test-support/r4-definitions.js";
+import { r4Definitions } from "./test-support/test-definitions.js";
 import { writtenSegments } from "./written-paths.js";
 
 describe("written paths from the R4 definitions (#156, ADR-0023)", () => {

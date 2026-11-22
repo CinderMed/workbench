@@ -1,0 +1,44 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "sex",
+  "url": "http://example.org/fhir/r5-visit/ConceptMap/sex",
+  "version": "0.1.0",
+  "name": "Sex",
+  "status": "draft",
+  "group": [
+    {
+      "element": [
+        {
+          "code": "M",
+          "display": "male",
+          "target": [
+            {
+              "code": "male",
+              "relationship": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "F",
+          "display": "female",
+          "target": [
+            {
+              "code": "female",
+              "relationship": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "U",
+          "display": "unknown",
+          "target": [
+            {
+              "code": "unknown",
+              "relationship": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Validates every FHIR resource of the verified examples with the HL7 validator (R4, no
-# terminology server), each example folder loaded as an implementation guide so maps and logical
+# Validates every FHIR resource of the verified examples with the HL7 validator, in each example's
+# FHIR version (R4, or R5 for r5-visit with the pinned R5 terminology package, #78), with no
+# terminology server, each example folder loaded as an implementation guide so maps and logical
 # models resolve: logical models, compiled StructureMaps, ConceptMaps and the produced Bundles.
 # Every resource must validate with 0 errors (warnings are reported, not fatal).
 #
@@ -36,7 +37,11 @@ for folder in "$fixtures"/*/; do
   done
   [ ${#files[@]} -eq 0 ] && continue
   log="$out/$name.log"
-  java -jar "$VALIDATOR" "${files[@]}" -version 4.0.1 -tx n/a -ig "$folder" >"$log" 2>&1 || true
+  version=$(node -e 'console.log(require(process.argv[1]).project.fhirVersion)' "$folder/project.json")
+  extra=()
+  # R5 core does not carry the terminology code systems: the same pinned package as RunMap.java.
+  [[ "$version" == 5.* ]] && extra=(-ig "hl7.terminology.r5#6.2.0")
+  java -jar "$VALIDATOR" "${files[@]}" -version "$version" -tx n/a -ig "$folder" "${extra[@]}" >"$log" 2>&1 || true
   results=$(grep -E "^(Success|\*FAILURE\*):" "$log" || true)
   if [ "$(echo "$results" | grep -c .)" -ne ${#files[@]} ]; then
     echo "validate: $name: expected ${#files[@]} results, see $log" >&2

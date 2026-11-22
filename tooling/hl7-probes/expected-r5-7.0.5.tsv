@@ -1,0 +1,8 @@
+check	result
+compile -version=5.0.0	ok
+compilation validated as R5	111 errors
+listed defects shown	comment-documentation,condition-parentheses,element-array,no-narrative,resource-definition,rule-name-hyphen
+other differences from our JSON	none
+run from the .map text	entries=4 errors=0 same as the committed Bundle
+run from the engine compilation	entries=4 errors=0 same as the committed Bundle
+run from our JSON	entries=4 errors=0 same as the committed Bundle

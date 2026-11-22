@@ -1,0 +1,117 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.2.0",
+  "source": "Visit",
+  "logicalModel": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "patient_id",
+      "sourceName": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "sex",
+      "sourceName": "sex",
+      "type": "string",
+      "allowedValues": [
+        "M",
+        "F",
+        "U"
+      ]
+    },
+    {
+      "name": "visit_date",
+      "sourceName": "visit_date",
+      "type": "date"
+    },
+    {
+      "name": "encounter_class",
+      "sourceName": "encounter_class",
+      "type": "string",
+      "allowedValues": [
+        "AMB",
+        "IMP"
+      ]
+    },
+    {
+      "name": "measure",
+      "sourceName": "measure",
+      "type": "decimal"
+    },
+    {
+      "name": "score",
+      "sourceName": "score",
+      "type": "decimal"
+    },
+    {
+      "name": "pain",
+      "sourceName": "pain",
+      "type": "integer"
+    },
+    {
+      "name": "onset_age",
+      "sourceName": "onset_age",
+      "type": "integer"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Encounter0",
+      "literals": [
+        "enc"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "obs-weight"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Condition0",
+      "literals": [
+        "cond"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

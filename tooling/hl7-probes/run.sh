@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# HL7 probe (#134): which element names the HL7 engine accepts in FML and FHIRPath, and whether
-# delimited identifiers survive compilation to StructureMap JSON. Runs every probe map with the HL7
+# HL7 probes. Element names (#134): which element names the HL7 engine accepts in FML and FHIRPath,
+# and whether delimited identifiers survive compilation to StructureMap JSON. Runs every probe map with the HL7
 # engine and with the mapping.g4 check, joins the results into .tmp/hl7-probes/results.tsv and
 # compares them with expected-<validator version>.tsv. Exit 1 if they differ: the engine behaves
 # differently from the recorded version (better or worse); read the diff and update the notes.
+# Then the R5 compile probe (r5-compile.sh, #78).
 # Needs Java 21 and @cindermed/fml built (pnpm --filter @cindermed/fml build).
 #
 # Usage: VALIDATOR=/abs/path/validator_cli-<version>.jar bash tooling/hl7-probes/run.sh [version]
@@ -45,10 +46,14 @@ for c in cases:
 PY
 
 expected="$here/expected-$version.tsv"
+status=0
 if diff -u "$expected" "$out/results.tsv" >"$out/diff.txt"; then
   echo "hl7-probes: $(($(wc -l <"$out/results.tsv") - 1)) maps behave as recorded in $(basename "$expected")"
 else
   echo "hl7-probes: results differ from $(basename "$expected") (see $out/results.tsv):" >&2
   cat "$out/diff.txt" >&2
-  exit 1
+  status=1
 fi
+# The R5 compile (#78): which engine defects of the closed list the validator still shows.
+bash "$here/r5-compile.sh" "$version" || status=1
+exit $status

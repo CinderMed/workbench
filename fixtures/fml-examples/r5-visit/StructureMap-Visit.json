@@ -1,0 +1,1385 @@
+{
+  "resourceType": "StructureMap",
+  "id": "Visit",
+  "text": {
+    "status": "additional",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://example.org/fhir/r5-visit/StructureMap/Visit&quot; = `Visit`\n\nuses &quot;http://example.org/fhir/r5-visit/StructureDefinition/VisitRow&quot; alias VisitRow as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; alias Bundle as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; alias Patient as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Encounter&quot; alias Encounter as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Observation&quot; alias Observation as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Condition&quot; alias Condition as target\n\n// Main group: one transaction Bundle per normalized record.\n// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).\ngroup Visit(source src : VisitRow, target bundle : Bundle) {\n  src -&gt; bundle.type = 'transaction' &quot;bundle-type&quot;;\n  // Patient[0] · patient — always\n  src where ($this.id_Patient0.exists()) -&gt; bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {\n    src.id_Patient0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Patient/' + $this) &quot;Patient0-id&quot;;\n    src then Patient0(src, res) &quot;Patient0-body&quot;;\n  } &quot;Patient0&quot;;\n  // Encounter[0] · visit — always\n  src where ($this.id_Encounter0.exists()) -&gt; bundle.entry as e, e.resource = create('Encounter') as res, e.request as req then {\n    src.id_Encounter0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Encounter/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Encounter/' + $this) &quot;Encounter0-id&quot;;\n    src then Encounter0(src, res) &quot;Encounter0-body&quot;;\n  } &quot;Encounter0&quot;;\n  // Observation[0] · measurement — always\n  src where ($this.id_Observation0.exists()) -&gt; bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {\n    src.id_Observation0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Observation/' + $this) &quot;Observation0-id&quot;;\n    src then Observation0(src, res) &quot;Observation0-body&quot;;\n  } &quot;Observation0&quot;;\n  // Condition[0] · condition — always\n  src where ($this.id_Condition0.exists()) -&gt; bundle.entry as e, e.resource = create('Condition') as res, e.request as req then {\n    src.id_Condition0 as i -&gt; res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Condition/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/r5-visit/Condition/' + $this) &quot;Condition0-id&quot;;\n    src then Condition0(src, res) &quot;Condition0-body&quot;;\n  } &quot;Condition0&quot;;\n}\n\ngroup Patient0(source src : VisitRow, target res : Patient) {\n  src.patient_id as v -&gt; res.identifier as p, p.value = v &quot;R-001&quot;;\n  // R-002: value map sex (one rule per value; ConceptMap exported separately)\n  src.sex as v where ($this = 'M') -&gt; res.gender = 'male' &quot;R-002-M&quot;;\n  src.sex as v where ($this = 'F') -&gt; res.gender = 'female' &quot;R-002-F&quot;;\n  src.sex as v where ($this = 'U') -&gt; res.gender = 'unknown' &quot;R-002-U&quot;;\n}\n\ngroup Encounter0(source src : VisitRow, target res : Encounter) {\n  src -&gt; res.status = 'completed' &quot;fixed-status&quot;;\n  src.encounter_class as v -&gt; res.class = create('CodeableConcept') as cn then {\n    v -&gt; cn.coding = create('Coding') as cd then {\n      v -&gt; cd.system = 'http://terminology.hl7.org/CodeSystem/v3-ActCode', cd.code = v &quot;R-003-code&quot;;\n    } &quot;R-003-coding&quot;;\n  } &quot;R-003&quot;;\n  src.visit_date as v -&gt; res.actualPeriod as p, p.start = v &quot;R-004&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-005&quot;;\n}\n\ngroup Observation0(source src : VisitRow, target res : Observation) {\n  src -&gt; res.status = 'final' &quot;fixed-status&quot;;\n  src -&gt; res.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'measure', 'synthetic measurement') &quot;fixed-code&quot;;\n  src.measure as v -&gt; res.value = create('Quantity') as q then {\n    v -&gt; q.value = v &quot;R-006-value&quot;;\n    src -&gt; q.unit = 'kilogram', q.system = 'http://unitsofmeasure.org', q.code = 'kg' &quot;R-006-unit&quot;;\n  } &quot;R-006&quot;;\n  src -&gt; res.effective = create('dateTime') as x, x.value = '2024-03-12T09:30:00+01:00' &quot;R-007&quot;;\n  // component[d2s]: named slice, created only if the column has a value\n  src where ($this.score.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'd2s', 'decimal as text') &quot;slice-d2s-code&quot;;\n    src.score as v -&gt; slc.value = create('string') as x, x.value = v &quot;R-008&quot;;\n  } &quot;slice-d2s&quot;;\n  // component[pain]: named slice, created only if the column has a value\n  src where ($this.pain.exists()) -&gt; res.component as slc then {\n    src -&gt; slc.code = cc('https://cindermed.org/fhir/CodeSystem/r5-visit-checks', 'pain', 'pain score') &quot;slice-pain-code&quot;;\n    src.pain as v -&gt; slc.value = v &quot;R-009&quot;;\n  } &quot;slice-pain&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-010&quot;;\n  src.id_Encounter0 as t -&gt; res.encounter as r, r.reference = evaluate(t, 'Encounter/' + $this) &quot;R-011&quot;;\n}\n\ngroup Condition0(source src : VisitRow, target res : Condition) {\n  src -&gt; res.clinicalStatus = cc('http://terminology.hl7.org/CodeSystem/condition-clinical', 'active', 'Active') &quot;fixed-clinicalStatus&quot;;\n  src -&gt; res.code = cc('http://snomed.info/sct', '38341003', 'Hypertensive disorder') &quot;fixed-code&quot;;\n  src.onset_age as v -&gt; res.onset = create('Age') as q then {\n    v -&gt; q.value = v &quot;R-012-value&quot;;\n    src -&gt; q.unit = 'year', q.system = 'http://unitsofmeasure.org', q.code = 'a' &quot;R-012-unit&quot;;\n  } &quot;R-012&quot;;\n  src.id_Patient0 as t -&gt; res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) &quot;R-013&quot;;\n}\n</pre></div>"
+  },
+  "url": "http://example.org/fhir/r5-visit/StructureMap/Visit",
+  "name": "Visit",
+  "status": "draft",
+  "structure": [
+    {
+      "url": "http://example.org/fhir/r5-visit/StructureDefinition/VisitRow",
+      "mode": "source",
+      "alias": "VisitRow"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Bundle",
+      "mode": "target",
+      "alias": "Bundle"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Patient",
+      "mode": "target",
+      "alias": "Patient"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Encounter",
+      "mode": "target",
+      "alias": "Encounter"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Observation",
+      "mode": "target",
+      "alias": "Observation"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Condition",
+      "mode": "target",
+      "alias": "Condition"
+    }
+  ],
+  "group": [
+    {
+      "name": "Visit",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "bundle",
+          "type": "Bundle",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "bundle-type",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "element": "type",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "transaction"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Patient0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Patient0.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Patient"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Patient0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Patient0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Patient/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/r5-visit/Patient/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Patient0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Patient0",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueId": "res"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Encounter0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Encounter0.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Encounter"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Encounter0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Encounter0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Encounter/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/r5-visit/Encounter/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Encounter0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Encounter0",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueId": "res"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Observation0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Observation0.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Observation"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Observation0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Observation0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Observation/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/r5-visit/Observation/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Observation0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Observation0",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueId": "res"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Condition0",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.id_Condition0.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "element": "entry",
+              "variable": "e"
+            },
+            {
+              "context": "e",
+              "element": "resource",
+              "variable": "res",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Condition"
+                }
+              ]
+            },
+            {
+              "context": "e",
+              "element": "request",
+              "variable": "req"
+            }
+          ],
+          "rule": [
+            {
+              "name": "Condition0-id",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "id_Condition0",
+                  "variable": "i"
+                }
+              ],
+              "target": [
+                {
+                  "context": "res",
+                  "element": "id",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "method",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "PUT"
+                    }
+                  ]
+                },
+                {
+                  "context": "req",
+                  "element": "url",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'Condition/' + $this"
+                    }
+                  ]
+                },
+                {
+                  "context": "e",
+                  "element": "fullUrl",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "i"
+                    },
+                    {
+                      "valueString": "'http://example.org/fhir/r5-visit/Condition/' + $this"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Condition0-body",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "Condition0",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueId": "res"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Patient0",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Patient",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "R-001",
+          "source": [
+            {
+              "context": "src",
+              "element": "patient_id",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "identifier",
+              "variable": "p"
+            },
+            {
+              "context": "p",
+              "element": "value",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueId": "v"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-002-M",
+          "source": [
+            {
+              "context": "src",
+              "element": "sex",
+              "variable": "v",
+              "condition": "($this = 'M')"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "gender",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "male"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-002-F",
+          "source": [
+            {
+              "context": "src",
+              "element": "sex",
+              "variable": "v",
+              "condition": "($this = 'F')"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "gender",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "female"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-002-U",
+          "source": [
+            {
+              "context": "src",
+              "element": "sex",
+              "variable": "v",
+              "condition": "($this = 'U')"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "gender",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "unknown"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Encounter0",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Encounter",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "fixed-status",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "status",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "completed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-003",
+          "source": [
+            {
+              "context": "src",
+              "element": "encounter_class",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "class",
+              "variable": "cn",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "CodeableConcept"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "R-003-coding",
+              "source": [
+                {
+                  "context": "v"
+                }
+              ],
+              "target": [
+                {
+                  "context": "cn",
+                  "element": "coding",
+                  "variable": "cd",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Coding"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "R-003-code",
+                  "source": [
+                    {
+                      "context": "v"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "cd",
+                      "element": "system",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueString": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+                        }
+                      ]
+                    },
+                    {
+                      "context": "cd",
+                      "element": "code",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueId": "v"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-004",
+          "source": [
+            {
+              "context": "src",
+              "element": "visit_date",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "actualPeriod",
+              "variable": "p"
+            },
+            {
+              "context": "p",
+              "element": "start",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueId": "v"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-005",
+          "source": [
+            {
+              "context": "src",
+              "element": "id_Patient0",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "subject",
+              "variable": "r"
+            },
+            {
+              "context": "r",
+              "element": "reference",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "t"
+                },
+                {
+                  "valueString": "'Patient/' + $this"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Observation0",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Observation",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "fixed-status",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "status",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "final"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fixed-code",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "code",
+              "transform": "cc",
+              "parameter": [
+                {
+                  "valueString": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks"
+                },
+                {
+                  "valueString": "measure"
+                },
+                {
+                  "valueString": "synthetic measurement"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-006",
+          "source": [
+            {
+              "context": "src",
+              "element": "measure",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "value",
+              "variable": "q",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Quantity"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "R-006-value",
+              "source": [
+                {
+                  "context": "v"
+                }
+              ],
+              "target": [
+                {
+                  "context": "q",
+                  "element": "value",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "v"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "R-006-unit",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "q",
+                  "element": "unit",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "kilogram"
+                    }
+                  ]
+                },
+                {
+                  "context": "q",
+                  "element": "system",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "http://unitsofmeasure.org"
+                    }
+                  ]
+                },
+                {
+                  "context": "q",
+                  "element": "code",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "kg"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-007",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "effective",
+              "variable": "x",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "dateTime"
+                }
+              ]
+            },
+            {
+              "context": "x",
+              "element": "value",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "2024-03-12T09:30:00+01:00"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "slice-d2s",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.score.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "component",
+              "variable": "slc"
+            }
+          ],
+          "rule": [
+            {
+              "name": "slice-d2s-code",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "slc",
+                  "element": "code",
+                  "transform": "cc",
+                  "parameter": [
+                    {
+                      "valueString": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks"
+                    },
+                    {
+                      "valueString": "d2s"
+                    },
+                    {
+                      "valueString": "decimal as text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "R-008",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "score",
+                  "variable": "v"
+                }
+              ],
+              "target": [
+                {
+                  "context": "slc",
+                  "element": "value",
+                  "variable": "x",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "string"
+                    }
+                  ]
+                },
+                {
+                  "context": "x",
+                  "element": "value",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "v"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "slice-pain",
+          "source": [
+            {
+              "context": "src",
+              "condition": "($this.pain.exists())"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "component",
+              "variable": "slc"
+            }
+          ],
+          "rule": [
+            {
+              "name": "slice-pain-code",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "slc",
+                  "element": "code",
+                  "transform": "cc",
+                  "parameter": [
+                    {
+                      "valueString": "https://cindermed.org/fhir/CodeSystem/r5-visit-checks"
+                    },
+                    {
+                      "valueString": "pain"
+                    },
+                    {
+                      "valueString": "pain score"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "R-009",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "pain",
+                  "variable": "v"
+                }
+              ],
+              "target": [
+                {
+                  "context": "slc",
+                  "element": "value",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "v"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-010",
+          "source": [
+            {
+              "context": "src",
+              "element": "id_Patient0",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "subject",
+              "variable": "r"
+            },
+            {
+              "context": "r",
+              "element": "reference",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "t"
+                },
+                {
+                  "valueString": "'Patient/' + $this"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-011",
+          "source": [
+            {
+              "context": "src",
+              "element": "id_Encounter0",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "encounter",
+              "variable": "r"
+            },
+            {
+              "context": "r",
+              "element": "reference",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "t"
+                },
+                {
+                  "valueString": "'Encounter/' + $this"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Condition0",
+      "input": [
+        {
+          "name": "src",
+          "type": "VisitRow",
+          "mode": "source"
+        },
+        {
+          "name": "res",
+          "type": "Condition",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "fixed-clinicalStatus",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "clinicalStatus",
+              "transform": "cc",
+              "parameter": [
+                {
+                  "valueString": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+                },
+                {
+                  "valueString": "active"
+                },
+                {
+                  "valueString": "Active"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fixed-code",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "code",
+              "transform": "cc",
+              "parameter": [
+                {
+                  "valueString": "http://snomed.info/sct"
+                },
+                {
+                  "valueString": "38341003"
+                },
+                {
+                  "valueString": "Hypertensive disorder"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-012",
+          "source": [
+            {
+              "context": "src",
+              "element": "onset_age",
+              "variable": "v"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "onset",
+              "variable": "q",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Age"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "R-012-value",
+              "source": [
+                {
+                  "context": "v"
+                }
+              ],
+              "target": [
+                {
+                  "context": "q",
+                  "element": "value",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueId": "v"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "R-012-unit",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "q",
+                  "element": "unit",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "year"
+                    }
+                  ]
+                },
+                {
+                  "context": "q",
+                  "element": "system",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "http://unitsofmeasure.org"
+                    }
+                  ]
+                },
+                {
+                  "context": "q",
+                  "element": "code",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "a"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "R-013",
+          "source": [
+            {
+              "context": "src",
+              "element": "id_Patient0",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "res",
+              "element": "subject",
+              "variable": "r"
+            },
+            {
+              "context": "r",
+              "element": "reference",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "t"
+                },
+                {
+                  "valueString": "'Patient/' + $this"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

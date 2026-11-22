@@ -6,10 +6,11 @@ J=${VALIDATOR:?set VALIDATOR to the path of validator_cli.jar}; ok=0; ko=0
 # TypeScript normalizer (tooling/golden/normalize-ts.mjs). Same command line, output and messages.
 NORMALIZE=${NORMALIZE:-node tools/normalize.mjs}
 [ -f tools/java/RunMap.class ] || javac -proc:none -cp "$J" tools/java/RunMap.java 2>&1 | grep -v JAVA_TOOL
-rm -f metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json element-names/test-data/bundle-*.json type-combinations/test-data/bundle-*.json
+rm -f r5-visit/test-data/bundle-*.json metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json element-names/test-data/bundle-*.json type-combinations/test-data/bundle-*.json
 run(){ # folder map input output expected_entries [external-refs]
   $NORMALIZE "$1/normalization-$2.json" "$1/test-data/$3.csv" > "$1/test-data/$3.normalized.json" 2>/dev/null
-  res=$(java -Xmx2g -cp "$J:tools/java" RunMap "$1" "http://example.org/fhir/$1/StructureMap/$2" "$1/test-data/$3.normalized.json" "$1/test-data/$4.json" 2>&1 | grep -E "Bundle validation|\[error\]")
+  # FHIR: the example's FHIR version (default 4.0.1; 5.0.0 for r5-visit, #78).
+  res=$(java -Xmx2g -cp "$J:tools/java" RunMap "$1" "http://example.org/fhir/$1/StructureMap/$2" "$1/test-data/$3.normalized.json" "$1/test-data/$4.json" "${FHIR:-4.0.1}" 2>&1 | grep -E "Bundle validation|\[error\]")
   n=$(python3 -c "import json;print(len(json.load(open('$1/test-data/$4.json')).get('entry',[])))")
   err=$(echo "$res" | sed -nE 's/.*Bundle validation: ([0-9]+) errors.*/\1/p')
   if [ "$n" = "$5" ] && { [ "$err" = "0" ] || [ "${6:-}" = "external-refs" ]; }; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
@@ -81,4 +82,10 @@ PY
 mm=$(java -Xmx2g -jar "$J" mimic-iv-demo/test-data/bundle-merged.json -version 4.0.1 -tx n/a -ig mimic-iv-demo 2>&1 | grep -E "^(Success|\*FAILURE\*)")
 echo "MIMIC-IV demo merged (order Patients → Admissions → Labevents): $mm"
 echo "$mm" | grep -q "0 errors" && ok=$((ok+1)) || ko=$((ko+1))
+# R5 (#78): the StructureMap in its R5 form, an R5 ConceptMap, R5 elements (Encounter.class as a
+# list, actualPeriod, Condition.clinicalStatus) and the #156 choice rules, run and validated in R5.
+FHIR=5.0.0 run r5-visit Visit visit bundle-visit 4
+r5=$(python3 tests/r5-visit.py r5-visit/test-data/bundle-visit.json)
+echo "$r5" | grep -q "^OK " && ok=$((ok+1)) || ko=$((ko+1))
+printf '%-8s %-12s %s\n' "$(echo "$r5" | grep -q '^OK ' && echo OK || echo FAILED)" "r5" "${r5#* }"
 echo "Total: $ok passed, $ko failed"
