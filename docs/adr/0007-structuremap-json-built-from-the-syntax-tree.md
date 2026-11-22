@@ -83,13 +83,20 @@ The CI golden job now proves the whole TypeScript chain, not only the stored fix
 The R5 form is now checked by the HL7 engine, on `fixtures/fml-examples/r5-visit`.
 
 - **The engine runs our R5 StructureMap.** The Bundle validates in R5 with 0 errors. Our JSON validates as an R5 StructureMap with 0 errors too.
-- **The engine's own R5 compilation is not valid R5.** Validator 7.0.5 compiles the R5 map into a StructureMap with 111 validation errors. Its known defects are:
-  - `element` written as a one-item array;
-  - rule names without their `-` (`R-001` → `R001`);
-  - FML comments copied into `documentation`, no narrative, and an unknown `resourceDefinition`;
-  - conditions without their outer parentheses.
-- **The comparison in R5.** `tooling/golden/compare-structuremap.mjs` sets aside exactly those defects, and the rest must be equal. With them set aside, the engine's compilation and ours are identical. R4 keeps the exact comparison (`status` aside).
+- **The engine's own R5 compilation is not valid R5.** Validator 7.0.5 compiles the R5 map into a StructureMap with 111 validation errors. The R5 comparison sets aside a closed list of engine defects, `R5_ENGINE_DEFECTS` in `tooling/golden/compare-structuremap.mjs`:
+  - `element-array`: `element` written as a one-item array (R5 defines a single string). Invalid R5;
+  - `resource-definition`: an extra `resourceDefinition` (`…/StructureMap|0.1.0`). Invalid R5;
+  - `rule-name-hyphen`: rule names without their `-` (`R-001` → `R001`);
+  - `comment-documentation`: FML comments copied into `documentation`;
+  - `no-narrative`: no narrative (`text`);
+  - `condition-parentheses`: conditions without their outer parentheses.
+
+  The last four are valid R5, but differ from the R4 compilation of the same map. Each defect is matched in one exact form and only on the engine's side; any other difference fails the Golden job (`tooling/compare-structuremap.test.ts`).
+
+- **The comparison in R5.** With exactly those defects set aside, the engine's compilation and ours are identical. R4 keeps the exact comparison (`status` aside).
+- **The engine runs R5 maps three ways.** With 7.0.5, the Bundles made from the `.map` text, from the engine's own compilation and from our JSON are identical to the committed one and validate in R5 with 0 errors. So a `.map` uploaded to a server that compiles FML with the same engine runs correctly; only the compiled JSON is invalid as a resource. R5 packages do not need to be run from our JSON.
+- **The probe.** `tooling/hl7-probes/r5-compile.sh` records, per validator version, which listed defects the compilation still shows and how the three runs behave (`expected-r5-7.0.5.tsv`). A defect that disappears leaves the list in the PR that upgrades the validator.
 - **The committed and exported R5 JSON is ours**, not the engine's compilation (in R4 it is the engine's, plus `status: draft`).
 - **R5 terminology.** R5 core does not carry the terminology code systems, so the R5 run and validation load `hl7.terminology.r5#6.2.0`, pinned in `RunMap.java` and `validate-resources.sh`.
 
-If a later validator writes valid R5, the defects set aside here should disappear one by one. The comparison script then gets simpler, and the committed JSON can become the engine's compilation, as in R4.
+If a later validator writes valid R5, the defects set aside here should disappear one by one (the probe shows it). The list then shrinks, and once it is empty the committed JSON can become the engine's compilation, as in R4.

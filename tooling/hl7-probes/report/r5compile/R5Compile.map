@@ -1,0 +1,9 @@
+map "http://example.org/StructureMap/R5Compile" = "R5Compile"
+
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias BasicIn as source
+uses "http://hl7.org/fhir/StructureDefinition/Basic" alias BasicOut as target
+
+group R5Compile(source src : BasicIn, target tgt : BasicOut) {
+  // copy the id when there is one
+  src.id as v where (v.exists()) -> tgt.id = v "copy-id";
+}

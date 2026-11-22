@@ -237,7 +237,8 @@ R5 core does not carry the terminology code systems (`v3-ActCode`, `condition-cl
 `tooling/golden/validate-resources.sh` load `hl7.terminology.r5#6.2.0` for R5.
 
 **The committed StructureMap JSON is ours, not the engine's compilation.** Validator 7.0.5 compiles the R5 map into
-a StructureMap that is not valid R5 (111 errors). After the engine's listed defects are set aside, the two are
-identical (`tooling/golden/compare-structuremap.mjs`, ADR-0007 addendum). Our JSON validates as R5 with 0 errors,
-and the engine runs it.
+a StructureMap that is not valid R5 (111 errors). After the engine's defects are set aside, the two are identical;
+the defects are a closed list in `tooling/golden/compare-structuremap.mjs` (ADR-0007 addendum), and any other
+difference fails. Our JSON validates as R5 with 0 errors. The engine runs the map the same way from our JSON, from
+its own compilation and from the `.map` text (`tooling/hl7-probes/r5-compile.sh`).
 
