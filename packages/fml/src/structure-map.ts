@@ -29,7 +29,7 @@ import type {
   Target,
   Transform,
 } from "./fml-ast.js";
-import { printLiteral, printMap, quoteString } from "./fml-print.js";
+import { printJoin, printLiteral, printMap, quoteString } from "./fml-print.js";
 
 export type StructureMapFhirRelease = "R4" | "R5";
 
@@ -144,6 +144,8 @@ export function renderFhirPath(expr: Expr): string {
       return `(${renderFhirPath(expr.arg)}).not()`;
     case "prefixThis":
       return `${quoteString(expr.prefix)} + $this`;
+    case "join":
+      return printJoin(expr);
     case "raw":
       return expr.text;
   }

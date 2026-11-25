@@ -151,6 +151,15 @@ export type Expr =
   | { readonly kind: "not"; readonly arg: Expr }
   /** `'Patient/' + $this` */
   | { readonly kind: "prefixThis"; readonly prefix: string }
+  /**
+   * Concatenation (#98): `$this.a.toString().combine($this.b.toString()).join(' ')`, the columns in
+   * order, empty ones skipped.
+   */
+  | {
+      readonly kind: "join";
+      readonly columns: readonly [Identifier, Identifier, ...Identifier[]];
+      readonly separator: string;
+    }
   /** Expert expression (D6) only; inserted as is, still checked by the grammar and the engine. */
   | { readonly kind: "raw"; readonly text: string };
 
