@@ -11,7 +11,7 @@
  *   writes it inline. A named slice is always a block (`slice-<name>`, discriminator
  *   `slice-<name>-code`). A reference to a conditional role of the same table is guarded by that
  *   role's condition (`<code>-guard`), and so is a row with its own condition.
- * - Value maps and quantities come with the value-map rules (#11, #12); `concat` with #98;
+ * - Value maps and quantities come with the value-map rules (#11, #12); `concat` (#98);
  *   expert expressions are not supported in the MVP.
  * - Element names and choice types come from the FHIR definitions, resolved by the export and
  *   passed as plain data (`WrittenPaths`, ADR-0023). On a choice element, a value whose type is not
@@ -397,6 +397,37 @@ function valueRule(
       }
       return { name, source: { context: src }, targets: write(context, fixed, writtenType(fixed)) };
     }
+    case "concat": {
+      // #98: the columns in order, empty ones skipped, joined by the separator; the rule fires
+      // only when one of them has a value, so an all-empty row writes no element.
+      const [a, b, ...more] = transform.columnIds.map((id) => g.columnElement(id));
+      if (a === undefined || b === undefined)
+        throw new Error(`Row ${row.code}: a concatenation has two columns at least (schema).`);
+      const columns = [a, b, ...more] as const;
+      return {
+        name,
+        source: {
+          context: src,
+          where: {
+            kind: "or",
+            args: [
+              { kind: "exists", column: a },
+              { kind: "exists", column: b },
+              ...more.map((column): Expr => ({ kind: "exists", column })),
+            ],
+          },
+        },
+        targets: write(
+          context,
+          {
+            kind: "evaluate",
+            variable: src,
+            expression: { kind: "join", columns, separator: transform.separator ?? " " },
+          },
+          "string",
+        ),
+      };
+    }
     case "reference": {
       const target = g.project.instances.find((i) => i.id === transform.targetInstanceId);
       if (target === undefined)
@@ -437,9 +468,7 @@ function valueRule(
       const why =
         transform.kind === "expression"
           ? "expert expressions (D6) are not supported in the MVP"
-          : transform.kind === "concat"
-            ? "concatenation is not supported yet (#98)"
-            : "a Quantity.unit value map is used only by a quantity transform";
+          : "a Quantity.unit value map is used only by a quantity transform";
       g.error(
         GeneratorCode.TRANSFORM_UNSUPPORTED,
         "mapping",
@@ -450,6 +479,15 @@ function valueRule(
       return undefined;
     }
   }
+}
+
+/**
+ * The columns whose value a row writes: every column of a concatenation (#98), else its column. A
+ * shared block is created when one of its rows' value columns has a value.
+ */
+function valueColumns(row: MappingRow): readonly Id[] {
+  if (row.transform.kind === "concat") return row.transform.columnIds;
+  return row.columnId === undefined ? [] : [row.columnId];
 }
 
 /** A guard: `src where (condition) then { rules } "<name>"`. */
@@ -918,8 +956,8 @@ function roleGroup(g: Generation, instance: Instance): Group {
         const leaf = parsed.get(member.id)?.[1];
         if (leaf === undefined) continue;
         inner.push(...rowRules(g, member, alias, [leaf]));
-        if (member.columnId !== undefined) {
-          const element = g.columnElement(member.columnId);
+        for (const id of valueColumns(member)) {
+          const element = g.columnElement(id);
           if (!columns.includes(element)) columns.push(element);
         }
       }

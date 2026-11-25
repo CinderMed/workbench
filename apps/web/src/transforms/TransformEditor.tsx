@@ -268,7 +268,6 @@ export function TransformEditor({
                 columns: draft.columnIds.map(columnName).join(" + ") || "—",
               })}
             </Text>
-            <Alert color="orange">{t("transforms.concatNotExported")}</Alert>
           </>
         );
       case "constant":
@@ -346,14 +345,9 @@ export function TransformEditor({
             label={t("transforms.field.kind")}
             data-autofocus
             value={draft.kind}
-            data={kindsFor(column, row.transform.kind).map((k) => ({
-              value: k,
-              label: t(`grid.transform.${k}`),
-            }))}
+            data={kindsFor(column).map((k) => ({ value: k, label: t(`grid.transform.${k}`) }))}
             onChange={(event) => {
-              const kind = kindsFor(column, row.transform.kind).find(
-                (k) => k === event.currentTarget.value,
-              );
+              const kind = kindsFor(column).find((k) => k === event.currentTarget.value);
               if (kind !== undefined) set({ kind });
             }}
           />

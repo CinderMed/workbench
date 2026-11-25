@@ -114,9 +114,61 @@ export function printExpr(expr: Expr): string {
       return `(${printExpr(expr.arg)}).not()`;
     case "prefixThis":
       return `${quoteString(expr.prefix)} + $this`;
+    case "join":
+      return printJoin(expr);
     case "raw":
       return expr.text;
   }
+}
+
+/**
+ * A concatenation (#98): `$this.a.toString().combine($this.b.toString()).join(' ')`. `combine`
+ * keeps the order and skips an empty column; `toString()` writes a decimal with its digits
+ * (`1.50`). The HL7 engine (validator 7.0.5) stores a FHIRPath string without its escapes, so a
+ * separator with `'` would break the map: such a separator, or one with a control character, is
+ * written in base64 and decoded by FHIRPath (`'Jw=='.decode('base64')`). Same text in the FML and
+ * in the StructureMap JSON.
+ */
+export function printJoin(expr: Extract<Expr, { kind: "join" }>): string {
+  const [first, ...rest] = expr.columns.map((column) => `$this.${column}.toString()`);
+  const combined = rest.reduce((all, next) => `${all}.combine(${next})`, first ?? "");
+  // eslint-disable-next-line no-control-regex -- control characters are what this looks for
+  const plain = !/['\u0000-\u001f\u007f]/.test(expr.separator);
+  const separator = plain
+    ? quoteString(expr.separator)
+    : `${quoteString(base64(expr.separator))}.decode('base64')`;
+  return `${combined}.join(${separator})`;
+}
+
+const BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/** The base64 of a string's UTF-8 bytes (no I/O, no platform API: a domain package). */
+export function base64(text: string): string {
+  const bytes: number[] = [];
+  for (const ch of text) {
+    const c = ch.codePointAt(0) ?? 0;
+    if (c < 0x80) bytes.push(c);
+    else if (c < 0x800) bytes.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+    else if (c < 0x10000) bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    else
+      bytes.push(
+        0xf0 | (c >> 18),
+        0x80 | ((c >> 12) & 63),
+        0x80 | ((c >> 6) & 63),
+        0x80 | (c & 63),
+      );
+  }
+  let out = "";
+  for (let i = 0; i < bytes.length; i += 3) {
+    const [a = 0, b = 0, c = 0] = bytes.slice(i, i + 3);
+    const n = (a << 16) | (b << 8) | c;
+    const left = bytes.length - i;
+    out += BASE64[(n >> 18) & 63] ?? "";
+    out += BASE64[(n >> 12) & 63] ?? "";
+    out += left > 1 ? (BASE64[(n >> 6) & 63] ?? "") : "=";
+    out += left > 2 ? (BASE64[n & 63] ?? "") : "=";
+  }
+  return out;
 }
 
 function printTransform(transform: Transform): string {

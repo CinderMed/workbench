@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import firstOverviewMap from "../../../../fixtures/fml-examples/metastra/FirstOverview.map?raw";
 import metastraProject from "../../../../fixtures/fml-examples/metastra/project.json" with { type: "json" };
 import motuProject from "../../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
-import { printMap } from "../fml-print.js";
+import { base64, printMap } from "../fml-print.js";
 import { parseFml } from "../grammar-check.js";
 import { GeneratorCode } from "./codes.js";
 import { roleCondition, type ColumnNames } from "./conditions.js";
@@ -157,21 +157,13 @@ describe("generateMap errors", () => {
     return map.ok ? [] : map.results.map((r) => [r.code, r.id, r.field]);
   };
 
-  it("refuses expressions and concatenations", () => {
+  it("refuses expressions", () => {
     const file = copy(motuProject);
     row(file, "R-007").transform = {
       kind: "expression",
       language: "fml",
       expression: "x",
     } as never;
-    expect(codes(file)).toEqual([
-      [GeneratorCode.TRANSFORM_UNSUPPORTED, "map_07", "transform.kind"],
-    ]);
-    row(file, "R-007").transform = {
-      kind: "concat",
-      columnIds: ["col_f_date", "col_f_id"],
-      separator: " ",
-    };
     expect(codes(file)).toEqual([
       [GeneratorCode.TRANSFORM_UNSUPPORTED, "map_07", "transform.kind"],
     ]);
@@ -519,5 +511,74 @@ describe("choice elements written with their type (#156, ADR-0023)", () => {
     const written = new Map(testWrittenPaths(file));
     written.delete(pathKey("ins_obs0", "component[nrs].valueInteger"));
     expect(() => generateMap(file, planned.value, written)).toThrow(GeneratorInputError);
+  });
+});
+
+describe("generateMap concatenation (#98)", () => {
+  const concatLine = (separator: string | undefined, path = "event.text") => {
+    const file = copy(motuProject);
+    const r = row(file, "R-007");
+    r.path = path;
+    r.transform = {
+      kind: "concat",
+      columnIds: ["col_f_date", "col_f_id"],
+      ...(separator === undefined ? {} : { separator }),
+    };
+    const text = printed(file, "src_fall");
+    // The official grammar accepts the expression, base64 form included.
+    expect(parseFml(text)).toEqual([]);
+    return text
+      .split("\n")
+      .find((line) => line.includes('"R-007"'))
+      ?.trim();
+  };
+
+  it("joins the columns in order, only when one has a value, with a space by default", () => {
+    expect(concatLine(undefined)).toBe(
+      "src where ($this.FallDate.exists() or $this.AnonymousID.exists()) -> res.event as p, p.text = evaluate(src, $this.FallDate.toString().combine($this.AnonymousID.toString()).join(' ')) \"R-007\";",
+    );
+  });
+
+  it("creates a shared block when any concatenated column has a value", () => {
+    const file = copy(motuProject);
+    const r = row(file, "R-007");
+    r.path = "event.text";
+    r.transform = { kind: "concat", columnIds: ["col_f_date", "col_f_id"] };
+    // A second row on `event` makes it a shared block.
+    file.mappings.push({
+      ...r,
+      id: "map_99",
+      code: "R-099",
+      columnId: "col_f_adm",
+      path: "event.id",
+      transform: { kind: "copy" },
+    });
+    expect(printed(file, "src_fall")).toContain(
+      "src where ($this.FallDate.exists() or $this.AnonymousID.exists() or $this.AdmissionDate.exists()) -> res.event as p then {",
+    );
+  });
+
+  it("writes a separator with a quote or a control character in base64", () => {
+    expect(concatLine(", ")).toContain(".join(', '))");
+    // "' · '" in UTF-8, base64: the HL7 engine loses the escape of a quote (#98).
+    expect(concatLine("' · '")).toContain(".join('JyDCtyAn'.decode('base64')))");
+    expect(concatLine("\n")).toContain(".join('Cg=='.decode('base64')))");
+  });
+});
+
+describe("base64 (concatenation separators)", () => {
+  it("encodes UTF-8 bytes", () => {
+    const cases: [string, string][] = [
+      ["", ""],
+      ["'", "Jw=="],
+      ["' · '", "JyDCtyAn"],
+      ["a\nb", "YQpi"],
+      ["Sì", "U8Os"],
+      ["😀 x", "8J+YgCB4"],
+      ["ab", "YWI="],
+      ["abc", "YWJj"],
+      ["abcd", "YWJjZA=="],
+    ];
+    for (const [text, encoded] of cases) expect(base64(text)).toBe(encoded);
   });
 });

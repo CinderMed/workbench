@@ -8,6 +8,8 @@ import metastraProject from "../../../../fixtures/fml-examples/metastra/project.
 import { createI18n } from "../i18n";
 import { LocalApp } from "../local/LocalApp";
 import { mockLayout } from "../test-layout";
+import type { Validator } from "../validation/use-validation";
+import { syntheticDefinitions } from "../validation/synthetic-definitions";
 import { validateAll } from "../validation/validate";
 
 let restore: (() => void) | undefined;
@@ -41,15 +43,68 @@ function metastraWithCopies(): ProjectFile {
   };
 }
 
-async function open(project: ProjectFile) {
+const withoutDefinitions: Validator = (p) =>
+  validateAll(p, { message: "no definitions in this test" });
+const withDefinitions: Validator = (p) => validateAll(p, syntheticDefinitions());
+
+/** A patient table: given → name.text, flag → active (FHIR definitions: synthetic-definitions). */
+function namesProject(): ProjectFile {
+  return {
+    formatVersion: "1.4.0",
+    project: {
+      id: "prj_names1",
+      name: "Names",
+      fhirVersion: "4.0.1",
+      canonicalBase: "https://cindermed.org/fhir/n",
+    },
+    sources: [
+      {
+        id: "src_names1",
+        name: "Names",
+        columns: [
+          { id: "col_given", name: "given", dataType: "string" },
+          { id: "col_family", name: "family", dataType: "string" },
+          { id: "col_flag", name: "flag", dataType: "boolean" },
+        ],
+      },
+    ],
+    instances: [
+      {
+        id: "ins_pat001",
+        resourceType: "Patient",
+        index: 0,
+        sourceId: "src_names1",
+        multiplicity: { kind: "perRow" },
+      },
+    ],
+    mappings: [
+      {
+        id: "map_given",
+        code: "R-001",
+        columnId: "col_given",
+        instanceId: "ins_pat001",
+        path: "name.text",
+        transform: { kind: "copy" },
+      },
+      {
+        id: "map_flag1",
+        code: "R-002",
+        columnId: "col_flag",
+        instanceId: "ins_pat001",
+        path: "active",
+        transform: { kind: "copy" },
+      },
+    ],
+    valueMaps: [],
+  };
+}
+
+async function open(project: ProjectFile, validator: Validator = withoutDefinitions) {
   const download = vi.fn<(name: string, text: string) => void>();
   render(
     <I18nextProvider i18n={createI18n()}>
       <MantineProvider>
-        <LocalApp
-          download={download}
-          validator={(p) => validateAll(p, { message: "no definitions in this test" })}
-        />
+        <LocalApp download={download} validator={validator} />
       </MantineProvider>
     </I18nextProvider>,
   );
@@ -184,41 +239,56 @@ describe("the transform editor (D5)", () => {
     expect(added).not.toHaveProperty("columnId");
   });
 
-  it("does not offer concatenation until the export can write it, and shows a row that has one", async () => {
+  it("offers concatenation again, and the grid reports no error for it (#98)", async () => {
     const user = userEvent.setup();
-    const project = load(metastraProject);
-    const withConcat: ProjectFile = {
-      ...project,
-      mappings: project.mappings.map((m) =>
-        m.code === "R-001"
-          ? {
-              ...m,
-              transform: { kind: "concat", columnIds: ["col_patient_id", "col_encounter_fo"] },
-            }
-          : m,
-      ),
+    const { grid, download } = await open(namesProject(), withDefinitions);
+    const summary = await screen.findByTestId("validation-summary");
+    const clean = () => {
+      expect(within(summary).getByText("0 errors")).toBeTruthy();
+      expect(within(summary).getByText("0 warnings")).toBeTruthy();
+      expect(within(summary).getByText(/Checked against FHIR 4\.0\.1/)).toBeTruthy();
     };
-    const { grid } = await open(withConcat);
+    await waitFor(clean);
 
-    await user.dblClick(cell(grid, "R-002", 5));
-    let dialog = await screen.findByRole("dialog");
-    const kinds = () =>
-      within(within(dialog).getByLabelText<HTMLSelectElement>("Transform"))
-        .getAllByRole("option")
-        .map((o) => o.getAttribute("value"));
-    expect(kinds()).not.toContain("concat");
-    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    // R-001 (given → name.text) becomes given + family.
+    await user.dblClick(cell(grid, "R-001", 5));
+    const dialog = await screen.findByRole("dialog");
+    const kinds = within(within(dialog).getByLabelText<HTMLSelectElement>("Transform"))
+      .getAllByRole("option")
+      .map((o) => o.getAttribute("value"));
+    expect(kinds).toContain("concat");
+    await user.selectOptions(within(dialog).getByLabelText("Transform"), "concat");
+    await user.click(within(dialog).getByLabelText("family"));
+    expect(within(dialog).getByText("Joined in this order: given + family")).toBeTruthy();
+    await user.click(within(dialog).getByRole("button", { name: "Save" }));
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
+    expect(cell(grid, "R-001", 5).textContent).toBe("Concatenation");
 
-    await user.dblClick(cell(grid, "R-001", 5));
-    dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByLabelText<HTMLSelectElement>("Transform").value).toBe("concat");
+    // The FHIR checks ran on it and found nothing: no error in the summary or the row's cells.
+    await waitFor(clean);
     expect(
-      within(dialog).getByText(
-        /The FML export cannot write a concatenation yet: it refuses this row \(TRANSFORM_UNSUPPORTED\)/,
-      ),
-    ).toBeTruthy();
+      within(grid)
+        .getAllByRole("gridcell")
+        .filter((c) => c.getAttribute("aria-invalid") === "true"),
+    ).toEqual([]);
+    const project = await saved(download);
+    expect(project.mappings.find((m) => m.code === "R-001")?.transform).toEqual({
+      kind: "concat",
+      columnIds: ["col_given", "col_family"],
+    });
+
+    // The same checks still catch a concatenation on a boolean element (Patient.active).
+    await user.dblClick(cell(grid, "R-002", 5));
+    const second = await screen.findByRole("dialog");
+    await user.selectOptions(within(second).getByLabelText("Transform"), "concat");
+    await user.click(within(second).getByLabelText("given"));
+    await user.click(within(second).getByRole("button", { name: "Save" }));
+    // Two errors: a boolean column cannot be joined, and Patient.active is not a string.
+    await waitFor(() => {
+      expect(within(summary).getByText("2 errors")).toBeTruthy();
+    });
+    expect(cell(grid, "R-002", 5).getAttribute("aria-invalid")).toBe("true");
   });
 });
