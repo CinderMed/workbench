@@ -404,10 +404,14 @@ function valueRule(
       if (a === undefined || b === undefined)
         throw new Error(`Row ${row.code}: a concatenation has two columns at least (schema).`);
       const columns = [a, b, ...more] as const;
+      // `src as s … evaluate(s, …)`: the HL7 validator checks an evaluate on `src` against the
+      // logical model's alias and reports "Unknown context"; on an alias it does not (#98).
+      const s = ident("s");
       return {
         name,
         source: {
           context: src,
+          alias: s,
           where: {
             kind: "or",
             args: [
@@ -421,7 +425,7 @@ function valueRule(
           context,
           {
             kind: "evaluate",
-            variable: src,
+            variable: s,
             expression: { kind: "join", columns, separator: transform.separator ?? " " },
           },
           "string",

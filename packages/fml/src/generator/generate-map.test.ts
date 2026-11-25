@@ -535,7 +535,7 @@ describe("generateMap concatenation (#98)", () => {
 
   it("joins the columns in order, only when one has a value, with a space by default", () => {
     expect(concatLine(undefined)).toBe(
-      "src where ($this.FallDate.exists() or $this.AnonymousID.exists()) -> res.event as p, p.text = evaluate(src, $this.FallDate.toString().combine($this.AnonymousID.toString()).join(' ')) \"R-007\";",
+      "src as s where ($this.FallDate.exists() or $this.AnonymousID.exists()) -> res.event as p, p.text = evaluate(s, $this.FallDate.toString().combine($this.AnonymousID.toString()).join(' ')) \"R-007\";",
     );
   });
 
