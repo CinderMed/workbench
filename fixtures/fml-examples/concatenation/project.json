@@ -1,0 +1,241 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.4.0",
+  "project": {
+    "id": "prj_concatenation",
+    "name": "Concatenation",
+    "description": "Golden case (#98): the concatenation transform. Columns of type categorical, string, integer and decimal are joined in order, empty ones skipped, on a string element inside a shared block, on a choice element (valueString) and on a markdown element, with a separator that holds a quote.",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/concatenation",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/concatenation",
+      "onInvalidValue": "fail"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One row per visit.",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "Patient ID",
+          "dataType": "string"
+        },
+        {
+          "id": "col_title",
+          "name": "title",
+          "label": "Title",
+          "description": "Title before the name.",
+          "dataType": "categorical",
+          "allowedValues": [
+            {
+              "code": "Dr",
+              "label": "doctor"
+            },
+            {
+              "code": "Prof",
+              "label": "professor"
+            }
+          ]
+        },
+        {
+          "id": "col_given",
+          "name": "given",
+          "label": "Given name",
+          "dataType": "string"
+        },
+        {
+          "id": "col_family",
+          "name": "family",
+          "label": "Family name",
+          "dataType": "string"
+        },
+        {
+          "id": "col_systolic",
+          "name": "systolic",
+          "label": "Systolic",
+          "description": "Systolic blood pressure, mm[Hg].",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_diastolic",
+          "name": "diastolic",
+          "label": "Diastolic",
+          "description": "Diastolic blood pressure, mm[Hg].",
+          "dataType": "integer"
+        },
+        {
+          "id": "col_score",
+          "name": "score",
+          "label": "Score",
+          "description": "A score with two decimal digits: 1.50 must stay 1.50.",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_comment",
+          "name": "comment",
+          "label": "Comment",
+          "dataType": "string"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "note",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs-note"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation comment [Interpretation] Narrative",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "columnId": "col_patient_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_title",
+      "instanceId": "ins_patient0",
+      "path": "name.text",
+      "transform": {
+        "kind": "concat",
+        "columnIds": [
+          "col_title",
+          "col_given",
+          "col_family"
+        ]
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "columnId": "col_family",
+      "instanceId": "ins_patient0",
+      "path": "name.family",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "columnId": "col_systolic",
+      "instanceId": "ins_obs0",
+      "path": "valueString",
+      "transform": {
+        "kind": "concat",
+        "columnIds": [
+          "col_systolic",
+          "col_diastolic"
+        ],
+        "separator": "/"
+      }
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "columnId": "col_score",
+      "instanceId": "ins_obs0",
+      "path": "note.text",
+      "transform": {
+        "kind": "concat",
+        "columnIds": [
+          "col_score",
+          "col_comment"
+        ],
+        "separator": "' · '"
+      }
+    },
+    {
+      "id": "map_0006",
+      "code": "R-006",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": []
+}

@@ -1,0 +1,6 @@
+{
+  "resourceType": "http://example.org/fhir/concatenation/StructureDefinition/VisitRow",
+  "patient_id": "P-003",
+  "id_Patient0": "pat-8e88677cc577742b1709c99f",
+  "id_Observation0": "obs-note-8e88677cc577742b1709c99f"
+}

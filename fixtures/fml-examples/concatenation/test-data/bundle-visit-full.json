@@ -1,0 +1,48 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/concatenation/Patient/pat-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-e2505a26bb5ff0304b7ecf81",
+      "identifier" : [{
+        "value" : "P-001"
+      }],
+      "name" : [{
+        "text" : "Dr Anna Rossi",
+        "family" : "Rossi"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/concatenation/Observation/obs-note-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-note-e2505a26bb5ff0304b7ecf81",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+      },
+      "valueString" : "120/80",
+      "note" : [{
+        "text" : "1.50' · 'stable"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-note-e2505a26bb5ff0304b7ecf81"
+    }
+  }]
+}

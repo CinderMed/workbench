@@ -1,0 +1,47 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/concatenation/Patient/pat-f1e9457858515eb756b1cc98",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-f1e9457858515eb756b1cc98",
+      "identifier" : [{
+        "value" : "P-002"
+      }],
+      "name" : [{
+        "text" : "Luca"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-f1e9457858515eb756b1cc98"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/concatenation/Observation/obs-note-f1e9457858515eb756b1cc98",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-note-f1e9457858515eb756b1cc98",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-f1e9457858515eb756b1cc98"
+      },
+      "valueString" : "120",
+      "note" : [{
+        "text" : "dell'orto"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-note-f1e9457858515eb756b1cc98"
+    }
+  }]
+}
