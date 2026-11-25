@@ -481,6 +481,15 @@ function valueRule(
   }
 }
 
+/**
+ * The columns whose value a row writes: every column of a concatenation (#98), else its column. A
+ * shared block is created when one of its rows' value columns has a value.
+ */
+function valueColumns(row: MappingRow): readonly Id[] {
+  if (row.transform.kind === "concat") return row.transform.columnIds;
+  return row.columnId === undefined ? [] : [row.columnId];
+}
+
 /** A guard: `src where (condition) then { rules } "<name>"`. */
 function guard(name: string, where: Expr, rules: readonly Rule[], comment?: string): Rule {
   return {
@@ -947,8 +956,8 @@ function roleGroup(g: Generation, instance: Instance): Group {
         const leaf = parsed.get(member.id)?.[1];
         if (leaf === undefined) continue;
         inner.push(...rowRules(g, member, alias, [leaf]));
-        if (member.columnId !== undefined) {
-          const element = g.columnElement(member.columnId);
+        for (const id of valueColumns(member)) {
+          const element = g.columnElement(id);
           if (!columns.includes(element)) columns.push(element);
         }
       }

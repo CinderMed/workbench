@@ -539,6 +539,25 @@ describe("generateMap concatenation (#98)", () => {
     );
   });
 
+  it("creates a shared block when any concatenated column has a value", () => {
+    const file = copy(motuProject);
+    const r = row(file, "R-007");
+    r.path = "event.text";
+    r.transform = { kind: "concat", columnIds: ["col_f_date", "col_f_id"] };
+    // A second row on `event` makes it a shared block.
+    file.mappings.push({
+      ...r,
+      id: "map_99",
+      code: "R-099",
+      columnId: "col_f_adm",
+      path: "event.id",
+      transform: { kind: "copy" },
+    });
+    expect(printed(file, "src_fall")).toContain(
+      "src where ($this.FallDate.exists() or $this.AnonymousID.exists() or $this.AdmissionDate.exists()) -> res.event as p then {",
+    );
+  });
+
   it("writes a separator with a quote or a control character in base64", () => {
     expect(concatLine(", ")).toContain(".join(', '))");
     // "' · '" in UTF-8, base64: the HL7 engine loses the escape of a quote (#98).
