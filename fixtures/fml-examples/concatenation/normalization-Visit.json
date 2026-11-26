@@ -1,0 +1,88 @@
+{
+  "$schema": "../normalization.schema.json",
+  "formatVersion": "1.2.0",
+  "source": "Visit",
+  "logicalModel": "http://example.org/fhir/concatenation/StructureDefinition/VisitRow",
+  "input": {
+    "format": "csv",
+    "delimiter": ",",
+    "encoding": "utf-8",
+    "headerRow": 1
+  },
+  "onInvalidValue": "fail",
+  "columns": [
+    {
+      "name": "patient_id",
+      "sourceName": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "title",
+      "sourceName": "title",
+      "type": "string",
+      "allowedValues": [
+        "Dr",
+        "Prof"
+      ]
+    },
+    {
+      "name": "given",
+      "sourceName": "given",
+      "type": "string"
+    },
+    {
+      "name": "family",
+      "sourceName": "family",
+      "type": "string"
+    },
+    {
+      "name": "systolic",
+      "sourceName": "systolic",
+      "type": "integer"
+    },
+    {
+      "name": "diastolic",
+      "sourceName": "diastolic",
+      "type": "integer"
+    },
+    {
+      "name": "score",
+      "sourceName": "score",
+      "type": "decimal"
+    },
+    {
+      "name": "comment",
+      "sourceName": "comment",
+      "type": "string"
+    }
+  ],
+  "ids": [
+    {
+      "field": "id_Patient0",
+      "literals": [
+        "pat"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    },
+    {
+      "field": "id_Observation0",
+      "literals": [
+        "obs-note"
+      ],
+      "columns": [
+        "patient_id"
+      ],
+      "encoding": "hash",
+      "hashLength": 24,
+      "separator": "-"
+    }
+  ],
+  "hash": {
+    "algorithm": "sha256"
+  }
+}

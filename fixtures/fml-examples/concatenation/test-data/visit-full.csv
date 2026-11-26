@@ -1,0 +1,2 @@
+patient_id,title,given,family,systolic,diastolic,score,comment
+P-001,Dr,Anna,Rossi,120,80,1.50,stable

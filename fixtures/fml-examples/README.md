@@ -20,6 +20,8 @@ verification prototypes, not the final generator, which will be written in TypeS
 - `element-names/` — 1 table (Visit): a column named `a b` is used in a creation condition. Its element name must
   be accepted by the HL7 FHIRPath parser, which rejects names whose second character is `_` (#134)
 - `r5-visit/` — 1 table (Visit), 4 roles, one synthetic row, **FHIR R5** (#78): see "R5 golden case" below
+- `concatenation/` — 1 table (Visit), 2 roles, three synthetic rows: the concatenation transform (#98), see
+  "Golden case concatenation" below
 - `type-combinations/` — 1 table (Visit), 10 roles, one synthetic row: every combination of the type-compatibility table
   that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
   casts; Quantity, Duration and SimpleQuantity; Coding and CodeableConcept from a code column, #106; constants of
@@ -241,4 +243,21 @@ a StructureMap that is not valid R5 (111 errors). After the engine's defects are
 the defects are a closed list in `tooling/golden/compare-structuremap.mjs` (ADR-0007 addendum), and any other
 difference fails. Our JSON validates as R5 with 0 errors. The engine runs the map the same way from our JSON, from
 its own compilation and from the `.map` text (`tooling/hl7-probes/r5-compile.sh`).
+
+## Golden case concatenation (25 November 2026, #98)
+`concatenation/` covers the concatenation transform, on three synthetic rows (all columns, some empty, all empty):
+
+- `R-002`: a categorical and two string columns on `Patient.name.text`, inside the shared block of `name` with
+  `R-003` (`name.family`). The block is created when any concatenated column has a value: the partial row has only
+  `given`;
+- `R-004`: two integer columns on `Observation.valueString`, a choice element, with `/`;
+- `R-005`: a decimal (`1.50`, digits kept) and a string column on `Observation.note.text` (markdown), with the
+  separator `' · '`. The HL7 engine (validator 7.0.5) stores FHIRPath strings without their escapes, so a quote in
+  the separator would break the map; the generator writes such a separator in base64, decoded by FHIRPath
+  (`'JyDCtyAn'.decode('base64')`).
+
+The map, the StructureMap JSON (the HL7 compilation, equal to our builder's), the logical model, the normalization
+specification and the manifest were written by `tooling/golden/write-fixture.mjs`; the normalized rows and Bundles by
+`normalize.mjs` and `RunMap`. The three Bundles validate with 0 errors, and `tests/concatenation.py` checks 9 values:
+empty columns are skipped with their separators, and an all-empty row writes no element at all.
 

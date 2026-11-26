@@ -1,0 +1,40 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/concatenation/Patient/pat-8e88677cc577742b1709c99f",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-8e88677cc577742b1709c99f",
+      "identifier" : [{
+        "value" : "P-003"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-8e88677cc577742b1709c99f"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/concatenation/Observation/obs-note-8e88677cc577742b1709c99f",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-note-8e88677cc577742b1709c99f",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-8e88677cc577742b1709c99f"
+      }
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-note-8e88677cc577742b1709c99f"
+    }
+  }]
+}

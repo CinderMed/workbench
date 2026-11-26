@@ -27,6 +27,9 @@ import fallJson from "../../../fixtures/fml-examples/motu/StructureMap-Fall.json
 import stayJson from "../../../fixtures/fml-examples/motu/StructureMap-HospitalStay.json" with { type: "json" };
 import patientJson from "../../../fixtures/fml-examples/motu/StructureMap-MotuPatient.json" with { type: "json" };
 import motuProject from "../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
+import concatJson from "../../../fixtures/fml-examples/concatenation/StructureMap-Visit.json" with { type: "json" };
+import concatMap from "../../../fixtures/fml-examples/concatenation/Visit.map?raw";
+import concatProject from "../../../fixtures/fml-examples/concatenation/project.json" with { type: "json" };
 import { printMap, printMapWithLines } from "./fml-print.js";
 import { generateMap } from "./generator/generate-map.js";
 import { planTable } from "./generator/table-plan.js";
@@ -61,6 +64,7 @@ const cases = [
   ["boolean-value-map Visit", visitProject, "src_visit", visitMap, visitJson],
   ["element-names Visit", namesProject, "src_visit", namesMap, namesJson],
   ["type-combinations Visit", combosProject, "src_visit", combosMap, combosJson],
+  ["concatenation Visit", concatProject, "src_visit", concatMap, concatJson],
   // R5 (#78): the committed JSON is our R5 form, which validates as R5 and which the HL7 engine
   // runs; the engine's own R5 compilation is compared in the golden suite (ADR-0007 addendum).
   ["r5-visit Visit", r5Project, "src_visit", r5Map, r5Json],

@@ -36,12 +36,29 @@ for folder in "$fixtures"/*/; do
     done
   done
   [ ${#files[@]} -eq 0 ] && continue
-  log="$out/$name.log"
   version=$(node -e 'console.log(require(process.argv[1]).project.fhirVersion)' "$folder/project.json")
   extra=()
   # R5 core does not carry the terminology code systems: the same pinned package as RunMap.java.
   [[ "$version" == 5.* ]] && extra=(-ig "hl7.terminology.r5#6.2.0")
-  java -jar "$VALIDATOR" "${files[@]}" -version "$version" -tx n/a -ig "$folder" "${extra[@]}" >"$log" 2>&1 || true
+  # Two runs: the logical models, then everything else. Validated in the same run before a
+  # StructureMap, a logical model makes validator 7.0.5 report each `evaluate(src, …)` on it as
+  # "Unknown context" (#98); validated alone, the same StructureMap has no error.
+  models=()
+  others=()
+  for file in "${files[@]}"; do
+    case "$(basename "$file")" in
+      StructureDefinition-*) models+=("$file") ;;
+      *) others+=("$file") ;;
+    esac
+  done
+  log="$out/$name.log"
+  : >"$log"
+  for batch in models others; do
+    declare -n list=$batch
+    [ ${#list[@]} -eq 0 ] && continue
+    java -jar "$VALIDATOR" "${list[@]}" -version "$version" -tx n/a -ig "$folder" "${extra[@]}" >>"$log" 2>&1 || true
+    unset -n list
+  done
   results=$(grep -E "^(Success|\*FAILURE\*):" "$log" || true)
   if [ "$(echo "$results" | grep -c .)" -ne ${#files[@]} ]; then
     echo "validate: $name: expected ${#files[@]} results, see $log" >&2
