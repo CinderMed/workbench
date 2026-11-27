@@ -143,6 +143,9 @@ describe("guided transforms (D5)", () => {
         unitValueMapId: "",
       }),
     ).toBe("unitValueMapRequired");
+    expect(error("R-007", { kind: "quantity", unitMode: "text", unitColumnId: "" })).toBe(
+      "unitColumnRequired",
+    );
     expect(error("R-007", { kind: "coding", system: "" })).toBe("systemRequired");
     expect(error("R-001", { kind: "concat", columnIds: ["col_patient_id"] })).toBe("concatTooFew");
     expect(error("R-007", { repeat: true })).toBe("repeatNeedsMultipleChoice");
@@ -158,6 +161,27 @@ describe("guided transforms (D5)", () => {
       kind: "quantity",
       unit: { system: UCUM, code: "{score}" },
     });
+    // A unit text (#108): no value map, and the code system only when one is given.
+    for (const unitSystem of ["", " http://example.org/units "]) {
+      const text = rebuild(project, rowByCode(project, "R-010"), {
+        kind: "quantity",
+        unitMode: "text",
+        unitColumnId: "col_hb_unit",
+        unitValueMapId: "vm_hb_unit",
+        unitSystem,
+      });
+      const transform = "row" in text ? text.row.transform : undefined;
+      expect(transform).toEqual({
+        kind: "quantity",
+        unitColumnId: "col_hb_unit",
+        ...(unitSystem === "" ? {} : { unitSystem: "http://example.org/units" }),
+      });
+      const row = { ...rowByCode(project, "R-010"), ...(transform && { transform }) };
+      expect(draftOf(row, columnOf(project, row))).toMatchObject({
+        unitMode: "text",
+        unitSystem: unitSystem.trim(),
+      });
+    }
     const concat = rebuild(project, rowByCode(project, "R-001"), {
       kind: "concat",
       columnIds: ["col_encounter_fo", "col_patient_id"],

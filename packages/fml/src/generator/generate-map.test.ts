@@ -276,6 +276,29 @@ describe("value maps", () => {
     );
   });
 
+  it("copies the unit text of a column, with its system when one is given (#108)", () => {
+    const unitText = (unitSystem?: string) => {
+      const file = copy(metastraProject);
+      row(file, "R-010").transform = {
+        kind: "quantity",
+        unitColumnId: "col_hb_unit",
+        ...(unitSystem === undefined ? {} : { unitSystem }),
+      };
+      const text = printed(file, "src_firstoverview");
+      expect(parseFml(text)).toEqual([]);
+      return text;
+    };
+    expect(unitText()).toContain(
+      [
+        "    // R-010-unit: unit text from column obs_bloodt_hb_spec",
+        '    src.obs_bloodt_hb_spec as u -> q.unit = u "R-010-unit";',
+      ].join("\n"),
+    );
+    expect(unitText("http://example.org/units")).toContain(
+      "    src.obs_bloodt_hb_spec as u -> q.unit = u, q.system = 'http://example.org/units', q.code = u \"R-010-unit\";",
+    );
+  });
+
   it("writes a coding from a code column, typed, with its display when present (#106)", () => {
     const file = copy(metastraProject);
     row(file, "R-006").transform = {

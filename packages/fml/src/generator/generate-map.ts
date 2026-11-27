@@ -601,7 +601,46 @@ const withComment = (rules: Rule[], comment: string): Rule[] => {
   return first === undefined ? rules : [{ ...first, comment }, ...rest];
 };
 
-/** Unit rules of a quantity: a fixed unit, or one rule per value of the unit column's value map. */
+/**
+ * The unit text of a quantity read from a column, copied as it is (#108), and with `unitSystem`
+ * also the code of that system:
+ *
+ *   src.uom as u -> q.unit = u, q.system = '<system>', q.code = u "R-x-unit";
+ */
+function unitTextRule(
+  g: Generation,
+  row: MappingRow,
+  q: Identifier,
+  unitColumnId: string,
+  system: string | undefined,
+): Rule {
+  const u = ident("u");
+  const copy = { kind: "copy", variable: u } as const;
+  const column = g.columns.get(unitColumnId)?.name ?? "";
+  return {
+    name: ruleName(`${row.code}-unit`),
+    comment: `${row.code}-unit: unit text from column ${column}${system === undefined ? "" : `, system ${system}`}`,
+    source: { context: src, element: g.columnElement(unitColumnId), alias: u },
+    targets: [
+      { context: q, element: ident("unit"), transform: copy },
+      ...(system === undefined
+        ? []
+        : [
+            {
+              context: q,
+              element: ident("system"),
+              transform: { kind: "literal", value: system } as const,
+            },
+            { context: q, element: ident("code"), transform: copy },
+          ]),
+    ],
+  };
+}
+
+/**
+ * Unit rules of a quantity: a fixed unit, the unit text of a column (#108), or one rule per value
+ * of the unit column's value map.
+ */
 function unitRules(g: Generation, row: MappingRow, q: Identifier): Rule[] {
   const transform = row.transform;
   if (transform.kind !== "quantity") return [];
@@ -623,8 +662,11 @@ function unitRules(g: Generation, row: MappingRow, q: Identifier): Rule[] {
       },
     ];
   }
+  if (transform.unitColumnId === undefined) return [];
+  if (transform.unitValueMapId === undefined)
+    return [unitTextRule(g, row, q, transform.unitColumnId, transform.unitSystem)];
   const map = g.project.valueMaps.find((m) => m.id === transform.unitValueMapId);
-  if (map === undefined || transform.unitColumnId === undefined) return [];
+  if (map === undefined) return [];
   const rules = valueMapRules(
     g,
     row,

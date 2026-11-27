@@ -64,6 +64,21 @@ describe("mapping table content", () => {
     ]);
   });
 
+  it("names the unit of a quantity: a value map, or a unit text with its system (#108)", () => {
+    const file = project(metastraProject);
+    const r = file.mappings.find((m) => m.code === "R-010");
+    if (r === undefined) throw new Error("fixture changed");
+    const transformText = () =>
+      sheet(mappingTables(file), "Mapping").rows.find((line) => line[0] === "R-010")?.[7];
+    expect(transformText()).toBe("quantity, unit from obs_bloodt_hb_spec (value map hbUnit)");
+    r.transform = { kind: "quantity", unitColumnId: "col_hb_unit" };
+    expect(transformText()).toBe("quantity, unit text from obs_bloodt_hb_spec");
+    r.transform = { ...r.transform, unitSystem: "http://example.org/units" };
+    expect(transformText()).toBe(
+      "quantity, unit text from obs_bloodt_hb_spec (system http://example.org/units)",
+    );
+  });
+
   it("writes every action with its detail and the verification of codes", () => {
     const file = project(motuProject);
     const map = file.valueMaps[0];
