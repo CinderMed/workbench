@@ -38,6 +38,7 @@ import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { cleanProject } from "./clean.js";
 import { loadOrder } from "./load-order.js";
 import { deterministicZip } from "./zip.js";
+import { ZONE_RULES } from "./time-zones/zone-rules.js";
 
 export const ExportCode = {
   /** Two tables depend on each other through `via` relations: no load order exists. */
@@ -177,7 +178,12 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
     text.set(files.model, json(model));
     text.set(
       files.normalization,
-      json(normalizationSpec(project, plan, { schemaRef: refs.normalization })),
+      json(
+        normalizationSpec(project, plan, {
+          schemaRef: refs.normalization,
+          zoneRules: ZONE_RULES,
+        }),
+      ),
     );
     tables.push({
       source: name,

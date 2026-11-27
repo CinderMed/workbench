@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_motu",
     "name": "MOTU",
-    "formatVersion": "1.4.0",
+    "formatVersion": "1.5.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -117,7 +117,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "56f1047ae142d65bd6e6e42520a0689dec3448ee90668556df58f40586ff2c9a",
+      "sha256": "b430f51bed2c5662a46f900c14b3862abafe2b8675240b4f23158ca1425f4b16",
       "mediaType": "application/json"
     },
     {
@@ -137,7 +137,7 @@
     },
     {
       "path": "normalization-MotuPatient.json",
-      "sha256": "89777bca8ea4907615ac4a4ceab676176bba88b355131ee82749fb83daaf3b68",
+      "sha256": "4bb14350f218539a17f2d024ed8a87bb331d5e80e9c513be9bab1b33917650eb",
       "mediaType": "application/json"
     },
     {
@@ -157,7 +157,7 @@
     },
     {
       "path": "normalization-HospitalStay.json",
-      "sha256": "8f1d605806ff54e18aca8ef459f8ccb62921638759439ab054ef653cfd0f09a7",
+      "sha256": "7069f266b3742926b2df628e46fbbb1d90be24e6e80767ed165b44d350605823",
       "mediaType": "application/json"
     },
     {
@@ -177,7 +177,7 @@
     },
     {
       "path": "normalization-Fall.json",
-      "sha256": "840d1474654c1ff791d16472913eb04e307ed9f9454d527338f993a49f4ea8ae",
+      "sha256": "0a44c662fe8a757aad7de9ddba37c3ff506afa7061c50ca784af82952aedfcc3",
       "mediaType": "application/json"
     },
     {
@@ -187,12 +187,12 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "17e13a84b338c904f33a65805f9a8ba1c92217f231d87f37a3fdbe620a40b7b7",
+      "sha256": "edf87a0913ecb687ac2621c3eb4b887024b303af1a038e042a54393d8fde0c59",
       "mediaType": "application/json"
     },
     {
       "path": "schemas/normalization.schema.json",
-      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "sha256": "03bdcfb188945eafc9726b351d316be7f56f8ea908c4d6ab0cd965bd7bb3ac4a",
       "mediaType": "application/json"
     },
     {

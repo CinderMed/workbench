@@ -46,8 +46,16 @@ export {
   parseDateTime,
   parseDecimal,
   parseInteger,
+  withTimeZone,
   type DecimalSeparator,
+  type ZoneRules,
 } from "./values/index.js";
+export {
+  TZDATA_VERSION,
+  formatHasTime,
+  isFixedOffset,
+  isKnownTimeZone,
+} from "./values/time-zones.js";
 
 export {
   type Migration,

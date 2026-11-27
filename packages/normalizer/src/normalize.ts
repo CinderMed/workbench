@@ -1,5 +1,5 @@
 /**
- * Reference implementation of the normalization specification (normalization.schema.json 1.2.0,
+ * Reference implementation of the normalization specification (normalization.schema.json 1.3.0,
  * specification "Normalization: what happens to each cell"), one record at a time. It reproduces
  * fixtures/fml-examples/tools/normalize.mjs exactly; a differential test keeps the two in step.
  * No I/O (ADR-0001) and no state between records, so memory does not grow with the file:
@@ -12,6 +12,7 @@ import {
   parseDateTime,
   parseDecimal,
   parseInteger,
+  withTimeZone,
   type Normalization,
   type NormalizationSpec,
 } from "@cindermed/model";
@@ -92,7 +93,11 @@ function convertBoolean(value: string, column: Normalization.Column): boolean | 
 }
 
 /** Step 4: conversion by type, or `undefined` when the value does not fit. */
-function convert(value: string, column: Normalization.Column): CellValue | undefined {
+function convert(
+  value: string,
+  column: Normalization.Column,
+  spec: NormalizationSpec,
+): CellValue | undefined {
   const number = (text: string | undefined): NumberText | undefined =>
     text === undefined ? undefined : { kind: "number", text };
   switch (column.type) {
@@ -107,8 +112,12 @@ function convert(value: string, column: Normalization.Column): CellValue | undef
       return convertBoolean(value, column);
     case "date":
       return parseDate(value, column.dateFormat);
-    case "dateTime":
-      return parseDateTime(value, column.dateFormat);
+    case "dateTime": {
+      // 1.3.0: a time gets the column's offset (ADR-0024); a date stays a date.
+      const local = parseDateTime(value, column.dateFormat);
+      if (local === undefined || column.timeZone === undefined) return local;
+      return withTimeZone(local, column.timeZone, spec.timeZones);
+    }
   }
 }
 
@@ -165,7 +174,7 @@ export function normalizeRow(
     const converted: CellValue[] = [];
     for (const part of parts) {
       const allowed = column.allowedValues?.includes(part) ?? true;
-      const result = allowed ? convert(part, column) : undefined;
+      const result = allowed ? convert(part, column, spec) : undefined;
       if (result !== undefined) {
         converted.push(result);
         continue;

@@ -65,9 +65,11 @@ export {
   type LogicalModelJson,
 } from "./generator/logical-model.js";
 export {
+  columnTimeZone,
   normalizationAllowedValues,
   normalizationSpec,
   type NormalizationSpecOptions,
+  type ZoneRuleSource,
 } from "./generator/normalization-spec.js";
 export {
   planTable,

@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_type_combinations",
     "name": "Type combinations",
-    "formatVersion": "1.4.0",
+    "formatVersion": "1.5.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -76,7 +76,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "f0aae3a64415ebcc7356af235adda46c2dcf06568d9f6250c412ba9a3ee3ffa0",
+      "sha256": "e8e48697eb64d97f80d3a92ba2c78bc202f243d162d49de46e8e3efe1c78163c",
       "mediaType": "application/json"
     },
     {
@@ -96,17 +96,17 @@
     },
     {
       "path": "normalization-Visit.json",
-      "sha256": "50f6cd442148313c15ccd416cfe8177f12b5ecdd7c5ec4adf995966df196acad",
+      "sha256": "28193ac464cd0aa3a8353829c00833bcda1ed45642b8415ef4fb418ac4766582",
       "mediaType": "application/json"
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "17e13a84b338c904f33a65805f9a8ba1c92217f231d87f37a3fdbe620a40b7b7",
+      "sha256": "edf87a0913ecb687ac2621c3eb4b887024b303af1a038e042a54393d8fde0c59",
       "mediaType": "application/json"
     },
     {
       "path": "schemas/normalization.schema.json",
-      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "sha256": "03bdcfb188945eafc9726b351d316be7f56f8ea908c4d6ab0cd965bd7bb3ac4a",
       "mediaType": "application/json"
     },
     {

@@ -1,5 +1,5 @@
 /**
- * Reading settings of the data file and decoding of its bytes (normalization.schema.json 1.2.0,
+ * Reading settings of the data file and decoding of its bytes (normalization.schema.json 1.3.0,
  * `input`). Decoding follows the WHATWG Encoding Standard (ADR-0010): `iso-8859-1` is windows-1252,
  * so 0x80 is `€`; UTF-8 drops a leading byte order mark. Bytes may come in chunks: a character split
  * across two chunks is decoded once both have arrived.

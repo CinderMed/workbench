@@ -3,7 +3,7 @@
 // issues (row, column or id field, kind, value) for the same specification and file bytes.
 // Messages are not compared: ours never hold cell values. Outputs go to .tmp/.
 import { spawnSync } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Normalization, NormalizationSpec } from "../packages/model/src/index.js";
 import { afterAll, describe, expect, it } from "vitest";
@@ -18,8 +18,20 @@ interface Case {
   readonly ids?: Normalization.IdField[];
   readonly onInvalidValue?: NormalizationSpec["onInvalidValue"];
   readonly encoding?: NonNullable<NormalizationSpec["input"]["encoding"]>;
+  readonly timeZones?: NormalizationSpec["timeZones"];
   readonly bytes: Uint8Array;
 }
+
+/** The workbench's tzdata snapshot (ADR-0024), reduced to the zones a case uses. */
+const snapshot = JSON.parse(
+  readFileSync(join(root, "packages/export/src/time-zones/zones.json"), "utf8"),
+) as { tzdata: string; from: number; to: number; zones: Record<string, [number, ...number[]]> };
+const zonesOf = (...names: string[]): NormalizationSpec["timeZones"] => ({
+  tzdata: snapshot.tzdata,
+  from: snapshot.from,
+  to: snapshot.to,
+  zones: Object.fromEntries(names.map((name) => [name, snapshot.zones[name] ?? [0]])),
+});
 
 const utf8 = (text: string): Uint8Array => new TextEncoder().encode(text);
 const id = (extra: Partial<Normalization.IdField>): Normalization.IdField => ({
@@ -88,6 +100,67 @@ const cases: readonly Case[] = [
     bytes: utf8("a,b\n10 42,17/09/2023\nàb,\n"),
   },
   {
+    // Normalization 1.3.0 (#107, ADR-0024). Europe/Rome in 2025: 30/03 02:30 does not exist
+    // (invalid), 26/10 02:30 occurs twice (the earlier, +02:00), 26/10 03:00 is +01:00 again.
+    // New York in MIMIC-IV's shifted years; times before 1970 or from 2300 are outside the
+    // snapshot; a date-only format has no offset; ids are computed over the value with its offset.
+    name: "time zones: fixed offsets, both daylight-saving changes, the range and ids",
+    columns: [
+      {
+        name: "rome",
+        sourceName: "rome",
+        type: "dateTime",
+        dateFormat: "dd/MM/yyyy HH:mm",
+        timeZone: "Europe/Rome",
+      },
+      { name: "kol", sourceName: "kol", type: "dateTime", timeZone: "+05:30" },
+      { name: "utc", sourceName: "utc", type: "dateTime", timeZone: "Z" },
+      {
+        name: "ny",
+        sourceName: "ny",
+        type: "dateTime",
+        dateFormat: "yyyy-MM-dd HH:mm:ss",
+        timeZone: "America/New_York",
+      },
+      {
+        name: "day",
+        sourceName: "day",
+        type: "dateTime",
+        dateFormat: "yyyy-MM-dd",
+        timeZone: "Europe/Rome",
+      },
+    ],
+    ids: [id({ columns: ["rome"] })],
+    timeZones: zonesOf("America/New_York", "Europe/Rome"),
+    bytes: utf8(
+      [
+        "rome,kol,utc,ny,day",
+        "15/01/2025 10:00,2025-01-15T10:00:00,2025-01-15T10:00:00,2113-08-04 18:46:00,2025-03-30",
+        "15/07/2025 10:00,,,2120-01-30 19:44:00,",
+        "30/03/2025 02:30,,,,",
+        "30/03/2025 03:00,,,,",
+        "26/10/2025 02:30,,,,",
+        "26/10/2025 03:00,,,,",
+        "31/12/1969 23:00,,,2300-01-01 00:00:00,",
+      ].join("\n"),
+    ),
+  },
+  {
+    name: "time zones: an offset that is not a whole number of minutes is invalid",
+    columns: [
+      {
+        name: "t",
+        sourceName: "t",
+        type: "dateTime",
+        dateFormat: "yyyy-MM-dd HH:mm",
+        timeZone: "Africa/Monrovia",
+      },
+    ],
+    timeZones: zonesOf("Africa/Monrovia"),
+    // Liberia was at -00:44:30 until 7 January 1972.
+    bytes: utf8("t\n1971-06-01 12:00\n1972-06-01 12:00\n"),
+  },
+  {
     name: "onInvalidValue: fail stops at a value outside the allowed values",
     columns: [{ name: "c", sourceName: "c", type: "code", allowedValues: ["Sì", "No"] }],
     onInvalidValue: "fail",
@@ -124,13 +197,14 @@ function referenceIssues(stderr: string): Issue[] {
 
 function run(c: Case, index: number) {
   const spec: NormalizationSpec = {
-    formatVersion: "1.2.0",
+    formatVersion: "1.3.0",
     source: "T",
     logicalModel: "http://example.org/StructureDefinition/TRow",
     input: { format: "csv", ...(c.encoding === undefined ? {} : { encoding: c.encoding }) },
     onInvalidValue: c.onInvalidValue ?? "report-drop",
     columns: c.columns as NormalizationSpec["columns"],
     ids: c.ids ?? [],
+    ...(c.timeZones === undefined ? {} : { timeZones: c.timeZones }),
   };
   const specFile = join(work, `spec-${String(index)}.json`);
   const dataFile = join(work, `rows-${String(index)}.csv`);

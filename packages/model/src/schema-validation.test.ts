@@ -145,7 +145,7 @@ describe("validateNormalizationSchema", () => {
     ["motu MotuPatient", motuPatient],
     ["boolean-value-map Visit", visitNormalization],
   ])("accepts the %s normalization", (_name, normalization) => {
-    expect(normalization.formatVersion).toBe("1.2.0");
+    expect(normalization.formatVersion).toBe("1.3.0");
     expect(validateNormalizationSchema(normalization)).toEqual([]);
   });
 

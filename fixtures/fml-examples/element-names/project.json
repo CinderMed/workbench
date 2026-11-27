@@ -1,6 +1,6 @@
 {
   "$schema": "../mapping-project.schema.json",
-  "formatVersion": "1.4.0",
+  "formatVersion": "1.5.0",
   "project": {
     "id": "prj_element_names",
     "name": "Element names",

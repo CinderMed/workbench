@@ -1,4 +1,4 @@
-// Deterministic normalization (specification normalization.schema.json 1.2.0).
+// Deterministic normalization (specification normalization.schema.json 1.3.0).
 // Reference prototype for the conversion module tests, not production code.
 // Usage: node normalize.mjs spec.json rows.csv > out.json     (errors on stderr)
 import fs from 'fs'; import crypto from 'crypto';
@@ -67,8 +67,35 @@ function convert(v, c) {
       if ((c.falseValues ?? ['0', 'false', 'no', 'n']).map(x => x.toLowerCase()).includes(l)) return false;
       return undefined;
     }
-    case 'date': case 'dateTime': { const d = parseDate(v, c.dateFormat, c.type === 'dateTime'); return d ?? undefined; }
+    case 'date': case 'dateTime': {
+      const d = parseDate(v, c.dateFormat, c.type === 'dateTime');
+      if (d === null) return undefined;
+      return c.type === 'dateTime' && c.timeZone !== undefined && d.includes('T') ? withZone(d, c.timeZone) ?? undefined : d;
+    }
   }
+}
+// Time zone (normalization 1.3.0, ADR-0024). Each segment of a zone's rules, [t_i, t_i+1) with
+// offset o_i, covers the local times [t_i + o_i, t_i+1 + o_i); a local time in none is a gap
+// (invalid), one in several takes the earliest instant.
+function withZone(local, tz) {
+  const off = s => `${s < 0 ? '-' : '+'}${String(Math.floor(Math.abs(s) / 3600)).padStart(2, '0')}:${String(Math.abs(s) % 3600 / 60).padStart(2, '0')}`;
+  if (tz === 'Z') return local + '+00:00';
+  if (/^[+-]\d{2}:\d{2}$/.test(tz)) return local + tz;
+  const rules = spec.timeZones, z = rules?.zones?.[tz];
+  if (!z) throw new Error(`time zone "${tz}" is not in the specification's timeZones`);
+  const [y, mo, d, h, mi, se] = local.split(/[-T:]/).map(Number);
+  const wall = Date.UTC(y, mo - 1, d, h, mi, se) / 1000;
+  const segments = [[-Infinity, z[0]]];
+  for (let i = 1; i < z.length; i += 2) segments.push([z[i], z[i + 1]]);
+  const instants = [];
+  segments.forEach(([start, o], i) => {
+    const end = i + 1 < segments.length ? segments[i + 1][0] : Infinity;
+    if (wall >= start + o && wall < end + o) instants.push([wall - o, o]);
+  });
+  if (instants.length === 0) return null;
+  const [instant, o] = instants.reduce((a, b) => (b[0] < a[0] ? b : a));
+  if (instant < rules.from || instant >= rules.to || o % 60 !== 0) return null;
+  return local + off(o);
 }
 const canonStr = x => (typeof x === 'object' ? x.canon : String(x));
 

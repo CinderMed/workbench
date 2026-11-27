@@ -53,6 +53,13 @@ export const IntegrityCode = {
    * missing values are removed, so the normalization would reject every value.
    */
   ALLOWED_VALUES_EMPTY: "ALLOWED_VALUES_EMPTY",
+  /**
+   * Rule 10 (format 1.5.0): a table or column names an IANA time zone that the workbench's tzdata
+   * snapshot does not have (ADR-0024).
+   */
+  TIME_ZONE_UNKNOWN: "TIME_ZONE_UNKNOWN",
+  /** Rule 10: a column that is not `dateTime` declares a time zone; it is not used. */
+  TIME_ZONE_NOT_DATETIME: "TIME_ZONE_NOT_DATETIME",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];

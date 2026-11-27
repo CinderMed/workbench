@@ -244,3 +244,34 @@ describe("blocking results and warnings", () => {
     expect(blocked.ok ? [] : blocked.results.map((r) => r.code)).toContain(ExportCode.TABLE_CYCLE);
   });
 });
+
+describe("time zones (#107, ADR-0024)", () => {
+  it("writes the zone of a dateTime column with a time and its rules from the tzdata snapshot", () => {
+    const motu = JSON.parse(motuProject) as {
+      sources: { id: string; timeZone?: string; columns: Record<string, unknown>[] }[];
+    };
+    const fall = motu.sources.find((s) => s.id === "src_fall");
+    const admission = fall?.columns.find((c) => c["id"] === "col_f_adm");
+    if (fall === undefined || admission === undefined) throw new Error("no Fall admission date");
+    fall.timeZone = "Europe/Rome";
+    Object.assign(admission, { dataType: "dateTime", dateFormat: "dd/MM/yyyy HH:mm" });
+    const result = exported(JSON.stringify(motu));
+    const text = (name: string) => strFromU8(result.files.get(name) ?? new Uint8Array());
+    const spec = JSON.parse(text("normalization-Fall.json")) as {
+      formatVersion: string;
+      columns: { sourceName: string; timeZone?: string }[];
+      timeZones?: { tzdata: string; from: number; to: number; zones: Record<string, number[]> };
+    };
+    expect(spec.formatVersion).toBe("1.3.0");
+    expect(spec.columns.find((c) => c.sourceName === "AdmissionDate")?.timeZone).toBe(
+      "Europe/Rome",
+    );
+    expect(Object.keys(spec.timeZones?.zones ?? {})).toEqual(["Europe/Rome"]);
+    // The snapshot: tzdata 2026e, from 1970-01-01 to 2300-01-01, Rome at +01:00 in 1970.
+    expect(spec.timeZones?.tzdata).toBe("2026e");
+    expect([spec.timeZones?.from, spec.timeZones?.to]).toEqual([0, 10413792000]);
+    expect(spec.timeZones?.zones["Europe/Rome"]?.[0]).toBe(3600);
+    // The other tables use no zone.
+    expect(text("normalization-MotuPatient.json")).not.toContain("timeZones");
+  });
+});

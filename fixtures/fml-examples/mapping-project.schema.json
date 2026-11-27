@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fhir-mapping-workbench.example.org/schema/mapping-project/1.4.0",
+  "$id": "https://fhir-mapping-workbench.example.org/schema/mapping-project/1.5.0",
   "title": "FHIR Mapping Workbench – project file",
   "description": "Native format of a tabular → FHIR mapping project. It is the source of truth from which the grid, the FML (StructureMap, logical model, ConceptMap) and the CSV export are generated. Every reference between objects uses the stable internal 'id', never the visible names.",
   "type": "object",
@@ -325,6 +325,10 @@
             "$ref": "#/$defs/Id"
           }
         },
+        "timeZone": {
+          "description": "Since 1.5.0. Time zone of the table's dateTime columns that have a time; a column can declare its own.",
+          "$ref": "#/$defs/TimeZone"
+        },
         "import": {
           "$ref": "#/$defs/ImportProfile"
         },
@@ -492,6 +496,10 @@
             "dd/MM/yyyy",
             "yyyy"
           ]
+        },
+        "timeZone": {
+          "description": "Since 1.5.0. Only for dataType = dateTime: the time zone of values with a time, over the table's.",
+          "$ref": "#/$defs/TimeZone"
         },
         "decimalSeparator": {
           "description": "Only for dataType = decimal: decimal separator used in the data file (e.g. ',' for '11,20'). Inside the platform decimals always use '.'; the normalization converts at the border.",
@@ -1729,6 +1737,15 @@
           }
         }
       }
+    },
+    "TimeZone": {
+      "description": "Since 1.5.0. Time zone of dateTime values that have a time but no offset in the data file: a fixed offset ('+01:00', '-05:00', 'Z') or an IANA zone ('Europe/Rome'), whose offset follows daylight saving. Declared at the border (ADR-0024): inside the platform a dateTime with a time always carries its offset.",
+      "type": "string",
+      "pattern": "^(Z|[+-](0[0-9]|1[0-3]):[0-5][0-9]|[+-]14:00|[A-Za-z][A-Za-z0-9_+-]*(/[A-Za-z0-9_+-]+)*)$",
+      "examples": [
+        "Europe/Rome",
+        "+01:00"
+      ]
     }
   }
 }
