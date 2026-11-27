@@ -36,4 +36,33 @@ describe("rule 10: time zones (format 1.5.0)", () => {
     ]);
     expect(results[0]?.message).toContain("Europe/Atlantis");
   });
+
+  it("requires a zone on a dateTime column with a time, from the column or its table", () => {
+    const missing = (mutate: (p: ProjectFile) => void) =>
+      zones((p) => {
+        const date = column(p, "col_adm");
+        date.dataType = "dateTime";
+        mutate(p);
+      }).filter((r) => r.code === IntegrityCode.TIME_ZONE_MISSING);
+
+    // No format means the default yyyy-MM-ddTHH:mm:ss, which has a time.
+    const results = missing(() => undefined);
+    expect(results.map((r) => [r.severity, r.objectKind, r.id, r.field])).toEqual([
+      ["error", "column", "col_adm", "timeZone"],
+    ]);
+    expect(results[0]?.message).toContain("no time zone");
+    expect(missing((p) => (column(p, "col_adm").dateFormat = "dd/MM/yyyy HH:mm"))).toHaveLength(1);
+
+    const table = (p: ProjectFile) =>
+      p.sources.find((t) => t.columns.some((c) => c.id === "col_adm"));
+    expect(
+      missing((p) => {
+        const own = table(p);
+        if (own !== undefined) own.timeZone = "Europe/Rome";
+      }),
+    ).toEqual([]);
+    expect(missing((p) => (column(p, "col_adm").timeZone = "Z"))).toEqual([]);
+    // A dateTime column whose values have no time gets no offset, so it needs no zone.
+    expect(missing((p) => (column(p, "col_adm").dateFormat = "dd/MM/yyyy"))).toEqual([]);
+  });
 });

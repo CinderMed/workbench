@@ -242,7 +242,11 @@ export function randomProject(seed: number): ProjectFile {
           column.multiValue = { encoding: "delimited", separator: "|" };
       }
       if (dataType === "date") column.dateFormat = pick(["dd/MM/yyyy", "yyyy-MM-dd", "MM/yyyy"]);
-      if (dataType === "dateTime") column.dateFormat = "dd/MM/yyyy HH:mm";
+      if (dataType === "dateTime") {
+        column.dateFormat = "dd/MM/yyyy HH:mm";
+        // A time needs a zone (TIME_ZONE_MISSING); fixed offsets need no zone rules.
+        column.timeZone = pick(["Z", "+01:00", "-05:00"]);
+      }
       if (dataType === "decimal" && chance(0.5)) column.decimalSeparator = ",";
       if (chance(0.15) && dataType !== "categorical" && dataType !== "multipleChoice")
         column.missingValues = ["NA"];

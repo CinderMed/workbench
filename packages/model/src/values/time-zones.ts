@@ -4,6 +4,7 @@
  * tooling/time-zones/build-zones.mjs). Only the names live here, so the check runs in the browser
  * too; the offsets are in @cindermed/export.
  */
+import type { Column, Source } from "../generated/project.js";
 import snapshot from "./time-zone-names.json" with { type: "json" };
 
 /** Version of the IANA tzdata of the snapshot (e.g. 2026e). */
@@ -24,3 +25,16 @@ export const isKnownTimeZone = (zone: string): boolean => isFixedOffset(zone) ||
  */
 export const formatHasTime = (dateFormat: string | undefined): boolean =>
   dateFormat === undefined || dateFormat.includes("HH");
+
+/** Whether a column's values get an offset: a dateTime column whose values have a time. */
+export const takesTimeZone = (column: Column): boolean =>
+  column.dataType === "dateTime" && formatHasTime(column.dateFormat);
+
+/**
+ * The time zone of a column whose values get an offset (project 1.5.0): its own, else its
+ * table's. `undefined` for other columns, and for a column without one (TIME_ZONE_MISSING).
+ */
+export function columnTimeZone(source: Source, column: Column): string | undefined {
+  if (!takesTimeZone(column)) return undefined;
+  return column.timeZone ?? source.timeZone;
+}

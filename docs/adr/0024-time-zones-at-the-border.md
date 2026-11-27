@@ -30,7 +30,7 @@ The choices below were made with the user on 2026-11-27.
 - **Validation (integrity rule 10):**
   - a zone outside the snapshot is an error (`TIME_ZONE_UNKNOWN`), because the export could not write its rules;
   - a zone on a column that is not `dateTime` is a warning (`TIME_ZONE_NOT_DATETIME`).
-  - A dateTime column with a time and no zone becomes an error (`TIME_ZONE_MISSING`) in the following PR, together with a zone for the examples that need one.
+  - a dateTime column whose values have a time (its `dateFormat` has `HH`, or it has none) and no zone, on the column or its table, is an error (`TIME_ZONE_MISSING`): FHIR requires the offset, and the workbench never guesses one. A dateTime column with a date-only format needs no zone.
 
 ## Alternatives considered
 

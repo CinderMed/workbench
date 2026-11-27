@@ -6,6 +6,7 @@
  * The writers (`toCsv`, `toXlsx`) turn the sheets into files.
  */
 import { conditionText, roleCondition, type ColumnNames, type Identifier } from "@cindermed/fml";
+import { columnTimeZone } from "@cindermed/model";
 import type {
   Coding,
   Column,
@@ -323,8 +324,10 @@ export function mappingTables(project: ProjectFile): Sheet[] {
     ],
     rows: project.sources.flatMap((source) =>
       source.columns.map((column) => {
+        const zone = columnTimeZone(source, column);
         const format = [
           column.dateFormat === undefined ? "" : `date ${column.dateFormat}`,
+          zone === undefined ? "" : `time zone ${zone}`,
           column.decimalSeparator === undefined
             ? ""
             : `decimal separator '${column.decimalSeparator}'`,

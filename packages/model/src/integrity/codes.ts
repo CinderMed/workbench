@@ -60,6 +60,11 @@ export const IntegrityCode = {
   TIME_ZONE_UNKNOWN: "TIME_ZONE_UNKNOWN",
   /** Rule 10: a column that is not `dateTime` declares a time zone; it is not used. */
   TIME_ZONE_NOT_DATETIME: "TIME_ZONE_NOT_DATETIME",
+  /**
+   * Rule 10: a dateTime column whose values have a time has no time zone, on the column or its
+   * table, so its values cannot get the offset FHIR requires (ADR-0024).
+   */
+  TIME_ZONE_MISSING: "TIME_ZONE_MISSING",
 } as const;
 
 export type IntegrityCode = (typeof IntegrityCode)[keyof typeof IntegrityCode];
