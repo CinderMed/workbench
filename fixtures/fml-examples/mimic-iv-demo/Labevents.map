@@ -72,20 +72,8 @@ group Observation0(source src : LabeventsRow, target res : Observation) {
   src.itemid as v where ($this = '51431') -> res.code = cc('http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems', '51431', 'Monos') "R-010-51431";
   src.valuenum as v -> res.value = create('Quantity') as q then {
     v -> q.value = v "R-011-value";
-    // R-011-unit: unit from column valueuom, value map labUnits
-    src.valueuom as u where ($this = '#/uL') -> q.unit = '#/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '#/uL' "R-011-unit---uL";
-    src.valueuom as u where ($this = '%') -> q.unit = '%', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = '%' "R-011-unit--";
-    src.valueuom as u where ($this = 'IU/L') -> q.unit = 'IU/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'IU/L' "R-011-unit-IU-L";
-    src.valueuom as u where ($this = 'K/uL') -> q.unit = 'K/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'K/uL' "R-011-unit-K-uL";
-    src.valueuom as u where ($this = 'fL') -> q.unit = 'fL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'fL' "R-011-unit-fL";
-    src.valueuom as u where ($this = 'g/dL') -> q.unit = 'g/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'g/dL' "R-011-unit-g-dL";
-    src.valueuom as u where ($this = 'm/uL') -> q.unit = 'm/uL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'm/uL' "R-011-unit-m-uL";
-    src.valueuom as u where ($this = 'mEq/L') -> q.unit = 'mEq/L', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mEq/L' "R-011-unit-mEq-L";
-    src.valueuom as u where ($this = 'mg/dL') -> q.unit = 'mg/dL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'mg/dL' "R-011-unit-mg-dL";
-    src.valueuom as u where ($this = 'ng/mL') -> q.unit = 'ng/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ng/mL' "R-011-unit-ng-mL";
-    src.valueuom as u where ($this = 'pg') -> q.unit = 'pg', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'pg' "R-011-unit-pg";
-    src.valueuom as u where ($this = 'sec') -> q.unit = 'sec', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'sec' "R-011-unit-sec";
-    src.valueuom as u where ($this = 'ug/mL') -> q.unit = 'ug/mL', q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = 'ug/mL' "R-011-unit-ug-mL";
+    // R-011-unit: unit text from column valueuom, system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units
+    src.valueuom as u -> q.unit = u, q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = u "R-011-unit";
   } "R-011";
   src where (($this.valuenum.exists()).not()) then {
     src.value as v -> res.value = v "R-012";

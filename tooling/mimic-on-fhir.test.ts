@@ -10,7 +10,7 @@
 // - Observation.issued (storetime is not mapped);
 // - Patient.birthDate: derived from anchor_year and anchor_age in the demo (derived columns, B10);
 // - referenceRange (ref_range_lower/upper), specimen, the lab-priority extension, flag;
-// - the units system of a number without a unit (#108, see valueQuantity below).
+// - the units system of a number without a unit (see valueQuantity below).
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -78,8 +78,8 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
             : {
                 value: Number(quantity["value"]),
                 unit: quantity["unit"],
-                // Known difference (#108): for a number without a unit the demo still writes the
-                // units system; our quantity writes system, unit and code only from a unit value.
+                // Known difference: for a number without a unit the demo still writes the units
+                // system; our quantity writes unit, system and code only from a unit text (#108).
                 system: quantity["code"] === undefined ? undefined : quantity["system"],
                 code: quantity["code"],
               },
