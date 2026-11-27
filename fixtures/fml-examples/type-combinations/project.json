@@ -1392,6 +1392,21 @@
         "targetInstanceId": "ins_pat",
         "auto": true
       }
+    },
+    {
+      "id": "map_0053",
+      "code": "R-053",
+      "columnId": "col_ref_low",
+      "instanceId": "ins_obs-weight",
+      "path": "referenceRange.low",
+      "transform": {
+        "kind": "quantity",
+        "unit": {
+          "system": "http://unitsofmeasure.org",
+          "code": "kg",
+          "display": "kilogram"
+        }
+      }
     }
   ],
   "valueMaps": []

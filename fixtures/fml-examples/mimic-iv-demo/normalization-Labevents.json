@@ -102,6 +102,16 @@
       "type": "string"
     },
     {
+      "name": "ref_range_lower",
+      "sourceName": "ref_range_lower",
+      "type": "decimal"
+    },
+    {
+      "name": "ref_range_upper",
+      "sourceName": "ref_range_upper",
+      "type": "decimal"
+    },
+    {
       "name": "comments",
       "sourceName": "comments",
       "type": "string"

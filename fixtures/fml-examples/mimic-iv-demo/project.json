@@ -358,6 +358,20 @@
           "dataType": "string"
         },
         {
+          "id": "col_le_rlow",
+          "name": "ref_range_lower",
+          "label": "ref_range_lower",
+          "description": "Lower bound of the reference range, in the unit of the result.",
+          "dataType": "decimal"
+        },
+        {
+          "id": "col_le_rhigh",
+          "name": "ref_range_upper",
+          "label": "ref_range_upper",
+          "description": "Upper bound of the reference range, in the unit of the result.",
+          "dataType": "decimal"
+        },
+        {
           "id": "col_le_comments",
           "name": "comments",
           "label": "comments",
@@ -728,6 +742,30 @@
       "path": "effectiveDateTime",
       "transform": {
         "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0020",
+      "code": "R-020",
+      "columnId": "col_le_rlow",
+      "instanceId": "ins_obs0",
+      "path": "referenceRange.low",
+      "transform": {
+        "kind": "quantity",
+        "unitColumnId": "col_le_unit",
+        "unitSystem": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
+      }
+    },
+    {
+      "id": "map_0021",
+      "code": "R-021",
+      "columnId": "col_le_rhigh",
+      "instanceId": "ins_obs0",
+      "path": "referenceRange.high",
+      "transform": {
+        "kind": "quantity",
+        "unitColumnId": "col_le_unit",
+        "unitSystem": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
       }
     }
   ],

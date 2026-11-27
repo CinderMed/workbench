@@ -115,7 +115,9 @@ Labevents,itemid,,itemid,What was measured: a code of d_labitems.,categorical,,"
 Labevents,charttime,,charttime,Time the specimen was charted.,dateTime,date yyyy-MM-dd HH:mm:ss; time zone America/New_York,,,R-019,
 Labevents,value,,value,Result as text.,string,,,,"R-012, R-016",
 Labevents,valuenum,,valuenum,Numeric result; empty when the result is text only.,decimal,,,,"R-011, R-012, R-016",
-Labevents,valueuom,,valueuom,"Unit of the numeric result, copied as text (#108).",string,,,,R-011,
+Labevents,valueuom,,valueuom,"Unit of the numeric result, copied as text (#108).",string,,,,"R-011, R-020, R-021",
+Labevents,ref_range_lower,,ref_range_lower,"Lower bound of the reference range, in the unit of the result.",decimal,,,,R-020,
+Labevents,ref_range_upper,,ref_range_upper,"Upper bound of the reference range, in the unit of the result.",decimal,,,,R-021,
 Labevents,comments,,comments,Free-text comments.,string,,,,"R-013, R-016",
 "
 `;
@@ -141,6 +143,8 @@ R-016,Labevents,comments,comments,string,Observation[0] · lab event,valueString
 R-017,Admissions,admittime,admittime,dateTime,Encounter[0] · hospital admission,period.start,copy,,,,
 R-018,Admissions,dischtime,dischtime,dateTime,Encounter[0] · hospital admission,period.end,copy,,,,
 R-019,Labevents,charttime,charttime,dateTime,Observation[0] · lab event,effectiveDateTime,copy,,,,
+R-020,Labevents,ref_range_lower,ref_range_lower,decimal,Observation[0] · lab event,referenceRange.low,"quantity, unit text from valueuom (system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units)",,,,
+R-021,Labevents,ref_range_upper,ref_range_upper,decimal,Observation[0] · lab event,referenceRange.high,"quantity, unit text from valueuom (system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units)",,,,
 "
 `;
 

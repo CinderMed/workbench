@@ -71,6 +71,9 @@ CELLS = [
     ("copy integer → positiveInt (choice)", "imm", ["protocolApplied", 0, "doseNumberPositiveInt"], 2),
     ("path through a choice: valueQuantity.value", "obs-through", ["valueQuantity", "value"], 72),
     ("path through a choice: valueQuantity.code", "obs-through", ["valueQuantity", "code"], "kg"),
+    # A quantity on a nested element, a single row: the parent opened inline (#125).
+    ("quantity on a nested element: referenceRange.low", "obs-weight", ["referenceRange", 0, "low", "value"], 50.5),
+    ("quantity on a nested element: its unit", "obs-weight", ["referenceRange", 0, "low", "code"], "kg"),
 ]
 
 failed = []

@@ -171,6 +171,42 @@
         ]
       },
       {
+        "id": "LabeventsRow.ref_range_lower",
+        "path": "LabeventsRow.ref_range_lower",
+        "short": "ref_range_lower",
+        "definition": "Lower bound of the reference range, in the unit of the result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.ref_range_lower",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.ref_range_upper",
+        "path": "LabeventsRow.ref_range_upper",
+        "short": "ref_range_upper",
+        "definition": "Upper bound of the reference range, in the unit of the result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.ref_range_upper",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
         "id": "LabeventsRow.comments",
         "path": "LabeventsRow.comments",
         "short": "comments",
@@ -399,6 +435,42 @@
         "type": [
           {
             "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.ref_range_lower",
+        "path": "LabeventsRow.ref_range_lower",
+        "short": "ref_range_lower",
+        "definition": "Lower bound of the reference range, in the unit of the result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.ref_range_lower",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
+          }
+        ]
+      },
+      {
+        "id": "LabeventsRow.ref_range_upper",
+        "path": "LabeventsRow.ref_range_upper",
+        "short": "ref_range_upper",
+        "definition": "Upper bound of the reference range, in the unit of the result.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "LabeventsRow.ref_range_upper",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "decimal"
           }
         ]
       },

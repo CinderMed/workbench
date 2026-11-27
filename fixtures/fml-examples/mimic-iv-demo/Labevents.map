@@ -87,4 +87,17 @@ group Observation0(source src : LabeventsRow, target res : Observation) {
     src.comments as v -> res.value = v "R-016";
   } "R-016-guard";
   src.charttime as v -> res.effective = v "R-019";
+  // referenceRange: written by 2 rows (R-020, R-021) → one shared instance
+  src where ($this.ref_range_lower.exists() or $this.ref_range_upper.exists()) -> res.referenceRange as p then {
+    src.ref_range_lower as v -> p.low = create('Quantity') as q then {
+      v -> q.value = v "R-020-value";
+      // R-020-unit: unit text from column valueuom, system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units
+      src.valueuom as u -> q.unit = u, q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = u "R-020-unit";
+    } "R-020";
+    src.ref_range_upper as v -> p.high = create('Quantity') as q then {
+      v -> q.value = v "R-021-value";
+      // R-021-unit: unit text from column valueuom, system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units
+      src.valueuom as u -> q.unit = u, q.system = 'http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units', q.code = u "R-021-unit";
+    } "R-021";
+  } "Observation0-referenceRange";
 }

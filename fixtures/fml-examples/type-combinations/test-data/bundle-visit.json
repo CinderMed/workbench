@@ -50,7 +50,15 @@
           "code" : "123",
           "display" : "Elevated weight"
         }]
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 50.5,
+          "unit" : "kilogram",
+          "system" : "http://unitsofmeasure.org",
+          "code" : "kg"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
