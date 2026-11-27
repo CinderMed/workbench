@@ -354,49 +354,8 @@
           "id": "col_le_unit",
           "name": "valueuom",
           "label": "valueuom",
-          "description": "Unit of the numeric result.",
-          "dataType": "categorical",
-          "allowedValues": [
-            {
-              "code": "#/uL"
-            },
-            {
-              "code": "%"
-            },
-            {
-              "code": "IU/L"
-            },
-            {
-              "code": "K/uL"
-            },
-            {
-              "code": "fL"
-            },
-            {
-              "code": "g/dL"
-            },
-            {
-              "code": "m/uL"
-            },
-            {
-              "code": "mEq/L"
-            },
-            {
-              "code": "mg/dL"
-            },
-            {
-              "code": "ng/mL"
-            },
-            {
-              "code": "pg"
-            },
-            {
-              "code": "sec"
-            },
-            {
-              "code": "ug/mL"
-            }
-          ]
+          "description": "Unit of the numeric result, copied as text (#108).",
+          "dataType": "string"
         },
         {
           "id": "col_le_comments",
@@ -669,7 +628,7 @@
       "transform": {
         "kind": "quantity",
         "unitColumnId": "col_le_unit",
-        "unitValueMapId": "vm_units"
+        "unitSystem": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units"
       }
     },
     {
@@ -1381,157 +1340,6 @@
             "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems",
             "code": "51431",
             "display": "Monos"
-          },
-          "action": {
-            "kind": "use"
-          }
-        }
-      ]
-    },
-    {
-      "id": "vm_units",
-      "name": "labUnits",
-      "description": "valueuom to the units code system of MIMIC-IV on FHIR (until the unit text can be copied from the column, #108).",
-      "target": "Quantity.unit",
-      "entries": [
-        {
-          "sourceValue": "#/uL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "#/uL",
-            "display": "#/uL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "%",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "%",
-            "display": "%"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "IU/L",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "IU/L",
-            "display": "IU/L"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "K/uL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "K/uL",
-            "display": "K/uL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "fL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "fL",
-            "display": "fL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "g/dL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "g/dL",
-            "display": "g/dL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "m/uL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "m/uL",
-            "display": "m/uL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "mEq/L",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "mEq/L",
-            "display": "mEq/L"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "mg/dL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "mg/dL",
-            "display": "mg/dL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "ng/mL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "ng/mL",
-            "display": "ng/mL"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "pg",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "pg",
-            "display": "pg"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "sec",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "sec",
-            "display": "sec"
-          },
-          "action": {
-            "kind": "use"
-          }
-        },
-        {
-          "sourceValue": "ug/mL",
-          "target": {
-            "system": "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
-            "code": "ug/mL",
-            "display": "ug/mL"
           },
           "action": {
             "kind": "use"

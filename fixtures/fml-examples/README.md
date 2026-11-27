@@ -170,7 +170,8 @@ one row per measurement, `itemid` says what was measured, `valuenum`/`valueuom` 
 long table with a code dictionary, three related tables, and an optional relation key (`hadm_id`).
 
 The project maps each lab event row to one Observation (code from a value map on `itemid`, `valueQuantity` from
-`valuenum` with a unit value map on `valueuom`, `valueString` from `value` when there is no number, and from
+`valuenum` with the unit text of `valueuom` as the unit and the code of the MIMIC-IV units system, one rule for every
+unit (#108), `valueString` from `value` when there is no number, and from
 `comments` when there is neither, `note` from `comments`) with references through `via` to Patient and Encounter.
 Everything else is generator output. `tools/java/RunMap.java` now also takes an array of normalized rows (long tables)
 and joins the Bundles of the rows. The merged Bundle (Patients → Admissions → Labevents) validates with 0 errors;
@@ -179,7 +180,7 @@ suite: 17 of 17.
 `tooling/mimic-on-fhir.test.ts` compares our Bundle with the open MIMIC-IV on FHIR demo (`mimic-on-fhir/`) on the key
 fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
 66 resources match. Not compared, each a gap: Patient.birthDate (derived
-columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit (#108).
+columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit.
 
 ## Manifests and versions from the exporter (12 November 2026, #83)
 The four `manifest.json` files are written by the exporter (`@cindermed/export`, ADR-0012) with package version 0.1.0,
@@ -292,3 +293,14 @@ StructureMap JSON (the HL7 compilation, equal to our builder's), the logical mod
 (with the rules of Europe/Rome, tzdata 2026e) and the manifest were written by `tooling/golden/write-fixture.mjs`; the
 normalized rows and the Bundle by `normalize.mjs` and `RunMap`. The Bundle validates with 0 errors.
 
+
+## Quantity unit text in mimic-iv-demo (27 November 2026, #108)
+`mimic-iv-demo` R-011 takes the unit of `valueQuantity` as text from `valueuom` (project format 1.5.0), with
+`unitSystem` set to the MIMIC-IV units system, so the text is also the code:
+`src.valueuom as u -> q.unit = u, q.system = '…/mimic-units', q.code = u "R-011-unit"`. The 13 unit rules of the
+`labUnits` value map become one rule, and a unit missing from a list can no longer be lost: `valueuom` is now a
+`string` column, and `labUnits` with its ConceptMap is removed. The Labevents map, its StructureMap JSON (the HL7
+compilation, equal to our builder's), the logical model, the normalization specification and the manifest were written
+by `tooling/golden/write-fixture.mjs`. The normalized rows and the Bundles are unchanged byte for byte: the value map
+wrote the same unit, system and code, and `tooling/mimic-on-fhir.test.ts` still finds all 66 resources equal to
+MIMIC-IV on FHIR's, units included.

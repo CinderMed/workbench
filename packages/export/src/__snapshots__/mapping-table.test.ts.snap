@@ -115,7 +115,7 @@ Labevents,itemid,,itemid,What was measured: a code of d_labitems.,categorical,,"
 Labevents,charttime,,charttime,Time the specimen was charted.,dateTime,date yyyy-MM-dd HH:mm:ss; time zone America/New_York,,,R-019,
 Labevents,value,,value,Result as text.,string,,,,"R-012, R-016",
 Labevents,valuenum,,valuenum,Numeric result; empty when the result is text only.,decimal,,,,"R-011, R-012, R-016",
-Labevents,valueuom,,valueuom,Unit of the numeric result.,categorical,,#/uL; %; IU/L; K/uL; fL; g/dL; m/uL; mEq/L; mg/dL; ng/mL; pg; sec; ug/mL,,R-011,
+Labevents,valueuom,,valueuom,"Unit of the numeric result, copied as text (#108).",string,,,,R-011,
 Labevents,comments,,comments,Free-text comments.,string,,,,"R-013, R-016",
 "
 `;
@@ -132,7 +132,7 @@ R-007,Admissions,,,,Encounter[0] · hospital admission,subject,reference to Pati
 R-008,Labevents,,,,Observation[0] · lab event,identifier.system,constant http://mimic.mit.edu/fhir/mimic/identifier/observation-labevents,,,,
 R-009,Labevents,labevent_id,labevent_id,string,Observation[0] · lab event,identifier.value,copy,,,,
 R-010,Labevents,itemid,itemid,categorical,Observation[0] · lab event,code,value map labItems,,,,
-R-011,Labevents,valuenum,valuenum,decimal,Observation[0] · lab event,valueQuantity,"quantity, unit from valueuom (value map labUnits)",,,,
+R-011,Labevents,valuenum,valuenum,decimal,Observation[0] · lab event,valueQuantity,"quantity, unit text from valueuom (system http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units)",,,,
 R-012,Labevents,value,value,string,Observation[0] · lab event,valueString,copy,valuenum is empty,,,
 R-013,Labevents,comments,comments,string,Observation[0] · lab event,note.text,copy,,,,
 R-014,Labevents,,,,Observation[0] · lab event,subject,reference to Patient[0] · patient via rel_lab_patients,,,,
@@ -204,19 +204,6 @@ labItems,CodeableConcept,51428,Macrophage,http://mimic.mit.edu/fhir/mimic/CodeSy
 labItems,CodeableConcept,51438,"RBC, Other Fluid",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51438,"RBC, Other Fluid",,use,,R-010
 labItems,CodeableConcept,52369,"Total Nucleated Cells, Other",http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,52369,"Total Nucleated Cells, Other",,use,,R-010
 labItems,CodeableConcept,51431,Monos,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-d-labitems,51431,Monos,,use,,R-010
-labUnits,Quantity.unit,#/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,#/uL,#/uL,,use,,R-011
-labUnits,Quantity.unit,%,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,%,%,,use,,R-011
-labUnits,Quantity.unit,IU/L,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,IU/L,IU/L,,use,,R-011
-labUnits,Quantity.unit,K/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,K/uL,K/uL,,use,,R-011
-labUnits,Quantity.unit,fL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,fL,fL,,use,,R-011
-labUnits,Quantity.unit,g/dL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,g/dL,g/dL,,use,,R-011
-labUnits,Quantity.unit,m/uL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,m/uL,m/uL,,use,,R-011
-labUnits,Quantity.unit,mEq/L,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,mEq/L,mEq/L,,use,,R-011
-labUnits,Quantity.unit,mg/dL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,mg/dL,mg/dL,,use,,R-011
-labUnits,Quantity.unit,ng/mL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,ng/mL,ng/mL,,use,,R-011
-labUnits,Quantity.unit,pg,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,pg,pg,,use,,R-011
-labUnits,Quantity.unit,sec,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,sec,sec,,use,,R-011
-labUnits,Quantity.unit,ug/mL,,http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units,ug/mL,ug/mL,,use,,R-011
 "
 `;
 

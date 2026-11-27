@@ -109,10 +109,6 @@
     {
       "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labItems",
       "file": "ConceptMap-labItems.json"
-    },
-    {
-      "url": "http://example.org/fhir/mimic-iv-demo/ConceptMap/labUnits",
-      "file": "ConceptMap-labUnits.json"
     }
   ],
   "verification": {
@@ -129,7 +125,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "0df7de3284926f13fb98636311dd900cf5c86ec3ddb3c2938ccd8bd209f4fa88",
+      "sha256": "a08fcbfe95db345b4126d31da0e05f3f978499f64f0eb8da9530b4fcf407b724",
       "mediaType": "application/json"
     },
     {
@@ -174,22 +170,22 @@
     },
     {
       "path": "Labevents.map",
-      "sha256": "56040cc8e5c129e1c96a3d4f8a0a05cd37a0eb58bbfc2c319c68df3b9f90f671",
+      "sha256": "a6a5980d5406ae20238602a40f0460ad1cba6cc5dc6e9fac182ac22a7b93450c",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Labevents.json",
-      "sha256": "b8db46a2bb35d366b66499aa393efbd45e1ddb54bbe4565e5ea8a8df1f4d2978",
+      "sha256": "4c9778a643d332017d1dc5f46f0a73e84527b32715d3d3e003287952a1adf983",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "StructureDefinition-LabeventsRow.json",
-      "sha256": "352439dacc85f28e58cceaab8ea10dbdf353c172fb060a4dbbf0cc9854544c2c",
+      "sha256": "964dd2e9b2393db1dc9ccfcfffc9c6c02907ca6cb5dd54b5e900bbf86a23cf7e",
       "mediaType": "application/fhir+json"
     },
     {
       "path": "normalization-Labevents.json",
-      "sha256": "dfbbd40978a48faee76c8a3dd998c8d3dae4286f0d387d8321699914ad05d40a",
+      "sha256": "5bca724ae122e40dec58023967dbc0277ff606ca6965dd978f568639891d3628",
       "mediaType": "application/json"
     },
     {
@@ -205,11 +201,6 @@
     {
       "path": "ConceptMap-labItems.json",
       "sha256": "3ca331d1d9165df49ff093f495745a322511997a5085c5d81635cba4147987b9",
-      "mediaType": "application/fhir+json"
-    },
-    {
-      "path": "ConceptMap-labUnits.json",
-      "sha256": "066a48b1b42ccdb3feb4b11ae714d887c6643db93c12dc0570fc41dbf449c0f3",
       "mediaType": "application/fhir+json"
     },
     {

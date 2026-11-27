@@ -8,7 +8,6 @@ import { describe, expect, it } from "vitest";
 import admissionClass from "../../../fixtures/fml-examples/mimic-iv-demo/ConceptMap-admissionClass.json?raw";
 import gender from "../../../fixtures/fml-examples/mimic-iv-demo/ConceptMap-gender.json?raw";
 import labItems from "../../../fixtures/fml-examples/mimic-iv-demo/ConceptMap-labItems.json?raw";
-import labUnits from "../../../fixtures/fml-examples/mimic-iv-demo/ConceptMap-labUnits.json?raw";
 import admissionsMap from "../../../fixtures/fml-examples/mimic-iv-demo/Admissions.map?raw";
 import labeventsMap from "../../../fixtures/fml-examples/mimic-iv-demo/Labevents.map?raw";
 import patientsMap from "../../../fixtures/fml-examples/mimic-iv-demo/Patients.map?raw";
@@ -82,7 +81,6 @@ describe("long-format golden case, ConceptMaps", () => {
       gender,
       admissionClass,
       labItems,
-      labUnits,
     ]);
   });
 });

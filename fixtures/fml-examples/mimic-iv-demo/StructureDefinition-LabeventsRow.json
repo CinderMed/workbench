@@ -156,7 +156,7 @@
         "id": "LabeventsRow.valueuom",
         "path": "LabeventsRow.valueuom",
         "short": "valueuom",
-        "definition": "Unit of the numeric result.",
+        "definition": "Unit of the numeric result, copied as text (#108).",
         "min": 0,
         "max": "1",
         "base": {
@@ -388,7 +388,7 @@
         "id": "LabeventsRow.valueuom",
         "path": "LabeventsRow.valueuom",
         "short": "valueuom",
-        "definition": "Unit of the numeric result.",
+        "definition": "Unit of the numeric result, copied as text (#108).",
         "min": 0,
         "max": "1",
         "base": {

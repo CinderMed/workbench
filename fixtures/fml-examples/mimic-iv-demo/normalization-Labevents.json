@@ -99,22 +99,7 @@
     {
       "name": "valueuom",
       "sourceName": "valueuom",
-      "type": "string",
-      "allowedValues": [
-        "#/uL",
-        "%",
-        "IU/L",
-        "K/uL",
-        "fL",
-        "g/dL",
-        "m/uL",
-        "mEq/L",
-        "mg/dL",
-        "ng/mL",
-        "pg",
-        "sec",
-        "ug/mL"
-      ]
+      "type": "string"
     },
     {
       "name": "comments",
