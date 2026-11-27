@@ -1,5 +1,22 @@
 # @cindermed/fhir-defs
 
+## 0.2.0
+
+### Minor Changes
+
+- cd92662: The #156 cells that now have a golden case are turned back on: copies, casts, constants and fixed values on a choice element (written with the chosen type), a quantity on a choice chosen as Age, a path through a choice and element names such as `doseQuantity`. Still turned off, with no golden case: a value map to `code` on a choice, a reference on a choice, other types derived from Quantity, and Quantity constants.
+- e625743: The export manifest pins its FHIR packages (manifest format 1.1.0, #146, ADR-0025). `packages` lists every package the definitions were built from, dependencies included, each with the SHA-256 of its tarball. The digest is pinned for the core packages; for the others the CLI computes it at download and keeps it in the package cache (`<id>#<version>/cindermed.json`), downloading the tarball again for a package cached without it. An unknown digest blocks the export with `EXPORT_PACKAGE_DIGEST_MISSING`. The definition index (format 1.2.0) carries the digest of each package as `tarballSha256`. 1.0.0 manifests still validate.
+
+### Patch Changes
+
+- 5b5460c: Each package now has the metadata a publish needs: `repository`, `homepage`, `bugs`, `engines` (Node 22.12 or later), a README and the LICENSE. Its tarball holds only `dist/` without source maps, its LICENSE and its README. Nothing is published: npm publishing is deferred after the MVP (#199), and every package stays private.
+- Updated dependencies [6b56067]
+- Updated dependencies [29d3164]
+- Updated dependencies [e625743]
+- Updated dependencies [5b5460c]
+- Updated dependencies [3d4a3f1]
+  - @cindermed/model@0.6.0
+
 ## 0.1.1
 
 ### Patch Changes

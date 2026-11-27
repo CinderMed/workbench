@@ -1,5 +1,33 @@
 # @cindermed/export
 
+## 0.3.0
+
+### Minor Changes
+
+- cd92662: The #156 cells that now have a golden case are turned back on: copies, casts, constants and fixed values on a choice element (written with the chosen type), a quantity on a choice chosen as Age, a path through a choice and element names such as `doseQuantity`. Still turned off, with no golden case: a value map to `code` on a choice, a reference on a choice, other types derived from Quantity, and Quantity constants.
+- 6b56067: A quantity can take its unit text from a column (project format 1.5.0, #108): `unitColumnId` without `unitValueMapId` writes `src.uom as u -> q.unit = u`, one rule for any number of units, such as MIMIC-IV's `valueuom`. The new optional `unitSystem` also writes the text as the code of that system (`q.system = '<system>', q.code = u`); the schema accepts it only with `unitColumnId` and without `unitValueMapId`. Before, a unit column without a value map wrote no unit. The mapping table names the unit text and its system, and the grid's quantity editor offers "Unit text from a column" with the optional code system.
+- 29d3164: Time zones at the border (#107, ADR-0024). Project format 1.5.0 adds an optional `timeZone` on a table and on a column: a fixed offset (`+01:00`, `Z`) or an IANA zone (`Europe/Rome`). Normalization 1.3.0 writes a dateTime with a time with its offset (`2025-01-15T10:00:00+01:00`). An IANA zone's offsets come from the zone's rules in the specification's new `timeZones`, which the export copies from a committed tzdata snapshot (2026e, 1970–2299), so every implementation gives the same result without a time-zone library. A local time in the spring-forward gap is an invalid value; one in the repeated fall-back hour takes the earlier offset. Integrity rule 10 reports a zone the snapshot does not have (`TIME_ZONE_UNKNOWN`, error) and a zone on a column that is not dateTime (`TIME_ZONE_NOT_DATETIME`, warning). Projects without a zone convert as before.
+- cd92662: The generator takes element names and choice types from the FHIR definitions instead of a fixed list of names (#156, ADR-0023). `generateMap(project, plan, written)` gets them as plain data, which `@cindermed/export` resolves with `@cindermed/fhir-defs` for every path the generator writes (`pathsToWrite`). On a choice element, a value whose type is not the chosen one is written with that type (`res.value = create('string') as x, x.value = v`), and a type derived from Quantity, or a path through a choice, is opened with its type (`create('Age')`, `create('Quantity') as p`). No existing map changes. `exportPackage` now requires `definitions`, and `cindermed export` always loads them: `--no-fhir` applies to `validate` only, and the export stops with the reason when the FHIR packages cannot be loaded. The cells of #156 stay turned off until their golden cases.
+- e625743: The export manifest pins its FHIR packages (manifest format 1.1.0, #146, ADR-0025). `packages` lists every package the definitions were built from, dependencies included, each with the SHA-256 of its tarball. The digest is pinned for the core packages; for the others the CLI computes it at download and keeps it in the package cache (`<id>#<version>/cindermed.json`), downloading the tarball again for a package cached without it. An unknown digest blocks the export with `EXPORT_PACKAGE_DIGEST_MISSING`. The definition index (format 1.2.0) carries the digest of each package as `tarballSha256`. 1.0.0 manifests still validate.
+- 3d4a3f1: A `dateTime` column whose values have a time now needs a time zone, its own or its table's: validation reports `TIME_ZONE_MISSING` (error) otherwise. `columnTimeZone` and `takesTimeZone` move to `@cindermed/model` (`@cindermed/fml` no longer exports `columnTimeZone`). The mapping table's Columns sheet shows the time zone of a date-time column in its Format cell.
+
+### Patch Changes
+
+- 5b5460c: Each package now has the metadata a publish needs: `repository`, `homepage`, `bugs`, `engines` (Node 22.12 or later), a README and the LICENSE. Its tarball holds only `dist/` without source maps, its LICENSE and its README. Nothing is published: npm publishing is deferred after the MVP (#199), and every package stays private.
+- Updated dependencies [cd92662]
+- Updated dependencies [6b56067]
+- Updated dependencies [29d3164]
+- Updated dependencies [0abf6a6]
+- Updated dependencies [cd92662]
+- Updated dependencies [dba1cdd]
+- Updated dependencies [e625743]
+- Updated dependencies [5b5460c]
+- Updated dependencies [0e83ca7]
+- Updated dependencies [3d4a3f1]
+  - @cindermed/fhir-defs@0.2.0
+  - @cindermed/model@0.6.0
+  - @cindermed/fml@0.3.0
+
 ## 0.2.1
 
 ### Patch Changes
