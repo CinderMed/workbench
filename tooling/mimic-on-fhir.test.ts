@@ -6,13 +6,10 @@
 // Times are compared with their offsets (#107): the tables declare America/New_York, whose
 // daylight-saving rules MIMIC-IV on FHIR applies to the shifted dates (-04:00, -05:00).
 //
-// Not compared, each a gap of the model or the generator (see the fixtures README):
-// - Observation.issued (storetime is not mapped);
-// - Patient.birthDate: derived from anchor_year and anchor_age in the demo (derived columns, B10);
-// - specimen, the lab-priority extension, flag;
-// - the units system of a number without a unit (see quantity below).
-//
-// referenceRange (ref_range_lower/upper, #125) is compared like valueQuantity.
+// Key fields (#198): identifier (system and value), status, codes, subject and encounter, times,
+// value with unit, system and code, reference range, gender, class. The elements only the demo
+// writes are listed in ACCEPTED, each with its reason, and checked exactly: a new difference fails,
+// and so does a listed one that is gone (remove it then). `meta` holds the demo's profiles.
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -42,6 +39,38 @@ function keys(resources: Resource[]): Map<string, string> {
   );
 }
 
+/** Elements only MIMIC-IV on FHIR writes, by resource type, with the reason each is accepted. */
+const ACCEPTED: Record<string, Record<string, string>> = {
+  Patient: {
+    birthDate: "derived from anchor_year and anchor_age in the demo (derived columns, B10)",
+    name: "a synthetic name (Patient_<subject_id>) the source has no column for",
+    communication: "from admissions.language, a per-admission value, not mapped on Patient",
+    maritalStatus: "from admissions.marital_status, a per-admission value, not mapped on Patient",
+    extension:
+      "US Core race, ethnicity and birth sex: race is per admission, birth sex a profile rule",
+    managingOrganization: "the demo's Organization resource, outside the slice",
+  },
+  Encounter: {
+    type: "a fixed SNOMED code of the demo's profile, not a source value",
+    priority: "admission_type mapped to v3-ActPriority: not mapped in the slice",
+    serviceType: "from the services table, outside the slice",
+    hospitalization: "admission_location and discharge_location: not mapped in the slice",
+    location: "from the transfers table, outside the slice",
+    serviceProvider: "the demo's Organization resource, outside the slice",
+  },
+  Observation: {
+    issued: "storetime is not mapped",
+    specimen: "specimen_id refers to a Specimen resource, outside the slice",
+    extension: "the lab-priority extension (priority is not mapped)",
+  },
+};
+
+/**
+ * Accepted at value level: for a number without a unit the demo still writes the units system;
+ * our quantity writes unit, system and code only from a unit text (#108).
+ */
+const SYSTEM_WITHOUT_UNIT = "system without unit";
+
 function keyFields(r: Resource, refs: Map<string, string>): Record<string, unknown> {
   const ref = (field: string) => {
     const reference = (r[field] as { reference?: string } | undefined)?.reference;
@@ -53,12 +82,17 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
       code: c["code"],
       display: c["display"],
     }));
+  const id = (r["identifier"] as Record<string, string>[] | undefined)?.map((i) => ({
+    system: i["system"],
+    value: i["value"],
+  }));
   switch (r.resourceType) {
     case "Patient":
-      return { gender: r["gender"] };
+      return { identifier: id, gender: r["gender"] };
     case "Encounter": {
       const cls = r["class"] as Record<string, string>;
       return {
+        identifier: id,
         status: r["status"],
         class: { system: cls["system"], code: cls["code"] },
         subject: ref("subject"),
@@ -72,13 +106,13 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
           : {
               value: Number(q["value"]),
               unit: q["unit"],
-              // Known difference: for a number without a unit the demo still writes the units
-              // system; our quantity writes unit, system and code only from a unit text (#108).
+              // SYSTEM_WITHOUT_UNIT, accepted.
               system: q["code"] === undefined ? undefined : q["system"],
               code: q["code"],
             };
       const ranges = r["referenceRange"] as Record<string, Record<string, unknown>>[] | undefined;
       return {
+        identifier: id,
         status: r["status"],
         effectiveDateTime: r["effectiveDateTime"],
         category: (r["category"] as { coding: Record<string, string>[] }[]).map(
@@ -117,5 +151,34 @@ describe("MIMIC-IV demo slice against MIMIC-IV on FHIR (key fields)", () => {
     const their = reference.get(key);
     if (our === undefined || their === undefined) throw new Error(`missing ${key}`);
     expect(keyFields(our, ourRefs)).toEqual(keyFields(their, theirRefs));
+  });
+
+  it("differs only by the accepted elements, each still a difference", () => {
+    // Elements one side writes and the other does not, by resource type (meta: the demo's profiles).
+    const onlyIn = (a: Map<string, Resource>, b: Map<string, Resource>) => {
+      const found: Record<string, Set<string>> = {};
+      for (const [key, r] of a) {
+        const other = b.get(key) ?? {};
+        for (const element of Object.keys(r))
+          if (element !== "meta" && !(element in other))
+            (found[r.resourceType] ??= new Set()).add(element);
+      }
+      return Object.fromEntries(
+        Object.entries(found).map(([type, elements]) => [type, [...elements].sort()]),
+      );
+    };
+    const accepted = Object.fromEntries(
+      Object.entries(ACCEPTED).map(([type, elements]) => [type, Object.keys(elements).sort()]),
+    );
+    expect(onlyIn(reference, mine)).toEqual(accepted);
+    expect(onlyIn(mine, reference)).toEqual({});
+  });
+
+  it(`still has the accepted value-level difference: ${SYSTEM_WITHOUT_UNIT}`, () => {
+    const withoutUnit = [...reference.values()].filter((r) => {
+      const q = r["valueQuantity"] as Record<string, unknown> | undefined;
+      return q !== undefined && q["code"] === undefined && q["system"] !== undefined;
+    });
+    expect(withoutUnit.length).toBeGreaterThan(0);
   });
 });
