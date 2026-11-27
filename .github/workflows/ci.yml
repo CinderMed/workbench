@@ -123,6 +123,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       - run: pnpm build
+      # What npm would receive (#199); publishing stays off and every package stays private.
+      - name: Pack the packages and check the tarballs
+        run: node tooling/release/pack-check-cli.ts
+      - name: Install the tarballs in an empty folder and run the CLI
+        run: |
+          mkdir -p .tmp/pack-install && cd .tmp/pack-install
+          echo '{"name":"pack-smoke","private":true}' > package.json
+          npm install --no-audit --no-fund --ignore-scripts ../pack/*.tgz
+          ./node_modules/.bin/cindermed validate ../../fixtures/fml-examples/motu/project.json --no-fhir
 
   golden:
     name: Golden

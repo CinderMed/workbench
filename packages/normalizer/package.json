@@ -4,6 +4,18 @@
   "private": true,
   "description": "Reference normalizer for tabular source rows",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CinderMed/workbench.git",
+    "directory": "packages/normalizer"
+  },
+  "homepage": "https://github.com/CinderMed/workbench/tree/main/packages/normalizer#readme",
+  "bugs": {
+    "url": "https://github.com/CinderMed/workbench/issues"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -12,7 +24,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.map"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

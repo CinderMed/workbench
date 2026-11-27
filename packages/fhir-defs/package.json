@@ -4,6 +4,18 @@
   "private": true,
   "description": "FHIR R4/R5 definitions: element trees and path resolution",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CinderMed/workbench.git",
+    "directory": "packages/fhir-defs"
+  },
+  "homepage": "https://github.com/CinderMed/workbench/tree/main/packages/fhir-defs#readme",
+  "bugs": {
+    "url": "https://github.com/CinderMed/workbench/issues"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -12,7 +24,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.map"
   ],
   "dependencies": {
     "@cindermed/model": "workspace:*",
