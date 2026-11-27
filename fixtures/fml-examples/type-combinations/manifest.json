@@ -76,17 +76,17 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "e8e48697eb64d97f80d3a92ba2c78bc202f243d162d49de46e8e3efe1c78163c",
+      "sha256": "8386a2ebeadd89e76490b6432e8f1c5279ebffe84564536620b5f551cecfd8be",
       "mediaType": "application/json"
     },
     {
       "path": "Visit.map",
-      "sha256": "5e05bd8c49d054c2af6e465dcf1e6233f21b2e84e7ac78c80c3b4ca3e39cd8a4",
+      "sha256": "82e9688056ddd4538d974eba9e2f98278f78d0531808730e60103f5a1eeb6b2a",
       "mediaType": "text/fhir-mapping"
     },
     {
       "path": "StructureMap-Visit.json",
-      "sha256": "19e5b62113247128bd0cd600e7997ef3c9e04fca127e42ea5f75c74bf374e426",
+      "sha256": "72ea7d98c4f06f054c3fa311f32db6ea010dd4e634e4940984f08e39c21e58f2",
       "mediaType": "application/fhir+json"
     },
     {

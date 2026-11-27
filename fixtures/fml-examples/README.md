@@ -172,7 +172,8 @@ long table with a code dictionary, three related tables, and an optional relatio
 The project maps each lab event row to one Observation (code from a value map on `itemid`, `valueQuantity` from
 `valuenum` with the unit text of `valueuom` as the unit and the code of the MIMIC-IV units system, one rule for every
 unit (#108), `valueString` from `value` when there is no number, and from
-`comments` when there is neither, `note` from `comments`) with references through `via` to Patient and Encounter.
+`comments` when there is neither, `note` from `comments`, `referenceRange.low`/`.high` from `ref_range_lower`/`ref_range_upper`
+with the same unit, #125) with references through `via` to Patient and Encounter.
 Everything else is generator output. `tools/java/RunMap.java` now also takes an array of normalized rows (long tables)
 and joins the Bundles of the rows. The merged Bundle (Patients → Admissions → Labevents) validates with 0 errors;
 suite: 17 of 17.
@@ -180,7 +181,7 @@ suite: 17 of 17.
 `tooling/mimic-on-fhir.test.ts` compares our Bundle with the open MIMIC-IV on FHIR demo (`mimic-on-fhir/`) on the key
 fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
 66 resources match. Not compared, each a gap: Patient.birthDate (derived
-columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit.
+columns), specimen, the priority extension, and the units system of a number without a unit.
 
 ## Manifests and versions from the exporter (12 November 2026, #83)
 The four `manifest.json` files are written by the exporter (`@cindermed/export`, ADR-0012) with package version 0.1.0,
@@ -304,3 +305,14 @@ compilation, equal to our builder's), the logical model, the normalization speci
 by `tooling/golden/write-fixture.mjs`. The normalized rows and the Bundles are unchanged byte for byte: the value map
 wrote the same unit, system and code, and `tooling/mimic-on-fhir.test.ts` still finds all 66 resources equal to
 MIMIC-IV on FHIR's, units included.
+
+## Quantities on a nested element (27 November 2026, #125)
+`mimic-iv-demo` R-020 and R-021 write `ref_range_lower` and `ref_range_upper` on `Observation.referenceRange.low` and
+`.high`, with the unit text of `valueuom` and the MIMIC-IV units system, as R-011 does. The two rows share one
+`referenceRange` block, each with its own `create('Quantity')`. 48 of the 60 lab events get a reference range, 0/0
+included, the same 48 as MIMIC-IV on FHIR, and `tooling/mimic-on-fhir.test.ts` now compares it.
+`type-combinations` R-053 writes `ref_low` alone on `referenceRange.low` (fixed unit kg): a single row on a two-level
+path opens the parent inline, `src.ref_low as v -> res.referenceRange as p, p.low = create('Quantity') as q then { … }`,
+and `tests/type-combinations.py` checks its value and unit. The maps, the StructureMap JSON of Labevents and Visit (the
+HL7 compilations, equal to our builder's), the logical model, the normalization specification and the manifests were
+written by `tooling/golden/write-fixture.mjs`; the normalized rows and the Bundles by `normalize.mjs` and `RunMap`.

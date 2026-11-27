@@ -34,7 +34,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -77,6 +91,20 @@
       },
       "note" : [{
         "text" : "___"
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
       }]
     },
     "request" : {
@@ -117,7 +145,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -160,6 +202,20 @@
       },
       "note" : [{
         "text" : "___"
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
       }]
     },
     "request" : {
@@ -200,7 +256,21 @@
         "unit" : "#/uL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "#/uL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "#/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "#/uL"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "#/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "#/uL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -240,7 +310,21 @@
         "unit" : "#/uL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "#/uL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "#/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "#/uL"
+        },
+        "high" : {
+          "value" : 0,
+          "unit" : "#/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "#/uL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -400,7 +484,15 @@
       "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 1
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0.9
+        },
+        "high" : {
+          "value" : 1.1
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -443,7 +535,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 9.4,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 12.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -486,7 +592,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 25,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 36.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -529,7 +649,21 @@
         "unit" : "IU/L",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "IU/L"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        },
+        "high" : {
+          "value" : 40,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -572,7 +706,21 @@
         "unit" : "IU/L",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "IU/L"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 35,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        },
+        "high" : {
+          "value" : 105,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -615,7 +763,21 @@
         "unit" : "mEq/L",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "mEq/L"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 8,
+          "unit" : "mEq/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mEq/L"
+        },
+        "high" : {
+          "value" : 20,
+          "unit" : "mEq/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mEq/L"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -702,6 +864,20 @@
       },
       "note" : [{
         "text" : "If fasting, 70-100 normal, >125 provisional diabetes."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 70,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 100,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
       }]
     },
     "request" : {
@@ -748,6 +924,20 @@
       },
       "note" : [{
         "text" : "Slightly Hemolyzed specimen.  Hemolysis falsely elevates this test."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 94,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        },
+        "high" : {
+          "value" : 250,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        }
       }]
     },
     "request" : {
@@ -789,6 +979,20 @@
       "valueString" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI.",
       "note" : [{
         "text" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "ng/mL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "ng/mL"
+        },
+        "high" : {
+          "value" : 0.01,
+          "unit" : "ng/mL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "ng/mL"
+        }
       }]
     },
     "request" : {
@@ -835,6 +1039,20 @@
       },
       "note" : [{
         "text" : "If fasting, 70-100 normal, >125 provisional diabetes."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 70,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 100,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
       }]
     },
     "request" : {
@@ -948,7 +1166,15 @@
       "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 0.9
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0.9
+        },
+        "high" : {
+          "value" : 1.1
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -988,7 +1214,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 9.4,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 12.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1028,7 +1268,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 25,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 36.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1068,7 +1322,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 2,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1108,7 +1376,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 4,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1148,7 +1430,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 40,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 52,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1188,7 +1484,21 @@
         "unit" : "g/dL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "g/dL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 14,
+          "unit" : "g/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "g/dL"
+        },
+        "high" : {
+          "value" : 18,
+          "unit" : "g/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "g/dL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1228,7 +1538,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 18,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 42,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1268,7 +1592,21 @@
         "unit" : "pg",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "pg"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 27,
+          "unit" : "pg",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "pg"
+        },
+        "high" : {
+          "value" : 32,
+          "unit" : "pg",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "pg"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1308,7 +1646,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 31,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 35,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1348,7 +1700,21 @@
         "unit" : "fL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "fL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 82,
+          "unit" : "fL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "fL"
+        },
+        "high" : {
+          "value" : 98,
+          "unit" : "fL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "fL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1388,7 +1754,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 2,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 11,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1428,7 +1808,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 50,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 70,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1468,7 +1862,21 @@
         "unit" : "K/uL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "K/uL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 150,
+          "unit" : "K/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "K/uL"
+        },
+        "high" : {
+          "value" : 440,
+          "unit" : "K/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "K/uL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1508,7 +1916,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 10.5,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 15.5,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1548,7 +1970,21 @@
         "unit" : "m/uL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "m/uL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 4.6,
+          "unit" : "m/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "m/uL"
+        },
+        "high" : {
+          "value" : 6.2,
+          "unit" : "m/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "m/uL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1588,7 +2024,21 @@
         "unit" : "K/uL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "K/uL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 4,
+          "unit" : "K/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "K/uL"
+        },
+        "high" : {
+          "value" : 11,
+          "unit" : "K/uL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "K/uL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1628,7 +2078,21 @@
         "unit" : "mEq/L",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "mEq/L"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 8,
+          "unit" : "mEq/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mEq/L"
+        },
+        "high" : {
+          "value" : 20,
+          "unit" : "mEq/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mEq/L"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1668,7 +2132,21 @@
         "unit" : "mg/dL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "mg/dL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 180,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 400,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1705,7 +2183,15 @@
       "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 0.9
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0.9
+        },
+        "high" : {
+          "value" : 1.1
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1745,7 +2231,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 9.4,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 12.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1785,7 +2285,21 @@
         "unit" : "sec",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "sec"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 25,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        },
+        "high" : {
+          "value" : 36.5,
+          "unit" : "sec",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "sec"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -1823,6 +2337,20 @@
       "valueString" : "NEG.",
       "note" : [{
         "text" : "NEG."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 10,
+          "unit" : "ug/mL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "ug/mL"
+        },
+        "high" : {
+          "value" : 30,
+          "unit" : "ug/mL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "ug/mL"
+        }
       }]
     },
     "request" : {
@@ -1936,7 +2464,21 @@
         "unit" : "mg/dL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "mg/dL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0.4,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 1.1,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2017,6 +2559,20 @@
       },
       "note" : [{
         "text" : "80 (THESE UNITS) = 0.08 (% BY WEIGHT)."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 10,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 10,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
       }]
     },
     "request" : {
@@ -2057,7 +2613,21 @@
         "unit" : "IU/L",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "IU/L"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 0,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        },
+        "high" : {
+          "value" : 60,
+          "unit" : "IU/L",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "IU/L"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2095,6 +2665,20 @@
       "valueString" : "NEG.",
       "note" : [{
         "text" : "NEG."
+      }],
+      "referenceRange" : [{
+        "low" : {
+          "value" : 2,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 25,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
       }]
     },
     "request" : {
@@ -2173,7 +2757,21 @@
         "unit" : "mg/dL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "mg/dL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 6,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        },
+        "high" : {
+          "value" : 20,
+          "unit" : "mg/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "mg/dL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2213,7 +2811,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 36,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 48,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2253,7 +2865,21 @@
         "unit" : "g/dL",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "g/dL"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 12,
+          "unit" : "g/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "g/dL"
+        },
+        "high" : {
+          "value" : 16,
+          "unit" : "g/dL",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "g/dL"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2293,7 +2919,21 @@
         "unit" : "pg",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "pg"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 27,
+          "unit" : "pg",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "pg"
+        },
+        "high" : {
+          "value" : 32,
+          "unit" : "pg",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "pg"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",
@@ -2333,7 +2973,21 @@
         "unit" : "%",
         "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
         "code" : "%"
-      }
+      },
+      "referenceRange" : [{
+        "low" : {
+          "value" : 31,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        },
+        "high" : {
+          "value" : 35,
+          "unit" : "%",
+          "system" : "http://mimic.mit.edu/fhir/mimic/CodeSystem/mimic-units",
+          "code" : "%"
+        }
+      }]
     },
     "request" : {
       "method" : "PUT",

@@ -9,8 +9,10 @@
 // Not compared, each a gap of the model or the generator (see the fixtures README):
 // - Observation.issued (storetime is not mapped);
 // - Patient.birthDate: derived from anchor_year and anchor_age in the demo (derived columns, B10);
-// - referenceRange (ref_range_lower/upper), specimen, the lab-priority extension, flag;
-// - the units system of a number without a unit (see valueQuantity below).
+// - specimen, the lab-priority extension, flag;
+// - the units system of a number without a unit (see quantity below).
+//
+// referenceRange (ref_range_lower/upper, #125) is compared like valueQuantity.
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -64,7 +66,18 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
       };
     }
     default: {
-      const quantity = r["valueQuantity"] as Record<string, unknown> | undefined;
+      const quantity = (q: Record<string, unknown> | undefined) =>
+        q === undefined
+          ? undefined
+          : {
+              value: Number(q["value"]),
+              unit: q["unit"],
+              // Known difference: for a number without a unit the demo still writes the units
+              // system; our quantity writes unit, system and code only from a unit text (#108).
+              system: q["code"] === undefined ? undefined : q["system"],
+              code: q["code"],
+            };
+      const ranges = r["referenceRange"] as Record<string, Record<string, unknown>>[] | undefined;
       return {
         status: r["status"],
         effectiveDateTime: r["effectiveDateTime"],
@@ -72,17 +85,11 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
           (c) => c.coding[0]?.["code"],
         ),
         code: coding("code"),
-        valueQuantity:
-          quantity === undefined
-            ? undefined
-            : {
-                value: Number(quantity["value"]),
-                unit: quantity["unit"],
-                // Known difference: for a number without a unit the demo still writes the units
-                // system; our quantity writes unit, system and code only from a unit text (#108).
-                system: quantity["code"] === undefined ? undefined : quantity["system"],
-                code: quantity["code"],
-              },
+        valueQuantity: quantity(r["valueQuantity"] as Record<string, unknown> | undefined),
+        referenceRange: ranges?.map((range) => ({
+          low: quantity(range["low"]),
+          high: quantity(range["high"]),
+        })),
         valueString: r["valueString"],
         note: (r["note"] as { text: string }[] | undefined)?.map((n) => n.text),
         subject: ref("subject"),

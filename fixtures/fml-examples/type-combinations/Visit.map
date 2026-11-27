@@ -101,6 +101,10 @@ group Observation0(source src : VisitRow, target res : Observation) {
     } "R-037-coding";
   } "R-037";
   src.visit_date as v -> res.effective = create('dateTime') as x, x.value = v "R-043";
+  src.ref_low as v -> res.referenceRange as p, p.low = create('Quantity') as q then {
+    v -> q.value = v "R-053-value";
+    src -> q.unit = 'kilogram', q.system = 'http://unitsofmeasure.org', q.code = 'kg' "R-053-unit";
+  } "R-053";
 }
 
 group Location0(source src : VisitRow, target res : Location) {
