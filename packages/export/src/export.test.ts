@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import metastraProject from "../../../fixtures/fml-examples/metastra/project.json?raw";
 import motuProject from "../../../fixtures/fml-examples/motu/project.json?raw";
 import { ExportCode, cleanProject, exportPackage, loadOrder, packageVersion } from "./index.js";
-import { r4Definitions } from "./test-support/test-definitions.js";
+import { r4Definitions, testDefinitions } from "./test-support/test-definitions.js";
 
 const options = {
   definitions: r4Definitions(),
@@ -181,6 +181,42 @@ describe("cleaned project copy", () => {
 });
 
 describe("blocking results and warnings", () => {
+  it("lists every package the definitions were built from, with its tarball's SHA-256 (#146)", () => {
+    const core = {
+      id: "hl7.fhir.r4.core",
+      version: "4.0.1",
+      sha256: "ebd7731df7d36b5b7d39d5fb6c9d77b44bb7fe5742f1a2e87f164738c3289d44",
+    };
+    const dep = { id: "example.dep", version: "2.0.0", tarballSha256: "a".repeat(64) };
+    const ig = { id: "example.ig", version: "1.0.0", tarballSha256: "b".repeat(64) };
+    // The core package's digest is pinned, even when the index does not carry it.
+    const withAll = exportPackage(metastraProject, {
+      ...options,
+      definitions: testDefinitions("4.0.1", [{ id: core.id, version: core.version }, dep, ig]),
+    });
+    expect(withAll.ok && withAll.manifest.formatVersion).toBe("1.1.0");
+    expect(withAll.ok && withAll.manifest.packages).toEqual([
+      { name: core.id, version: core.version, sha256: core.sha256 },
+      { name: dep.id, version: dep.version, sha256: dep.tarballSha256 },
+      { name: ig.id, version: ig.version, sha256: ig.tarballSha256 },
+    ]);
+
+    // A package whose digest is unknown (cached by another tool, loaded offline) blocks the export.
+    const blocked = exportPackage(metastraProject, {
+      ...options,
+      definitions: testDefinitions("4.0.1", [
+        { id: core.id, version: core.version },
+        { id: ig.id, version: ig.version },
+      ]),
+    });
+    expect(blocked.ok).toBe(false);
+    const results = blocked.ok ? [] : blocked.results;
+    expect(results.map((r) => [r.severity, r.code])).toEqual([
+      ["error", ExportCode.PACKAGE_DIGEST_MISSING],
+    ]);
+    expect(results[0]?.message).toContain("example.ig#1.0.0");
+  });
+
   it("blocks on an integrity error and returns quality warnings otherwise", () => {
     const broken = project(motuProject);
     const [row] = broken.mappings;

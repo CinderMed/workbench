@@ -10,7 +10,7 @@ Later this section will also document the contracts generated from their schemas
 
 - the project file schema (format 1.4.0)
 - the normalization specification (1.3.0)
-- the export package manifest (1.0.0)
+- the export package manifest (1.1.0)
 - the REST API (OpenAPI)
 
 The full functional [specification](https://github.com/CinderMed/workbench/blob/main/docs/specification.md) and the [architecture decision records](https://github.com/CinderMed/workbench/tree/main/docs/adr) live in the repository.

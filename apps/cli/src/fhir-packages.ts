@@ -7,6 +7,11 @@
  * packages.fhir.org, checked (SHA-256 pinned for the core packages, the registry's SHA-1 for the
  * others), extracted to a temporary folder and then renamed into place, so the cache never holds
  * half a package.
+ *
+ * Every package's tarball SHA-256 goes into the definition index and the export manifest (#146,
+ * ADR-0025): pinned for the core packages; for the others computed at download and kept next to
+ * the package in the cache (`<id>#<version>/cindermed.json`). A package another tool put in the
+ * cache has no such file: its tarball is downloaded again, checked and digested, not re-extracted.
  */
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -105,7 +110,46 @@ export async function packageFolder(
   const limits = { ...DEFAULT_LIMITS, ...options.limits };
   const tarball = await download(ref, options, limits);
   await install(tarball, folder, cacheDir, limits, label(ref));
+  await keepDigest(folder, tarball, ref);
   return join(folder, "package");
+}
+
+/** The file next to `package/` that keeps the SHA-256 of a non-core package's tarball. */
+const DIGEST_FILE = "cindermed.json";
+const SHA256 = /^[0-9a-f]{64}$/;
+
+async function keepDigest(folder: string, tarball: Uint8Array, ref: PackageRef): Promise<void> {
+  if (findCorePackage(ref.id, ref.version) !== undefined) return;
+  const tarballSha256 = createHash("sha256").update(tarball).digest("hex");
+  await writeFile(join(folder, DIGEST_FILE), `${JSON.stringify({ tarballSha256 }, null, 2)}\n`);
+}
+
+/**
+ * The SHA-256 of a package's tarball: pinned for a core package, kept in the cache for the
+ * others, or computed by downloading the tarball again (checked against the registry's SHA-1).
+ * `undefined` only when it is not kept and downloads are off.
+ */
+export async function packageDigest(
+  ref: PackageRef,
+  options: PackageOptions = {},
+): Promise<string | undefined> {
+  const core = findCorePackage(ref.id, ref.version);
+  if (core !== undefined) return core.tarballSha256;
+  const folder = join(options.cacheDir ?? defaultCacheDir(), label(ref));
+  try {
+    const kept = (
+      JSON.parse(await readFile(join(folder, DIGEST_FILE), "utf8")) as {
+        tarballSha256?: unknown;
+      }
+    ).tarballSha256;
+    if (typeof kept === "string" && SHA256.test(kept)) return kept;
+  } catch {
+    // Not kept (or unreadable): computed below.
+  }
+  if (options.offline === true) return undefined;
+  const tarball = await download(ref, options, { ...DEFAULT_LIMITS, ...options.limits });
+  await keepDigest(folder, tarball, ref);
+  return createHash("sha256").update(tarball).digest("hex");
 }
 
 async function download(
@@ -364,7 +408,15 @@ export async function readPackage(
   }
   const resources: unknown[] = [];
   for (const file of files.sort()) resources.push(await json(file));
-  return { id: ref.id, version: ref.version, fhirVersions, dependencies, resources };
+  const tarballSha256 = await packageDigest(ref, options);
+  return {
+    id: ref.id,
+    version: ref.version,
+    ...(tarballSha256 === undefined ? {} : { tarballSha256 }),
+    fhirVersions,
+    dependencies,
+    resources,
+  };
 }
 
 export interface LoadedDefinitions {

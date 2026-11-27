@@ -16,4 +16,4 @@ export const manifestSchema: Readonly<Record<string, unknown>> = manifest;
 
 export const PROJECT_FORMAT_VERSION = "1.5.0";
 export const NORMALIZATION_FORMAT_VERSION = "1.3.0";
-export const MANIFEST_FORMAT_VERSION = "1.0.0";
+export const MANIFEST_FORMAT_VERSION = "1.1.0";

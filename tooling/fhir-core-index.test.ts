@@ -5,6 +5,7 @@
 import {
   FhirDefinitions,
   elementTree,
+  findCorePackage,
   referenceTargets,
   resolvePath,
   withDefinitions,
@@ -45,7 +46,14 @@ describe.runIf(enabled).each([
       const first = await loadDefinitions(fhirVersion, []);
       const second = await loadDefinitions(fhirVersion, []);
       const { index, definitions, issues } = first;
-      expect(index.manifest.packages).toEqual([{ id: coreId, version: fhirVersion }]);
+      // With the pinned SHA-256 of its tarball (index format 1.2.0, #146).
+      expect(index.manifest.packages).toEqual([
+        {
+          id: coreId,
+          version: fhirVersion,
+          tarballSha256: findCorePackage(coreId, fhirVersion)?.tarballSha256,
+        },
+      ]);
       expect(second.index.manifestText).toBe(index.manifestText);
       expect([...second.index.files]).toEqual([...index.files]);
       // The only definitions left out with a warning: two example profiles shipped without snapshot.

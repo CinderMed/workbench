@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fhir-mapping-workbench.example.org/schema/export-manifest/1.0.0",
+  "$id": "https://fhir-mapping-workbench.example.org/schema/export-manifest/1.1.0",
   "title": "Manifest of the exported mapping package",
   "description": "Describes the content of the FML package exported by the workbench (G7) and everything the conversion module needs to run it without knowing the workbench: tables, load order, files with SHA-256 digests, versions and verification results.",
   "type": "object",
@@ -19,7 +19,9 @@
       "type": "string"
     },
     "formatVersion": {
-      "const": "1.0.0"
+      "description": "Version of this manifest format (semver). A reader of 1.x accepts every older 1.y; the major changes only with incompatible changes.",
+      "type": "string",
+      "pattern": "^1\\.\\d+\\.\\d+$"
     },
     "package": {
       "type": "object",
@@ -98,7 +100,7 @@
       ]
     },
     "packages": {
-      "description": "Required FHIR packages (core + any IGs).",
+      "description": "The FHIR packages the mapping was checked against: the core package first, then the project's packages and their dependencies, by name (format 1.1.0: every package loaded, #146).",
       "type": "array",
       "items": {
         "type": "object",
@@ -113,6 +115,11 @@
           },
           "version": {
             "type": "string"
+          },
+          "sha256": {
+            "description": "Format 1.1.0 (#146): SHA-256 (hex) of the package tarball as published by the registry, so the conversion module can check it runs against the same definitions. The export always writes it.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
           }
         }
       }

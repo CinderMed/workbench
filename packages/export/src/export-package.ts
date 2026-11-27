@@ -10,6 +10,7 @@
  * cleaned project copy → the three schemas → manifest with SHA-256 digests → zip.
  */
 import {
+  MANIFEST_FORMAT_VERSION,
   manifestSchema,
   normalizationSchema,
   parseProject,
@@ -19,7 +20,7 @@ import {
   type ProjectFile,
   type ValidationResult,
 } from "@cindermed/model";
-import { type FhirDefinitions, validateFhir } from "@cindermed/fhir-defs";
+import { type FhirDefinitions, findCorePackage, validateFhir } from "@cindermed/fhir-defs";
 import { writtenPaths } from "./written-paths.js";
 import {
   conceptMaps,
@@ -43,7 +44,34 @@ import { ZONE_RULES } from "./time-zones/zone-rules.js";
 export const ExportCode = {
   /** Two tables depend on each other through `via` relations: no load order exists. */
   TABLE_CYCLE: "EXPORT_TABLE_CYCLE",
+  /**
+   * The SHA-256 of a FHIR package's tarball is unknown (a package in the cache without its
+   * digest, loaded offline): the manifest must pin every package it was checked against (#146).
+   */
+  PACKAGE_DIGEST_MISSING: "EXPORT_PACKAGE_DIGEST_MISSING",
 } as const;
+
+/**
+ * Every package the definitions were built from, with its tarball's SHA-256 (manifest 1.1.0,
+ * #146): from the index, or pinned for a core package. A package without one is an error.
+ */
+function manifestPackages(
+  definitions: FhirDefinitions,
+  results: ValidationResult[],
+): NonNullable<ExportManifest["packages"]> {
+  return definitions.manifest.packages.map((p) => {
+    const sha256 = p.tarballSha256 ?? findCorePackage(p.id, p.version)?.tarballSha256;
+    if (sha256 === undefined)
+      results.push({
+        severity: "error",
+        code: ExportCode.PACKAGE_DIGEST_MISSING,
+        objectKind: "project",
+        field: "project.packages",
+        message: `The SHA-256 of the FHIR package ${p.id}#${p.version} is not known: it is in the package cache without its digest. Export once with downloads on, so the package is digested and the manifest can pin it.`,
+      });
+    return { name: p.id, version: p.version, ...(sha256 === undefined ? {} : { sha256 }) };
+  });
+}
 
 export interface ExportOptions {
   /**
@@ -199,6 +227,7 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
         ),
     });
   }
+  const packages = manifestPackages(options.definitions, results);
   if (results.length > 0) return { ok: false, results: [...results, ...warnings] };
 
   const release = project.project.fhirVersion.startsWith("5") ? "R5" : "R4";
@@ -227,14 +256,10 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
   text.set("schemas/manifest.schema.json", json(manifestSchema));
 
   const bytes = new Map([...text].map(([path, content]) => [path, utf8ToBytes(content)]));
-  const core =
-    release === "R5"
-      ? { name: "hl7.fhir.r5.core", version: "5.0.0" }
-      : { name: "hl7.fhir.r4.core", version: "4.0.1" };
   const output = project.project.output;
   const manifest: ExportManifest = {
     $schema: refs.manifest,
-    formatVersion: "1.0.0",
+    formatVersion: MANIFEST_FORMAT_VERSION,
     package: {
       name: `${project.project.name.toLowerCase()}-mapping`,
       version,
@@ -248,10 +273,7 @@ export function exportPackage(projectText: string, options: ExportOptions): Expo
       file: "project.json",
     },
     fhirVersion: project.project.fhirVersion,
-    packages: [
-      core,
-      ...(project.project.packages ?? []).map((p) => ({ name: p.name, version: p.version })),
-    ],
+    packages,
     output: {
       bundleType: output?.bundleType ?? "transaction",
       requestMethod: output?.requestMethod ?? "PUT",

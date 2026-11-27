@@ -1,6 +1,6 @@
 {
   "$schema": "../manifest.schema.json",
-  "formatVersion": "1.0.0",
+  "formatVersion": "1.1.0",
   "package": {
     "name": "r5 visit-mapping",
     "version": "0.1.0",
@@ -20,7 +20,8 @@
   "packages": [
     {
       "name": "hl7.fhir.r5.core",
-      "version": "5.0.0"
+      "version": "5.0.0",
+      "sha256": "74b27cd1bfce9e80eaceac431edf230b0945a443564fbf5512f82e5fa50a80d4"
     }
   ],
   "output": {
@@ -115,7 +116,7 @@
     },
     {
       "path": "schemas/manifest.schema.json",
-      "sha256": "4449ea8ad84c808ed623e1afc9b76cb661babc33e72a3fd44d06b4216903ce7c",
+      "sha256": "41e268d59e939b97e35db177c127791360d7cd7a12acef0fe377726125b1f43b",
       "mediaType": "application/json"
     }
   ]

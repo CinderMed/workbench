@@ -6,7 +6,10 @@
  */
 export interface ExportManifest {
   $schema?: string;
-  formatVersion: "1.0.0";
+  /**
+   * Version of this manifest format (semver). A reader of 1.x accepts every older 1.y; the major changes only with incompatible changes.
+   */
+  formatVersion: string;
   package: {
     name: string;
     /**
@@ -33,11 +36,15 @@ export interface ExportManifest {
   };
   fhirVersion: "4.0.1" | "5.0.0";
   /**
-   * Required FHIR packages (core + any IGs).
+   * The FHIR packages the mapping was checked against: the core package first, then the project's packages and their dependencies, by name (format 1.1.0: every package loaded, #146).
    */
   packages?: {
     name: string;
     version: string;
+    /**
+     * Format 1.1.0 (#146): SHA-256 (hex) of the package tarball as published by the registry, so the conversion module can check it runs against the same definitions. The export always writes it.
+     */
+    sha256?: string;
   }[];
   output: {
     bundleType: "transaction";
