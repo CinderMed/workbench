@@ -179,9 +179,11 @@ and joins the Bundles of the rows. The merged Bundle (Patients → Admissions �
 suite: 17 of 17.
 
 `tooling/mimic-on-fhir.test.ts` compares our Bundle with the open MIMIC-IV on FHIR demo (`mimic-on-fhir/`) on the key
-fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
-66 resources match. Not compared, each a gap: Patient.birthDate (derived
-columns), specimen, the priority extension, and the units system of a number without a unit.
+fields (identifiers, codes, values, units, reference ranges, times, notes, references resolved to the source keys,
+status, category, gender, class): all 66 resources match (#198). The elements only the demo writes are a list in the
+test, each with its reason (Patient.birthDate from derived columns, Encounter.location from the transfers table,
+Observation.specimen, …), checked exactly, so a new difference fails and a closed gap must leave the list; so is the
+units system the demo writes on a number without a unit.
 
 ## Manifests and versions from the exporter (12 November 2026, #83)
 The four `manifest.json` files are written by the exporter (`@cindermed/export`, ADR-0012) with package version 0.1.0,

@@ -7,7 +7,7 @@ non-synthetic rows in this repository.
 Contains information from the **MIMIC-IV Clinical Database Demo** (version 2.2) and the **MIMIC-IV Clinical
 Database Demo on FHIR** (version 2.1.0), which are made available here under the Open Database License (ODbL).
 Everything derived from them in this folder (the slice, the normalized rows, the Bundles produced by our maps, the
-project's value maps of lab items and units) is a derivative database under the same licence.
+project's value map of lab items) is a derivative database under the same licence.
 
 ## Sources
 
