@@ -4,8 +4,8 @@ import { buildApp } from "./app.js";
 
 let app: FastifyInstance;
 
-beforeEach(() => {
-  app = buildApp({ version: "1.2.3" });
+beforeEach(async () => {
+  app = await buildApp({ version: "1.2.3" });
 });
 
 afterEach(async () => {
@@ -22,5 +22,13 @@ describe("GET /api/health", () => {
   it("answers 404 outside the known routes", async () => {
     const response = await app.inject({ method: "GET", url: "/api/unknown" });
     expect(response.statusCode).toBe(404);
+    // RFC 9457 problem details.
+    expect(response.headers["content-type"]).toContain("application/problem+json");
+    expect(response.json()).toMatchObject({ code: "not-found", status: 404 });
+  });
+
+  it("serves the OpenAPI document at /api/docs", async () => {
+    const response = await app.inject({ method: "GET", url: "/api/docs" });
+    expect(response.json()).toMatchObject({ openapi: "3.1.0", info: { version: "1.2.3" } });
   });
 });

@@ -13,6 +13,13 @@ describe("readServerConfig", () => {
     });
   });
 
+  it("reads DATABASE_URL when set", () => {
+    expect(readServerConfig({ DATABASE_URL: "postgres://x@db/y" }).databaseUrl).toBe(
+      "postgres://x@db/y",
+    );
+    expect(readServerConfig({ DATABASE_URL: "" })).not.toHaveProperty("databaseUrl");
+  });
+
   it.each(["0", "70000", "abc", "3.5"])("rejects PORT=%s", (port) => {
     expect(() => readServerConfig({ PORT: port })).toThrow("PORT must be an integer");
   });

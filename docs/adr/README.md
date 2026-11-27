@@ -31,3 +31,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0023](0023-choice-elements-from-definitions.md)             | Element names and choice types from the FHIR definitions                  | accepted |
 | [0024](0024-time-zones-at-the-border.md)                     | Time zones declared at the border, with a committed tzdata snapshot       | accepted |
 | [0025](0025-fhir-package-digests.md)                         | The export manifest pins every FHIR package by the SHA-256 of its tarball | accepted |
+| [0026](0026-api-persistence-and-errors.md)                   | API persistence of project objects, errors and OpenAPI                    | accepted |
