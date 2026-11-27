@@ -727,25 +727,19 @@ function rowRules(
     const v = ident("v");
     const q = ident("q");
     // On a choice, the chosen type: Quantity, or a type derived from it (Age, Duration, #156).
-    const [target] = write({
+    // On a two-level path the parent is opened inline, as for other single rows (#125):
+    //   src.col as v -> res.referenceRange as p, p.low = create('Quantity') as q then { … }
+    const targets = write({
       kind: "create",
-      type: ident(segments[0]?.choiceType ?? "Quantity"),
+      type: ident(segments.at(-1)?.choiceType ?? "Quantity"),
     });
-    if (target === undefined || segments.length > 1) {
-      g.error(
-        GeneratorCode.PATH_UNSUPPORTED,
-        "mapping",
-        row.id,
-        "path",
-        `Row ${row.code}: a quantity is written on a top-level element only.`,
-      );
-      return [];
-    }
+    const quantity = targets.at(-1);
+    if (quantity === undefined) return [];
     return [
       {
         name: ruleName(row.code),
         source: { context: src, element: g.columnElement(row.columnId), alias: v },
-        targets: [{ ...target, alias: q }],
+        targets: [...targets.slice(0, -1), { ...quantity, alias: q }],
         then: {
           kind: "rules",
           rules: [

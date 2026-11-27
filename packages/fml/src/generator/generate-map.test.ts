@@ -444,6 +444,40 @@ describe("choice elements written with their type (#156, ADR-0023)", () => {
     expect(text.split("\n").map((l) => l.trim())).toContain(line);
   };
 
+  it("writes a quantity on a two-level path with the parent opened inline (#125)", () => {
+    const unit = { system: "http://unitsofmeasure.org", code: "g/dL" };
+    const low = generateWith([
+      { path: "referenceRange.low", transform: { kind: "quantity", unit } },
+    ]);
+    expect(parseFml(low)).toEqual([]);
+    has(
+      low,
+      "src.obs_bloodt_hb as v -> res.referenceRange as p, p.low = create('Quantity') as q then {",
+    );
+    has(low, 'v -> q.value = v "R-100-value";');
+    has(
+      low,
+      "src -> q.unit = 'g/dL', q.system = 'http://unitsofmeasure.org', q.code = 'g/dL' \"R-100-unit\";",
+    );
+    // A choice at the second level is created with its chosen type.
+    const component = generateWith([
+      { path: "component.valueQuantity", transform: { kind: "quantity", unit } },
+    ]);
+    expect(parseFml(component)).toEqual([]);
+    has(
+      component,
+      "src.obs_bloodt_hb as v -> res.component as p, p.value = create('Quantity') as q then {",
+    );
+    // Two rows on the same parent share its block, each with its own Quantity.
+    const range = generateWith([
+      { path: "referenceRange.low", transform: { kind: "quantity", unit } },
+      { path: "referenceRange.high", transform: { kind: "quantity", unit } },
+    ]);
+    expect(parseFml(range)).toEqual([]);
+    has(range, "src.obs_bloodt_hb as v -> p.low = create('Quantity') as q then {");
+    has(range, "src.obs_bloodt_hb as v -> p.high = create('Quantity') as q then {");
+  });
+
   it("converts a value to the chosen type: a decimal cast to string on valueString", () => {
     const text = generateWith([{ path: "valueString", transform: { kind: "cast", to: "string" } }]);
     has(
