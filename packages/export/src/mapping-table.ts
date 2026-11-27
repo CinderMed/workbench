@@ -149,7 +149,10 @@ function transformText(
       return `value map ${mapName(t.valueMapId)}`;
     case "quantity":
       if (t.unit !== undefined) return `quantity, unit ${coding(t.unit)}`;
-      return `quantity, unit from ${t.unitColumnId === undefined ? "?" : columnName(t.unitColumnId)}${t.unitValueMapId === undefined ? "" : ` (value map ${mapName(t.unitValueMapId)})`}`;
+      if (t.unitColumnId === undefined) return "quantity";
+      if (t.unitValueMapId !== undefined)
+        return `quantity, unit from ${columnName(t.unitColumnId)} (value map ${mapName(t.unitValueMapId)})`;
+      return `quantity, unit text from ${columnName(t.unitColumnId)}${t.unitSystem === undefined ? "" : ` (system ${t.unitSystem})`}`;
     case "coding":
       return `${t.as} from the code, system ${t.system}${t.displayColumnId === undefined ? "" : `, display from ${columnName(t.displayColumnId)}`}`;
     case "concat":

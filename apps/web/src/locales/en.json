@@ -241,12 +241,13 @@
     "valueMapOption": "{{name}} → {{target}} ({{count}} values)",
     "unitFixed": "Fixed unit",
     "unitColumn": "Unit from a column",
+    "unitText": "Unit text from a column",
     "concatOrder": "Joined in this order: {{columns}}",
     "help": {
       "copy": "The column's value as it is. Its type must fit the element.",
       "cast": "The value converted to another type: integer to decimal, date to dateTime, or any type to string.",
       "valueMap": "Each value of the column becomes a code, a coding or true/false, as the value map says.",
-      "quantity": "The number with its unit: a fixed UCUM unit, or the unit read from another column and translated by a value map.",
+      "quantity": "The number with its unit: a fixed UCUM unit, the unit read from another column and translated by a value map, or the unit text of another column copied as it is.",
       "coding": "The column's value is the code of one code system; the display can come from another column of the same row.",
       "concat": "The values of several columns of the same row, joined into one text, in the order chosen. Empty columns are skipped; when all are empty, nothing is written.",
       "constant": "The same value in every resource, with no column."
@@ -264,6 +265,8 @@
       "unitColumn": "Unit column",
       "unitValueMap": "Unit value map",
       "unitValueMapHint": "Turns the unit column's values into UCUM units.",
+      "unitSystem": "Unit code system (optional)",
+      "unitSystemHint": "With a code system, the unit text is also written as the unit's code in that system.",
       "as": "Written as",
       "displayColumn": "Display from column (optional)",
       "columns": "Columns to join",

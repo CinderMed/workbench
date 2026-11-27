@@ -1346,7 +1346,7 @@
             "kind"
           ],
           "additionalProperties": false,
-          "description": "Quantity: fixed unit (unit) or read from an auxiliary column translated with a value map (unitColumnId + unitValueMapId).",
+          "description": "Quantity: fixed unit (unit), or read from an auxiliary column (unitColumnId), translated with a value map (unitValueMapId) or, from format 1.5.0 (#108), copied as text into Quantity.unit; with unitSystem the text is also the code of that system.",
           "properties": {
             "kind": {
               "const": "quantity"
@@ -1359,7 +1359,22 @@
             },
             "unitValueMapId": {
               "$ref": "#/$defs/Id"
+            },
+            "unitSystem": {
+              "description": "Format 1.5.0 (#108): the code system of the unit text read from unitColumnId, written as Quantity.system with the text as Quantity.code (e.g. MIMIC-IV's units system). Only with unitColumnId and without unitValueMapId.",
+              "$ref": "#/$defs/Canonical"
             }
+          },
+          "dependentRequired": {
+            "unitSystem": [
+              "unitColumnId"
+            ]
+          },
+          "not": {
+            "required": [
+              "unitSystem",
+              "unitValueMapId"
+            ]
           }
         },
         {

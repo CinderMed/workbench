@@ -149,9 +149,10 @@ export function TransformEditor({
               data={[
                 { value: "fixed", label: t("transforms.unitFixed") },
                 { value: "column", label: t("transforms.unitColumn") },
+                { value: "text", label: t("transforms.unitText") },
               ]}
               onChange={(value) => {
-                set({ unitMode: value === "column" ? "column" : "fixed" });
+                set({ unitMode: value === "column" || value === "text" ? value : "fixed" });
               }}
             />
             {draft.unitMode === "fixed" ? (
@@ -186,15 +187,26 @@ export function TransformEditor({
                     set({ unitColumnId: event.currentTarget.value });
                   }}
                 />
-                <NativeSelect
-                  label={t("transforms.field.unitValueMap")}
-                  description={t("transforms.field.unitValueMapHint")}
-                  value={draft.unitValueMapId}
-                  data={mapChoices}
-                  onChange={(event) => {
-                    set({ unitValueMapId: event.currentTarget.value });
-                  }}
-                />
+                {draft.unitMode === "column" ? (
+                  <NativeSelect
+                    label={t("transforms.field.unitValueMap")}
+                    description={t("transforms.field.unitValueMapHint")}
+                    value={draft.unitValueMapId}
+                    data={mapChoices}
+                    onChange={(event) => {
+                      set({ unitValueMapId: event.currentTarget.value });
+                    }}
+                  />
+                ) : (
+                  <TextInput
+                    label={t("transforms.field.unitSystem")}
+                    description={t("transforms.field.unitSystemHint")}
+                    value={draft.unitSystem}
+                    onChange={(event) => {
+                      set({ unitSystem: event.currentTarget.value });
+                    }}
+                  />
+                )}
               </>
             )}
           </>

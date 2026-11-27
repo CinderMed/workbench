@@ -57,11 +57,14 @@ export interface TransformDraft {
   readonly castTo: string;
   readonly inputFormat: string;
   readonly valueMapId: string;
-  readonly unitMode: "fixed" | "column";
+  /** A fixed unit, a unit column through a value map, or a unit column copied as text (#108). */
+  readonly unitMode: "fixed" | "column" | "text";
   readonly unitCode: string;
   readonly unitDisplay: string;
   readonly unitColumnId: string;
   readonly unitValueMapId: string;
+  /** The code system of the unit text, optional (`unitSystem`). */
+  readonly unitSystem: string;
   readonly system: string;
   readonly as: "Coding" | "CodeableConcept";
   readonly displayColumnId: string;
@@ -84,11 +87,17 @@ export function draftOf(row: MappingRow, column: Column | undefined): TransformD
     castTo: t.kind === "cast" ? t.to : (castTypes(column)[0] ?? ""),
     inputFormat: t.kind === "cast" ? (t.inputFormat ?? "") : date ? (column.dateFormat ?? "") : "",
     valueMapId: t.kind === "valueMap" ? t.valueMapId : "",
-    unitMode: t.kind === "quantity" && t.unit === undefined ? "column" : "fixed",
+    unitMode:
+      t.kind !== "quantity" || t.unit !== undefined
+        ? "fixed"
+        : t.unitColumnId !== undefined && t.unitValueMapId === undefined
+          ? "text"
+          : "column",
     unitCode: t.kind === "quantity" ? (t.unit?.code ?? "") : (column?.unit?.code ?? ""),
     unitDisplay: t.kind === "quantity" ? (t.unit?.display ?? "") : (column?.unit?.display ?? ""),
     unitColumnId: t.kind === "quantity" ? (t.unitColumnId ?? "") : "",
     unitValueMapId: t.kind === "quantity" ? (t.unitValueMapId ?? "") : "",
+    unitSystem: t.kind === "quantity" ? (t.unitSystem ?? "") : "",
     system: t.kind === "coding" ? t.system : "",
     as: t.kind === "coding" ? t.as : "CodeableConcept",
     displayColumnId: t.kind === "coding" ? (t.displayColumnId ?? "") : "",
@@ -143,6 +152,17 @@ function transformOf(draft: TransformDraft, row: MappingRow, column: Column | un
         ? { error: "valueMapRequired" }
         : { transform: { kind: "valueMap", valueMapId: draft.valueMapId } };
     case "quantity": {
+      if (draft.unitMode === "text") {
+        if (draft.unitColumnId === "") return { error: "unitColumnRequired" };
+        const unitSystem = draft.unitSystem.trim();
+        return {
+          transform: {
+            kind: "quantity",
+            unitColumnId: draft.unitColumnId,
+            ...(unitSystem === "" ? {} : { unitSystem }),
+          },
+        };
+      }
       if (draft.unitMode === "column") {
         if (draft.unitColumnId === "") return { error: "unitColumnRequired" };
         if (draft.unitValueMapId === "") return { error: "unitValueMapRequired" };

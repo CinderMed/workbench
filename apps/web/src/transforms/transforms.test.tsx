@@ -189,6 +189,42 @@ describe("the transform editor (D5)", () => {
       );
   });
 
+  it("copies a unit text from a column, with its code system, and opens it again as it was (#108)", async () => {
+    const user = userEvent.setup();
+    const { grid, download } = await open(load(metastraProject));
+
+    await user.dblClick(cell(grid, "R-010", 6));
+    let dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByText("Unit text from a column"));
+    // The unit column stays; the value map gives way to the optional code system.
+    expect(within(dialog).queryByLabelText(/^Unit value map/)).toBeNull();
+    await user.type(
+      within(dialog).getByLabelText(/^Unit code system/),
+      "http://example.org/fhir/units",
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    expect(cell(grid, "R-010", 6).textContent).toBe("unit: obs_bloodt_hb_spec");
+    expect(cell(grid, "R-010", 5).getAttribute("aria-invalid")).not.toBe("true");
+
+    await user.dblClick(cell(grid, "R-010", 6));
+    dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByLabelText(/^Unit code system/)).toHaveProperty(
+      "value",
+      "http://example.org/fhir/units",
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    const project = await saved(download);
+    expect(project.mappings.find((m) => m.code === "R-010")?.transform).toEqual({
+      kind: "quantity",
+      unitColumnId: "col_hb_unit",
+      unitSystem: "http://example.org/fhir/units",
+    });
+  });
+
   it("adds a constant row, and says why a reference or an empty line has no editor here", async () => {
     const user = userEvent.setup();
     const { grid, download } = await open(load(metastraProject));

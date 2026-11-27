@@ -185,6 +185,10 @@ export type Transform =
       unit?: Coding;
       unitColumnId?: Id;
       unitValueMapId?: Id;
+      /**
+       * Format 1.5.0 (#108): the code system of the unit text read from unitColumnId, written as Quantity.system with the text as Quantity.code (e.g. MIMIC-IV's units system). Only with unitColumnId and without unitValueMapId.
+       */
+      unitSystem?: Canonical;
     }
   | {
       kind: "coding";
