@@ -110,3 +110,75 @@ export function parseDate(text: string, format?: string): string | undefined {
 export function parseDateTime(text: string, format?: string): string | undefined {
   return parseDateText(text, format, true);
 }
+
+/**
+ * The offset rules of IANA zones (normalization 1.3.0, `timeZones`): by zone name, the offset at
+ * `from`, then pairs of (instant, new offset), in seconds (instants since 1970-01-01T00:00:00Z,
+ * offsets east of UTC).
+ */
+export interface ZoneRules {
+  readonly from: number;
+  readonly to: number;
+  readonly zones: Readonly<Record<string, readonly number[]>>;
+}
+
+const FIXED_OFFSET = /^[+-](0[0-9]|1[0-3]):[0-5][0-9]$|^[+-]14:00$/;
+const LOCAL_DATE_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/;
+
+/** The offset of a zone at an instant (seconds since 1970-01-01T00:00:00Z). */
+function offsetAt(entry: readonly number[], instant: number): number {
+  let offset = entry[0] ?? 0;
+  // Pairs of (instant, offset) after the first item, in increasing order.
+  let lo = 0;
+  let hi = (entry.length - 1) / 2;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if ((entry[1 + 2 * mid] ?? 0) <= instant) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo > 0) offset = entry[2 * lo] ?? offset;
+  return offset;
+}
+
+/** `+01:00` for 3600 seconds; `+00:00` for 0. */
+function formatOffset(seconds: number): string {
+  const sign = seconds < 0 ? "-" : "+";
+  const minutes = Math.abs(seconds) / 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${sign}${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+}
+
+/**
+ * A local date and time (`YYYY-MM-DDThh:mm:ss`, as `parseDateTime` writes it) with the offset of a
+ * time zone (normalization 1.3.0, ADR-0024): a fixed offset (`+01:00`; `Z` gives `+00:00`), or an
+ * IANA zone of `rules`, whose offset at that local time is used. `undefined` (an invalid value)
+ * for a local time that does not exist (a daylight-saving gap), an offset that is not a whole
+ * number of minutes, or a time outside the rules' range. A local time that occurs twice takes the
+ * earlier offset, its first occurrence. A date without a time is returned as it is. Throws when
+ * `timeZone` names a zone `rules` does not have: the specification is not valid.
+ */
+export function withTimeZone(
+  local: string,
+  timeZone: string,
+  rules?: ZoneRules,
+): string | undefined {
+  const match = LOCAL_DATE_TIME.exec(local);
+  if (match === null) return local;
+  if (timeZone === "Z") return `${local}+00:00`;
+  if (FIXED_OFFSET.test(timeZone)) return `${local}${timeZone}`;
+  const entry = rules?.zones[timeZone];
+  if (rules === undefined || entry === undefined)
+    throw new Error(`time zone "${timeZone}" is not in the specification's timeZones`);
+  const [, y, mo, d, h, mi, s] = match.map(Number);
+  const wall = Date.UTC(y ?? 0, (mo ?? 1) - 1, d ?? 1, h ?? 0, mi ?? 0, s ?? 0) / 1000;
+  // The offsets in force a day around this local time: a change of offset is never closer to
+  // another than that. An offset fits when the instant it gives has that offset.
+  const candidates = [...new Set([-86400, 0, 86400].map((shift) => offsetAt(entry, wall + shift)))];
+  const fitting = candidates.filter((offset) => offsetAt(entry, wall - offset) === offset);
+  if (fitting.length === 0) return undefined;
+  // Several fit when the local time occurs twice: the earlier instant has the larger offset.
+  const offset = Math.max(...fitting);
+  const instant = wall - offset;
+  if (instant < rules.from || instant >= rules.to || offset % 60 !== 0) return undefined;
+  return `${local}${formatOffset(offset)}`;
+}

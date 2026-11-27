@@ -1,6 +1,6 @@
 {
   "$schema": "../normalization.schema.json",
-  "formatVersion": "1.2.0",
+  "formatVersion": "1.3.0",
   "source": "Admissions",
   "logicalModel": "http://example.org/fhir/mimic-iv-demo/StructureDefinition/AdmissionsRow",
   "input": {

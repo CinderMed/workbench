@@ -1,5 +1,5 @@
 /**
- * Normalization specification of a table (normalization.schema.json 1.2.0): how the conversion
+ * Normalization specification of a table (normalization.schema.json 1.3.0): how the conversion
  * module turns each CSV row into the normalized row the logical model describes. It is derived
  * from the column dictionary (`dateFormat`, `decimalSeparator`, `missingValues`, `allowedValues`,
  * `multiValue`, `originalName`), the roles' `idRule` and `project.output.onInvalidValue`, as in the verified
@@ -12,11 +12,14 @@
  */
 import {
   canonicalText,
+  formatHasTime,
+  isFixedOffset,
   NORMALIZATION_FORMAT_VERSION,
   type Column,
   type Normalization,
   type NormalizationSpec,
   type ProjectFile,
+  type Source,
 } from "@cindermed/model";
 import { GeneratorInputError } from "./codes.js";
 import { ELEMENT_TYPE, logicalModelUrl } from "./logical-model.js";
@@ -28,6 +31,29 @@ export interface NormalizationSpecOptions {
    * examples use `../normalization.schema.json`; the export chooses the value for its package.
    */
   readonly schemaRef?: string;
+  /**
+   * The offset rules of IANA zones (ADR-0024), from the workbench's tzdata snapshot in
+   * @cindermed/export: the generator copies those of the zones its columns use into `timeZones`.
+   * Needed only when a column uses an IANA zone.
+   */
+  readonly zoneRules?: ZoneRuleSource;
+}
+
+/** Where the offsets of IANA zones come from: plain data, so the generator holds no tzdata. */
+export interface ZoneRuleSource {
+  readonly tzdata: string;
+  readonly from: number;
+  readonly to: number;
+  readonly zone: (name: string) => readonly number[] | undefined;
+}
+
+/**
+ * The time zone of a dateTime column whose values have a time (project 1.5.0): its own, else its
+ * table's. `undefined` for other columns, and for a column without one (TIME_ZONE_MISSING).
+ */
+export function columnTimeZone(source: Source, column: Column): string | undefined {
+  if (column.dataType !== "dateTime" || !formatHasTime(column.dateFormat)) return undefined;
+  return column.timeZone ?? source.timeZone;
 }
 
 /** Default of `project.output.onInvalidValue` (project schema 1.3.0): stop at the first invalid value. */
@@ -55,13 +81,15 @@ export function normalizationAllowedValues(column: Column): [string, ...string[]
   return [first, ...rest];
 }
 
-function columnSpec({ column, element }: PlannedColumn): Normalization.Column {
+function columnSpec(source: Source, { column, element }: PlannedColumn): Normalization.Column {
   const spec: Normalization.Column = {
     name: element,
     sourceName: column.originalName ?? column.name,
     type: ELEMENT_TYPE[column.dataType],
   };
   if (column.dateFormat !== undefined) spec.dateFormat = column.dateFormat;
+  const timeZone = columnTimeZone(source, column);
+  if (timeZone !== undefined) spec.timeZone = timeZone;
   if (column.decimalSeparator !== undefined) spec.decimalSeparator = column.decimalSeparator;
   if (column.missingValues !== undefined) spec.missingValues = [...column.missingValues];
   const allowedValues = normalizationAllowedValues(column);
@@ -89,6 +117,8 @@ export function normalizationSpec(
   plan: TablePlan,
   options: NormalizationSpecOptions = {},
 ): NormalizationSpec {
+  const columns = plan.columns.map((column) => columnSpec(plan.source, column));
+  const timeZones = zoneRules(columns, options.zoneRules);
   return {
     ...(options.schemaRef === undefined ? {} : { $schema: options.schemaRef }),
     formatVersion: NORMALIZATION_FORMAT_VERSION,
@@ -96,8 +126,37 @@ export function normalizationSpec(
     logicalModel: logicalModelUrl(project, plan),
     input: { format: "csv", delimiter: ",", encoding: "utf-8", headerRow: 1 },
     onInvalidValue: project.project.output?.onInvalidValue ?? DEFAULT_ON_INVALID_VALUE,
-    columns: plan.columns.map(columnSpec) as NormalizationSpec["columns"],
+    columns: columns as NormalizationSpec["columns"],
     ids: plan.idFields.map(idFieldSpec),
+    ...(timeZones === undefined ? {} : { timeZones }),
     hash: { algorithm: "sha256" },
   };
+}
+
+/** The offset rules of the IANA zones the columns use, in name order; none for fixed offsets. */
+function zoneRules(
+  columns: readonly Normalization.Column[],
+  source: ZoneRuleSource | undefined,
+): NormalizationSpec["timeZones"] {
+  const names = [
+    ...new Set(
+      columns.flatMap((c) =>
+        c.timeZone === undefined || isFixedOffset(c.timeZone) ? [] : [c.timeZone],
+      ),
+    ),
+  ].sort();
+  if (names.length === 0) return undefined;
+  if (source === undefined)
+    throw new GeneratorInputError("A column uses an IANA time zone, but no zone rules were given.");
+  const zones: Record<string, [number, ...number[]]> = {};
+  for (const name of names) {
+    const entry = source.zone(name);
+    const [first, ...rest] = entry ?? [];
+    if (first === undefined)
+      throw new GeneratorInputError(
+        `Time zone "${name}" is not in the zone rules (TIME_ZONE_UNKNOWN): validate before generating.`,
+      );
+    zones[name] = [first, ...rest];
+  }
+  return { tzdata: source.tzdata, from: source.from, to: source.to, zones };
 }

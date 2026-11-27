@@ -1,4 +1,4 @@
-/** Reference normalizer for tabular source rows (normalization.schema.json 1.2.0). */
+/** Reference normalizer for tabular source rows (normalization.schema.json 1.3.0). */
 export const packageName = "@cindermed/normalizer";
 
 export { CsvReader, parseCsv, type CsvOptions } from "./csv.js";

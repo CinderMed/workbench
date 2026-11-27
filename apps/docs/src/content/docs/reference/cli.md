@@ -96,7 +96,7 @@ The FHIR checks read the core package of the project's FHIR version (`hl7.fhir.r
 {
   "file": "fixtures/fml-examples/motu/project.json",
   "valid": true,
-  "formatVersion": "1.4.0",
+  "formatVersion": "1.5.0",
   "fhir": { "checks": "done", "packages": ["hl7.fhir.r4.core#4.0.1"] },
   "results": []
 }

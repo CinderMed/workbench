@@ -13,7 +13,7 @@
   "project": {
     "id": "prj_metastra",
     "name": "Metastra",
-    "formatVersion": "1.4.0",
+    "formatVersion": "1.5.0",
     "file": "project.json"
   },
   "fhirVersion": "4.0.1",
@@ -93,7 +93,7 @@
   "files": [
     {
       "path": "project.json",
-      "sha256": "9ec4f5d7057ca9a08d00aed2b811e86627de6cf2ae5add41d1c80f4046f69c43",
+      "sha256": "9d82a9cad7e0f5a3ff7ddfe6ac798417d74106fc244ab8d5103d0c0ed7d5cd04",
       "mediaType": "application/json"
     },
     {
@@ -113,7 +113,7 @@
     },
     {
       "path": "normalization-FirstOverview.json",
-      "sha256": "13baae95c8a5c2266835140e4c801b34b78a21e1e882eee5d598e48f12a1382b",
+      "sha256": "a2f7c0afd1f06b9c5499d05f9ddbe360189ad771a162ec23d4a040635db89d3e",
       "mediaType": "application/json"
     },
     {
@@ -143,12 +143,12 @@
     },
     {
       "path": "schemas/mapping-project.schema.json",
-      "sha256": "17e13a84b338c904f33a65805f9a8ba1c92217f231d87f37a3fdbe620a40b7b7",
+      "sha256": "edf87a0913ecb687ac2621c3eb4b887024b303af1a038e042a54393d8fde0c59",
       "mediaType": "application/json"
     },
     {
       "path": "schemas/normalization.schema.json",
-      "sha256": "31c4a3c96070a9e1e8df8d38b6355215589a99785d633c77bd53ef312990988a",
+      "sha256": "03bdcfb188945eafc9726b351d316be7f56f8ea908c4d6ab0cd965bd7bb3ac4a",
       "mediaType": "application/json"
     },
     {

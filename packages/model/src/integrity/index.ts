@@ -15,6 +15,7 @@ import { checkValueMaps } from "./rule-6-value-maps.js";
 import { checkResourceIds } from "./rule-7-resource-ids.js";
 import { checkRepeat } from "./rule-8-repeat.js";
 import { checkAllowedValues } from "./rule-9-allowed-values.js";
+import { checkTimeZones } from "./rule-10-time-zones.js";
 
 export { IntegrityCode } from "./codes.js";
 export { MAX_ID_LENGTH, idLength } from "./rule-7-resource-ids.js";
@@ -29,9 +30,10 @@ const RULES = [
   checkResourceIds,
   checkRepeat,
   checkAllowedValues,
+  checkTimeZones,
 ] as const;
 
-/** Checks the integrity rules 1–9 and returns every violation, in rule order, without duplicates. */
+/** Checks the integrity rules 1–10 and returns every violation, in rule order, without duplicates. */
 export function checkIntegrity(project: ProjectFile): ValidationResult[] {
   const index = buildIndex(project);
   const seen = new Set<string>();

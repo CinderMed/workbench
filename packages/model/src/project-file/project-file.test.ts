@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import metastra from "../../../../fixtures/fml-examples/metastra/project.json" with { type: "json" };
 import motu from "../../../../fixtures/fml-examples/motu/project.json" with { type: "json" };
+import mimic from "../../../../fixtures/fml-examples/mimic-iv-demo/project.json" with { type: "json" };
 import type { ProjectFile } from "../generated/project.js";
 import { IntegrityCode } from "../integrity/index.js";
 import { SCHEMA_VIOLATION } from "../schema-validation.js";
@@ -178,7 +179,7 @@ describe("parseProject", () => {
     expect(parsed.results.map((result) => result.code)).toEqual([IntegrityCode.DUPLICATE_ROW_CODE]);
   });
 
-  it.each(["2.0.0", "1.5.0"])("rejects the newer format version %s", (version) => {
+  it.each(["2.0.0", "1.6.0"])("rejects the newer format version %s", (version) => {
     const parsed = parseProject(JSON.stringify(withVersion(version)));
     expect(parsed.project).toBeUndefined();
     expect(parsed.results).toEqual([
@@ -191,10 +192,10 @@ describe("parseProject", () => {
   });
 
   it("reads another patch of the current minor as it is", () => {
-    const parsed = parseProject(JSON.stringify(withVersion("1.4.7")));
+    const parsed = parseProject(JSON.stringify(withVersion("1.5.7")));
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBeUndefined();
-    expect(parsed.project?.formatVersion).toBe("1.4.7");
+    expect(parsed.project?.formatVersion).toBe("1.5.7");
   });
 
   it("reads an older minor of the same major and stamps the current version", () => {
@@ -215,25 +216,35 @@ describe("parseProject", () => {
     const parsed = parseProject(JSON.stringify(legacy));
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBe("1.2.0");
-    expect(parsed.project?.formatVersion).toBe("1.4.0");
+    expect(parsed.project?.formatVersion).toBe(PROJECT_FORMAT_VERSION);
     expect(parsed.project?.project.output).not.toHaveProperty("onInvalidValue");
   });
 
-  it("reads a 1.3.0 project as 1.4.0, with its content unchanged", () => {
+  it("reads a 1.3.0 project as the current format, with its content unchanged", () => {
     // A real 1.3.0 file: the motu example as it was before format 1.4.0, which only adds fields.
     const legacy = { ...copy(motu), formatVersion: "1.3.0" };
     const parsed = parseProject(JSON.stringify(legacy));
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBe("1.3.0");
-    expect(parsed.project).toEqual({ ...legacy, formatVersion: "1.4.0" });
+    expect(parsed.project).toEqual({ ...legacy, formatVersion: PROJECT_FORMAT_VERSION });
   });
 
-  it("reads a 1.3.0 project with named slices as 1.4.0 (slice names only widen, #150)", () => {
+  it("reads a 1.3.0 project with named slices as the current format (slice names only widen, #150)", () => {
     const legacy = { ...copy(metastra), formatVersion: "1.3.0" };
     const parsed = parseProject(JSON.stringify(legacy));
     expect(parsed.results).toEqual([]);
     expect(parsed.migratedFrom).toBe("1.3.0");
-    expect(parsed.project).toEqual({ ...legacy, formatVersion: "1.4.0" });
+    expect(parsed.project).toEqual({ ...legacy, formatVersion: PROJECT_FORMAT_VERSION });
+  });
+
+  it("reads a 1.4.0 project as 1.5.0, with its content unchanged", () => {
+    // A real 1.4.0 file: the mimic-iv-demo example (dateTime columns with a time) as it was before
+    // format 1.5.0, which only adds the optional time zones (#107).
+    const legacy = { ...copy(mimic), formatVersion: "1.4.0" };
+    const parsed = parseProject(JSON.stringify(legacy));
+    expect(parsed.results).toEqual([]);
+    expect(parsed.migratedFrom).toBe("1.4.0");
+    expect(parsed.project).toEqual({ ...legacy, formatVersion: "1.5.0" });
   });
 
   it("rejects an older major with no migration", () => {

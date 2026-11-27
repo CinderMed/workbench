@@ -11,3 +11,13 @@ export function error(
 ): ValidationResult {
   return { severity: "error", code, objectKind: owner.objectKind, id: owner.id, field, message };
 }
+
+/** Builds an integrity warning on an object. */
+export function warning(
+  code: IntegrityCode,
+  owner: Owner,
+  field: string,
+  message: string,
+): ValidationResult {
+  return { severity: "warning", code, objectKind: owner.objectKind, id: owner.id, field, message };
+}

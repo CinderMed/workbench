@@ -33,6 +33,13 @@ export type Timestamp = string;
  */
 export type Name = string;
 /**
+ * Since 1.5.0. Time zone of dateTime values that have a time but no offset in the data file: a fixed offset ('+01:00', '-05:00', 'Z') or an IANA zone ('Europe/Rome'), whose offset follows daylight saving. Declared at the border (ADR-0024): inside the platform a dateTime with a time always carries its offset.
+ *
+ * This interface was referenced by `ProjectFile`'s JSON-Schema
+ * via the `definition` "TimeZone".
+ */
+export type TimeZone = string;
+/**
  * This interface was referenced by `ProjectFile`'s JSON-Schema
  * via the `definition` "ColumnType".
  */
@@ -355,6 +362,10 @@ export interface Source {
    * Columns that identify a record (e.g. patient_id). Used for deterministic ids and for links between tables.
    */
   rowKey?: Id[];
+  /**
+   * Since 1.5.0. Time zone of the table's dateTime columns that have a time; a column can declare its own.
+   */
+  timeZone?: TimeZone;
   import?: ImportProfile;
   sections?: {
     id: Id;
@@ -426,6 +437,10 @@ export interface Column {
   order?: number;
   dataType: ColumnType;
   dateFormat?: string;
+  /**
+   * Since 1.5.0. Only for dataType = dateTime: the time zone of values with a time, over the table's.
+   */
+  timeZone?: TimeZone;
   /**
    * Only for dataType = decimal: decimal separator used in the data file (e.g. ',' for '11,20'). Inside the platform decimals always use '.'; the normalization converts at the border.
    */

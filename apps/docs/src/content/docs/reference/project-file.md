@@ -5,7 +5,7 @@ description: The JSON file that holds a whole mapping project.
 
 A project file is one JSON document with the whole mapping project: tables and columns, roles, mapping rows, value maps, templates and review comments. It is the native format of CinderMed. You can export it, keep it in git and import it again.
 
-The format is described by the JSON Schema `mapping-project.schema.json`, format version 1.4.0. The two example projects in the repository are good starting points:
+The format is described by the JSON Schema `mapping-project.schema.json`, format version 1.5.0. The two example projects in the repository are good starting points:
 
 - `fixtures/fml-examples/metastra/project.json`: one table, 11 variables
 - `fixtures/fml-examples/motu/project.json`: three tables linked by a relation
@@ -19,9 +19,9 @@ Check a file with [`cindermed validate`](/workbench/reference/cli/).
 | File version                         | What happens                                                       |
 | ------------------------------------ | ------------------------------------------------------------------ |
 | Same major and minor (any patch)     | Read as it is                                                      |
-| Same major, older minor (e.g. 1.2.0) | Read as it is; saved again as 1.4.0                                |
+| Same major, older minor (e.g. 1.2.0) | Read as it is; saved again as 1.5.0                                |
 | Older major                          | Migrated automatically, one major at a time                        |
-| Newer minor or major (e.g. 1.4.0)    | Rejected with `UNSUPPORTED_FORMAT_VERSION`: update CinderMed first |
+| Newer minor or major (e.g. 1.6.0)    | Rejected with `UNSUPPORTED_FORMAT_VERSION`: update CinderMed first |
 
 ## Data formats
 
@@ -29,6 +29,7 @@ Inside CinderMed every value has one form: dates in ISO 8601 (`2023-09-17`), dec
 
 - `dateFormat`: the date pattern in the file, for example `dd/MM/yyyy`
 - `decimalSeparator`: `.` (default) or `,` for values such as `11,20`. The separator is strict and there are no thousands separators: in a `,` column, `1.234` and `1.234,5` are invalid values (`1.234` is a thousands separator in Italian data, so it is never read as 1.234); in a `.` column, `1,234` is invalid.
+- `timeZone` (format 1.5.0): the time zone of the file's date-times, on the table or on one `dateTime` column (a column's own one wins). See "Time zones" below.
 
 A column of type `boolean` accepts only `true`/`false`, `1`/`0`, `yes`/`no` and `y`/`n`, in any case. Booleans written as words in another language, such as `Sì`/`No`, are a `categorical` column with a value map to `boolean`. `cindermed validate` reports `ALLOWED_VALUE_TYPE_MISMATCH` when an allowed value does not fit its column: `Sì` in a `boolean` column, `11,20` in a decimal column without `decimalSeparator: ","`, or `31/02/2023` in a date column.
 
@@ -45,6 +46,21 @@ A value map can be used only by a `categorical`, `multipleChoice` or `boolean` c
 | `reject-row`     | The whole row is left out and reported                      |
 
 Projects saved before format 1.3.0 have no `onInvalidValue`, so they use `fail`.
+
+## Time zones
+
+A FHIR `dateTime` with a time must have an offset, such as `2025-01-15T10:00:00+01:00`, but data files usually write only `15/01/2025 10:00`. The zone the times were written in is declared once, on the table, or on a column whose zone differs:
+
+```json
+{ "id": "src_visit", "name": "Visit", "timeZone": "Europe/Rome", "columns": [ … ] }
+```
+
+- A **fixed offset** (`+01:00`, `-05:00`, `Z`) is added as it is (`Z` as `+00:00`).
+- An **IANA zone** (`Europe/Rome`, `America/New_York`) gives each time the offset in force on that day: `+01:00` in January and `+02:00` in July in Rome.
+- On the day clocks go forward, a time in the skipped hour (`30/03/2025 02:30` in Rome) does not exist: it is an invalid value, handled by `onInvalidValue`. On the day they go back, a time in the repeated hour (`26/10/2025 02:30`) takes the earlier offset, `+02:00`.
+- Only `dateTime` columns whose format has a time get an offset; a date stays a date. A zone the workbench does not know is an error (`TIME_ZONE_UNKNOWN`), and a zone on a column that is not `dateTime` is a warning (`TIME_ZONE_NOT_DATETIME`).
+
+The offsets of IANA zones come from a tzdata snapshot in the workbench (tzdata 2026e, years 1970 to 2299), copied into each exported normalization specification with its version, so a package converts the same way on every machine. A time outside those years, with an IANA zone, is an invalid value; data with shifted dates can declare a fixed offset instead.
 
 ## Written files
 

@@ -51,6 +51,32 @@ export interface NormalizationSpec {
    * Id fields to compute, one per role created or referenced by this table.
    */
   ids: IdField[];
+  /**
+   * Since 1.3.0. The offset rules of every IANA zone a column uses, so every implementation gives the same offsets without a time-zone library. Written by the export from the workbench's tzdata snapshot (ADR-0024).
+   */
+  timeZones?: {
+    /**
+     * Version of the IANA tzdata the offsets come from (e.g. 2026e).
+     */
+    tzdata: string;
+    /**
+     * First instant covered, in seconds since 1970-01-01T00:00:00Z.
+     */
+    from: number;
+    /**
+     * End of the covered range (excluded), in seconds since 1970-01-01T00:00:00Z. A time outside [from, to) is an invalid value.
+     */
+    to: number;
+    /**
+     * By zone name: [offset at from, then pairs of (instant, new offset)], instants in seconds since 1970-01-01T00:00:00Z in increasing order, offsets in seconds east of UTC.
+     */
+    zones: {
+      /**
+       * @minItems 1
+       */
+      [k: string]: [number, ...number[]];
+    };
+  };
   hash?: {
     algorithm: "sha256";
     /**
@@ -60,7 +86,7 @@ export interface NormalizationSpec {
   };
 }
 /**
- * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 3b) allowedValues (1.2.0) → every value (every part) must be in the list, case-sensitive, else it is invalid; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept (the separator is strict and there are no thousands separators: with ',' a '.' is invalid, with '.' a ',' is invalid); boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss without time zone). Value that cannot be converted → onInvalidValue.
+ * Algorithm for each cell: 1) Unicode NFC and trim; 2) empty cell or value in missingValues → element omitted; 3) multiValue → split into a list; 3b) allowedValues (1.2.0) → every value (every part) must be in the list, case-sensitive, else it is invalid; 4) conversion by type: string/code unchanged; integer ^[+-]?[0-9]+$ with no leading zeros in output; decimal with decimalSeparator → '.', ^[+-]?[0-9]+(\.[0-9]+)?$, digits kept (the separator is strict and there are no thousands separators: with ',' a '.' is invalid, with '.' a ',' is invalid); boolean from trueValues/falseValues (case-insensitive); date/dateTime according to dateFormat, calendar validity check, ISO output (YYYY-MM-DD, or YYYY-MM-DDThh:mm:ss followed by the timeZone offset ±hh:mm since 1.3.0, without an offset when the column has no timeZone). Value that cannot be converted → onInvalidValue.
  *
  * This interface was referenced by `NormalizationSpec`'s JSON-Schema
  * via the `definition` "Column".
@@ -76,6 +102,10 @@ export interface Column {
    * Only for date and dateTime. Allowed symbols: yyyy, MM, dd, HH, mm, ss; every other character must match literally. Absent = already ISO 8601 in the file.
    */
   dateFormat?: string;
+  /**
+   * Since 1.3.0. Only for dateTime: a value with a time gets this offset. A fixed offset ('+01:00'; 'Z' is written '+00:00'), or the name of a zone in timeZones: its offset at that local time. A local time that does not exist (daylight-saving gap) is an invalid value; one that occurs twice takes the earlier offset (its first occurrence). An offset that is not a whole number of minutes, or a time outside timeZones' range, is an invalid value. Absent: written without an offset.
+   */
+  timeZone?: string;
   decimalSeparator?: "." | ",";
   trueValues?: string[];
   falseValues?: string[];

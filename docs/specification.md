@@ -347,7 +347,7 @@ The most important constraints concern clinical data: the real dataset must neve
 
 ## Project JSON Schema
 
-The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.4.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
+The project file (H3) is a single JSON document, described by a JSON Schema draft 2020-12 (`mapping-project.schema.json`, format 1.5.0). It is the source of truth: the grid edits it, and the FML generator and the CSV export read it. The schema and an example with 11 Metastra variables were checked with the Ajv validator.
 
 | Key | Content | Features |
 | --- | --- | --- |
@@ -383,7 +383,7 @@ Each arrow is an `…Id` field that points to the internal id of another object.
 | References | The id of the referenced resource is computed by applying the target role's `idRule` to the current record. The rule's columns must be in the same table or reachable through `via`. A reference to a `perValue` role is allowed only from a repeating element (one reference per generated resource), never from a single element. |
 | Resource creation | A resource is created if `createWhen` is true (absent = always) and no column mapped to the role has a value whose action is `skipInstance`. The grid shows the resulting condition in plain words. |
 | Repeating elements | Without a slice, all rows that touch a repeating element write into the same repetition. Several repetitions need a named slice. |
-| Data formats (format 1.3.0) | Inside the platform every value has one canonical form: ISO dates, `.` decimals, `true`/`false`. Local formats are declared on the column, at the border: `dateFormat` (e.g. `dd/MM/yyyy`) and `decimalSeparator` (`.` or `,`, e.g. `11,20`). The separator is strict and there are no thousands separators: with `,` a `.` is invalid (`1.234` in Italian data is one thousand two hundred thirty-four, never 1.234), and with `.` a `,` is invalid. Booleans written as words (`Sì`/`No`) are a `categorical` column with a value map to `boolean`; a `boolean` column accepts only the canonical forms. The data file's delimiter, quote, encoding and header row describe the file, not the mapping: the conversion module receives them at run time. `project.output.onInvalidValue` decides what happens to a value that cannot be converted: `fail` (default) stops the conversion and reports it, `report-drop` omits and reports it, `reject-row` discards the row and reports it. |
+| Data formats (format 1.3.0) | Inside the platform every value has one canonical form: ISO dates, `.` decimals, `true`/`false`. Local formats are declared on the column, at the border: `dateFormat` (e.g. `dd/MM/yyyy`) and `decimalSeparator` (`.` or `,`, e.g. `11,20`). A `dateTime` with a time always carries its offset inside the platform (format 1.5.0, ADR-0024): the data file's zone is declared on the table (`timeZone`), or on a column over its table's, as a fixed offset (`+01:00`, `Z`) or an IANA zone (`Europe/Rome`); with an IANA zone the offset follows daylight saving, a local time that does not exist (the spring-forward gap) is an invalid value, and one that occurs twice (the fall-back hour) takes the earlier offset, its first occurrence. The separator is strict and there are no thousands separators: with `,` a `.` is invalid (`1.234` in Italian data is one thousand two hundred thirty-four, never 1.234), and with `.` a `,` is invalid. Booleans written as words (`Sì`/`No`) are a `categorical` column with a value map to `boolean`; a `boolean` column accepts only the canonical forms. The data file's delimiter, quote, encoding and header row describe the file, not the mapping: the conversion module receives them at run time. `project.output.onInvalidValue` decides what happens to a value that cannot be converted: `fail` (default) stops the conversion and reports it, `report-drop` omits and reports it, `reject-row` discards the row and reports it. |
 | Multiple choices | The column declares how the value appears in the data: `delimited` (e.g. `1,3,5` with a separator) or `expanded` (one 0/1 column per value, V2). A row with `repeat: eachValue` writes one repetition per value, e.g. `Procedure.bodySite` for each level of `proc_surg_loc`. |
 
 **Rules the schema cannot express**, checked by the application on import and on save:
@@ -397,6 +397,7 @@ Each arrow is an `…Id` field that points to the internal id of another object.
 7. Generated ids respect the FHIR limit of 64 characters, fixed parts included.
 8. `repeat: eachValue` is used only with `multipleChoice` columns and towards repeating elements.
 9. The allowed values of a column fit its declared type (format 1.3.0, code `ALLOWED_VALUE_TYPE_MISMATCH`, error): `boolean` only in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive), so `Sì`/`No` needs a `categorical` column with a value map to `boolean`; `integer` an integer; `decimal` a number with the column's `decimalSeparator` (strict: `1.234` does not fit a `,` column); `date` and `dateTime` a valid date that matches `dateFormat`. Values listed in `missingValues` are ignored. The check uses the same parsers as the normalization, so a value accepted here is a value the conversion accepts. A `categorical` or `multipleChoice` column with a list must keep at least one allowed value once missing values are removed (normalization 1.2.0, code `ALLOWED_VALUES_EMPTY`, error), because an empty list would reject every value.
+10. A declared time zone is a fixed offset or an IANA zone of the workbench's tzdata snapshot (format 1.5.0, ADR-0024, code `TIME_ZONE_UNKNOWN`, error): the export copies the zone's offsets into the normalization specification. A time zone on a column that is not `dateTime` is never used (`TIME_ZONE_NOT_DATETIME`, warning).
 
 **Example: the role Condition\[1\] · osteoporosis** (excerpt of the example file)
 
@@ -531,8 +532,8 @@ For each table the generator produces artifacts described by their own schemas, 
 
 | Artifact | Format | Produced by | Used by |
 | --- | --- | --- | --- |
-| Project file | `mapping-project.schema.json` 1.4.0 | Workbench | Generator, export |
-| Normalization specification | `normalization.schema.json` 1.2.0 | Generator | Conversion module |
+| Project file | `mapping-project.schema.json` 1.5.0 | Workbench | Generator, export |
+| Normalization specification | `normalization.schema.json` 1.3.0 | Generator | Conversion module |
 | Logical model of the normalized row | `logical` StructureDefinition | Generator | FML engine |
 | StructureMap | FML, plus JSON compiled by the HL7 engine | Generator (syntax tree → printer) | FML engine |
 | ConceptMap | FHIR resources | Generator | Documentation and reuse |
@@ -548,7 +549,7 @@ The conversion module reads only the package: the normalization specification to
 2. Empty cell or value in `missingValues` → element omitted.
 3. Multiple choice: split on the separator, empty parts dropped, duplicates removed, order kept.
 3b. Allowed values (format 1.2.0): for `categorical` and `multipleChoice` columns the specification lists the allowed values (`allowedValues`, missing values left out). Each value, or each part of a multiple choice, must be in the list, compared after step 1 and case-sensitive (`sì` is not `Sì`); otherwise it is an invalid value and step 5 applies. A column without allowed values is not checked.
-4. Conversion by type: integers without leading zeros; decimals with `decimalSeparator` (comma too) and digits kept (`11,20` → `11.20`), the separator strict and no thousands separators (with `,`, `1.234` and `1.234,5` are invalid values; with `.`, `1,234` is); booleans in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive; the generator never writes `trueValues`/`falseValues`, and words such as `Sì`/`No` go through a value map); dates according to `dateFormat` (`yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`) with a calendar check (`31/02/2023` is rejected), year-only and year-month included.
+4. Conversion by type: integers without leading zeros; decimals with `decimalSeparator` (comma too) and digits kept (`11,20` → `11.20`), the separator strict and no thousands separators (with `,`, `1.234` and `1.234,5` are invalid values; with `.`, `1,234` is); booleans in the canonical forms (`true`/`false`, `1`/`0`, `yes`/`no`, `y`/`n`, case-insensitive; the generator never writes `trueValues`/`falseValues`, and words such as `Sì`/`No` go through a value map); dates according to `dateFormat` (`yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`) with a calendar check (`31/02/2023` is rejected), year-only and year-month included. A date and time gets the offset of the column's `timeZone` (normalization 1.3.0): a fixed offset as it is (`Z` as `+00:00`), or an IANA zone's offset at that local time, read from the specification's `timeZones` (the offsets of each zone it uses, from the tzdata snapshot, with its version); a local time that does not exist, an offset that is not a whole number of minutes, or a time outside the snapshot's range (1970 to 2300) is an invalid value, and a local time that occurs twice takes the earlier offset.
 5. Value that cannot be converted → `onInvalidValue`, taken from `project.output.onInvalidValue`: `fail` (the project default) stops the conversion at the first such value and reports it; `report-drop` omits it and reports it; `reject-row` discards the row and reports it. (The normalization schema's own default, for specifications that omit the field, stays `report-drop`.)
 6. Id: SHA-256 (or HMAC with a key kept outside the package) over the already normalized values, joined by U+001F; result = fixed parts + the first 24 hex characters. If a column of the id is missing, the id is not computed and the role is not created.
 
@@ -622,7 +623,7 @@ workbench/
     cli/                 `cindermed` command (validate, export); published to npm with the domain packages
     docs/                user documentation site (Astro Starlight): guides, worked examples, reference
   packages/
-    model/               JSON Schemas (project 1.4.0, normalization 1.2.0, manifest), generated types, integrity rules
+    model/               JSON Schemas (project 1.5.0, normalization 1.3.0, manifest), generated types, integrity rules
     fhir-defs/           loading R4/R5 packages, element tree, path resolution
     fml/                 syntax tree, printer, project → FML generator, grammar check
     normalizer/          reference normalizer (port of tools/normalize.mjs)

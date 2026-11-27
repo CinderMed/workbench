@@ -1,6 +1,6 @@
 {
   "$schema": "../normalization.schema.json",
-  "formatVersion": "1.2.0",
+  "formatVersion": "1.3.0",
   "source": "HospitalStay",
   "logicalModel": "http://example.org/fhir/motu/StructureDefinition/HospitalStayRow",
   "input": {
