@@ -4,6 +4,18 @@
   "private": true,
   "description": "FML package with manifest, CSV/Excel and project JSON export",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CinderMed/workbench.git",
+    "directory": "packages/export"
+  },
+  "homepage": "https://github.com/CinderMed/workbench/tree/main/packages/export#readme",
+  "bugs": {
+    "url": "https://github.com/CinderMed/workbench/issues"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -12,7 +24,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.map"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
