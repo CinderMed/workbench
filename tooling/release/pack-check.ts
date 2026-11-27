@@ -25,6 +25,11 @@ export interface PackedPackage {
 
 const DEPENDENCY_FIELDS = ["dependencies", "peerDependencies", "optionalDependencies"] as const;
 
+/** A path inside a test-support or __tests__ folder, at any depth. */
+const TEST_FOLDER = /(?:^|\/)(?:test-support|__tests__)\//;
+/** A compiled test file, such as `a.test.js`. */
+const TEST_FILE = /\.test\.[cm]?[jt]s$/;
+
 /** Paths an `exports` or `bin` field points to, without the leading `./`. */
 function targets(value: unknown): string[] {
   if (typeof value === "string") return [value.replace(/^\.\//, "")];
@@ -65,7 +70,7 @@ export function checkPacked(packed: PackedPackage, rootLicense: string): string[
     if (!allowed) problems.push(`${name}: ${entry} should not be published`);
     else if (entry.endsWith(".map"))
       problems.push(`${name}: ${entry} is a source map without its sources`);
-    else if (/(^|\/)(test-support|__tests__)\/|\.test\.[cm]?[jt]s$/.test(entry))
+    else if (TEST_FOLDER.test(entry) || TEST_FILE.test(entry))
       problems.push(`${name}: ${entry} is test code`);
   }
 
