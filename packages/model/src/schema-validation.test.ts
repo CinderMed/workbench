@@ -202,6 +202,26 @@ describe("validateManifestSchema", () => {
     expect(validateManifestSchema(manifest)).toEqual([]);
   });
 
+  it("reads a 1.0.0 manifest, without package digests, as it is (migration to 1.1.0, #146)", () => {
+    const old = copy(metastraManifest);
+    old["formatVersion"] = "1.0.0";
+    for (const p of list(old, "packages")) delete p["sha256"];
+    expect(validateManifestSchema(old)).toEqual([]);
+  });
+
+  it("accepts a package digest only as 64 hex digits, and no other major", () => {
+    const manifest = copy(metastraManifest);
+    first(list(manifest, "packages"))["sha256"] = "ABC";
+    expect(validateManifestSchema(manifest)).toContainEqual(
+      expect.objectContaining({ objectKind: "manifest", field: "packages.0.sha256" }),
+    );
+    const major = copy(metastraManifest);
+    major["formatVersion"] = "2.0.0";
+    expect(validateManifestSchema(major)).toContainEqual(
+      expect.objectContaining({ objectKind: "manifest", field: "formatVersion" }),
+    );
+  });
+
   it("rejects an unsupported FHIR version", () => {
     const manifest = copy(metastraManifest);
     manifest["fhirVersion"] = "3.0.2";

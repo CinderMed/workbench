@@ -1,6 +1,6 @@
 {
   "$schema": "../manifest.schema.json",
-  "formatVersion": "1.0.0",
+  "formatVersion": "1.1.0",
   "package": {
     "name": "metastra-mapping",
     "version": "0.1.0",
@@ -20,7 +20,8 @@
   "packages": [
     {
       "name": "hl7.fhir.r4.core",
-      "version": "4.0.1"
+      "version": "4.0.1",
+      "sha256": "ebd7731df7d36b5b7d39d5fb6c9d77b44bb7fe5742f1a2e87f164738c3289d44"
     }
   ],
   "output": {
@@ -153,7 +154,7 @@
     },
     {
       "path": "schemas/manifest.schema.json",
-      "sha256": "4449ea8ad84c808ed623e1afc9b76cb661babc33e72a3fd44d06b4216903ce7c",
+      "sha256": "41e268d59e939b97e35db177c127791360d7cd7a12acef0fe377726125b1f43b",
       "mediaType": "application/json"
     }
   ]

@@ -4,17 +4,28 @@
  * holds it; each file holds one type or profile, loaded only when needed. The API serves these
  * files as they are, so the browser never loads a whole core package.
  *
- * Format version 1.1.0 (1.0.0 plus the ValueSet expansions of bindings, ADR-0016). A reader
+ * Format version 1.2.0 (1.1.0 plus the SHA-256 of each package tarball, #146; 1.1.0 added the
+ * ValueSet expansions of bindings, ADR-0016). A reader
  * accepts every 1.x.y index; a new optional field is a minor version, anything else a major one.
  */
 
-export const INDEX_FORMAT_VERSION = "1.1.0";
+export const INDEX_FORMAT_VERSION = "1.2.0";
 const SUPPORTED_MAJOR = "1.";
 
 /** A FHIR package, as `<id>#<version>` in the manifest. */
 export interface PackageRef {
   readonly id: string;
   readonly version: string;
+}
+
+/** A package the index was built from (format 1.2.0: with the digest of its tarball, #146). */
+export interface IndexPackage extends PackageRef {
+  /**
+   * SHA-256 (hex) of the package tarball as the registry publishes it: pinned for the core
+   * packages, computed by the loader at download for the others. Absent when the loader could not
+   * have it (a package in the cache without its digest, offline).
+   */
+  readonly tarballSha256?: string;
 }
 
 export type DefinitionKind = "resource" | "complex-type" | "primitive-type";
@@ -63,7 +74,7 @@ export interface IndexManifest {
   readonly indexFormat: string;
   readonly fhirVersion: string;
   /** The packages the index was built from: the core package first, then the others by id. */
-  readonly packages: readonly PackageRef[];
+  readonly packages: readonly IndexPackage[];
   /** Sorted by `file`. */
   readonly entries: readonly IndexEntry[];
   /** Format 1.1.0: the ValueSets of required, extensible and preferred bindings, sorted by URL. */
@@ -207,8 +218,13 @@ function isEntry(value: unknown): value is IndexEntry {
   );
 }
 
-function isPackageRef(value: unknown): value is PackageRef {
-  return isObject(value) && isString(value["id"]) && isString(value["version"]);
+function isPackageRef(value: unknown): value is IndexPackage {
+  return (
+    isObject(value) &&
+    isString(value["id"]) &&
+    isString(value["version"]) &&
+    optional(value["tarballSha256"], (v) => isString(v) && /^[0-9a-f]{64}$/.test(v))
+  );
 }
 
 function isElementType(value: unknown): value is ElementType {

@@ -10,6 +10,7 @@ import {
   PackageError,
   loadDefinitions,
   packageFolder,
+  packageDigest,
   readPackage,
   writeIndex,
 } from "./fhir-packages.js";
@@ -156,7 +157,43 @@ describe("FHIR package cache", () => {
     ]);
     // No temporary folder and no other/ folder left behind.
     expect(await readdir(cache)).toEqual(["example.ig#1.0.0"]);
-    expect(await readdir(join(cache, "example.ig#1.0.0"))).toEqual(["package"]);
+    // Next to package/, the digest of the tarball (#146).
+    expect((await readdir(join(cache, "example.ig#1.0.0"))).sort()).toEqual([
+      "cindermed.json",
+      "package",
+    ]);
+  });
+
+  it("keeps the SHA-256 of a non-core tarball, and computes it again for one cached without it (#146)", async () => {
+    const tgz = await tarball(
+      packageFiles("example.ig", "1.0.0", { "StructureDefinition-a.json": sd("a", "resource") }),
+    );
+    const sha256 = createHash("sha256").update(tgz).digest("hex");
+    const ref = { id: "example.ig", version: "1.0.0" };
+    const { asked, fetch } = registry({ "example.ig/1.0.0": tgz });
+    await packageFolder(ref, { cacheDir: cache, fetch });
+    const downloads = asked.length;
+    expect(await packageDigest(ref, { cacheDir: cache, fetch, offline: true })).toBe(sha256);
+    expect(asked).toHaveLength(downloads);
+
+    // Put in the cache by another tool: no digest kept. Offline it is unknown; online the tarball
+    // is downloaded again, checked against the registry's SHA-1, digested and the digest kept.
+    await rm(join(cache, "example.ig#1.0.0", "cindermed.json"));
+    expect(await packageDigest(ref, { cacheDir: cache, fetch, offline: true })).toBeUndefined();
+    expect(await packageDigest(ref, { cacheDir: cache, fetch })).toBe(sha256);
+    expect(asked.slice(downloads)).toEqual([
+      "https://packages.fhir.org/example.ig",
+      "https://packages.fhir.org/example.ig/1.0.0",
+    ]);
+    expect(await packageDigest(ref, { cacheDir: cache, offline: true })).toBe(sha256);
+
+    // A digest file that is not a digest is not trusted.
+    await writeFile(join(cache, "example.ig#1.0.0", "cindermed.json"), '{"tarballSha256":"x"}');
+    expect(await packageDigest(ref, { cacheDir: cache, offline: true })).toBeUndefined();
+    // A core package's digest is the pinned one, with no file and no network.
+    expect(
+      await packageDigest({ id: "hl7.fhir.r4.core", version: "4.0.1" }, { offline: true }),
+    ).toBe("ebd7731df7d36b5b7d39d5fb6c9d77b44bb7fe5742f1a2e87f164738c3289d44");
   });
 
   it("refuses a package whose checksum does not match, and leaves the cache clean", async () => {
@@ -295,8 +332,13 @@ describe("loadDefinitions", () => {
       cacheDir: cache,
       offline: true,
     });
+    // Offline, cached without digests: only the core package's pinned one is known (#146).
     expect(loaded.index.manifest.packages).toEqual([
-      { id: "hl7.fhir.r4.core", version: "4.0.1" },
+      {
+        id: "hl7.fhir.r4.core",
+        version: "4.0.1",
+        tarballSha256: "ebd7731df7d36b5b7d39d5fb6c9d77b44bb7fe5742f1a2e87f164738c3289d44",
+      },
       { id: "example.dep", version: "2.0.0" },
       { id: "example.ig", version: "1.0.0" },
     ]);

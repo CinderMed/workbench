@@ -30,6 +30,8 @@ export interface PackageContents {
   readonly version: string;
   /** `fhirVersions` of its package.json. */
   readonly fhirVersions: readonly string[];
+  /** SHA-256 (hex) of its tarball, when the loader has it (#146). */
+  readonly tarballSha256?: string;
   /** Its resources, parsed. Everything that is not a StructureDefinition is ignored. */
   readonly resources: Iterable<unknown>;
 }
@@ -145,7 +147,11 @@ export function buildIndex(
   const manifest: IndexManifest = {
     indexFormat: INDEX_FORMAT_VERSION,
     fhirVersion,
-    packages: ordered.map((p) => ({ id: p.id, version: p.version })),
+    packages: ordered.map((p) => ({
+      id: p.id,
+      version: p.version,
+      ...(p.tarballSha256 === undefined ? {} : { tarballSha256: p.tarballSha256 }),
+    })),
     entries,
     valueSets,
   };

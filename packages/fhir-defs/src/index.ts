@@ -29,6 +29,7 @@ export {
   type IndexIssue,
   type IndexIssueCode,
   type IndexManifest,
+  type IndexPackage,
   type PackageRef,
   type Result,
   type TypeDocument,
