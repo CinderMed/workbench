@@ -6,7 +6,7 @@ J=${VALIDATOR:?set VALIDATOR to the path of validator_cli.jar}; ok=0; ko=0
 # TypeScript normalizer (tooling/golden/normalize-ts.mjs). Same command line, output and messages.
 NORMALIZE=${NORMALIZE:-node tools/normalize.mjs}
 [ -f tools/java/RunMap.class ] || javac -proc:none -cp "$J" tools/java/RunMap.java 2>&1 | grep -v JAVA_TOOL
-rm -f concatenation/test-data/bundle-*.json r5-visit/test-data/bundle-*.json metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json element-names/test-data/bundle-*.json type-combinations/test-data/bundle-*.json
+rm -f time-zone/test-data/bundle-*.json concatenation/test-data/bundle-*.json r5-visit/test-data/bundle-*.json metastra/test-data/*bundle*.json motu/test-data/bundle-*.json boolean-value-map/test-data/bundle-*.json mimic-iv-demo/test-data/bundle-*.json element-names/test-data/bundle-*.json type-combinations/test-data/bundle-*.json
 run(){ # folder map input output expected_entries [external-refs]
   $NORMALIZE "$1/normalization-$2.json" "$1/test-data/$3.csv" > "$1/test-data/$3.normalized.json" 2>/dev/null
   # FHIR: the example's FHIR version (default 4.0.1; 5.0.0 for r5-visit, #78).
@@ -90,6 +90,15 @@ run concatenation Visit visit-empty bundle-visit-empty 2
 cc=$(python3 tests/concatenation.py concatenation/test-data)
 echo "$cc" | grep -q "^OK " && ok=$((ok+1)) || ko=$((ko+1))
 printf '%-8s %-12s %s\n' "$(echo "$cc" | grep -q '^OK ' && echo OK || echo FAILED)" "concat" "${cc#* }"
+# Time zone (#107): local Italian times (Europe/Rome) get their offset across both daylight-saving
+# changes of 2025; the skipped hour of 30 March is an invalid value, reported and dropped.
+run time-zone Visit visits bundle-visits 10
+tz=$(python3 tests/time-zone.py time-zone/test-data/bundle-visits.json)
+echo "$tz" | grep -q "^OK " && ok=$((ok+1)) || ko=$((ko+1))
+printf '%-8s %-12s %s\n' "$(echo "$tz" | grep -q '^OK ' && echo OK || echo FAILED)" "time zone" "${tz#* }"
+gerr=$($NORMALIZE time-zone/normalization-Visit.json time-zone/test-data/visits.csv 2>&1 >/dev/null)
+if [ "$(echo "$gerr" | grep -c .)" = "1" ] && echo "$gerr" | grep -q 'row 5, measured_at: invalid value "30/03/2025 02:30" for dateTime'; then ok=$((ok+1)); s=OK; else ko=$((ko+1)); s=FAILED; fi
+printf '%-8s %-12s %s\n' "$s" "time zone" "skipped hour reported as an invalid value"
 # R5 (#78): the StructureMap in its R5 form, an R5 ConceptMap, R5 elements (Encounter.class as a
 # list, actualPeriod, Condition.clinicalStatus) and the #156 choice rules, run and validated in R5.
 FHIR=5.0.0 run r5-visit Visit visit bundle-visit 4

@@ -27,4 +27,9 @@ group Encounter0(source src : AdmissionsRow, target res : Encounter) {
   src.admission_type as v where ($this = 'EW EMER.') -> res.class = c('http://terminology.hl7.org/CodeSystem/v3-ActCode', 'EMER', 'emergency') "R-006-EW-EMER.";
   // R-007 reference to Patient[0] in another table (via rel_admissions_patients): the resource must already be loaded
   src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-007";
+  // period: written by 2 rows (R-017, R-018) → one shared instance
+  src where ($this.admittime.exists() or $this.dischtime.exists()) -> res.period as p then {
+    src.admittime as v -> p.start = v "R-017";
+    src.dischtime as v -> p.end = v "R-018";
+  } "Encounter0-period";
 }

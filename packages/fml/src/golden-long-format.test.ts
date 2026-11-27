@@ -31,6 +31,7 @@ import { planTable } from "./generator/table-plan.js";
 import { checkGrammar } from "./grammar.js";
 import { toStructureMap } from "./structure-map.js";
 import { testWrittenPaths } from "./test-support/written-paths.js";
+import { TEST_ZONE_RULES } from "./test-support/zone-rules.js";
 
 function project(document: unknown): ProjectFile {
   if (!isProjectFile(document)) throw new Error("fixture is not a valid project");
@@ -66,7 +67,10 @@ describe.each([
     expect(serialize(logicalModel(file, planned.value, { version: "0.1.0" }))).toBe(model);
     expect(
       serialize(
-        normalizationSpec(file, planned.value, { schemaRef: "../normalization.schema.json" }),
+        normalizationSpec(file, planned.value, {
+          schemaRef: "../normalization.schema.json",
+          zoneRules: TEST_ZONE_RULES,
+        }),
       ),
     ).toBe(spec);
   });

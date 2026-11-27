@@ -56,6 +56,7 @@
       "rowKey": [
         "col_ad_hadm"
       ],
+      "timeZone": "America/New_York",
       "columns": [
         {
           "id": "col_ad_subject",
@@ -111,6 +112,7 @@
       "rowKey": [
         "col_le_id"
       ],
+      "timeZone": "America/New_York",
       "columns": [
         {
           "id": "col_le_id",
@@ -737,6 +739,36 @@
             "columnId": "col_le_value"
           }
         ]
+      }
+    },
+    {
+      "id": "map_0017",
+      "code": "R-017",
+      "columnId": "col_ad_admit",
+      "instanceId": "ins_encounter0",
+      "path": "period.start",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0018",
+      "code": "R-018",
+      "columnId": "col_ad_disch",
+      "instanceId": "ins_encounter0",
+      "path": "period.end",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0019",
+      "code": "R-019",
+      "columnId": "col_le_time",
+      "instanceId": "ins_obs0",
+      "path": "effectiveDateTime",
+      "transform": {
+        "kind": "copy"
       }
     }
   ],

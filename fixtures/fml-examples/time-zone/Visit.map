@@ -1,0 +1,38 @@
+map "http://example.org/fhir/time-zone/StructureMap/Visit" = `Visit`
+
+uses "http://example.org/fhir/time-zone/StructureDefinition/VisitRow" alias VisitRow as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias Bundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" alias Observation as target
+
+// Main group: one transaction Bundle per normalized record.
+// Each role becomes an entry with PUT on its deterministic id (computed by the normalization).
+group Visit(source src : VisitRow, target bundle : Bundle) {
+  src -> bundle.type = 'transaction' "bundle-type";
+  // Patient[0] · patient — always
+  src where ($this.id_Patient0.exists()) -> bundle.entry as e, e.resource = create('Patient') as res, e.request as req then {
+    src.id_Patient0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Patient/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/time-zone/Patient/' + $this) "Patient0-id";
+    src then Patient0(src, res) "Patient0-body";
+  } "Patient0";
+  // Observation[0] · measurement — always
+  src where ($this.id_Observation0.exists()) -> bundle.entry as e, e.resource = create('Observation') as res, e.request as req then {
+    src.id_Observation0 as i -> res.id = i, req.method = 'PUT', req.url = evaluate(i, 'Observation/' + $this), e.fullUrl = evaluate(i, 'http://example.org/fhir/time-zone/Observation/' + $this) "Observation0-id";
+    src then Observation0(src, res) "Observation0-body";
+  } "Observation0";
+}
+
+group Patient0(source src : VisitRow, target res : Patient) {
+  src.patient_id as v -> res.identifier as p, p.value = v "R-001";
+}
+
+group Observation0(source src : VisitRow, target res : Observation) {
+  src -> res.status = 'final' "fixed-status";
+  src -> res.code = cc('http://loinc.org', '48767-8', 'Annotation comment [Interpretation] Narrative') "fixed-code";
+  src.measured_at as v -> res.effective = v "R-002";
+  // note: written by 2 rows (R-003, R-004) → one shared instance
+  src where ($this.note.exists() or $this.received_at.exists()) -> res.note as p then {
+    src.note as v -> p.text = v "R-003";
+    src.received_at as v -> p.time = v "R-004";
+  } "Observation0-note";
+  src.id_Patient0 as t -> res.subject as r, r.reference = evaluate(t, 'Patient/' + $this) "R-005";
+}

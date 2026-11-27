@@ -22,6 +22,8 @@ verification prototypes, not the final generator, which will be written in TypeS
 - `r5-visit/` — 1 table (Visit), 4 roles, one synthetic row, **FHIR R5** (#78): see "R5 golden case" below
 - `concatenation/` — 1 table (Visit), 2 roles, three synthetic rows: the concatenation transform (#98), see
   "Golden case concatenation" below
+- `time-zone/` — 1 table (Visit), 2 roles, five synthetic rows in local Italian time: time zones at the border across
+  both daylight-saving changes (#107), see "Golden case time-zone" below
 - `type-combinations/` — 1 table (Visit), 10 roles, one synthetic row: every combination of the type-compatibility table
   that the other examples do not cover (copies to code, id, uri, url, canonical, positiveInt, unsignedInt, decimal;
   casts; Quantity, Duration and SimpleQuantity; Coding and CodeableConcept from a code column, #106; constants of
@@ -176,7 +178,7 @@ suite: 17 of 17.
 
 `tooling/mimic-on-fhir.test.ts` compares our Bundle with the open MIMIC-IV on FHIR demo (`mimic-on-fhir/`) on the key
 fields (codes, values, units, notes, references resolved to the source keys, status, category, gender, class): all
-66 resources match. Not compared, each a gap: times (no time zone at the border, #107), Patient.birthDate (derived
+66 resources match. Not compared, each a gap: Patient.birthDate (derived
 columns), referenceRange, specimen, the priority extension, and the units system of a number without a unit (#108).
 
 ## Manifests and versions from the exporter (12 November 2026, #83)
@@ -260,4 +262,33 @@ The map, the StructureMap JSON (the HL7 compilation, equal to our builder's), th
 specification and the manifest were written by `tooling/golden/write-fixture.mjs`; the normalized rows and Bundles by
 `normalize.mjs` and `RunMap`. The three Bundles validate with 0 errors, and `tests/concatenation.py` checks 9 values:
 empty columns are skipped with their separators, and an all-empty row writes no element at all.
+
+## Time zones at the border (27 November 2026, #107)
+Project format 1.5.0 declares the zone of a table's (or a column's) date-times; normalization 1.3.0 writes each time
+with its offset, from the zone rules the export copies into the specification (ADR-0024). Every example moved to
+format 1.5.0 and normalization 1.3.0 with no other change, except:
+
+- `mimic-iv-demo/` declares `America/New_York` on Admissions and Labevents, and maps the times it left out until now:
+  `admittime` and `dischtime` on `Encounter.period` (one shared block), `charttime` on `Observation.effectiveDateTime`
+  (R-017 to R-019). MIMIC-IV on FHIR applies New York's daylight-saving rules to the shifted dates, and our 66 times
+  equal its own (`2113-08-04T18:46:00-04:00`, `2120-01-30T21:07:00-05:00`); `tooling/mimic-on-fhir.test.ts` now
+  compares them.
+
+## Golden case time-zone (27 November 2026, #107)
+`time-zone/` writes five measurements taken in Rome in local time (`dd/MM/yyyy HH:mm`, table zone `Europe/Rome`) on
+`Observation.effectiveDateTime`, and the laboratory's reception time in UTC (a column with its own zone, `Z`) on
+`Observation.note.time`:
+
+| Row | Local time | Written as |
+| --- | --- | --- |
+| P-001 | 15/01/2025 10:00 | `2025-01-15T10:00:00+01:00` (winter) |
+| P-002 | 15/07/2025 10:00 | `2025-07-15T10:00:00+02:00` (summer) |
+| P-003 | 26/10/2025 02:30 | `2025-10-26T02:30:00+02:00`: the hour occurs twice, the earlier offset |
+| P-004 | 26/10/2025 03:00 | `2025-10-26T03:00:00+01:00` |
+| P-005 | 30/03/2025 02:30 | none: the hour does not exist, an invalid value (`report-drop`: reported and dropped) |
+
+`tests/time-zone.py` checks the 7 times, and `run-all.sh` checks that the skipped hour is reported. The map, the
+StructureMap JSON (the HL7 compilation, equal to our builder's), the logical model, the normalization specification
+(with the rules of Europe/Rome, tzdata 2026e) and the manifest were written by `tooling/golden/write-fixture.mjs`; the
+normalized rows and the Bundle by `normalize.mjs` and `RunMap`. The Bundle validates with 0 errors.
 

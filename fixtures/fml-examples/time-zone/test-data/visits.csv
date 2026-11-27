@@ -1,0 +1,6 @@
+patient_id,measured_at,received_at,note
+P-001,15/01/2025 10:00,2025-01-15 09:05:00,winter: +01:00
+P-002,15/07/2025 10:00,2025-07-15 08:05:00,summer: +02:00
+P-003,26/10/2025 02:30,2025-10-26 00:35:00,repeated hour: the earlier offset
+P-004,26/10/2025 03:00,2025-10-26 02:05:00,after the change: +01:00
+P-005,30/03/2025 02:30,2025-03-30 00:35:00,skipped hour: invalid
