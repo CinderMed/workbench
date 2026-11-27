@@ -1,5 +1,36 @@
 # @cindermed/web
 
+## 0.5.0
+
+### Minor Changes
+
+- 6b56067: A quantity can take its unit text from a column (project format 1.5.0, #108): `unitColumnId` without `unitValueMapId` writes `src.uom as u -> q.unit = u`, one rule for any number of units, such as MIMIC-IV's `valueuom`. The new optional `unitSystem` also writes the text as the code of that system (`q.system = '<system>', q.code = u`); the schema accepts it only with `unitColumnId` and without `unitValueMapId`. Before, a unit column without a value map wrote no unit. The mapping table names the unit text and its system, and the grid's quantity editor offers "Unit text from a column" with the optional code system.
+- 0abf6a6: The generator writes the concatenation transform (D5, #98): `src where ($this.a.exists() or $this.b.exists()) -> res.element = evaluate(src, $this.a.toString().combine($this.b.toString()).join(' '))`. The columns are joined in the row's order with the separator (a space by default), empty columns are skipped, a decimal keeps its digits (`1.50`), and an all-empty row writes no element. A separator with `'` or a control character is written in base64 and decoded by FHIRPath, because the HL7 engine loses the escape of a quote. `cindermed export` no longer refuses concatenations (`TRANSFORM_UNSUPPORTED` stays for expert expressions). The grid's transform editor offers concatenation again.
+- aa27f95: Module 3b (long tables and the publishing groundwork): the generator writes choice elements with their chosen type (#156), the concatenation transform (#98), a quantity's unit taken as text from a column (#108) and quantities on a nested element such as `referenceRange.low` (#125). Time zones are declared at the border (#107): a table or column names a fixed offset or an IANA zone, daylight saving is applied from a tzdata snapshot copied into each normalization specification, and a date-time with a time and no zone is an error (`TIME_ZONE_MISSING`). The export manifest pins every FHIR package by the SHA-256 of its tarball (#146). An R5 golden case (#78) and the MIMIC-IV demo slice join the golden suite; the slice matches the MIMIC-IV on FHIR demo on its key fields, with the accepted differences listed and checked (#198).
+
+  Formats: project 1.5.0, normalization 1.3.0, manifest 1.1.0; older files are read as they are.
+
+  **Not published to npm:** publishing is deferred after the MVP (#216). Every pull request packs the core packages and the CLI and checks the tarballs; use them from the repository as before (`pnpm -r build`, `pnpm cindermed …`).
+
+  Known limitations:
+
+  - #204: a value-map condition on a value with an apostrophe (`Crohn's`) is read wrongly by the HL7 engine, which drops FHIRPath escapes; avoid such source values in value maps for now.
+  - The grid edits neither `dateFormat` nor `timeZone`: a `TIME_ZONE_MISSING` error is fixed in the project file until the column dictionary (B4, module 5).
+  - R5 projects do not load `hl7.terminology.r5` by default: bindings to its value sets are checked only when the project lists the package in `project.packages`.
+  - #194: a cell with `TYPE_NEEDS_TRANSFORM` names the transform to use, but it is still set by hand.
+  - The grid still runs only in the local mode, with no login, until module 4; the Docker images do not contain it.
+
+### Patch Changes
+
+- Updated dependencies [cd92662]
+- Updated dependencies [6b56067]
+- Updated dependencies [29d3164]
+- Updated dependencies [e625743]
+- Updated dependencies [5b5460c]
+- Updated dependencies [3d4a3f1]
+  - @cindermed/fhir-defs@0.2.0
+  - @cindermed/model@0.6.0
+
 ## 0.4.0
 
 ### Minor Changes

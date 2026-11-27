@@ -1,5 +1,27 @@
 # @cindermed/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- cd92662: The generator takes element names and choice types from the FHIR definitions instead of a fixed list of names (#156, ADR-0023). `generateMap(project, plan, written)` gets them as plain data, which `@cindermed/export` resolves with `@cindermed/fhir-defs` for every path the generator writes (`pathsToWrite`). On a choice element, a value whose type is not the chosen one is written with that type (`res.value = create('string') as x, x.value = v`), and a type derived from Quantity, or a path through a choice, is opened with its type (`create('Age')`, `create('Quantity') as p`). No existing map changes. `exportPackage` now requires `definitions`, and `cindermed export` always loads them: `--no-fhir` applies to `validate` only, and the export stops with the reason when the FHIR packages cannot be loaded. The cells of #156 stay turned off until their golden cases.
+- e625743: The export manifest pins its FHIR packages (manifest format 1.1.0, #146, ADR-0025). `packages` lists every package the definitions were built from, dependencies included, each with the SHA-256 of its tarball. The digest is pinned for the core packages; for the others the CLI computes it at download and keeps it in the package cache (`<id>#<version>/cindermed.json`), downloading the tarball again for a package cached without it. An unknown digest blocks the export with `EXPORT_PACKAGE_DIGEST_MISSING`. The definition index (format 1.2.0) carries the digest of each package as `tarballSha256`. 1.0.0 manifests still validate.
+
+### Patch Changes
+
+- 5b5460c: Each package now has the metadata a publish needs: `repository`, `homepage`, `bugs`, `engines` (Node 22.12 or later), a README and the LICENSE. Its tarball holds only `dist/` without source maps, its LICENSE and its README. Nothing is published: npm publishing is deferred after the MVP (#199), and every package stays private.
+- Updated dependencies [cd92662]
+- Updated dependencies [6b56067]
+- Updated dependencies [29d3164]
+- Updated dependencies [cd92662]
+- Updated dependencies [e625743]
+- Updated dependencies [5b5460c]
+- Updated dependencies [3d4a3f1]
+  - @cindermed/fhir-defs@0.2.0
+  - @cindermed/export@0.3.0
+  - @cindermed/model@0.6.0
+  - @cindermed/normalizer@0.2.0
+
 ## 0.4.0
 
 ### Minor Changes

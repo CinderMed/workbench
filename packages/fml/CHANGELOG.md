@@ -1,5 +1,27 @@
 # @cindermed/fml
 
+## 0.3.0
+
+### Minor Changes
+
+- 6b56067: A quantity can take its unit text from a column (project format 1.5.0, #108): `unitColumnId` without `unitValueMapId` writes `src.uom as u -> q.unit = u`, one rule for any number of units, such as MIMIC-IV's `valueuom`. The new optional `unitSystem` also writes the text as the code of that system (`q.system = '<system>', q.code = u`); the schema accepts it only with `unitColumnId` and without `unitValueMapId`. Before, a unit column without a value map wrote no unit. The mapping table names the unit text and its system, and the grid's quantity editor offers "Unit text from a column" with the optional code system.
+- 29d3164: Time zones at the border (#107, ADR-0024). Project format 1.5.0 adds an optional `timeZone` on a table and on a column: a fixed offset (`+01:00`, `Z`) or an IANA zone (`Europe/Rome`). Normalization 1.3.0 writes a dateTime with a time with its offset (`2025-01-15T10:00:00+01:00`). An IANA zone's offsets come from the zone's rules in the specification's new `timeZones`, which the export copies from a committed tzdata snapshot (2026e, 1970–2299), so every implementation gives the same result without a time-zone library. A local time in the spring-forward gap is an invalid value; one in the repeated fall-back hour takes the earlier offset. Integrity rule 10 reports a zone the snapshot does not have (`TIME_ZONE_UNKNOWN`, error) and a zone on a column that is not dateTime (`TIME_ZONE_NOT_DATETIME`, warning). Projects without a zone convert as before.
+- 0abf6a6: The generator writes the concatenation transform (D5, #98): `src where ($this.a.exists() or $this.b.exists()) -> res.element = evaluate(src, $this.a.toString().combine($this.b.toString()).join(' '))`. The columns are joined in the row's order with the separator (a space by default), empty columns are skipped, a decimal keeps its digits (`1.50`), and an all-empty row writes no element. A separator with `'` or a control character is written in base64 and decoded by FHIRPath, because the HL7 engine loses the escape of a quote. `cindermed export` no longer refuses concatenations (`TRANSFORM_UNSUPPORTED` stays for expert expressions). The grid's transform editor offers concatenation again.
+- cd92662: The generator takes element names and choice types from the FHIR definitions instead of a fixed list of names (#156, ADR-0023). `generateMap(project, plan, written)` gets them as plain data, which `@cindermed/export` resolves with `@cindermed/fhir-defs` for every path the generator writes (`pathsToWrite`). On a choice element, a value whose type is not the chosen one is written with that type (`res.value = create('string') as x, x.value = v`), and a type derived from Quantity, or a path through a choice, is opened with its type (`create('Age')`, `create('Quantity') as p`). No existing map changes. `exportPackage` now requires `definitions`, and `cindermed export` always loads them: `--no-fhir` applies to `validate` only, and the export stops with the reason when the FHIR packages cannot be loaded. The cells of #156 stay turned off until their golden cases.
+- 0e83ca7: A quantity can be written on a two-level path by a single row (#125): `src.col as v -> res.referenceRange as p, p.low = create('Quantity') as q then { … }`, the parent opened inline as for other single rows, and a choice at the second level created with its chosen type (`component.valueQuantity`). Before, such a row was `PATH_UNSUPPORTED`; rows sharing the parent (`referenceRange.low` and `.high`) already worked.
+- 3d4a3f1: A `dateTime` column whose values have a time now needs a time zone, its own or its table's: validation reports `TIME_ZONE_MISSING` (error) otherwise. `columnTimeZone` and `takesTimeZone` move to `@cindermed/model` (`@cindermed/fml` no longer exports `columnTimeZone`). The mapping table's Columns sheet shows the time zone of a date-time column in its Format cell.
+
+### Patch Changes
+
+- dba1cdd: The R5 StructureMap form (ADR-0007) is now checked by the HL7 engine on an R5 golden case (#78). The engine runs it, and the Bundle validates in R5 with 0 errors. The generator is unchanged.
+- 5b5460c: Each package now has the metadata a publish needs: `repository`, `homepage`, `bugs`, `engines` (Node 22.12 or later), a README and the LICENSE. Its tarball holds only `dist/` without source maps, its LICENSE and its README. Nothing is published: npm publishing is deferred after the MVP (#199), and every package stays private.
+- Updated dependencies [6b56067]
+- Updated dependencies [29d3164]
+- Updated dependencies [e625743]
+- Updated dependencies [5b5460c]
+- Updated dependencies [3d4a3f1]
+  - @cindermed/model@0.6.0
+
 ## 0.2.1
 
 ### Patch Changes
