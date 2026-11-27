@@ -152,12 +152,12 @@ cindermed mapping-table <project.json> [--format xlsx|csv] [--delimiter <char>]
 
 Writes the mapping table of a project, a flat view for documentation and review, in the style of Table 1 of the MOTU paper. It has four sheets:
 
-| Sheet      | One line per                                                                                               |
-| ---------- | ---------------------------------------------------------------------------------------------------------- |
-| Mapping    | Mapping row: column, role, element, transform, condition, notes and review status                          |
-| Value maps | Entry of every value map, including maps to `true`/`false`: target, code verification, action              |
-| Roles      | Role: description, how many resources, when they are created, id rule, fixed values and their verification |
-| Columns    | Source column: description, type, formats, allowed and missing values, and the rows and roles that use it  |
+| Sheet      | One line per                                                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mapping    | Mapping row: column, role, element, transform, condition, notes and review status                                                                    |
+| Value maps | Entry of every value map, including maps to `true`/`false`: target, code verification, action                                                        |
+| Roles      | Role: description, how many resources, when they are created, id rule, fixed values and their verification                                           |
+| Columns    | Source column: description, type, formats (with the time zone of a date-time column), allowed and missing values, and the rows and roles that use it |
 
 The table shows review statuses and notes, but not who reviewed, the comments or where an object came from.
 

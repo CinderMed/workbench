@@ -52,9 +52,11 @@ export {
 } from "./values/index.js";
 export {
   TZDATA_VERSION,
+  columnTimeZone,
   formatHasTime,
   isFixedOffset,
   isKnownTimeZone,
+  takesTimeZone,
 } from "./values/time-zones.js";
 
 export {

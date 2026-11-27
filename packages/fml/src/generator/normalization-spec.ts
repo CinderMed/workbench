@@ -12,7 +12,7 @@
  */
 import {
   canonicalText,
-  formatHasTime,
+  columnTimeZone,
   isFixedOffset,
   NORMALIZATION_FORMAT_VERSION,
   type Column,
@@ -45,15 +45,6 @@ export interface ZoneRuleSource {
   readonly from: number;
   readonly to: number;
   readonly zone: (name: string) => readonly number[] | undefined;
-}
-
-/**
- * The time zone of a dateTime column whose values have a time (project 1.5.0): its own, else its
- * table's. `undefined` for other columns, and for a column without one (TIME_ZONE_MISSING).
- */
-export function columnTimeZone(source: Source, column: Column): string | undefined {
-  if (column.dataType !== "dateTime" || !formatHasTime(column.dateFormat)) return undefined;
-  return column.timeZone ?? source.timeZone;
 }
 
 /** Default of `project.output.onInvalidValue` (project schema 1.3.0): stop at the first invalid value. */

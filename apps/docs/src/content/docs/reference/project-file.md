@@ -58,7 +58,8 @@ A FHIR `dateTime` with a time must have an offset, such as `2025-01-15T10:00:00+
 - A **fixed offset** (`+01:00`, `-05:00`, `Z`) is added as it is (`Z` as `+00:00`).
 - An **IANA zone** (`Europe/Rome`, `America/New_York`) gives each time the offset in force on that day: `+01:00` in January and `+02:00` in July in Rome.
 - On the day clocks go forward, a time in the skipped hour (`30/03/2025 02:30` in Rome) does not exist: it is an invalid value, handled by `onInvalidValue`. On the day they go back, a time in the repeated hour (`26/10/2025 02:30`) takes the earlier offset, `+02:00`.
-- Only `dateTime` columns whose format has a time get an offset; a date stays a date. A zone the workbench does not know is an error (`TIME_ZONE_UNKNOWN`), and a zone on a column that is not `dateTime` is a warning (`TIME_ZONE_NOT_DATETIME`).
+- Only `dateTime` columns whose format has a time get an offset; a date stays a date. Such a column must have a zone, its own or its table's (`TIME_ZONE_MISSING`, an error), because FHIR requires the offset and the workbench never guesses one. A `dateTime` column without `dateFormat` has a time (the default is `yyyy-MM-ddTHH:mm:ss`), so it needs a zone too.
+- A zone the workbench does not know is an error (`TIME_ZONE_UNKNOWN`), and a zone on a column that is not `dateTime` is a warning (`TIME_ZONE_NOT_DATETIME`).
 
 The offsets of IANA zones come from a tzdata snapshot in the workbench (tzdata 2026e, years 1970 to 2299), copied into each exported normalization specification with its version, so a package converts the same way on every machine. A time outside those years, with an IANA zone, is an invalid value; data with shifted dates can declare a fixed offset instead.
 
