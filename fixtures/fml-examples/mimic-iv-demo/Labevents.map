@@ -98,4 +98,5 @@ group Observation0(source src : LabeventsRow, target res : Observation) {
   src where (($this.valuenum.exists()).not() and ($this.value.exists()).not()) then {
     src.comments as v -> res.value = v "R-016";
   } "R-016-guard";
+  src.charttime as v -> res.effective = v "R-019";
 }

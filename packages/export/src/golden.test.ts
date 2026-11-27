@@ -21,6 +21,8 @@ import motuProject from "../../../fixtures/fml-examples/motu/project.json?raw";
 import normalizationSchemaText from "../../../fixtures/fml-examples/normalization.schema.json?raw";
 import concatManifest from "../../../fixtures/fml-examples/concatenation/manifest.json?raw";
 import concatProject from "../../../fixtures/fml-examples/concatenation/project.json?raw";
+import zoneManifest from "../../../fixtures/fml-examples/time-zone/manifest.json?raw";
+import zoneProject from "../../../fixtures/fml-examples/time-zone/project.json?raw";
 import { cleanProject, exportPackage } from "./index.js";
 import { testDefinitions } from "./test-support/test-definitions.js";
 import r5Manifest from "../../../fixtures/fml-examples/r5-visit/manifest.json?raw";
@@ -57,6 +59,7 @@ describe.each([
   ["element-names", namesProject, namesManifest],
   ["type-combinations", combosProject, combosManifest],
   ["concatenation", concatProject, concatManifest],
+  ["time-zone", zoneProject, zoneManifest],
   ["r5-visit", r5Project, r5Manifest],
 ])("export of %s", (folder, projectText, manifestText) => {
   const expected = JSON.parse(manifestText) as ExportManifest;

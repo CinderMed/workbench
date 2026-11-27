@@ -3,8 +3,11 @@
 // demo uses its own profiles and ids. Resources are matched by identifier, and references are
 // resolved to the source keys (subject_id, hadm_id) on both sides.
 //
+// Times are compared with their offsets (#107): the tables declare America/New_York, whose
+// daylight-saving rules MIMIC-IV on FHIR applies to the shifted dates (-04:00, -05:00).
+//
 // Not compared, each a gap of the model or the generator (see the fixtures README):
-// - times (effectiveDateTime, issued, Encounter.period): no time zone at the border yet (#107);
+// - Observation.issued (storetime is not mapped);
 // - Patient.birthDate: derived from anchor_year and anchor_age in the demo (derived columns, B10);
 // - referenceRange (ref_range_lower/upper), specimen, the lab-priority extension, flag;
 // - the units system of a number without a unit (#108, see valueQuantity below).
@@ -57,12 +60,14 @@ function keyFields(r: Resource, refs: Map<string, string>): Record<string, unkno
         status: r["status"],
         class: { system: cls["system"], code: cls["code"] },
         subject: ref("subject"),
+        period: r["period"],
       };
     }
     default: {
       const quantity = r["valueQuantity"] as Record<string, unknown> | undefined;
       return {
         status: r["status"],
+        effectiveDateTime: r["effectiveDateTime"],
         category: (r["category"] as { coding: Record<string, string>[] }[]).map(
           (c) => c.coding[0]?.["code"],
         ),

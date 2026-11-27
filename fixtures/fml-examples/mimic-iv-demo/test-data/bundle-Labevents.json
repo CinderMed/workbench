@@ -28,6 +28,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 20,
         "unit" : "%",
@@ -67,6 +68,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 2,
         "unit" : "%",
@@ -109,6 +111,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 23,
         "unit" : "%",
@@ -148,6 +151,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 55,
         "unit" : "%",
@@ -190,6 +194,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 34000,
         "unit" : "#/uL",
@@ -229,6 +234,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 889,
         "unit" : "#/uL",
@@ -268,6 +274,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 95,
         "unit" : "mg/dL",
@@ -307,6 +314,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 362,
         "unit" : "IU/L",
@@ -346,6 +354,7 @@
       "subject" : {
         "reference" : "Patient/pat-654497824fddf8633975b18a"
       },
+      "effectiveDateTime" : "2113-08-04T13:57:00-04:00",
       "valueQuantity" : {
         "value" : 4.8,
         "unit" : "g/dL",
@@ -388,6 +397,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 1
       }
@@ -427,6 +437,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 11.2,
         "unit" : "sec",
@@ -469,6 +480,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 28.9,
         "unit" : "sec",
@@ -511,6 +523,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 18,
         "unit" : "IU/L",
@@ -553,6 +566,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 98,
         "unit" : "IU/L",
@@ -595,6 +609,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 18,
         "unit" : "mEq/L",
@@ -637,6 +652,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueString" : "Using this patient's age, gender, and serum creatinine value of 0.6, .  Estimated GFR = >75 if non African-American (mL/min/1.73 m2) .  Estimated GFR = >75 if African-American (mL/min/1.73 m2) .  For comparison, mean GFR for age group 70+ is 75 (mL/min/1.73 m2) .  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure.",
       "note" : [{
         "text" : "Using this patient's age, gender, and serum creatinine value of 0.6, .  Estimated GFR = >75 if non African-American (mL/min/1.73 m2) .  Estimated GFR = >75 if African-American (mL/min/1.73 m2) .  For comparison, mean GFR for age group 70+ is 75 (mL/min/1.73 m2) .  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure."
@@ -677,6 +693,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 113,
         "unit" : "mg/dL",
@@ -722,6 +739,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueQuantity" : {
         "value" : 192,
         "unit" : "IU/L",
@@ -767,6 +785,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-05T05:00:00-04:00",
       "valueString" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI.",
       "note" : [{
         "text" : "<0.01.  cTropnT > 0.10 ng/mL suggests Acute MI."
@@ -807,6 +826,7 @@
       "encounter" : {
         "reference" : "Encounter/enc-808ff1929871336a2fcd8282"
       },
+      "effectiveDateTime" : "2113-08-06T07:50:00-04:00",
       "valueQuantity" : {
         "value" : 99,
         "unit" : "mg/dL",
@@ -849,6 +869,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueString" : "HOLD.  DISCARD GREATER THAN 4 HOURS OLD.",
       "note" : [{
         "text" : "___"
@@ -886,6 +907,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueString" : "___",
       "note" : [{
         "text" : "HOLD."
@@ -923,6 +945,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 0.9
       }
@@ -959,6 +982,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 9.8,
         "unit" : "sec",
@@ -998,6 +1022,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 32.3,
         "unit" : "sec",
@@ -1037,6 +1062,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 0.4,
         "unit" : "%",
@@ -1076,6 +1102,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 0.8,
         "unit" : "%",
@@ -1115,6 +1142,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 36.4,
         "unit" : "%",
@@ -1154,6 +1182,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 12.3,
         "unit" : "g/dL",
@@ -1193,6 +1222,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 19.9,
         "unit" : "%",
@@ -1232,6 +1262,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 33.4,
         "unit" : "pg",
@@ -1271,6 +1302,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 33.9,
         "unit" : "%",
@@ -1310,6 +1342,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 99,
         "unit" : "fL",
@@ -1349,6 +1382,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 16.2,
         "unit" : "%",
@@ -1388,6 +1422,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 62.6,
         "unit" : "%",
@@ -1427,6 +1462,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 186,
         "unit" : "K/uL",
@@ -1466,6 +1502,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 13.3,
         "unit" : "%",
@@ -1505,6 +1542,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 3.7,
         "unit" : "m/uL",
@@ -1544,6 +1582,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 10.4,
         "unit" : "K/uL",
@@ -1583,6 +1622,7 @@
       "subject" : {
         "reference" : "Patient/pat-d36ba945d2c3b023ce8724c6"
       },
+      "effectiveDateTime" : "2125-06-17T01:45:00-04:00",
       "valueQuantity" : {
         "value" : 18,
         "unit" : "mEq/L",
@@ -1622,6 +1662,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 507,
         "unit" : "mg/dL",
@@ -1661,6 +1702,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 0.9
       }
@@ -1697,6 +1739,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 9.6,
         "unit" : "sec",
@@ -1736,6 +1779,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 28.2,
         "unit" : "sec",
@@ -1775,6 +1819,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "NEG.",
       "note" : [{
         "text" : "NEG."
@@ -1812,6 +1857,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "NEG"
     },
     "request" : {
@@ -1846,6 +1892,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "POS",
       "note" : [{
         "text" : "BENZODIAZEPINE IMMUNOASSAY SCREEN DOES NOT RELIABLY DETECT SOME DRUGS,;INCLUDING LORAZEPAM, CLONAZEPAM, AND FLUNITRAZEPAM."
@@ -1883,6 +1930,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 0.6,
         "unit" : "mg/dL",
@@ -1922,6 +1970,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "Using this patient's age, gender, and serum creatinine value of 0.6,.  Estimated GFR = >75 if non African-American (mL/min/1.73 m2).  Estimated GFR = >75 if African-American (mL/min/1.73 m2).  For comparison, mean GFR for age group 50-59 is 93 (mL/min/1.73 m2).  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure.",
       "note" : [{
         "text" : "Using this patient's age, gender, and serum creatinine value of 0.6,.  Estimated GFR = >75 if non African-American (mL/min/1.73 m2).  Estimated GFR = >75 if African-American (mL/min/1.73 m2).  For comparison, mean GFR for age group 50-59 is 93 (mL/min/1.73 m2).  GFR<60 = Chronic Kidney Disease, GFR<15 = Kidney Failure."
@@ -1959,6 +2008,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 96,
         "unit" : "mg/dL",
@@ -2001,6 +2051,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 17,
         "unit" : "IU/L",
@@ -2040,6 +2091,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "NEG.",
       "note" : [{
         "text" : "NEG."
@@ -2077,6 +2129,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "NEG",
       "note" : [{
         "text" : "POSITIVE TRICYCLIC RESULTS REPRESENT POTENTIALLY TOXIC LEVELS;THERAPEUTIC TRICYCLIC LEVELS WILL TYPICALLY HAVE NEGATIVE RESULTS."
@@ -2114,6 +2167,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 10,
         "unit" : "mg/dL",
@@ -2153,6 +2207,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 41.2,
         "unit" : "%",
@@ -2192,6 +2247,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 13.9,
         "unit" : "g/dL",
@@ -2231,6 +2287,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 32.7,
         "unit" : "pg",
@@ -2270,6 +2327,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueQuantity" : {
         "value" : 33.6,
         "unit" : "%",
@@ -2309,6 +2367,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:00:00-05:00",
       "valueString" : "___",
       "note" : [{
         "text" : "HOLD."
@@ -2346,6 +2405,7 @@
       "subject" : {
         "reference" : "Patient/pat-2ebb7b3fb087c91f4379338d"
       },
+      "effectiveDateTime" : "2120-01-30T20:14:00-05:00",
       "valueString" : "VEN.",
       "note" : [{
         "text" : "___"

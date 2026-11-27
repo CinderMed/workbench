@@ -105,14 +105,14 @@ Patients,subject_id,,subject_id,Patient identifier.,string,,,,"R-002, Patient[0]
 Patients,gender,,gender,Administrative gender.,categorical,,F (female); M (male),,R-003,
 Admissions,subject_id,,subject_id,Patient identifier.,string,,,,,
 Admissions,hadm_id,,hadm_id,Hospital admission identifier.,string,,,,"R-005, Encounter[0] · hospital admission",
-Admissions,admittime,,admittime,Admission time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
-Admissions,dischtime,,dischtime,Discharge time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
+Admissions,admittime,,admittime,Admission time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,R-017,
+Admissions,dischtime,,dischtime,Discharge time.,dateTime,date yyyy-MM-dd HH:mm:ss,,,R-018,
 Admissions,admission_type,,admission_type,Type of admission.,categorical,,URGENT; EW EMER.,,R-006,
 Labevents,labevent_id,,labevent_id,Lab event identifier.,string,,,,"R-009, Observation[0] · lab event",
 Labevents,subject_id,,subject_id,Patient identifier.,string,,,,,
 Labevents,hadm_id,,hadm_id,Hospital admission identifier; empty for outpatient tests.,string,,,,,
 Labevents,itemid,,itemid,What was measured: a code of d_labitems.,categorical,,"52033 (Specimen Type); 50879 (Barbiturate Screen); 50981 (Salicylate); 50955 (Light Green Top Hold); 50999 (Tricyclic Antidepressant Screen); 50868 (Anion Gap); 50922 (Ethanol); 50861 (Alanine Aminotransferase (ALT)); 50863 (Alkaline Phosphatase); 50933 (Green Top Hold (plasma)); 50931 (Glucose); 50954 (Lactate Dehydrogenase (LD)); 50912 (Creatinine); 51006 (Urea Nitrogen); 51003 (Troponin T); 50956 (Lipase); 50880 (Benzodiazepine Screen); 50920 (Estimated GFR (MDRD equation)); 50856 (Acetaminophen); 51035 (LD, Body Fluid); 51043 (Total Protein, Body Fluid); 51034 (Glucose, Body Fluid); 51254 (Monocytes); 51279 (Red Blood Cells); 51244 (Lymphocytes); 51214 (Fibrinogen, Functional); 51146 (Basophils); 51249 (MCHC); 51237 (INR(PT)); 51222 (Hemoglobin); 51265 (Platelet Count); 51221 (Hematocrit); 51277 (RDW); 51200 (Eosinophils); 51256 (Neutrophils); 51250 (MCV); 51274 (PT); 51275 (PTT); 51248 (MCH); 51301 (White Blood Cells); 51427 (Lymphocytes); 51436 (Polys); 51428 (Macrophage); 51438 (RBC, Other Fluid); 52369 (Total Nucleated Cells, Other); 51431 (Monos)",,R-010,
-Labevents,charttime,,charttime,Time the specimen was charted.,dateTime,date yyyy-MM-dd HH:mm:ss,,,,
+Labevents,charttime,,charttime,Time the specimen was charted.,dateTime,date yyyy-MM-dd HH:mm:ss,,,R-019,
 Labevents,value,,value,Result as text.,string,,,,"R-012, R-016",
 Labevents,valuenum,,valuenum,Numeric result; empty when the result is text only.,decimal,,,,"R-011, R-012, R-016",
 Labevents,valueuom,,valueuom,Unit of the numeric result.,categorical,,#/uL; %; IU/L; K/uL; fL; g/dL; m/uL; mEq/L; mg/dL; ng/mL; pg; sec; ug/mL,,R-011,
@@ -138,6 +138,9 @@ R-013,Labevents,comments,comments,string,Observation[0] · lab event,note.text,c
 R-014,Labevents,,,,Observation[0] · lab event,subject,reference to Patient[0] · patient via rel_lab_patients,,,,
 R-015,Labevents,,,,Observation[0] · lab event,encounter,reference to Encounter[0] · hospital admission via rel_lab_admissions,,,,
 R-016,Labevents,comments,comments,string,Observation[0] · lab event,valueString,copy,valuenum is empty and value is empty,,,
+R-017,Admissions,admittime,admittime,dateTime,Encounter[0] · hospital admission,period.start,copy,,,,
+R-018,Admissions,dischtime,dischtime,dateTime,Encounter[0] · hospital admission,period.end,copy,,,,
+R-019,Labevents,charttime,charttime,dateTime,Observation[0] · lab event,effectiveDateTime,copy,,,,
 "
 `;
 

@@ -1,0 +1,184 @@
+{
+  "$schema": "../mapping-project.schema.json",
+  "formatVersion": "1.5.0",
+  "project": {
+    "id": "prj_time_zone",
+    "name": "Time zone",
+    "description": "Golden case (#107): times written in local Italian time (Europe/Rome) get their offset at the border, across both daylight-saving changes of 2025: the repeated hour of 26 October takes the earlier offset, the skipped hour of 30 March is an invalid value. A column with its own zone (UTC) overrides the table's.",
+    "fhirVersion": "4.0.1",
+    "packages": [],
+    "canonicalBase": "http://example.org/fhir/time-zone",
+    "output": {
+      "bundleType": "transaction",
+      "requestMethod": "PUT",
+      "fullUrlBase": "http://example.org/fhir/time-zone",
+      "onInvalidValue": "report-drop"
+    }
+  },
+  "sources": [
+    {
+      "id": "src_visit",
+      "name": "Visit",
+      "description": "One row per measurement, times in local Italian time.",
+      "rowKey": [
+        "col_patient_id"
+      ],
+      "timeZone": "Europe/Rome",
+      "columns": [
+        {
+          "id": "col_patient_id",
+          "name": "patient_id",
+          "label": "Patient ID",
+          "dataType": "string"
+        },
+        {
+          "id": "col_measured_at",
+          "name": "measured_at",
+          "label": "Measured at",
+          "description": "Local time in Rome, as the ward writes it.",
+          "dataType": "dateTime",
+          "dateFormat": "dd/MM/yyyy HH:mm"
+        },
+        {
+          "id": "col_received_at",
+          "name": "received_at",
+          "label": "Received at",
+          "description": "Written by the laboratory system in UTC.",
+          "dataType": "dateTime",
+          "dateFormat": "yyyy-MM-dd HH:mm:ss",
+          "timeZone": "Z"
+        },
+        {
+          "id": "col_note",
+          "name": "note",
+          "label": "Note",
+          "dataType": "string"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "ins_patient0",
+      "resourceType": "Patient",
+      "index": 0,
+      "label": "patient",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "pat"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      }
+    },
+    {
+      "id": "ins_obs0",
+      "resourceType": "Observation",
+      "index": 0,
+      "label": "measurement",
+      "sourceId": "src_visit",
+      "multiplicity": {
+        "kind": "perRow"
+      },
+      "context": {
+        "patientInstanceId": "ins_patient0"
+      },
+      "idRule": {
+        "parts": [
+          {
+            "literal": "obs"
+          },
+          {
+            "columnId": "col_patient_id"
+          }
+        ],
+        "encoding": "hash"
+      },
+      "fixedValues": [
+        {
+          "path": "status",
+          "value": {
+            "type": "code",
+            "value": "final"
+          }
+        },
+        {
+          "path": "code",
+          "value": {
+            "type": "CodeableConcept",
+            "coding": {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation comment [Interpretation] Narrative",
+              "verification": {
+                "status": "manual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "id": "map_0001",
+      "code": "R-001",
+      "columnId": "col_patient_id",
+      "instanceId": "ins_patient0",
+      "path": "identifier.value",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0002",
+      "code": "R-002",
+      "columnId": "col_measured_at",
+      "instanceId": "ins_obs0",
+      "path": "effectiveDateTime",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0003",
+      "code": "R-003",
+      "columnId": "col_note",
+      "instanceId": "ins_obs0",
+      "path": "note.text",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0004",
+      "code": "R-004",
+      "columnId": "col_received_at",
+      "instanceId": "ins_obs0",
+      "path": "note.time",
+      "transform": {
+        "kind": "copy"
+      }
+    },
+    {
+      "id": "map_0005",
+      "code": "R-005",
+      "instanceId": "ins_obs0",
+      "path": "subject",
+      "transform": {
+        "kind": "reference",
+        "targetInstanceId": "ins_patient0",
+        "auto": true
+      }
+    }
+  ],
+  "valueMaps": []
+}

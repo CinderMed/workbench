@@ -15,6 +15,7 @@ import { planTable } from "./generator/table-plan.js";
 import { toStructureMap } from "./structure-map.js";
 import { emptyStrings } from "./test-support/empty-strings.js";
 import { testWrittenPaths } from "./test-support/written-paths.js";
+import { TEST_ZONE_RULES } from "./test-support/zone-rules.js";
 
 function resources(document: unknown): [string, unknown][] {
   if (!isProjectFile(document)) throw new Error("fixture is not a valid project");
@@ -28,7 +29,10 @@ function resources(document: unknown): [string, unknown][] {
     const planned = planTable(project, source.id);
     if (!planned.ok) throw new Error(JSON.stringify(planned.results));
     out.push([`logical model ${source.name}`, logicalModel(project, planned.value)]);
-    out.push([`normalization ${source.name}`, normalizationSpec(project, planned.value)]);
+    out.push([
+      `normalization ${source.name}`,
+      normalizationSpec(project, planned.value, { zoneRules: TEST_ZONE_RULES }),
+    ]);
     const map = generateMap(project, planned.value, testWrittenPaths(project));
     if (!map.ok) throw new Error(JSON.stringify(map.results));
     for (const release of ["R4", "R5"] as const) {

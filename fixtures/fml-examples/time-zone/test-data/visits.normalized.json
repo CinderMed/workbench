@@ -1,0 +1,46 @@
+[
+  {
+    "resourceType": "http://example.org/fhir/time-zone/StructureDefinition/VisitRow",
+    "patient_id": "P-001",
+    "measured_at": "2025-01-15T10:00:00+01:00",
+    "received_at": "2025-01-15T09:05:00+00:00",
+    "note": "winter: +01:00",
+    "id_Patient0": "pat-e2505a26bb5ff0304b7ecf81",
+    "id_Observation0": "obs-e2505a26bb5ff0304b7ecf81"
+  },
+  {
+    "resourceType": "http://example.org/fhir/time-zone/StructureDefinition/VisitRow",
+    "patient_id": "P-002",
+    "measured_at": "2025-07-15T10:00:00+02:00",
+    "received_at": "2025-07-15T08:05:00+00:00",
+    "note": "summer: +02:00",
+    "id_Patient0": "pat-f1e9457858515eb756b1cc98",
+    "id_Observation0": "obs-f1e9457858515eb756b1cc98"
+  },
+  {
+    "resourceType": "http://example.org/fhir/time-zone/StructureDefinition/VisitRow",
+    "patient_id": "P-003",
+    "measured_at": "2025-10-26T02:30:00+02:00",
+    "received_at": "2025-10-26T00:35:00+00:00",
+    "note": "repeated hour: the earlier offset",
+    "id_Patient0": "pat-8e88677cc577742b1709c99f",
+    "id_Observation0": "obs-8e88677cc577742b1709c99f"
+  },
+  {
+    "resourceType": "http://example.org/fhir/time-zone/StructureDefinition/VisitRow",
+    "patient_id": "P-004",
+    "measured_at": "2025-10-26T03:00:00+01:00",
+    "received_at": "2025-10-26T02:05:00+00:00",
+    "note": "after the change: +01:00",
+    "id_Patient0": "pat-63216100671af30973859afc",
+    "id_Observation0": "obs-63216100671af30973859afc"
+  },
+  {
+    "resourceType": "http://example.org/fhir/time-zone/StructureDefinition/VisitRow",
+    "patient_id": "P-005",
+    "received_at": "2025-03-30T00:35:00+00:00",
+    "note": "skipped hour: invalid",
+    "id_Patient0": "pat-6b21bb454989e0c2b3ab4ba5",
+    "id_Observation0": "obs-6b21bb454989e0c2b3ab4ba5"
+  }
+]

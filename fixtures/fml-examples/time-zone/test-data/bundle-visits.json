@@ -1,0 +1,208 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "transaction",
+  "entry" : [{
+    "fullUrl" : "http://example.org/fhir/time-zone/Patient/pat-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-e2505a26bb5ff0304b7ecf81",
+      "identifier" : [{
+        "value" : "P-001"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Observation/obs-e2505a26bb5ff0304b7ecf81",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-e2505a26bb5ff0304b7ecf81",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-e2505a26bb5ff0304b7ecf81"
+      },
+      "effectiveDateTime" : "2025-01-15T10:00:00+01:00",
+      "note" : [{
+        "time" : "2025-01-15T09:05:00+00:00",
+        "text" : "winter: +01:00"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-e2505a26bb5ff0304b7ecf81"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Patient/pat-f1e9457858515eb756b1cc98",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-f1e9457858515eb756b1cc98",
+      "identifier" : [{
+        "value" : "P-002"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-f1e9457858515eb756b1cc98"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Observation/obs-f1e9457858515eb756b1cc98",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-f1e9457858515eb756b1cc98",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-f1e9457858515eb756b1cc98"
+      },
+      "effectiveDateTime" : "2025-07-15T10:00:00+02:00",
+      "note" : [{
+        "time" : "2025-07-15T08:05:00+00:00",
+        "text" : "summer: +02:00"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-f1e9457858515eb756b1cc98"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Patient/pat-8e88677cc577742b1709c99f",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-8e88677cc577742b1709c99f",
+      "identifier" : [{
+        "value" : "P-003"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-8e88677cc577742b1709c99f"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Observation/obs-8e88677cc577742b1709c99f",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-8e88677cc577742b1709c99f",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-8e88677cc577742b1709c99f"
+      },
+      "effectiveDateTime" : "2025-10-26T02:30:00+02:00",
+      "note" : [{
+        "time" : "2025-10-26T00:35:00+00:00",
+        "text" : "repeated hour: the earlier offset"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-8e88677cc577742b1709c99f"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Patient/pat-63216100671af30973859afc",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-63216100671af30973859afc",
+      "identifier" : [{
+        "value" : "P-004"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-63216100671af30973859afc"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Observation/obs-63216100671af30973859afc",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-63216100671af30973859afc",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-63216100671af30973859afc"
+      },
+      "effectiveDateTime" : "2025-10-26T03:00:00+01:00",
+      "note" : [{
+        "time" : "2025-10-26T02:05:00+00:00",
+        "text" : "after the change: +01:00"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-63216100671af30973859afc"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Patient/pat-6b21bb454989e0c2b3ab4ba5",
+    "resource" : {
+      "resourceType" : "Patient",
+      "id" : "pat-6b21bb454989e0c2b3ab4ba5",
+      "identifier" : [{
+        "value" : "P-005"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Patient/pat-6b21bb454989e0c2b3ab4ba5"
+    }
+  },
+  {
+    "fullUrl" : "http://example.org/fhir/time-zone/Observation/obs-6b21bb454989e0c2b3ab4ba5",
+    "resource" : {
+      "resourceType" : "Observation",
+      "id" : "obs-6b21bb454989e0c2b3ab4ba5",
+      "status" : "final",
+      "code" : {
+        "coding" : [{
+          "system" : "http://loinc.org",
+          "code" : "48767-8",
+          "display" : "Annotation comment [Interpretation] Narrative"
+        }]
+      },
+      "subject" : {
+        "reference" : "Patient/pat-6b21bb454989e0c2b3ab4ba5"
+      },
+      "note" : [{
+        "time" : "2025-03-30T00:35:00+00:00",
+        "text" : "skipped hour: invalid"
+      }]
+    },
+    "request" : {
+      "method" : "PUT",
+      "url" : "Observation/obs-6b21bb454989e0c2b3ab4ba5"
+    }
+  }]
+}
