@@ -29,6 +29,7 @@ The plan and its new dependencies (kysely, pg, @fastify/swagger) were approved o
   - Every route except `/api/health` and `/api/docs` needs an authenticated caller, who gets a `users` row on first sight.
   - The default authentication refuses everyone (401) until the JWT check (#19), so no project route can answer without a user.
   - Until #19 brings the role permissions, every project route needs a member of the project, and a non-member gets 404, as if the project didn't exist.
+- **Rate limit**: `@fastify/rate-limit` (approved on 2026-11-27, after CodeQL's `js/missing-rate-limiting` alert) allows 600 requests per client address and minute on every route except the health check. It runs before the authentication hook, so it also limits guessing credentials. The count is kept in memory, enough for the MVP's single API instance; several instances would need a shared store or the reverse proxy's limit. Past the limit the answer is 429, as a problem.
 - **Errors** are `application/problem+json`, with a stable `code` that is also the last segment of `type` (`https://cindermed.org/problems/<code>`).
   - Messages name objects and fields, never values.
   - A 500 logs only the error's name and code, because database messages can quote values.

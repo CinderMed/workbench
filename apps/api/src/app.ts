@@ -1,3 +1,4 @@
+import rateLimit from "@fastify/rate-limit";
 import swagger from "@fastify/swagger";
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import { type Authenticate, refuseAll, userOf } from "./auth.js";
@@ -18,6 +19,11 @@ export interface AppOptions {
   db?: Db;
   /** Who sent a request. Default: nobody, so every project route answers 401 (#19). */
   authenticate?: Authenticate;
+  /**
+   * Requests allowed per client address and minute, health checks excepted (default 600). It
+   * also limits guessing credentials through the authentication hook.
+   */
+  rateLimit?: number;
 }
 
 /** Routes that answer without a caller. */
@@ -34,6 +40,21 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     disableRequestLogging: true,
     // A whole project file can be imported in one request.
     bodyLimit: 20 * 1024 * 1024,
+  });
+
+  // Before every hook and route: a client over its limit is refused before authentication runs.
+  await app.register(rateLimit, {
+    global: true,
+    max: options.rateLimit ?? 600,
+    timeWindow: 60_000,
+    allowList: (request) => request.url === "/api/health",
+    errorResponseBuilder: (_request, context) =>
+      new ProblemError({
+        code: "too-many-requests",
+        status: 429,
+        title: "Too many requests",
+        detail: `More than ${String(context.max)} requests in a minute: try again in ${context.after}.`,
+      }),
   });
 
   await app.register(swagger, {
