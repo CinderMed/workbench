@@ -87,6 +87,14 @@ describe("GitHub Actions", () => {
     expect(steps).toContain("~/.fhir/packages");
   });
 
+  it("runs the API's database tests on PostgreSQL 17 in the unit-test job (#219)", () => {
+    const ci = load(".github/workflows/ci.yml") as Workflow & {
+      jobs: Record<string, { services?: Record<string, { image?: string }> }>;
+    };
+    expect(ci.jobs["test"]?.services?.["postgres"]?.image).toBe("postgres:17.11-alpine");
+    expect(JSON.stringify(ci.jobs["test"])).toContain("TEST_DATABASE_URL");
+  });
+
   it("validates the FHIR resources of the examples in the golden job", () => {
     const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf8");
     expect(ci).toContain("bash tooling/golden/validate-resources.sh");

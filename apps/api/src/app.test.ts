@@ -4,8 +4,8 @@ import { buildApp } from "./app.js";
 
 let app: FastifyInstance;
 
-beforeEach(() => {
-  app = buildApp({ version: "1.2.3" });
+beforeEach(async () => {
+  app = await buildApp({ version: "1.2.3" });
 });
 
 afterEach(async () => {
@@ -22,5 +22,32 @@ describe("GET /api/health", () => {
   it("answers 404 outside the known routes", async () => {
     const response = await app.inject({ method: "GET", url: "/api/unknown" });
     expect(response.statusCode).toBe(404);
+    // RFC 9457 problem details.
+    expect(response.headers["content-type"]).toContain("application/problem+json");
+    expect(response.json()).toMatchObject({ code: "not-found", status: 404 });
+  });
+
+  it("serves the OpenAPI document at /api/docs", async () => {
+    const response = await app.inject({ method: "GET", url: "/api/docs" });
+    expect(response.json()).toMatchObject({ openapi: "3.1.0", info: { version: "1.2.3" } });
+  });
+});
+
+describe("rate limit", () => {
+  it("answers 429 as a problem past the limit, and never limits the health check", async () => {
+    const limited = await buildApp({ version: "1.2.3", rateLimit: 2 });
+    try {
+      const docs = () => limited.inject({ method: "GET", url: "/api/docs" });
+      expect((await docs()).statusCode).toBe(200);
+      expect((await docs()).statusCode).toBe(200);
+      const refused = await docs();
+      expect(refused.statusCode).toBe(429);
+      expect(refused.headers["content-type"]).toContain("application/problem+json");
+      expect(refused.json()).toMatchObject({ code: "too-many-requests", status: 429 });
+      for (let i = 0; i < 5; i++)
+        expect((await limited.inject({ method: "GET", url: "/api/health" })).statusCode).toBe(200);
+    } finally {
+      await limited.close();
+    }
   });
 });
