@@ -16,7 +16,14 @@ import type { Db } from "../db/connect.js";
 import type { EntityKind } from "../db/schema.js";
 import { allow } from "../permissions.js";
 import { ProblemError, notFound, sendProblem } from "../problem.js";
-import { type WriteResult, importProject, loadProject, newId, writeChanges } from "./repository.js";
+import {
+  type VersionedChange,
+  type WriteResult,
+  importProject,
+  loadProject,
+  newId,
+  writeChanges,
+} from "./repository.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -107,7 +114,89 @@ function writeProblem(result: Exclude<WriteResult, { ok: true }>): ProblemError 
         title: "The change is refused",
         detail: result.message,
       });
+    case "conflict":
+      // The specification answers 409, with the current version, so the UI can compare (A3).
+      return new ProblemError({
+        code: "conflict",
+        status: 409,
+        title: "Changed since it was read",
+        detail:
+          "Someone else changed or deleted the object since it was read: compare with the current version and choose which to keep.",
+        conflicts: result.conflicts,
+      });
   }
+}
+
+/** One change of a batch, as sent. */
+type BatchChange =
+  | { op: "create"; kind: EntityKind; value: Record<string, unknown>; parentId?: string }
+  | {
+      op: "update";
+      kind: EntityKind | "project";
+      id: string;
+      value: Record<string, unknown>;
+      readVersion: string;
+    }
+  | { op: "delete"; kind: EntityKind; id: string; readVersion: string };
+
+const VERSION = { type: "string", pattern: "^[0-9]+$" } as const;
+const batchItem = {
+  oneOf: [
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["op", "kind", "value"],
+      properties: {
+        op: { const: "create" },
+        kind: { type: "string", enum: ENTITY_KINDS },
+        value: { type: "object" },
+        parentId: { type: "string" },
+      },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["op", "kind", "id", "value", "readVersion"],
+      properties: {
+        op: { const: "update" },
+        kind: { type: "string", enum: [...ENTITY_KINDS, "project"] },
+        id: { type: "string" },
+        value: { type: "object" },
+        readVersion: VERSION,
+      },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["op", "kind", "id", "readVersion"],
+      properties: {
+        op: { const: "delete" },
+        kind: { type: "string", enum: ENTITY_KINDS },
+        id: { type: "string" },
+        readVersion: VERSION,
+      },
+    },
+  ],
+} as const;
+
+/** An object's version as an entity tag (`"3"`). */
+const etag = (version: string | undefined) => `"${version ?? ""}"`;
+
+/**
+ * The version a write read, from `If-Match` (`"3"` or `3`). Every update and delete must carry
+ * one (A3): without it the API cannot tell a lost update, so it answers 428.
+ */
+function readVersion(request: FastifyRequest): string {
+  const header = request.headers["if-match"];
+  const match = typeof header === "string" ? /^\s*(?:W\/)?"?(\d+)"?\s*$/.exec(header) : null;
+  if (match?.[1] === undefined)
+    throw new ProblemError({
+      code: "precondition-required",
+      status: 428,
+      title: "If-Match required",
+      detail: "Send the version you read in If-Match, so a change made meanwhile is not lost.",
+    });
+  return match[1];
 }
 
 export function projectRoutes(app: FastifyInstance, db: Db): void {
@@ -154,16 +243,15 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
   app.get<{ Params: { p: string } }>(
     "/api/projects/:p",
     { schema: { summary: "The project settings" } },
-    async (request) => {
+    async (request, reply) => {
       const { p } = request.params;
       await allow(db, p, caller(request), "read");
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
-      return {
-        id: p,
-        version: stored.versions.get(objectKey("project", p)),
-        settings: stored.file.project,
-      };
+      const version = stored.versions.get(objectKey("project", p));
+      return reply
+        .header("etag", etag(version))
+        .send({ id: p, version, settings: stored.file.project });
     },
   );
 
@@ -174,11 +262,12 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
       const { p } = request.params;
       const user = caller(request);
       await allow(db, p, user, "manage");
+      const read = readVersion(request);
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
       const value = { ...stored.file.project, ...request.body, id: p };
       const result = await writeChanges(db, p, user, [
-        { op: "update", kind: "project", id: p, value },
+        { op: "update", kind: "project", id: p, value, readVersion: read },
       ]);
       if (!result.ok) throw writeProblem(result);
       return { id: p, version: result.versions.get(objectKey("project", p)), settings: value };
@@ -228,14 +317,15 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
   app.get<{ Params: { p: string; kind: EntityKind; id: string } }>(
     "/api/projects/:p/entities/:kind/:id",
     { schema: { summary: "One object", params: objectParam } },
-    async (request) => {
+    async (request, reply) => {
       const { p, kind, id } = request.params;
       await allow(db, p, caller(request), "read");
       const stored = await loadProject(db, p);
       const found =
         stored === undefined ? undefined : objectsOf(stored.file, kind).find((o) => o.id === id);
       if (stored === undefined || found === undefined) throw notFound(`no ${kind} ${id}`);
-      return { kind, ...found, version: stored.versions.get(objectKey(kind, id)) };
+      const version = stored.versions.get(objectKey(kind, id));
+      return reply.header("etag", etag(version)).send({ kind, ...found, version });
     },
   );
 
@@ -293,10 +383,62 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
       const { p, kind, id } = request.params;
       const user = caller(request);
       await allow(db, p, user, "edit");
+      const read = readVersion(request);
       const value = request.body.value;
-      const result = await writeChanges(db, p, user, [{ op: "update", kind, id, value } as Change]);
+      const result = await writeChanges(db, p, user, [
+        { op: "update", kind, id, value, readVersion: read } as VersionedChange,
+      ]);
       if (!result.ok) throw writeProblem(result);
-      return { kind, id, value, version: result.versions.get(objectKey(kind, id)) };
+      const version = result.versions.get(objectKey(kind, id));
+      return { kind, id, value, version };
+    },
+  );
+
+  app.post<{ Params: { p: string }; Body: { changes: BatchChange[] } }>(
+    "/api/projects/:p/entities::batch",
+    {
+      schema: {
+        summary: "Apply several changes in one transaction, all or nothing (D8, A3)",
+        body: {
+          type: "object",
+          required: ["changes"],
+          additionalProperties: false,
+          properties: { changes: { type: "array", minItems: 1, maxItems: 2000, items: batchItem } },
+        },
+      },
+    },
+    async (request) => {
+      const { p } = request.params;
+      const user = caller(request);
+      const { changes } = request.body;
+      // Settings need `manage`; every other change needs `edit`.
+      await allow(db, p, user, "edit");
+      if (changes.some((c) => c.kind === "project")) await allow(db, p, user, "manage");
+      const prepared: VersionedChange[] = changes.map((c) => {
+        if (c.op === "create") {
+          const id = typeof c.value["id"] === "string" ? c.value["id"] : newId(c.kind);
+          return {
+            op: "create",
+            kind: c.kind,
+            value: { ...c.value, id },
+            ...(c.parentId === undefined ? {} : { parentId: c.parentId }),
+          } as VersionedChange;
+        }
+        return { ...c } as VersionedChange;
+      });
+      const result = await writeChanges(db, p, user, prepared);
+      if (!result.ok) throw writeProblem(result);
+      return {
+        objects: prepared.map((c) => {
+          const id = c.op === "create" ? c.value.id : c.id;
+          return {
+            op: c.op,
+            kind: c.kind,
+            id,
+            version: result.versions.get(objectKey(c.kind, id)) ?? null,
+          };
+        }),
+      };
     },
   );
 
@@ -307,7 +449,10 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
       const { p, kind, id } = request.params;
       const user = caller(request);
       await allow(db, p, user, "edit");
-      const result = await writeChanges(db, p, user, [{ op: "delete", kind, id }]);
+      const read = readVersion(request);
+      const result = await writeChanges(db, p, user, [
+        { op: "delete", kind, id, readVersion: read },
+      ]);
       if (!result.ok) throw writeProblem(result);
       return reply.status(204).send();
     },

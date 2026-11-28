@@ -145,6 +145,7 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
     const updated = await as("ada", {
       method: "PUT",
       url: `/api/projects/${p}/entities/mapping/${made.id}`,
+      headers: { "if-match": `"${made.version}"` },
       payload: { value: { ...withoutId, id: made.id, code: "R-901" } },
     });
     expect(updated.json()).toMatchObject({ version: "2" });
@@ -158,6 +159,7 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
     const invalid = await as("ada", {
       method: "PUT",
       url: `/api/projects/${p}/entities/mapping/${made.id}`,
+      headers: { "if-match": '"2"' },
       payload: { value: { ...withoutId, id: made.id, code: "R-901", transform: { kind: "nope" } } },
     });
     expect(invalid.statusCode).toBe(422);
@@ -171,11 +173,16 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
     });
     expect(unchanged.json()).toMatchObject({ version: "2" });
 
-    // Delete: gone, and a second delete finds nothing.
+    // Delete: gone, and a second delete of what was read is a conflict (deleted meanwhile).
     const url = `/api/projects/${p}/entities/mapping/${made.id}`;
-    expect((await as("ada", { method: "DELETE", url })).statusCode).toBe(204);
+    const del = { method: "DELETE" as const, url, headers: { "if-match": '"2"' } };
+    expect((await as("ada", del)).statusCode).toBe(204);
     expect((await as("ada", { method: "GET", url })).statusCode).toBe(404);
-    expect((await as("ada", { method: "DELETE", url })).statusCode).toBe(404);
+    const again = await as("ada", del);
+    expect(again.statusCode).toBe(409);
+    expect(again.json()).toMatchObject({
+      conflicts: [{ kind: "mapping", id: made.id, version: null }],
+    });
 
     // The project still exports as the fixture.
     expect((await exported("ada", p)).body).toBe(
@@ -213,17 +220,28 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
       columnId,
     ]);
 
-    await as("ada", { method: "DELETE", url: `/api/projects/${p}/entities/column/${columnId}` });
+    const v1 = { "if-match": '"1"' };
+    await as("ada", {
+      method: "DELETE",
+      url: `/api/projects/${p}/entities/column/${columnId}`,
+      headers: v1,
+    });
     const last = await as("ada", {
       method: "DELETE",
       url: `/api/projects/${p}/entities/column/col_extra01`,
+      headers: v1,
     });
     expect(last.statusCode).toBe(422);
     expect(last.json()).toMatchObject({ code: "change-refused" });
 
     expect(
-      (await as("ada", { method: "DELETE", url: `/api/projects/${p}/entities/source/${source}` }))
-        .statusCode,
+      (
+        await as("ada", {
+          method: "DELETE",
+          url: `/api/projects/${p}/entities/source/${source}`,
+          headers: v1,
+        })
+      ).statusCode,
     ).toBe(204);
     const left = await db
       .selectFrom("entities")
@@ -246,6 +264,7 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
     const patched = await as("ada", {
       method: "PATCH",
       url: `/api/projects/${p}`,
+      headers: { "if-match": '"1"' },
       payload: { name: "Metastra 2", id: "prj_other" },
     });
     expect(patched.json()).toMatchObject({
@@ -274,9 +293,11 @@ describe.skipIf(!withDatabase)("project routes on PostgreSQL (#219)", () => {
     const missing = await as("ada", {
       method: "PUT",
       url: `/api/projects/${p}/entities/mapping/map_missing1`,
+      headers: { "if-match": '"1"' },
       payload: { value: { id: "map_missing1" } },
     });
-    expect(missing.statusCode).toBe(404);
+    expect(missing.statusCode).toBe(409);
+    expect(missing.json()).toMatchObject({ conflicts: [{ id: "map_missing1", version: null }] });
     const row = base.mappings[0];
     const duplicate = await as("ada", {
       method: "POST",
