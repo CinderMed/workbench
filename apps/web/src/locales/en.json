@@ -312,5 +312,50 @@
     "nothing": "The selected rows already have it: nothing to change.",
     "done_one": "{{count}} row updated.",
     "done_other": "{{count}} rows updated."
+  },
+  "projects": {
+    "title": "Projects",
+    "loading": "Loading your projects…",
+    "loadFailed": "The projects could not be loaded: {{message}}",
+    "none": "You have no projects yet: create one, or import a project file.",
+    "name": "Name",
+    "fhirVersion": "FHIR version",
+    "role": "Your role",
+    "roles": {
+      "owner": "Owner",
+      "mapper": "Mapper",
+      "reviewer": "Reviewer",
+      "engineer": "Engineer",
+      "viewer": "Viewer"
+    },
+    "new": "New project",
+    "import": "Import project file…",
+    "export": "Export JSON",
+    "exportOne": "Export {{name}} as JSON",
+    "imported": "{{file}} was imported.",
+    "created": "Project {{name}} was created.",
+    "notJson": "{{file}} is not a JSON file: only project files (.json) can be imported here.",
+    "importFailed": "{{file}} was not imported: {{message}}",
+    "exportFailed": "{{name}} could not be exported: {{message}}",
+    "createFailed": "The project was not created: {{message}}",
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "canonicalBase": "Canonical base",
+      "canonicalBaseHint": "The start of the URLs of the generated maps and models, for example https://example.org/fhir/my-study",
+      "packages": "FHIR packages (optional)",
+      "packagesHint": "One per line, as name#version, for example hl7.fhir.uv.ips#1.1.0. The core package of the FHIR version is always included.",
+      "table": "First table",
+      "columns": "Its columns",
+      "columnsHint": "One column name per line, or paste the header line of the data file (separated by commas, semicolons or tabs). Only names: never data values.",
+      "fhir": {
+        "4.0.1": "R4 (4.0.1)",
+        "5.0.0": "R5 (5.0.0)"
+      },
+      "required": "Required",
+      "notUrl": "Give an http or https URL",
+      "packageFormat": "Line {{line}}: write name#version",
+      "create": "Create project"
+    }
   }
 }

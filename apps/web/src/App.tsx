@@ -1,7 +1,9 @@
-import { Alert, Button, Center, Group, Loader, Stack, Text, Title } from "@mantine/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, AppShell, Button, Center, Group, Loader, Stack, Text, Title } from "@mantine/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { type ApiClient, createApiClient } from "./api/client";
 import type { AuthClient } from "./auth";
+import { ProjectsPage } from "./projects/ProjectsPage";
 
 type State =
   | { kind: "loading" }
@@ -13,10 +15,23 @@ export interface AppProps {
   auth: AuthClient;
   location: { href: string };
   replaceUrl: (url: string) => void;
+  /** The API (tests pass their own). Default: the same-origin API with the user's token. */
+  api?: ApiClient;
+  /** Saves a file on the user's computer. */
+  download?: (name: string, text: string) => void;
 }
 
-/** Module 0 shell: signs the user in through Keycloak and shows who is signed in. */
-export function App({ auth, location, replaceUrl }: AppProps) {
+function browserDownload(name: string, text: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+/** The signed-in app: signs the user in through Keycloak, then shows their projects (A1). */
+export function App({ auth, location, replaceUrl, api, download = browserDownload }: AppProps) {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "loading" });
 
@@ -50,6 +65,42 @@ export function App({ auth, location, replaceUrl }: AppProps) {
     void start();
   }, [start]);
 
+  const client = useMemo(
+    () =>
+      api ??
+      createApiClient(auth.accessToken, {
+        onUnauthenticated: () => {
+          void auth.signIn();
+        },
+      }),
+    [api, auth],
+  );
+
+  if (state.kind === "signedIn")
+    return (
+      <AppShell header={{ height: 56 }} padding={0}>
+        <AppShell.Header>
+          <Group h="100%" px="md" justify="space-between">
+            <Group gap="xs">
+              <Title order={3}>{t("app.name")}</Title>
+              <Text c="dimmed" size="sm">
+                {t("app.subtitle")}
+              </Text>
+            </Group>
+            <Group gap="xs">
+              <Text size="sm">{t("auth.signedInAs", { name: state.name })}</Text>
+              <Button variant="light" size="xs" onClick={() => void auth.signOut()}>
+                {t("auth.signOut")}
+              </Button>
+            </Group>
+          </Group>
+        </AppShell.Header>
+        <AppShell.Main>
+          <ProjectsPage api={client} download={download} />
+        </AppShell.Main>
+      </AppShell>
+    );
+
   return (
     <Center h="100vh">
       <Stack align="center" gap="md">
@@ -62,14 +113,6 @@ export function App({ auth, location, replaceUrl }: AppProps) {
           </Group>
         )}
         {state.kind === "redirecting" && <Text>{t("auth.redirecting")}</Text>}
-        {state.kind === "signedIn" && (
-          <>
-            <Text>{t("auth.signedInAs", { name: state.name })}</Text>
-            <Button variant="light" onClick={() => void auth.signOut()}>
-              {t("auth.signOut")}
-            </Button>
-          </>
-        )}
         {state.kind === "error" && (
           <Alert color="red" title={t("auth.error", { message: state.message })}>
             <Button variant="light" color="red" onClick={() => void start()}>
