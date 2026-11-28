@@ -169,6 +169,21 @@ export async function importProject(db: Db, user: User, parsed: ProjectFile): Pr
       .execute();
     const rows = entityRows(projectId, file, user.id);
     if (rows.length > 0) await trx.insertInto("entities").values(rows).execute();
+    await trx
+      .insertInto("entity_revisions")
+      .values(
+        [
+          { kind: "project" as const, id: projectId, data: JSON.stringify(file.project) },
+          ...rows.map((r) => ({ kind: r.kind, id: r.id, data: r.data })),
+        ].map((r) => ({
+          ...r,
+          project_id: projectId,
+          version: 1,
+          change: "import" as const,
+          author: user.id,
+        })),
+      )
+      .execute();
     return projectId;
   });
 }
@@ -242,6 +257,14 @@ export async function writeChanges(
 
     const versions = new Map<string, string>();
     const now = new Date();
+    // History (#220): the state each write leaves an object in, recorded with the write.
+    const revisions: {
+      kind: StoredKind;
+      id: string;
+      version: string;
+      change: "create" | "update" | "delete";
+      data: string | null;
+    }[] = [];
     for (const touched of applied.touched) {
       const key = objectKey(touched.kind, touched.id);
       if (touched.kind === "project") {
@@ -256,6 +279,13 @@ export async function writeChanges(
           .returning("version")
           .executeTakeFirstOrThrow();
         versions.set(key, row.version);
+        revisions.push({
+          kind: "project",
+          id: touched.id,
+          version: row.version,
+          change: "update",
+          data: JSON.stringify(applied.project.project),
+        });
         continue;
       }
       const kind: EntityKind = touched.kind;
@@ -274,6 +304,23 @@ export async function writeChanges(
           )
           .execute();
         versions.delete(key);
+        // A deletion keeps the version it deleted; a table's columns are deleted with it.
+        const gone = [
+          { kind, id: touched.id },
+          ...(kind === "source"
+            ? (stored.file.sources.find((s) => s.id === touched.id)?.columns ?? []).map((c) => ({
+                kind: "column" as const,
+                id: c.id,
+              }))
+            : []),
+        ];
+        for (const g of gone)
+          revisions.push({
+            ...g,
+            version: stored.versions.get(objectKey(g.kind, g.id)) ?? "0",
+            change: "delete",
+            data: null,
+          });
         continue;
       }
       const value = objectValue(applied.project, kind, touched.id);
@@ -293,6 +340,13 @@ export async function writeChanges(
           .returning("version")
           .executeTakeFirstOrThrow();
         versions.set(key, row.version);
+        revisions.push({
+          kind,
+          id: touched.id,
+          version: row.version,
+          change: "update",
+          data: JSON.stringify(value.data),
+        });
         continue;
       }
       const last = await trx
@@ -316,6 +370,13 @@ export async function writeChanges(
         .returning("version")
         .executeTakeFirstOrThrow();
       versions.set(key, row.version);
+      revisions.push({
+        kind,
+        id: touched.id,
+        version: row.version,
+        change: "create",
+        data: JSON.stringify(value.data),
+      });
       // A table created with its first columns: those are rows of their own.
       if (kind === "source")
         for (const [i, column] of (
@@ -335,8 +396,20 @@ export async function writeChanges(
             .returning("version")
             .executeTakeFirstOrThrow();
           versions.set(objectKey("column", column.id), created.version);
+          revisions.push({
+            kind: "column",
+            id: column.id,
+            version: created.version,
+            change: "create",
+            data: JSON.stringify(column),
+          });
         }
     }
+    if (revisions.length > 0)
+      await trx
+        .insertInto("entity_revisions")
+        .values(revisions.map((r) => ({ ...r, project_id: projectId, author: user.id, at: now })))
+        .execute();
     return { ok: true, versions } as const;
   });
 }

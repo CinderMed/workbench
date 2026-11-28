@@ -69,6 +69,16 @@ export interface Database {
     updated_by: string;
     updated_at: UpdatedAt;
   };
+  entity_revisions: {
+    project_id: string;
+    kind: EntityKind | "project";
+    id: string;
+    version: Version;
+    change: "import" | "create" | "update" | "delete";
+    data: ColumnType<Record<string, unknown> | null, string | null, never>;
+    author: string;
+    at: CreatedAt;
+  };
   schema_migrations: {
     name: string;
     applied_at: CreatedAt;
