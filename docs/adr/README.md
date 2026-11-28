@@ -33,3 +33,4 @@ An accepted ADR is not rewritten: a later decision adds an addendum to it or sup
 | [0025](0025-fhir-package-digests.md)                         | The export manifest pins every FHIR package by the SHA-256 of its tarball | accepted |
 | [0026](0026-api-persistence-and-errors.md)                   | API persistence of project objects, errors and OpenAPI                    | accepted |
 | [0027](0027-sign-in-and-project-roles.md)                    | Sign-in with Keycloak tokens, and project roles in the database           | accepted |
+| [0028](0028-optimistic-concurrency.md)                       | Optimistic concurrency with If-Match, and batches in one transaction      | accepted |

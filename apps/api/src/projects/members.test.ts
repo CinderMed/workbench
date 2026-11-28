@@ -94,9 +94,13 @@ describe.skipIf(!withDatabase)("members and roles (#19)", () => {
       const who = people[role];
       const read = await as(who, { method: "GET", url: `/api/projects/${p}/entities/mapping` });
       expect(read.statusCode).toBe(200);
+      const version = read
+        .json<{ id: string; version: string }[]>()
+        .find((m) => m.id === row?.id)?.version;
       const edit = await as(who, {
         method: "PUT",
         url: `/api/projects/${p}/entities/mapping/${row?.id ?? ""}`,
+        headers: { "if-match": `"${version ?? ""}"` },
         payload: { value: row },
       });
       expect([role, edit.statusCode]).toEqual([role, PERMISSIONS.edit.includes(role) ? 200 : 403]);
@@ -109,10 +113,23 @@ describe.skipIf(!withDatabase)("members and roles (#19)", () => {
         role,
         PERMISSIONS.export.includes(role) ? 200 : 403,
       ]);
-      const settings = await as(who, { method: "PATCH", url: `/api/projects/${p}`, payload: {} });
+      const current = (await as(who, { method: "GET", url: `/api/projects/${p}` })).json<{
+        version: string;
+      }>();
+      const settings = await as(who, {
+        method: "PATCH",
+        url: `/api/projects/${p}`,
+        headers: { "if-match": `"${current.version}"` },
+        payload: {},
+      });
       expect([role, settings.statusCode]).toEqual([role, role === "owner" ? 200 : 403]);
     }
-    const refused = await as("cy", { method: "PATCH", url: `/api/projects/${p}`, payload: {} });
+    const refused = await as("cy", {
+      method: "PATCH",
+      url: `/api/projects/${p}`,
+      headers: { "if-match": '"1"' },
+      payload: {},
+    });
     expect(refused.json()).toMatchObject({ code: "forbidden", status: 403, role: "reviewer" });
   });
 

@@ -43,6 +43,9 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     disableRequestLogging: true,
     // A whole project file can be imported in one request.
     bodyLimit: 20 * 1024 * 1024,
+    // Strict by default: an unknown field or a wrong type is refused, never removed or converted
+    // (Fastify's defaults would strip it, which also breaks `oneOf` bodies such as a batch).
+    ajv: { customOptions: { removeAdditional: false, coerceTypes: false } },
     ...(options.trustProxy === undefined ? {} : { trustProxy: options.trustProxy }),
   });
 

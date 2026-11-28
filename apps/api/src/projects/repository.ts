@@ -173,6 +173,20 @@ export async function importProject(db: Db, user: User, parsed: ProjectFile): Pr
   });
 }
 
+/**
+ * A change with the version of the object it read (A3, #20): an update or a delete applies only
+ * when the object still has that version.
+ */
+export type VersionedChange = Change & { readonly readVersion?: string };
+
+/** An object that changed since it was read: its current version and value (null: deleted). */
+export interface Conflict {
+  readonly kind: StoredKind;
+  readonly id: string;
+  readonly version: string | null;
+  readonly value: unknown;
+}
+
 export type WriteResult =
   | {
       readonly ok: true;
@@ -180,14 +194,36 @@ export type WriteResult =
       readonly versions: ReadonlyMap<string, string>;
     }
   | Exclude<ApplyResult, { ok: true }>
-  | { readonly ok: false; readonly reason: "noProject" };
+  | { readonly ok: false; readonly reason: "noProject" }
+  | { readonly ok: false; readonly reason: "conflict"; readonly conflicts: readonly Conflict[] };
 
-/** Applies changes to a project, all or nothing, and stores the objects they touched. */
+/** The objects a batch addresses that no longer have the version it read. */
+function conflictsOf(stored: StoredProject, changes: readonly VersionedChange[]): Conflict[] {
+  const conflicts: Conflict[] = [];
+  for (const change of changes) {
+    if (change.op === "create" || change.readVersion === undefined) continue;
+    const version = stored.versions.get(objectKey(change.kind, change.id)) ?? null;
+    if (version === change.readVersion) continue;
+    const value =
+      version === null
+        ? null
+        : change.kind === "project"
+          ? stored.file.project
+          : (objectValue(stored.file, change.kind, change.id)?.data ?? null);
+    conflicts.push({ kind: change.kind, id: change.id, version, value });
+  }
+  return conflicts;
+}
+
+/**
+ * Applies changes to a project, all or nothing, and stores the objects they touched. A change
+ * whose object no longer has the version it read makes the whole write a conflict.
+ */
 export async function writeChanges(
   db: Db,
   projectId: string,
   user: User,
-  changes: readonly Change[],
+  changes: readonly VersionedChange[],
 ): Promise<WriteResult> {
   return db.transaction().execute(async (trx) => {
     const locked = await trx
@@ -199,6 +235,8 @@ export async function writeChanges(
     if (locked === undefined) return { ok: false, reason: "noProject" } as const;
     const stored = await loadProject(trx, projectId);
     if (stored === undefined) return { ok: false, reason: "noProject" } as const;
+    const conflicts = conflictsOf(stored, changes);
+    if (conflicts.length > 0) return { ok: false, reason: "conflict", conflicts } as const;
     const applied = applyChanges(stored.file, changes);
     if (!applied.ok) return applied;
 
