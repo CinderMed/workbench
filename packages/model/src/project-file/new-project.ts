@@ -49,13 +49,22 @@ export function checkHeader(record: readonly string[]): { names: string[]; error
   return { names, errors };
 }
 
+/** The text without leading and trailing `_`, in linear time (no backtracking pattern). */
+function trimUnderscores(text: string): string {
+  let start = 0;
+  let end = text.length;
+  while (start < end && text[start] === "_") start += 1;
+  while (end > start && text[end - 1] === "_") end -= 1;
+  return text.slice(start, end);
+}
+
 /** An id of the project format (`[A-Za-z0-9_-]{6,64}`) from a prefix and a name. */
 export function idFrom(prefix: string, name: string, fallback: string): string {
-  const slug = name
+  const cleaned = name
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
-    .replace(/[^A-Za-z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+    .replace(/[^A-Za-z0-9_-]+/g, "_");
+  const slug = trimUnderscores(cleaned);
   const id = `${prefix}${slug === "" ? fallback : slug}`.slice(0, 64);
   return id.length >= 6 ? id : `${id}_${fallback}`.slice(0, 64);
 }

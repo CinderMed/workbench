@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validateProjectSchema } from "../schema-validation.js";
-import { checkHeader, newProject } from "./new-project.js";
+import { checkHeader, idFrom, newProject } from "./new-project.js";
 
 describe("newProject (A1, ADR-0022)", () => {
   it("makes a schema-valid project with one string table, its description and packages", () => {
@@ -49,5 +49,13 @@ describe("newProject (A1, ADR-0022)", () => {
       "empty",
       "duplicate",
     ]);
+  });
+
+  it("makes ids from names in linear time, also from long runs of separators", () => {
+    expect(idFrom("col_", "__a b__", "001")).toBe("col_a_b");
+    expect(idFrom("col_", "___", "001")).toBe("col_001");
+    const start = Date.now();
+    idFrom("col_", `${"_".repeat(100_000)}x${" ".repeat(100_000)}`, "001");
+    expect(Date.now() - start).toBeLessThan(200);
   });
 });
