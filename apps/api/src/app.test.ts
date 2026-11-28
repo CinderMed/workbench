@@ -34,6 +34,23 @@ describe("GET /api/health", () => {
 });
 
 describe("rate limit", () => {
+  it("counts the address the trusted proxy forwards, not the proxy's", async () => {
+    const limited = await buildApp({ version: "1.2.3", rateLimit: 1, trustProxy: ["127.0.0.1"] });
+    try {
+      const from = (address: string) =>
+        limited.inject({
+          method: "GET",
+          url: "/api/docs",
+          headers: { "x-forwarded-for": address },
+        });
+      expect((await from("192.0.2.1")).statusCode).toBe(200);
+      expect((await from("192.0.2.2")).statusCode).toBe(200);
+      expect((await from("192.0.2.1")).statusCode).toBe(429);
+    } finally {
+      await limited.close();
+    }
+  });
+
   it("answers 429 as a problem past the limit, and never limits the health check", async () => {
     const limited = await buildApp({ version: "1.2.3", rateLimit: 2 });
     try {

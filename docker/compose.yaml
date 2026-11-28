@@ -45,9 +45,13 @@ services:
     image: cindermed/api:dev
     environment:
       PORT: "3000"
+      # The web container's proxy, on the Docker network: the rate limit counts the browser's address.
+      TRUST_PROXY: uniquelocal
       DATABASE_URL: ${DATABASE_URL:-postgres://cindermed:cindermed-dev@db:5432/cindermed}
       OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8081/realms/cindermed}
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-cindermed-web}
+      # Tokens name the browser's address as issuer; the API fetches the keys inside the network.
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-http://keycloak:8080/realms/cindermed/protocol/openid-connect/certs}
       BIOPORTAL_API_KEY: ${BIOPORTAL_API_KEY:-}
       LOINC_USERNAME: ${LOINC_USERNAME:-}
       LOINC_PASSWORD: ${LOINC_PASSWORD:-}

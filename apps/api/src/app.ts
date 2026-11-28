@@ -4,6 +4,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastif
 import { type Authenticate, refuseAll, userOf } from "./auth.js";
 import type { Db } from "./db/connect.js";
 import { ProblemError, sendProblem } from "./problem.js";
+import { memberRoutes } from "./projects/members.js";
 import { projectRoutes } from "./projects/routes.js";
 
 export interface HealthResponse {
@@ -17,13 +18,15 @@ export interface AppOptions {
   logger?: FastifyServerOptions["logger"];
   /** The database. Without it only the health and documentation routes exist. */
   db?: Db;
-  /** Who sent a request. Default: nobody, so every project route answers 401 (#19). */
+  /** Who sent a request (`tokenAuthenticate` in production). Default: nobody, every route 401. */
   authenticate?: Authenticate;
   /**
    * Requests allowed per client address and minute, health checks excepted (default 600). It
    * also limits guessing credentials through the authentication hook.
    */
   rateLimit?: number;
+  /** Trusted proxies (Fastify `trustProxy`), so the rate limit counts real client addresses. */
+  trustProxy?: string[];
 }
 
 /** Routes that answer without a caller. */
@@ -40,6 +43,7 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     disableRequestLogging: true,
     // A whole project file can be imported in one request.
     bodyLimit: 20 * 1024 * 1024,
+    ...(options.trustProxy === undefined ? {} : { trustProxy: options.trustProxy }),
   });
 
   // Before every hook and route: a client over its limit is refused before authentication runs.
@@ -114,6 +118,7 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
       request.user = await userOf(db, identity);
     });
     projectRoutes(app, db);
+    memberRoutes(app, db);
   }
 
   return app;

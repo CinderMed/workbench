@@ -35,8 +35,12 @@ export async function testDb(): Promise<{ db: Db; drop: () => Promise<void> }> {
 
 /** Test identities, chosen by the `x-test-user` header. */
 export const PEOPLE: Readonly<Record<string, Identity>> = {
-  ada: { sub: "sub-ada", name: "Ada", email: "ada@example.org" },
-  bob: { sub: "sub-bob", name: "Bob", email: "bob@example.org" },
+  ada: { sub: "sub-ada", name: "Ada", email: "ada@example.org", emailVerified: true },
+  bob: { sub: "sub-bob", name: "Bob", email: "bob@example.org", emailVerified: true },
+  cy: { sub: "sub-cy", name: "Cy", email: "cy@example.org", emailVerified: true },
+  dee: { sub: "sub-dee", name: "Dee", email: "dee@example.org", emailVerified: true },
+  /** Email not verified by the identity provider: invitations are not accepted. */
+  eve: { sub: "sub-eve", name: "Eve", email: "eve@example.org", emailVerified: false },
 };
 
 export const testAuthenticate: Authenticate = (request: FastifyRequest) => {
