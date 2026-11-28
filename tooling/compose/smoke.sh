@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Smoke test of the Docker Compose stack (module 0 "done when": docker compose up shows the Keycloak login).
 # Checks: the web app is served; the API answers through the web proxy; Keycloak serves the login page
-# for the cindermed-web client; a realm test user can sign in and is sent back to the web app with a code.
+# for the cindermed-web client; a realm test user can sign in and is sent back to the web app with a code;
+# the code becomes an access token that the API accepts (GET /api/me through the web proxy, #19).
 # Usage: bash tooling/compose/smoke.sh   (stack already running with the default ports and passwords)
 set -euo pipefail
 
@@ -41,5 +42,16 @@ case "$location" in
   "$web/?"*"code="*) echo "redirected back to the web app with an authorization code" ;;
   *) echo "unexpected redirect after sign-in: '$location'" >&2; exit 1 ;;
 esac
+
+echo "access token accepted by the API"
+code=$(printf '%s' "$location" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
+token=$(curl -fsS "$keycloak/realms/cindermed/protocol/openid-connect/token" \
+  --data-urlencode "grant_type=authorization_code" --data-urlencode "client_id=cindermed-web" \
+  --data-urlencode "code=$code" --data-urlencode "redirect_uri=$web/" \
+  --data-urlencode "code_verifier=$verifier" | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+[ -n "$token" ] || { echo "no access token for the code" >&2; exit 1; }
+curl -fsS -H "Authorization: Bearer $token" "$web/api/me" | grep -q "\"email\":\"$user@cindermed.test\""
+status=$(curl -sS -o /dev/null -w '%{http_code}' "$web/api/me")
+[ "$status" = "401" ] || { echo "GET /api/me without a token answered $status, not 401" >&2; exit 1; }
 
 echo "smoke test passed"

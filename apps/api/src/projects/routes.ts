@@ -1,7 +1,7 @@
 /**
  * Project routes (specification, "REST API", #219): import and JSON export of a project file (H3),
- * the project settings, and its objects one by one. Every route needs a member of the project;
- * the permissions of each role come with #19.
+ * the project settings, and its objects one by one. Every route checks the caller's role in the
+ * project (`allow`, specification "Permissions").
  */
 import {
   type Change,
@@ -14,6 +14,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { User } from "../auth.js";
 import type { Db } from "../db/connect.js";
 import type { EntityKind } from "../db/schema.js";
+import { allow } from "../permissions.js";
 import { ProblemError, notFound, sendProblem } from "../problem.js";
 import { type WriteResult, importProject, loadProject, newId, writeChanges } from "./repository.js";
 
@@ -48,17 +49,6 @@ function caller(request: FastifyRequest): User {
   const user = request.user;
   if (user === undefined) throw new Error("the authentication hook did not run");
   return user;
-}
-
-/** Every route of a project needs a member of it; anything else looks like a missing project. */
-async function member(db: Db, projectId: string, user: User): Promise<void> {
-  const row = await db
-    .selectFrom("project_members")
-    .select("role")
-    .where("project_id", "=", projectId)
-    .where("user_id", "=", user.id)
-    .executeTakeFirst();
-  if (row === undefined) throw notFound(`no project ${projectId}`);
 }
 
 /** The objects of one kind in a file, with their parent for columns. */
@@ -166,7 +156,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     { schema: { summary: "The project settings" } },
     async (request) => {
       const { p } = request.params;
-      await member(db, p, caller(request));
+      await allow(db, p, caller(request), "read");
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
       return {
@@ -183,7 +173,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     async (request) => {
       const { p } = request.params;
       const user = caller(request);
-      await member(db, p, user);
+      await allow(db, p, user, "manage");
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
       const value = { ...stored.file.project, ...request.body, id: p };
@@ -209,7 +199,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     },
     async (request, reply: FastifyReply) => {
       const { p } = request.params;
-      await member(db, p, caller(request));
+      await allow(db, p, caller(request), "export");
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
       return reply
@@ -224,7 +214,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     { schema: { summary: "The objects of one kind", params: kindParam } },
     async (request) => {
       const { p, kind } = request.params;
-      await member(db, p, caller(request));
+      await allow(db, p, caller(request), "read");
       const stored = await loadProject(db, p);
       if (stored === undefined) throw notFound(`no project ${p}`);
       return objectsOf(stored.file, kind).map((o) => ({
@@ -240,7 +230,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     { schema: { summary: "One object", params: objectParam } },
     async (request) => {
       const { p, kind, id } = request.params;
-      await member(db, p, caller(request));
+      await allow(db, p, caller(request), "read");
       const stored = await loadProject(db, p);
       const found =
         stored === undefined ? undefined : objectsOf(stored.file, kind).find((o) => o.id === id);
@@ -268,7 +258,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     async (request, reply) => {
       const { p, kind } = request.params;
       const user = caller(request);
-      await member(db, p, user);
+      await allow(db, p, user, "edit");
       const id =
         typeof request.body.value["id"] === "string" ? request.body.value["id"] : newId(kind);
       const value = { ...request.body.value, id };
@@ -302,7 +292,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     async (request) => {
       const { p, kind, id } = request.params;
       const user = caller(request);
-      await member(db, p, user);
+      await allow(db, p, user, "edit");
       const value = request.body.value;
       const result = await writeChanges(db, p, user, [{ op: "update", kind, id, value } as Change]);
       if (!result.ok) throw writeProblem(result);
@@ -316,7 +306,7 @@ export function projectRoutes(app: FastifyInstance, db: Db): void {
     async (request, reply) => {
       const { p, kind, id } = request.params;
       const user = caller(request);
-      await member(db, p, user);
+      await allow(db, p, user, "edit");
       const result = await writeChanges(db, p, user, [{ op: "delete", kind, id }]);
       if (!result.ok) throw writeProblem(result);
       return reply.status(204).send();

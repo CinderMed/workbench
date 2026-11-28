@@ -34,6 +34,14 @@ export interface Database {
     sub: string;
     name: string;
     email: string;
+    email_verified: ColumnType<boolean, boolean | undefined, boolean>;
+    created_at: CreatedAt;
+  };
+  invitations: {
+    project_id: string;
+    email: string;
+    role: MemberRole;
+    invited_by: string;
     created_at: CreatedAt;
   };
   projects: {

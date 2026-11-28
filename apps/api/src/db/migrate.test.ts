@@ -17,7 +17,10 @@ describe.skipIf(!withDatabase)("migrate", () => {
   it("records each migration and applies none twice", async () => {
     expect(await migrate(db)).toEqual([]);
     const names = await db.selectFrom("schema_migrations").select("name").execute();
-    expect(names.map((n) => n.name)).toEqual(["0001_projects_and_entities.sql"]);
+    expect(names.map((n) => n.name)).toEqual([
+      "0001_projects_and_entities.sql",
+      "0002_invitations.sql",
+    ]);
   });
 
   it("creates the tables of the specification", async () => {
@@ -26,6 +29,7 @@ describe.skipIf(!withDatabase)("migrate", () => {
       WHERE table_schema = current_schema() ORDER BY table_name`.execute(db);
     expect(tables.rows.map((r) => r.table_name)).toEqual([
       "entities",
+      "invitations",
       "project_members",
       "projects",
       "schema_migrations",
