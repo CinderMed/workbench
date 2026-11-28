@@ -12,6 +12,8 @@ export interface AuthClient {
   getUser: () => Promise<SignedInUser | null>;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** The access token for the API, renewed when it expires; null when the session is over. */
+  accessToken: () => Promise<string | null>;
 }
 
 export function displayName(user: User): string {
@@ -27,6 +29,8 @@ export function createAuthClient(config: WebConfig, origin: string): AuthClient 
     post_logout_redirect_uri: `${origin}/`,
     response_type: "code",
     scope: "openid profile email",
+    // Renew the access token with the refresh token before it expires, so the API keeps answering.
+    automaticSilentRenew: true,
     userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   });
 
@@ -42,5 +46,9 @@ export function createAuthClient(config: WebConfig, origin: string): AuthClient 
     },
     signIn: () => manager.signinRedirect(),
     signOut: () => manager.signoutRedirect(),
+    accessToken: async () => {
+      const user = await manager.getUser();
+      return user && !user.expired ? user.access_token : null;
+    },
   };
 }

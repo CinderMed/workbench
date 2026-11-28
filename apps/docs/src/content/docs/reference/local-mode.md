@@ -28,6 +28,17 @@ pnpm cindermed fhir-index my-project.json --out apps/web/.fhir-index
 
 The development server serves that folder under `/fhir-index/`, only on `127.0.0.1`. The folder is not in git and not in the production build.
 
+### The signed-in app in development
+
+The local mode is the development server's default. To work on the signed-in app instead (projects, members and, later, the grid on the API), start the API, the database and Keycloak with Docker Compose, then start the development server with `VITE_APP_MODE=api`:
+
+```bash
+docker compose up --detach db keycloak api
+VITE_APP_MODE=api pnpm --filter @cindermed/web dev
+```
+
+Sign in with one of the realm's test users (`owner`, `mapper`, `reviewer`, `engineer`, `viewer`; password `cindermed-dev` by default). The development server forwards `/api` to the API on `localhost:3000`.
+
 ## Open and save
 
 - **Open** a project file with the button, or drop it on the page. Only project files (`.json`) are opened. Data files are never opened or read here: a file with another name is refused before it is read.

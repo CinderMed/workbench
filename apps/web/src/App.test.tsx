@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { I18nextProvider } from "react-i18next";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
+import { type ApiClient, createApiClient } from "./api/client";
 import type { AuthClient, SignedInUser } from "./auth";
 import { createI18n } from "./i18n";
 
@@ -16,16 +17,24 @@ function fakeAuth(overrides: Partial<AuthClient> = {}): AuthClient {
     getUser: vi.fn<() => Promise<SignedInUser | null>>().mockResolvedValue(null),
     signIn: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
     signOut: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    accessToken: vi.fn<() => Promise<string | null>>().mockResolvedValue("token"),
     ...overrides,
   };
 }
 
-function renderApp(auth: AuthClient, href = "http://localhost:8080/") {
+const noProjects: ApiClient = {
+  me: vi.fn(),
+  projects: () => Promise.resolve([]),
+  importProject: vi.fn(),
+  exportProject: vi.fn(),
+};
+
+function renderApp(auth: AuthClient, href = "http://localhost:8080/", api: ApiClient = noProjects) {
   const replaceUrl = vi.fn<(url: string) => void>();
   render(
     <I18nextProvider i18n={createI18n()}>
       <MantineProvider>
-        <App auth={auth} location={{ href }} replaceUrl={replaceUrl} />
+        <App auth={auth} location={{ href }} replaceUrl={replaceUrl} api={api} />
       </MantineProvider>
     </I18nextProvider>,
   );
@@ -66,5 +75,36 @@ describe("App", () => {
     expect(await screen.findByText("Sign-in failed: Keycloak unreachable")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Signed in as Ada Mapper")).toBeTruthy();
+  });
+
+  it("shows the signed-in user's projects", async () => {
+    const auth = fakeAuth({ getUser: vi.fn().mockResolvedValue({ name: "Ada Mapper" }) });
+    renderApp(auth);
+    expect(
+      await screen.findByText("You have no projects yet: create one, or import a project file."),
+    ).toBeTruthy();
+  });
+
+  it("sends the token to the API, and signs in again when the API answers 401", async () => {
+    const auth = fakeAuth({ getUser: vi.fn().mockResolvedValue({ name: "Ada Mapper" }) });
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({ code: "unauthenticated", status: 401, title: "Authentication required" }),
+        {
+          status: 401,
+          headers: { "content-type": "application/problem+json" },
+        },
+      ),
+    );
+    const api = createApiClient(auth.accessToken, {
+      fetch,
+      onUnauthenticated: () => void auth.signIn(),
+    });
+    renderApp(auth, "http://localhost:8080/", api);
+    expect(await screen.findByText(/The projects could not be loaded/)).toBeTruthy();
+    expect(fetch).toHaveBeenCalledWith("/api/projects", expect.objectContaining({ method: "GET" }));
+    const init = fetch.mock.calls[0]?.[1];
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer token");
+    expect(auth.signIn).toHaveBeenCalledOnce();
   });
 });

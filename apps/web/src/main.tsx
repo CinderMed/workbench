@@ -13,8 +13,9 @@ if (!root) throw new Error("#root not found");
 
 // Local mode (ADR-0021) only in the Vite dev server, which is bound to localhost. Vite replaces
 // import.meta.env.DEV with false in the production build, so the local mode is not in the bundle
-// (src/production-build.test.ts checks it).
-if (import.meta.env.DEV) {
+// (src/production-build.test.ts checks it). In development, VITE_APP_MODE=api starts the
+// signed-in app on the API instead (module 4); the local mode stays the default.
+if (import.meta.env.DEV && import.meta.env["VITE_APP_MODE"] !== "api") {
   void import("./local/start").then(({ startLocalMode }) => {
     startLocalMode(root);
   });

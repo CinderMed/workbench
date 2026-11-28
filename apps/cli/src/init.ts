@@ -6,11 +6,12 @@
  * taken from the data (they come from the dictionary, B3).
  */
 import {
-  type Column,
   type DecimalSeparator,
-  PROJECT_FORMAT_VERSION,
+  type FhirVersion,
   type ProjectFile,
   canonicalText,
+  checkHeader,
+  newProject,
   parseBoolean,
   parseDate,
   parseDateTime,
@@ -21,71 +22,17 @@ import { CsvReader, createDecoder, type InputSettings } from "@cindermed/normali
 
 export type Encoding = InputSettings["encoding"];
 export const ENCODINGS: readonly Encoding[] = ["utf-8", "utf-8-bom", "windows-1252", "iso-8859-1"];
-export const FHIR_VERSIONS = ["4.0.1", "5.0.0"] as const;
-export type FhirVersion = (typeof FHIR_VERSIONS)[number];
+export { FHIR_VERSIONS, type FhirVersion, type HeaderError, checkHeader } from "@cindermed/model";
+/** A finding about the file: the command writes nothing. */
+export interface InitError {
+  readonly message: string;
+}
 
 export interface ReadSettings {
   readonly delimiter: string;
   readonly encoding: Encoding;
   /** The header is the `headerRow`-th record that is not empty (as in the normalizer). */
   readonly headerRow: number;
-}
-
-/** A finding about the header: the command writes nothing. */
-export interface HeaderError {
-  readonly message: string;
-}
-
-/**
- * The column names of a header record: Unicode NFC, trimmed (as in the normalizer). Empty or
- * duplicate names are errors, with the column positions (1-based).
- */
-export function checkHeader(record: readonly string[]): { names: string[]; errors: HeaderError[] } {
-  const names = record.map(canonicalText);
-  const errors: HeaderError[] = [];
-  if (names.some((name) => name.includes("�")))
-    errors.push({
-      message:
-        "the header has characters that are not valid in the encoding: give the file's encoding with --encoding (Italian files are often windows-1252)",
-    });
-  const seen = new Map<string, number>();
-  names.forEach((name, i) => {
-    const position = i + 1;
-    if (name === "") {
-      errors.push({ message: `column ${String(position)} has an empty header` });
-      return;
-    }
-    const first = seen.get(name);
-    if (first === undefined) seen.set(name, position);
-    else
-      errors.push({
-        message: `columns ${String(first)} and ${String(position)} have the same header '${name}'`,
-      });
-  });
-  return { names, errors };
-}
-
-/** An id of the project format (`[A-Za-z0-9_-]{6,64}`) from a prefix and a name. */
-function idFrom(prefix: string, name: string, fallback: string): string {
-  const slug = name
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^A-Za-z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  const id = `${prefix}${slug === "" ? fallback : slug}`.slice(0, 64);
-  return id.length >= 6 ? id : `${id}_${fallback}`.slice(0, 64);
-}
-
-/** Column ids `col_<name>`, unique, with the position as a fallback for names with no letters. */
-function columnIds(names: readonly string[]): string[] {
-  const used = new Set<string>();
-  return names.map((name, i) => {
-    const base = idFrom("col_", name, String(i + 1).padStart(3, "0"));
-    let id = base;
-    for (let n = 2; used.has(id); n += 1) id = `${base.slice(0, 60)}_${String(n)}`;
-    used.add(id);
-    return id;
-  });
 }
 
 export interface ProjectSettings {
@@ -100,41 +47,20 @@ export interface ProjectSettings {
 
 /** The project: one table with the header's columns, all `string`; no roles, rows or value maps. */
 export function initProject(names: readonly string[], settings: ProjectSettings): ProjectFile {
-  const ids = columnIds(names);
-  const columns = names.map((name, i): Column => ({
-    id: ids[i] ?? `col_${String(i + 1)}`,
-    name,
-    dataType: "string",
-  }));
-  const [first, ...rest] = columns;
-  if (first === undefined) throw new Error("a header has at least one column");
-  return {
-    formatVersion: PROJECT_FORMAT_VERSION,
-    project: {
-      id: idFrom("prj_", settings.name.toLowerCase(), "project"),
-      name: settings.name,
-      fhirVersion: settings.fhirVersion,
-      canonicalBase: settings.canonicalBase,
+  return newProject(names, {
+    name: settings.name,
+    table: settings.table,
+    fhirVersion: settings.fhirVersion,
+    canonicalBase: settings.canonicalBase,
+    imported: {
+      fileName: settings.fileName,
+      fileKind: "data",
+      delimiter: settings.read.delimiter,
+      encoding: settings.read.encoding,
+      headerRow: settings.read.headerRow,
+      importedAt: settings.importedAt,
     },
-    sources: [
-      {
-        id: idFrom("src_", settings.table.toLowerCase(), "table"),
-        name: settings.table,
-        import: {
-          fileName: settings.fileName,
-          fileKind: "data",
-          delimiter: settings.read.delimiter,
-          encoding: settings.read.encoding,
-          headerRow: settings.read.headerRow,
-          importedAt: settings.importedAt,
-        },
-        columns: [first, ...rest],
-      },
-    ],
-    instances: [],
-    mappings: [],
-    valueMaps: [],
-  };
+  });
 }
 
 /** A type a column could have, with the format it needs. */
@@ -264,7 +190,7 @@ export class TypeCounter {
 /** What reading the data file gives: the header, and the type report when asked for. */
 export type ReadResult =
   | { readonly ok: true; readonly names: string[]; readonly report?: TypeReport }
-  | { readonly ok: false; readonly errors: HeaderError[] };
+  | { readonly ok: false; readonly errors: InitError[] };
 
 /**
  * Reads a data file in chunks: the header only, or (with `infer`) every data row, counted by
@@ -280,7 +206,7 @@ export async function readDataFile(
   let seen = 0;
   let names: string[] | undefined;
   let counter: TypeCounter | undefined;
-  let errors: HeaderError[] = [];
+  let errors: InitError[] = [];
   const take = (records: string[][]): boolean => {
     for (const record of records) {
       if (record.every((cell) => cell.trim() === "")) continue;
@@ -289,7 +215,16 @@ export async function readDataFile(
         if (seen < settings.headerRow) continue;
         const checked = checkHeader(record);
         names = checked.names;
-        errors = checked.errors;
+        // The CLI names its own option in the encoding hint.
+        errors = checked.errors.map((e) =>
+          e.code === "encoding"
+            ? {
+                ...e,
+                message:
+                  "the header has characters that are not valid in the encoding: give the file's encoding with --encoding (Italian files are often windows-1252)",
+              }
+            : e,
+        );
         if (errors.length > 0 || !options.infer) return true;
         counter = new TypeCounter(names);
         continue;

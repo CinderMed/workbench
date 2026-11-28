@@ -71,6 +71,16 @@ export {
   validateProject,
 } from "./project-file/index.js";
 export {
+  FHIR_VERSIONS,
+  type FhirVersion,
+  type HeaderError,
+  type NewProjectSettings,
+  checkHeader,
+  columnIds,
+  idFrom,
+  newProject,
+} from "./project-file/new-project.js";
+export {
   type ApplyResult,
   type Change,
   type ObjectValues,
