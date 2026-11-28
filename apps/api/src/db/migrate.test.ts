@@ -20,6 +20,7 @@ describe.skipIf(!withDatabase)("migrate", () => {
     expect(names.map((n) => n.name)).toEqual([
       "0001_projects_and_entities.sql",
       "0002_invitations.sql",
+      "0003_entity_revisions.sql",
     ]);
   });
 
@@ -29,6 +30,7 @@ describe.skipIf(!withDatabase)("migrate", () => {
       WHERE table_schema = current_schema() ORDER BY table_name`.execute(db);
     expect(tables.rows.map((r) => r.table_name)).toEqual([
       "entities",
+      "entity_revisions",
       "invitations",
       "project_members",
       "projects",

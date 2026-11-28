@@ -36,6 +36,12 @@ The plan and its new dependencies (kysely, pg, @fastify/swagger) were approved o
 - **OpenAPI**: `@fastify/swagger` builds the document from the route schemas and serves it as JSON at `/api/docs`. An interactive page would need another dependency (`@fastify/swagger-ui`). The documentation site can render the JSON later.
 - **Tests** run on PostgreSQL 17: a service container in the CI Unit tests job, a local container otherwise (`TEST_DATABASE_URL`). Each test file uses a schema of its own, so files run in parallel. Without the variable the tests are skipped, except in CI, where they fail.
 
+- **History** (#220, added 2026-11-28): `entity_revisions` keeps the state every write leaves an object in, settings included. Each revision has its version, its kind of change (`import`, `create`, `update`, `delete`), its author and its date, and is written in the same transaction as the write.
+  - A deletion keeps the version it deleted, with no data. A table's columns get theirs when the table goes.
+  - A refused write leaves nothing.
+  - `GET /projects/{p}/entities/{kind}/{id}/history` and `GET /projects/{p}/history` (settings) list the revisions newest first, 100 by default and up to 9999.
+  - The revisions are kept for the project's lifetime and deleted with it. Their UI and restore (A7) are V2, and a restore will be a new write with the old data.
+
 ## Alternatives considered
 
 - **One JSONB document per project.** Simple, but every write would rewrite the whole project and conflict with every other write, which defeats per-object concurrency (A3) and per-object history.

@@ -4,6 +4,7 @@ import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastif
 import { type Authenticate, refuseAll, userOf } from "./auth.js";
 import type { Db } from "./db/connect.js";
 import { ProblemError, sendProblem } from "./problem.js";
+import { historyRoutes } from "./projects/history.js";
 import { memberRoutes } from "./projects/members.js";
 import { projectRoutes } from "./projects/routes.js";
 
@@ -122,6 +123,7 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     });
     projectRoutes(app, db);
     memberRoutes(app, db);
+    historyRoutes(app, db);
   }
 
   return app;
