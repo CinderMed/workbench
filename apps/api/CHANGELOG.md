@@ -1,5 +1,14 @@
 # @cindermed/api
 
+## 0.6.0
+
+### Minor Changes
+
+- 60599f7: Sign-in and project roles (A2, #19, ADR-0027). The API checks each request's Keycloak access token: signature with the realm's keys, issuer, expiry and the web client. Every project route enforces the specification's permissions for the five roles. Non-members get 404 and members without the permission get 403. New routes: `GET /api/me`; the members of a project, with role changes, removal (always one owner left) and leaving; invitations by email, accepted when a user with that verified email signs in (no email is sent); and project deletion by owners. New settings: `OIDC_JWKS_URL`, where the realm's keys are fetched, and `TRUST_PROXY`, the proxies whose forwarded address the rate limit counts.
+- 8aaa396: Safe concurrent saving (A3, #20, ADR-0028). Every update, delete and settings change carries the version it read in `If-Match`, and reads give it as an `ETag`. A write without the header gets 428. A write on a version that changed meanwhile gets 409, with each object's current version and value, so the UI can compare and choose. `POST /api/projects/{p}/entities:batch` applies up to 2000 changes in one transaction, all or nothing (D8). Request bodies are validated strictly: an unknown field or a wrong type is a 400, never dropped or converted.
+- b8a3f81: History as infrastructure (#220). Every write keeps the state it leaves each object in, project settings included, with its version, author, date and kind of change (import, create, update or delete), in the same transaction as the write. `GET /api/projects/{p}/entities/{kind}/{id}/history` and `GET /api/projects/{p}/history` list an object's revisions, newest first. A deleted object keeps its history. The history UI and restore (A7) come in V2.
+- 524a299: The API stores projects in PostgreSQL, one row per object of the project file (#219, ADR-0026). It imports a project file (`POST /api/projects:import`) and exports it back byte for byte (`POST /api/projects/{p}/exports`, format `json`). It reads and changes the settings and each object, giving new objects an id, and keeps only changes that leave the project schema-valid. Each client address gets 600 requests a minute (429 past that). Errors are RFC 9457 problem details, and the OpenAPI document is at `/api/docs`. Every project route needs an authenticated member; until sign-in arrives (#19) no caller is accepted.
+
 ## 0.5.0
 
 ### Minor Changes
