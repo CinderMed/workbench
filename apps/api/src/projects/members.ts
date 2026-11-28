@@ -24,8 +24,17 @@ const roleBody = {
   properties: { role: { type: "string", enum: ROLES } },
 } as const;
 
-/** The same check as a typical email field: something@something.something, no spaces. */
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * The check of a typical email field: one `@`, something before it, a domain with a dot that is
+ * neither first nor last, and no spaces. Plain string checks: no regular expression to backtrack.
+ */
+export function isEmail(text: string): boolean {
+  const at = text.indexOf("@");
+  if (at <= 0 || at !== text.lastIndexOf("@") || /\s/.test(text)) return false;
+  const domain = text.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  return dot > 0 && dot < domain.length - 1 && !domain.startsWith(".");
+}
 
 const lastOwner = () =>
   new ProblemError({
@@ -96,7 +105,7 @@ export function memberRoutes(app: FastifyInstance, db: Db): void {
       const user = caller(request);
       await allow(db, p, user, "manage");
       const email = request.body.email.trim().toLowerCase();
-      if (!EMAIL.test(email))
+      if (!isEmail(email))
         throw new ProblemError({
           code: "invalid-email",
           status: 422,
